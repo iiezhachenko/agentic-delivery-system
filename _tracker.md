@@ -7,9 +7,9 @@
 
 ## YOU ARE HERE
 
-- **Phase being built:** Phase 0 (aPRD) — NOT STARTED
-- **Last prompt completed:** none
-- **Next action:** author Phase 0 / CLASSIFIER (greenfield class)
+- **Phase being built:** Phase 0 (aPRD) — IN PROGRESS
+- **Last prompt completed:** EXTRACT → `prompts/00-aprd/EXTRACT.md`
+- **Next action:** author Phase 0 / GAP-DETECT (reads `02-extraction.json` [+ greenfield grounding `03-` when authored] → `04-gaps.json`; adversarial, rank by blast radius)
 - **Last updated:** 2026-06-06
 
 ---
@@ -43,8 +43,8 @@ Phases 0→1→2→3→4 in sequence. Each phase consumes prior phase's artifact
 Status: ☐ todo · ◐ drafting · ☑ done
 
 ### Phase 0 — aPRD
-- ☐ CLASSIFIER
-- ☐ EXTRACT
+- ☑ CLASSIFIER
+- ☑ EXTRACT
 - ☐ GAP-DETECT
 - ☐ QUESTION-GEN
 - ☐ SYNTHESIZE
@@ -92,7 +92,7 @@ Status: ☐ todo · ◐ drafting · ☑ done
 - ☐ CRITIQUE (anti-cheat)
 - ☐ DEMO-GEN
 
-**Totals:** 0 / 40 done.
+**Totals:** 2 / 40 done.
 
 ---
 
@@ -161,3 +161,8 @@ _All resolved (D1–D4). Reopen here if new forks appear._
 - 2026-06-06 — Studied all 5 specs. Created tracker. Inventory = 40 prompts across 5 phases.
 - 2026-06-06 — Resolved D1 (per-role, split if justified), D2 (`prompts/<NN-phase>/<ROLE>.md`), D3 (artifacts to disk, manual pass), D4 (greenfield first). Next: author Phase 0 CLASSIFIER.
 - 2026-06-06 — Locked PR1 (non-interactive default), PR2 (producer/consumer contract), PR3 (interaction flagged in metadata), PR4 (caveman block verbatim). Defined canonical caveman block + standard prompt skeleton.
+- 2026-06-06 — Authored CLASSIFIER (`prompts/00-aprd/CLASSIFIER.md`). interactive:true conditional (confirm only on low-confidence/compound/non-greenfield). Out: `01-classification.json` w/ stable SR* ids, overall_confidence=min(subreq), escape block for non-greenfield. Threshold 0.80 (tunable). Next: EXTRACT.
+- 2026-06-06 — TESTED CLASSIFIER in 2 Sonnet/high subagents (fresh-session sim) against fixtures in `_sim/` (greenfield-clean, compound-mixed). Both: valid schema-exact JSON, correct routing. Happy path silent→EXTRACT; hard path decomposed 4 subreqs, halted w/ 4 MCQs + full escape. HARDENED prompt from debriefs: (1) explicit compound test — multi-class OR multi-system = compound; N features of ONE new system = atomic [load-bearing, was invented by agents]; (2) MCQ default 1:1 per subreq; (3) escape all-non-greenfield case + default-marker + text-stripping rules.
+- 2026-06-06 — Fixtures relocated. `_sim/` never existed on disk; durable test fixtures now live in `_fixtures/{greenfield-clean,compound-mixed}/.aprd/` (raw request + known-good `01-classification.json`). `_test_bench/` is scratch — cleared/seeded per run, never the fixture home.
+- 2026-06-06 — Authored EXTRACT (`prompts/00-aprd/EXTRACT.md`). interactive:false (pure structural transcription, no client touch). In: `00-raw-request.md` + `01-classification.json`. Out: `02-extraction.json` = {entities E*, explicit_requirements, implied_requirements, stated_constraints C*, unknowns U*}. Design calls: (1) single contiguous stable `R*` id-space across explicit→implied [P9, threads to aPRD]; (2) `inferred` flag + mandatory `rationale` on implied/inferred items; (3) strict explicit-vs-implied-vs-unknown split — implied = NECESSARY consequence only, merely-plausible → unknown (e.g. "must authenticate"=implied R, "which auth mechanism"=unknown U); (4) every item cites `source` (real request words) + `sr_ref` [traceability, P11 transcriber-not-author]; (5) guard escapes — HALT if `needs_confirmation:true` OR any non-greenfield subreq, write nothing.
+- 2026-06-06 — TESTED EXTRACT. Isolated (Sonnet/high): greenfield-clean → schema-exact, R1–R11 contiguous, all sr_ref/source/rationale valid, 12 unknowns feed GAP-DETECT, clean explicit/implied/unknown split. Guard test (compound-mixed, non-greenfield) → correctly HALTed, wrote nothing. E2E (Sonnet/high, fresh sessions): CLASSIFIER→EXTRACT chained off-disk with no manual fixup, both stop-conditions hit, EXTRACT output schema-valid (10 reqs this run vs 11 isolated — benign LLM variance, both faithful, zero invented reqs). No flaws found; prompt shipped as authored.

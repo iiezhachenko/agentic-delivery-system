@@ -1,0 +1,86 @@
+{
+  "request_ref": ".aprd/00-raw-request.md",
+  "is_compound": true,
+  "overall_confidence": 0.85,
+  "needs_confirmation": true,
+  "subrequests": [
+    {
+      "id": "SR1",
+      "text": "Our dashboard crashes whenever someone uploads a CSV bigger than ~10MB — need that fixed ASAP, it's hitting customers.",
+      "class": "bugfix",
+      "confidence": 0.92,
+      "reason": "'crashes whenever someone uploads a CSV bigger than ~10MB' — explicit crash on a specific condition; client frames it as something broken ('need that fixed'), not new behavior."
+    },
+    {
+      "id": "SR2",
+      "text": "The whole reports page is painfully slow, takes like 8 seconds to load.",
+      "class": "perf",
+      "confidence": 0.90,
+      "reason": "'painfully slow, takes like 8 seconds to load' — quantified latency complaint, behavior is working but not fast enough; no new functionality requested."
+    },
+    {
+      "id": "SR3",
+      "text": "Add a new 'share report via link' feature so people can send a read-only view to clients.",
+      "class": "feature-add",
+      "confidence": 0.93,
+      "reason": "'add a new share report via link feature' — net-new capability requested against an existing reports system; 'new' and 'add' are explicit."
+    },
+    {
+      "id": "SR4",
+      "text": "Figure out why our signup conversion dropped last month. Not sure if it's a bug or just seasonal.",
+      "class": "investigation",
+      "confidence": 0.85,
+      "reason": "'figure out why' — deliverable is an answer/diagnosis, not a fix. Client explicitly signals uncertainty about cause ('not sure if it's a bug or just seasonal'), confirming the ask is explanatory, not corrective."
+    }
+  ],
+  "confirmation_questions": [
+    {
+      "id": "Q1",
+      "question": "SR1 — dashboard crashes on CSV >10MB: we're treating this as a bugfix (find and fix the crash). Correct?",
+      "options": [
+        "A) Yes, bugfix — find and fix the crash [DEFAULT]",
+        "B) No — treat as investigation first (diagnose before committing to a fix)",
+        "C) No — something else (please describe)"
+      ],
+      "default": "A) Yes, bugfix — find and fix the crash",
+      "targets": ["SR1"]
+    },
+    {
+      "id": "Q2",
+      "question": "SR2 — reports page 8-second load time: we're treating this as a perf improvement (hit a latency target, no behavior change). Correct?",
+      "options": [
+        "A) Yes, perf — optimize load time, keep existing behavior [DEFAULT]",
+        "B) No — also involves fixing broken functionality (reclassify as bugfix)",
+        "C) No — something else (please describe)"
+      ],
+      "default": "A) Yes, perf — optimize load time, keep existing behavior",
+      "targets": ["SR2"]
+    },
+    {
+      "id": "Q3",
+      "question": "SR3 — 'share report via link': we're treating this as a feature-add to the existing reports system. Correct?",
+      "options": [
+        "A) Yes, feature-add to existing reports system [DEFAULT]",
+        "B) No — the sharing system is a fully standalone new product (reclassify as greenfield)",
+        "C) No — something else (please describe)"
+      ],
+      "default": "A) Yes, feature-add to existing reports system",
+      "targets": ["SR3"]
+    },
+    {
+      "id": "Q4",
+      "question": "SR4 — signup conversion drop: we're treating this as an investigation (deliverable = diagnosis/answer). If a bug is found, a separate bugfix subrequest will be scoped. Correct?",
+      "options": [
+        "A) Yes, investigation only for now — answer first, fix later if needed [DEFAULT]",
+        "B) No — if a bug is found, fix it immediately within this engagement (fold into bugfix)",
+        "C) No — this is out of scope for now; drop it"
+      ],
+      "default": "A) Yes, investigation only for now — answer first, fix later if needed",
+      "targets": ["SR4"]
+    }
+  ],
+  "escape": {
+    "non_greenfield_subrequests": ["SR1", "SR2", "SR3", "SR4"],
+    "note": "All four subrequests are non-greenfield (bugfix, perf, feature-add, investigation). No greenfield downstream pipeline applies. Playbooks for bugfix, perf, feature-add, and investigation are not yet authored — HALT after client confirms decomposition and classes."
+  }
+}
