@@ -1,0 +1,141 @@
+{
+  "aprd_ref": ".aprd/drafts/aprd.v1.md",
+  "extraction_ref": ".aprd/02-extraction.json",
+  "gaps_ref": ".aprd/04-gaps.json",
+  "answers_ref": ".aprd/06-answers.md",
+  "class": "greenfield",
+  "assumptions": [
+    {
+      "id": "A1",
+      "gap_ref": "G1",
+      "text": "PDF invoices are generated server-side: a backend service (e.g. a PDF library such as Puppeteer or WeasyPrint) generates the PDF file and streams it to the browser as a download. No client-side print-to-PDF flow is required.",
+      "source": "client-confirmed",
+      "chosen_interpretation": "Server-side PDF rendering: a backend service (e.g. headless browser, PDF library such as Puppeteer or WeasyPrint) generates the PDF file and streams it to the client on demand.",
+      "rejected_interpretations": [
+        "Client-side browser print: the invoice is rendered as an HTML/CSS page in the browser and the user triggers a print-to-PDF flow; no server-side PDF dependency."
+      ]
+    },
+    {
+      "id": "A2",
+      "gap_ref": "G2",
+      "text": "Authentication delegates to an external OAuth or social-login provider (e.g. Google or GitHub). The system stores only the provider token and user profile reference; it does not store hashed passwords or manage password resets internally.",
+      "source": "client-confirmed",
+      "chosen_interpretation": "OAuth / social login (e.g. Google, GitHub) or SSO: authentication delegates to an external identity provider; the system stores only provider tokens and user profile references, not credentials.",
+      "rejected_interpretations": [
+        "Email and password authentication: the system stores hashed credentials, manages sessions, and handles password reset — no third-party auth dependency."
+      ]
+    },
+    {
+      "id": "A3",
+      "gap_ref": "G3",
+      "text": "A client is a data record only — storing name, contact details, and billing address visible to the freelancer. Clients cannot log in or access any part of the system directly.",
+      "source": "client-confirmed",
+      "chosen_interpretation": "Client is a data record only: the client entity stores name, contact details, and billing address visible only to the freelancer; no client-facing login or portal exists.",
+      "rejected_interpretations": [
+        "Client has a login and portal: the client entity is also an authenticated user who can log in, view their invoices, and interact with the system — requiring a second user role, separate auth flow, and client-facing UI."
+      ]
+    },
+    {
+      "id": "A4",
+      "gap_ref": "G4",
+      "text": "Currency is set at the project level. Each Client Project carries a single currency; all of its time entries and the resulting invoice inherit that currency. No per-entry currency field is needed.",
+      "source": "client-confirmed",
+      "chosen_interpretation": "Currency is set at the project level: each Client Project carries a single currency; all time entries and the resulting invoice inherit that currency — no currency field on Time Entry or Billable Rate rows.",
+      "rejected_interpretations": [
+        "Currency is set at the time-entry level: each Time Entry (and/or Billable Rate) carries its own currency designation — the Invoice must then handle line items in mixed currencies, requiring a currency column on the time-entry table and aggregation logic."
+      ]
+    },
+    {
+      "id": "A5",
+      "gap_ref": "G5",
+      "text": "No currency conversion is performed. Each project and invoice stays in the currency chosen at creation time. No exchange-rate data and no external rate service are required.",
+      "source": "default-applied",
+      "chosen_interpretation": "Each project and invoice is fixed to a single currency; no conversion occurs — the system stores and displays amounts in the currency chosen at creation time, and no exchange-rate data or external rate service is needed.",
+      "rejected_interpretations": [
+        "The system performs live exchange-rate conversion: an external exchange-rate API is integrated, amounts can be converted between currencies on demand, and the data model stores both original and converted amounts."
+      ]
+    },
+    {
+      "id": "A6",
+      "gap_ref": "G6",
+      "text": "No specific hosting provider is mandated. The team selects a simple managed host that keeps monthly running costs low and avoids lock-in to a single large cloud vendor.",
+      "source": "client-described",
+      "chosen_interpretation": "No strong preference on hosting. We trust the team to pick a simple managed host; just keep monthly running cost low and avoid locking us into one big cloud vendor.",
+      "rejected_interpretations": [
+        "A specific hosting provider or infrastructure constraint is mandated (e.g. AWS only, Azure, on-premises, specific region for data residency): the stack and deployment pipeline must conform to that provider's services and tooling."
+      ]
+    },
+    {
+      "id": "A7",
+      "gap_ref": "G7",
+      "text": "Each account belongs to exactly one freelancer. There is no organisation entity, no multi-user membership, and no role management.",
+      "source": "default-applied",
+      "chosen_interpretation": "Single-freelancer accounts only: each account belongs to exactly one freelancer; no organisation entity, no multi-user membership, no role management.",
+      "rejected_interpretations": [
+        "Team or agency accounts: an Organisation entity sits above the Freelancer, multiple freelancers can belong to one organisation, and role-based access control governs what each member can see or do — requiring new tables and relationships."
+      ]
+    },
+    {
+      "id": "A8",
+      "gap_ref": "G8",
+      "text": "The billable rate is set at the project level. All time entries in a project share the same rate; no per-entry rate variation is supported.",
+      "source": "default-applied",
+      "chosen_interpretation": "Rate is set at the project level: a single Billable Rate record is attached to each Client Project; all time entries in that project inherit the same rate — no rate field on individual time entries.",
+      "rejected_interpretations": [
+        "Rate is set per individual time entry: each Time Entry carries its own rate (allowing rate variation within a project over time), requiring a rate column on the time_entries table and making the Billable Rate entity a property of each entry rather than the project."
+      ]
+    },
+    {
+      "id": "A9",
+      "gap_ref": "G9",
+      "text": "No specific compliance requirements apply. Standard data practices are used; no mandated audit logs, right-to-erasure data model, or data-residency hosting constraint.",
+      "source": "default-applied",
+      "chosen_interpretation": "No specific compliance requirements: standard data practices apply — no mandated audit logs, no right-to-erasure data model, no data-residency hosting constraint.",
+      "rejected_interpretations": [
+        "GDPR or equivalent compliance is required: the data model must include soft-delete / erasure capability, audit logging tables, and hosting must be in a compliant region — adding tables and hosting constraints to the build."
+      ]
+    },
+    {
+      "id": "A10",
+      "gap_ref": "G10",
+      "text": "The invoice billing period is always a fixed calendar month. The export UI presents a month-picker; no custom date-range input is provided.",
+      "source": "default-applied",
+      "chosen_interpretation": "Invoice period is always a fixed calendar month: the export UI presents a month-picker; the system generates an invoice for all entries in that calendar month — no custom date-range input required.",
+      "rejected_interpretations": [
+        "Billing period is configurable: the freelancer can specify an arbitrary start and end date (e.g. 15th to 14th, or any project span) — an additional date-range UI control and parameterised query are added, while the underlying model is unchanged."
+      ]
+    },
+    {
+      "id": "A11",
+      "gap_ref": "G11",
+      "text": "There is no enforced limit on the number of clients or projects per freelancer account. Any number may be created without quota checks.",
+      "source": "default-applied",
+      "chosen_interpretation": "Unbounded: a freelancer account can hold any number of clients and projects with no enforced limit — no quota logic, no limit enforcement in the application or data layer.",
+      "rejected_interpretations": [
+        "Bounded: a maximum number of clients and/or projects per account is enforced (e.g. a configurable cap) — requiring limit-check logic and corresponding UI feedback, while the data model shape remains the same."
+      ]
+    },
+    {
+      "id": "A12",
+      "gap_ref": "G12",
+      "text": "The PDF invoice uses a minimal format containing only the line items (date, description, hours, rate, line total) and an invoice total. No logo, freelancer or client legal details, payment terms, due date, or custom invoice numbering are included.",
+      "source": "default-applied",
+      "chosen_interpretation": "Minimal invoice: the PDF contains only the line items (date, description, hours, rate, line total) and an invoice total — no logo, no legal fields, no payment terms, no custom numbering scheme.",
+      "rejected_interpretations": [
+        "Full-featured invoice: the PDF includes freelancer and client legal details, a logo, payment terms, due date, sequential invoice number, tax fields, and notes — each additional field may require additional data stored on the freelancer or client record."
+      ]
+    },
+    {
+      "id": "A13",
+      "gap_ref": "G13",
+      "text": "The system is built for small personal-tool scale (tens of users, low concurrency). A single-server deployment with a synchronous request cycle is sufficient; no background job queues, horizontal scaling, or caching layer is required.",
+      "source": "default-applied",
+      "chosen_interpretation": "Small personal tool (tens of users, low concurrency): a single-server deployment with a straightforward synchronous request cycle suffices — no background job queues, no horizontal scaling, no caching layer required.",
+      "rejected_interpretations": [
+        "Multi-tenant SaaS scale (hundreds to thousands of users, meaningful concurrency): the build requires background job processing for PDF generation, connection pooling, caching, and a deployment model that supports horizontal scaling."
+      ]
+    }
+  ],
+  "flagged_requirements": [],
+  "assumption_count": 13
+}
