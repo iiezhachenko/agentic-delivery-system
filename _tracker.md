@@ -8,8 +8,8 @@
 ## YOU ARE HERE
 
 - **Phase being built:** Phase 0 (aPRD) — IN PROGRESS
-- **Last prompt completed:** EXTRACT → `prompts/00-aprd/EXTRACT.md`
-- **Next action:** author Phase 0 / GAP-DETECT (reads `02-extraction.json` [+ greenfield grounding `03-` when authored] → `04-gaps.json`; adversarial, rank by blast radius)
+- **Last prompt completed:** GAP-DETECT → `prompts/00-aprd/GAP-DETECT.md`
+- **Next action:** author Phase 0 / QUESTION-GEN (reads `04-gaps.json`, filters gaps where `blast_radius ∈ {architecture, scope}` i.e. `disposition: ask` → `05-questions.md`; ≤6 MCQ, each with recommended default marked = gap's `recommended_default`, recognition over recall P7; never ask what's safely assumed; cosmetic gaps skip — they become announced assumptions at SYNTHESIZE)
 - **Last updated:** 2026-06-06
 
 ---
@@ -45,7 +45,7 @@ Status: ☐ todo · ◐ drafting · ☑ done
 ### Phase 0 — aPRD
 - ☑ CLASSIFIER
 - ☑ EXTRACT
-- ☐ GAP-DETECT
+- ☑ GAP-DETECT
 - ☐ QUESTION-GEN
 - ☐ SYNTHESIZE
 - ☐ CRITIQUE
@@ -92,7 +92,7 @@ Status: ☐ todo · ◐ drafting · ☑ done
 - ☐ CRITIQUE (anti-cheat)
 - ☐ DEMO-GEN
 
-**Totals:** 2 / 40 done.
+**Totals:** 3 / 40 done.
 
 ---
 
@@ -166,3 +166,7 @@ _All resolved (D1–D4). Reopen here if new forks appear._
 - 2026-06-06 — Fixtures relocated. `_sim/` never existed on disk; durable test fixtures now live in `_fixtures/{greenfield-clean,compound-mixed}/.aprd/` (raw request + known-good `01-classification.json`). `_test_bench/` is scratch — cleared/seeded per run, never the fixture home.
 - 2026-06-06 — Authored EXTRACT (`prompts/00-aprd/EXTRACT.md`). interactive:false (pure structural transcription, no client touch). In: `00-raw-request.md` + `01-classification.json`. Out: `02-extraction.json` = {entities E*, explicit_requirements, implied_requirements, stated_constraints C*, unknowns U*}. Design calls: (1) single contiguous stable `R*` id-space across explicit→implied [P9, threads to aPRD]; (2) `inferred` flag + mandatory `rationale` on implied/inferred items; (3) strict explicit-vs-implied-vs-unknown split — implied = NECESSARY consequence only, merely-plausible → unknown (e.g. "must authenticate"=implied R, "which auth mechanism"=unknown U); (4) every item cites `source` (real request words) + `sr_ref` [traceability, P11 transcriber-not-author]; (5) guard escapes — HALT if `needs_confirmation:true` OR any non-greenfield subreq, write nothing.
 - 2026-06-06 — TESTED EXTRACT. Isolated (Sonnet/high): greenfield-clean → schema-exact, R1–R11 contiguous, all sr_ref/source/rationale valid, 12 unknowns feed GAP-DETECT, clean explicit/implied/unknown split. Guard test (compound-mixed, non-greenfield) → correctly HALTed, wrote nothing. E2E (Sonnet/high, fresh sessions): CLASSIFIER→EXTRACT chained off-disk with no manual fixup, both stop-conditions hit, EXTRACT output schema-valid (10 reqs this run vs 11 isolated — benign LLM variance, both faithful, zero invented reqs). No flaws found; prompt shipped as authored.
+- 2026-06-06 — Golden mid-pipeline fixture added: promoted the validated isolated EXTRACT output to `_fixtures/greenfield-clean/.aprd/02-extraction.json` (seed for GAP-DETECT isolated test). Later added `04-gaps.json` golden too. `_fixtures/greenfield-clean/.aprd/` now holds 00→01→02→04 chain.
+- 2026-06-06 — Authored GAP-DETECT (`prompts/00-aprd/GAP-DETECT.md`). interactive:false (adversarial analysis, no client touch — QUESTION-GEN asks later). In: `02-extraction.json` (+ OPTIONAL `03-grounding/`, gracefully absent since grounding stage unauthored). Out: `04-gaps.json` = ranked `gaps[]` {id G*, gap, refs→extraction IDs, interpretations[≥2], recommended_default(verbatim ∈ interpretations), blast_radius, disposition(ask/assume derived), reason} + `dismissed_unknowns[]` + `gap_counts`. Design calls: (1) adversarial — treat extraction as trap, hunt 5 sources (U*, R* scope+IMPLEMENTATION forks, inferred items, C*, missing negative space); (2) every U* accounted (fed a gap OR dismissed w/ reason) — no silent drop, threads P9; (3) recommended_default per gap feeds QUESTION-GEN's marked default (P7) + cosmetic announce; (4) blast tier is the load-bearing output — sharp architecture(data-model SHAPE/stack/platform/external-dep/impl-mechanism) vs scope(in/out, same structure) discriminator; (5) sort arch→scope→cosmetic; disposition deterministic from tier.
+- 2026-06-06 — TESTED GAP-DETECT. Isolated (Sonnet/high) on golden 02: 3 verifier rounds (separate fresh subagent each, no self-grade). Round 1 → 4 real PROMPT defects, all fixed by editing prompt (never the artifact): (a) tier broke BOTH ways — date-filter inflated to arch, mandated-host demoted to scope → added sharp arch↔scope discriminator (data-model SHAPE = tables/relationships, NOT query params); (b) missed IMPLEMENTATION forks (PDF server-side vs client-side render) → added explicit impl-fork hunt to Mandate 1; (c) `refs` padding → "directly arises from"; (d) re-litigated explicit client word "monthly" as ambiguous → added "don't re-litigate chosen words; frame as optional-extra=scope". Round 2 → 1 objective (R10 cross-cited into wrong gap; freemium scope invented) → added "one gap=one topic, no sibling-driver cross-cite" + "keep interpretations inside extraction, no invented product models". Round 3 → CONVERGED: residual FIX verdict was a verifier FALSE-POSITIVE (G11 "cap" is grounded in U4's literal "is there a limit?") + prose-nuance + cross-verifier DISAGREEMENT on compliance/hosting tier (judgment variance, not defect). Shipped: objective findings → 0 across rounds; remaining = adversarial-verifier steady-state noise. Mechanical checks (schema, contiguous G*, valid+relevant refs, default-verbatim, disposition-from-tier, tier-sort, counts, full U coverage) all green.
+- 2026-06-06 — E2E TESTED CLASSIFIER→EXTRACT→GAP-DETECT (3 fresh Sonnet/high sessions, seed only `00-raw-request.md`, each step reads PRIOR on-disk output, no re-seed). All stop-conditions hit; all schemas valid; IDs threaded. GAP-DETECT bound to the chain's OWN extraction (this run: R1–R7/E1–E6/U1–U9, 13 gaps = 9 arch/3 scope/1 cosmetic) not the golden's — PR2 producer/consumer holds under benign LLM variance. This run surfaced a cosmetic gap (disposition=assume), exercising the announce path. No downstream defect → no cascade. GAP-DETECT shipped.
