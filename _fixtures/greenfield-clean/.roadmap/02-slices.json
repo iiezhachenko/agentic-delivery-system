@@ -1,0 +1,62 @@
+{
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "lock_verified": true,
+  "class": "greenfield",
+  "project": "A web application that lets freelancers log billable hours against client projects, set per-project rates and currencies, and export monthly PDF invoices summarising those hours.",
+  "slices": [
+    {
+      "id": "S1",
+      "name": "Sign in via OAuth on the web application",
+      "requirements": ["R1", "R5"],
+      "acceptance": ["AC1", "AC5"],
+      "value": "high",
+      "value_basis": "Authentication is the entry gate to every other capability; without it the product cannot be used at all. R1 defines the web delivery constraint that every other slice inherits.",
+      "retires_risk": "OAuth provider integration (A2): first exercise of the external OAuth delegation; proves the provider round-trip works before any other slice depends on an authenticated session.",
+      "depends_on": [],
+      "candidate": true
+    },
+    {
+      "id": "S2",
+      "name": "Log and persist billable time entries against a project",
+      "requirements": ["R2", "R7"],
+      "acceptance": ["AC2", "AC7"],
+      "value": "high",
+      "value_basis": "Logging hours is the core daily action the PROJECT describes; without it no invoice can be generated and the product has no primary value.",
+      "retires_risk": null,
+      "depends_on": ["S1", "S4"],
+      "candidate": true
+    },
+    {
+      "id": "S3",
+      "name": "Export a monthly PDF invoice with line items and monetary totals",
+      "requirements": ["R3", "R8", "R9", "R10"],
+      "acceptance": ["AC3", "AC8", "AC9", "AC10"],
+      "value": "high",
+      "value_basis": "PDF invoice export is the terminal deliverable named in the PROJECT statement; it is the output the freelancer sends to their client and the reason the product exists.",
+      "retires_risk": "Server-side PDF generation (A1): first exercise of the backend PDF library (e.g. Puppeteer or WeasyPrint); proves file generation and browser-stream delivery work before the feature is considered done.",
+      "depends_on": ["S1", "S2", "S4"],
+      "candidate": true
+    },
+    {
+      "id": "S4",
+      "name": "Create and manage client projects with currency and billable rate",
+      "requirements": ["R4", "R6", "R9", "R10"],
+      "acceptance": ["AC4", "AC6"],
+      "value": "high",
+      "value_basis": "Client projects are the structural container every other capability depends on; without a project no hours can be logged and no invoice can be generated. Multi-currency and rate configuration are set here and flow into every downstream slice.",
+      "retires_risk": null,
+      "depends_on": ["S1"],
+      "candidate": true
+    }
+  ],
+  "unsliceable": [],
+  "coverage": {
+    "requirements_total": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10"],
+    "requirements_covered": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10"],
+    "requirement_orphans": [],
+    "acceptance_total": ["AC1", "AC2", "AC3", "AC4", "AC5", "AC6", "AC7", "AC8", "AC9", "AC10"],
+    "acceptance_covered": ["AC1", "AC2", "AC3", "AC4", "AC5", "AC6", "AC7", "AC8", "AC9", "AC10"],
+    "acceptance_orphans": []
+  },
+  "slice_counts": { "total": 4 }
+}
