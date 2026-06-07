@@ -1,0 +1,84 @@
+{
+  "id": "DP6",
+  "decision": "How should the application's HTTP surface be shaped: a server-rendered multi-page application, a REST/JSON API backend consumed by a single-page frontend, or a hybrid approach?",
+  "category": "API style",
+  "forced_by": ["R1", "C1", "AC1", "A1"],
+  "cut_ref": "FD1",
+  "grounding": {
+    "existing_system": "n/a — greenfield (C3): no existing system to conform to",
+    "canon_status": "absent",
+    "source": "reasoned",
+    "note": "arch-canon.json absent; option set reasoned from established architecture first principles; currency self-verified; A1 (server-side PDF file-streaming endpoint) is compatible with all three candidates; INV6 (single-server synchronous) does not eliminate any candidate"
+  },
+  "options": [
+    {
+      "option": "Server-rendered multi-page application (MPA / SSR)",
+      "summary": "The server renders full HTML pages on each request; browser navigates between pages with standard HTTP GET/POST; no separate frontend build artifact.",
+      "source": "reasoned",
+      "reason_to_consider": "Simplest delivery model for a personal-tool web app: eliminates a separate frontend build pipeline, stays in one deployable unit (consistent with DP1 monolith options and INV6), and every major DP2 framework stack (Rails ERB, Django templates, Express+EJS) has strong server-rendering support.",
+      "tradeoffs": {
+        "strengths": [
+          "Single deployable unit — no frontend build step or separate SPA hosting required; consistent with INV6 (single-server) and simplifies CI/CD under C2.",
+          "Server-rendered HTML is directly compatible with A1's server-side PDF file-streaming endpoint (the PDF endpoint is just another server route returning a file instead of HTML).",
+          "Full-page navigation is standard-browser-compatible, satisfying AC1 (no native app install) with zero client-side framework overhead.",
+          "Simpler security surface: session cookies and CSRF tokens are straightforward in MPA; no need for JWT/CORS configuration.",
+          "Faster time to first visible content for the feature set (CRUD forms, time-entry list, project list) at A13 scale."
+        ],
+        "costs": [
+          "Full-page reloads on every interaction; form submissions and list updates require round trips, which is more noticeable on slower connections though acceptable at personal-tool scale (A13).",
+          "UI interactivity (inline editing, dynamic filtering) requires additional JavaScript or HTMX-style progressive enhancement if desired; pure MPA is less interactive than an SPA.",
+          "If a richer frontend is added later, migrating from server-rendered templates to an API-driven approach requires significant refactoring."
+        ]
+      },
+      "bears_on": ["R1", "C1", "C2", "A1", "A13", "AC1", "AC3", "INV6"]
+    },
+    {
+      "option": "REST/JSON API backend with a single-page application frontend",
+      "summary": "The server exposes a stateless REST/JSON API; a separate JavaScript SPA (React, Vue, Svelte, etc.) consumes it from the browser; two distinct build artifacts.",
+      "source": "reasoned",
+      "reason_to_consider": "REST API + SPA is the dominant pattern for interactive web apps in 2025; provides a clean separation of concerns between server logic and UI, and enables richer client-side interactivity (inline time-entry editing, dynamic filtering) that CRUD-heavy tools often benefit from.",
+      "tradeoffs": {
+        "strengths": [
+          "Clean contract between backend and frontend — the JSON API is independently testable and allows the frontend to evolve without touching server logic.",
+          "Enables rich client-side interactivity (inline edit, optimistic updates, instant list refresh) without full-page reloads.",
+          "SPA frameworks (React, Vue, Svelte) have large ecosystems and strong tooling support.",
+          "The JSON API surface makes future integrations (mobile client, third-party scripts) straightforward without additional server work."
+        ],
+        "costs": [
+          "Two separate build pipelines (server and SPA) increase initial setup complexity — more work to get to a working skeleton under C2.",
+          "Introduces a second deployment artifact or a bundling step to serve the SPA from the same origin as the API — more configuration than a pure MPA.",
+          "REST API requires explicit CORS policy and token-based session (or cookie/CSRF adaptation) for cross-origin requests; adds auth surface complexity.",
+          "For simple CRUD at A13 scale, the SPA framework's bundle size and JS overhead may exceed the actual UI complexity of the application.",
+          "A1's server-side PDF file-streaming endpoint still requires a dedicated server route; the SPA simply triggers a link navigation to it — no architectural blocker, but it is a separate integration point."
+        ]
+      },
+      "bears_on": ["R1", "C1", "C2", "A1", "A13", "AC1", "AC3", "INV6"]
+    },
+    {
+      "option": "Hybrid: server-rendered HTML with API endpoints for dynamic interactions (e.g., HTMX or light SPA islands)",
+      "summary": "Primary UI is server-rendered HTML; targeted API or partial-HTML endpoints handle specific dynamic interactions (inline updates, partial page refreshes) using HTMX, Turbo Streams, or similar; single deployable unit.",
+      "source": "reasoned",
+      "reason_to_consider": "Hybrid approaches (HTMX + server-rendered HTML, Rails Hotwire/Turbo, Django + HTMX) have become a mainstream production pattern as of 2024–2025 for exactly this type of CRUD-heavy personal tool; provides MPA simplicity with selective interactivity without a full SPA build pipeline.",
+      "tradeoffs": {
+        "strengths": [
+          "Retains single-process deployment simplicity (no separate SPA artifact) — consistent with INV6 and DP1 monolith options.",
+          "Adds targeted interactivity (partial page updates, inline form submission) without a full frontend framework and without full-page reloads for every action.",
+          "HTMX/Turbo are lightweight JavaScript libraries (no build step required for basic usage) — lower frontend tooling overhead than a full SPA under C2.",
+          "A1's PDF streaming endpoint is a standard server route, compatible with no changes regardless of hybrid strategy.",
+          "Gradual adoption path: start MPA-pure for the skeleton, add HTMX interactions slice by slice without architectural rework."
+        ],
+        "costs": [
+          "Introduces a dependency on a client-side interaction library (HTMX, Turbo) whose mental model differs from both pure MPA and pure SPA — team must learn and maintain it.",
+          "Partial-HTML endpoint responses (HTMX fragments, Turbo Streams) create a two-response-format convention (full HTML for navigation, partial HTML for updates) that must be consistently applied across slices.",
+          "Debugging hybrid interaction flows (partial render, swap target, event handling) is more complex than debugging either a pure MPA or a pure REST/SPA interaction.",
+          "Less widely understood than the REST+SPA pattern; fewer developers have production experience with HTMX or Turbo compared to React/Vue."
+        ]
+      },
+      "bears_on": ["R1", "C1", "C2", "A1", "A13", "AC1", "AC3", "INV6"]
+    }
+  ],
+  "option_count": 3,
+  "degenerate": false,
+  "degenerate_reason": null,
+  "no_pick_note": "Live, unranked alternatives. EVALUATE-DECIDE scores against CONSTRAINTS / ACCEPTANCE / NFRs and picks (role 4); OPTION-GEN does not recommend."
+}

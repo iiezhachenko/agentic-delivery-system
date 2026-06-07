@@ -1,0 +1,85 @@
+{
+  "id": "DP4",
+  "decision": "Which datastore paradigm and technology should be used to persist all application state (freelancer identity, projects, time entries, invoices)?",
+  "category": "Persistence",
+  "forced_by": ["R7", "E1", "A2"],
+  "cut_ref": "FD3",
+  "grounding": {
+    "existing_system": "n/a — greenfield (C3): no existing system to conform to",
+    "canon_status": "absent",
+    "source": "reasoned",
+    "note": "arch-canon.json absent; option set reasoned from established architecture first principles; currency self-verified; options must satisfy relational data model implied by E1–E7 and multi-entity association requirements (R7); document store and embedded DB candidates verified current"
+  },
+  "options": [
+    {
+      "option": "Relational database — PostgreSQL",
+      "summary": "ACID-compliant SQL relational database; structured schema with foreign-key relationships between Freelancer, Client Project, Time Entry, Invoice, and Currency entities.",
+      "source": "reasoned",
+      "reason_to_consider": "The aPRD's entity model (E1–E7) is explicitly relational — freelancers own projects, projects own time entries, time entries aggregate into invoices — and PostgreSQL's foreign-key integrity, join queries, and aggregate functions are a direct match for R7, R8, R9, R10.",
+      "tradeoffs": {
+        "strengths": [
+          "Relational schema enforces entity association integrity (freelancer → project → time entry → invoice) that the aPRD data model requires (E1–E7, R7).",
+          "SQL aggregation (SUM, GROUP BY) directly supports invoice line-item totalling (R8, R9, R10, AC8, AC9, AC10) without application-layer aggregation logic.",
+          "ACID transactions ensure time-entry writes are durable and consistent (R7, AC7).",
+          "PostgreSQL is supported on all major PaaS and VPS platforms — no vendor lock-in (A6); managed offerings (Supabase, Render Postgres, Railway) are low-cost at A13 scale.",
+          "Mature tooling for schema migration (Flyway, Alembic, ActiveRecord migrations, Prisma Migrate) integrates with every candidate stack from DP2.",
+          "Widely understood; large pool of documentation and developer familiarity reduces ramp-up under C2."
+        ],
+        "costs": [
+          "Requires a running database process separate from the application server — two-process deployment vs single-process for embedded options.",
+          "Schema migration management adds an operational step to each slice deployment.",
+          "Slightly higher hosting cost than a fully embedded database (managed Postgres has a minimum instance cost), though at A13 scale this is a minor factor.",
+          "Upfront schema design required before the skeleton can write to it; column and table decisions must be made at skeleton time."
+        ]
+      },
+      "bears_on": ["R7", "R8", "R9", "R10", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "A2", "A6", "A13", "AC7", "AC8", "AC9", "AC10", "INV3", "INV4"]
+    },
+    {
+      "option": "Relational database — SQLite (embedded)",
+      "summary": "Embedded SQL relational database stored as a single file alongside the application process; no separate database server required.",
+      "source": "reasoned",
+      "reason_to_consider": "SQLite satisfies the same relational model as PostgreSQL (foreign keys, joins, aggregates) while eliminating the need for a separate database process — reducing deployment complexity at A13 personal-tool scale where a single-file store is operationally viable.",
+      "tradeoffs": {
+        "strengths": [
+          "Zero separate database process — the app and its data travel as one unit, simplifying deployment at A13 scale and reducing hosting cost.",
+          "Supports foreign keys, SQL joins, and aggregate functions — meets the same relational requirements (R7, R8, R9, R10) as PostgreSQL.",
+          "Trivial local development setup: no database server to install or configure, accelerating iteration under C2.",
+          "Well-supported by every candidate DP2 framework's ORM (SQLAlchemy, ActiveRecord, Prisma, Sequelize) with minimal config change vs PostgreSQL.",
+          "Backup is a simple file copy — operationally simple at personal-tool scale."
+        ],
+        "costs": [
+          "Write concurrency is limited (single writer at a time); at A13 scale (low concurrency) this is not a bottleneck, but it is a hard ceiling if scale grows beyond the assumption.",
+          "Some PostgreSQL-specific features (e.g., full-text search, advanced JSON operators, certain window functions) are absent or limited, though none are required by the current aPRD.",
+          "Less common in production web-app deployments than PostgreSQL; some PaaS platforms do not support persistent-file SQLite natively (ephemeral filesystems on Heroku, Render), requiring volume mounts or platform-specific configuration.",
+          "Migrating to PostgreSQL later (if scale exceeds A13) carries schema-export and ORM-reconfiguration cost."
+        ]
+      },
+      "bears_on": ["R7", "R8", "R9", "R10", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "A2", "A6", "A13", "AC7", "AC8", "AC9", "AC10", "INV3", "INV4"]
+    },
+    {
+      "option": "Document store — MongoDB",
+      "summary": "Schema-flexible NoSQL document database; entities stored as JSON-like documents with application-layer joins for cross-entity queries.",
+      "source": "reasoned",
+      "reason_to_consider": "A competent team might consider a document store given familiarity and broad hosting availability; MongoDB is widely supported and handles the flat document model for freelancer profile and project records.",
+      "tradeoffs": {
+        "strengths": [
+          "Schema flexibility allows the freelancer profile and project document shapes to evolve without formal migrations in early development.",
+          "MongoDB Atlas free tier is available on multiple cloud regions — low initial hosting cost at A13 scale.",
+          "Supported on all major PaaS and VPS platforms; no single-vendor lock-in (A6).",
+          "Mongoose ODM (Node.js) and Motor (Python) are mature and widely documented."
+        ],
+        "costs": [
+          "The aPRD entity model (E1–E7) is explicitly relational: time entries are foreign-keyed to projects which are foreign-keyed to freelancers; multi-document joins and invoice aggregation (R8, R9, R10, AC8) require application-layer logic rather than native SQL joins and aggregates.",
+          "No native referential integrity — application must enforce the invariant that a time entry is always associated with a valid project and freelancer (R7, AC7); missed association is a runtime bug, not a schema error.",
+          "INV3 (project-level currency) and INV4 (project-level rate) are relational invariants; enforcing them in a document store requires application-layer discipline rather than schema-level constraints.",
+          "Invoice aggregation logic (R8, sum of line totals) requires an aggregation pipeline or application-side reduce rather than a single SQL query — higher implementation complexity for S3."
+        ]
+      },
+      "bears_on": ["R7", "R8", "R9", "R10", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "A2", "A6", "A13", "AC7", "AC8", "AC9", "AC10", "INV3", "INV4"]
+    }
+  ],
+  "option_count": 3,
+  "degenerate": false,
+  "degenerate_reason": null,
+  "no_pick_note": "Live, unranked alternatives. EVALUATE-DECIDE scores against CONSTRAINTS / ACCEPTANCE / NFRs and picks (role 4); OPTION-GEN does not recommend."
+}

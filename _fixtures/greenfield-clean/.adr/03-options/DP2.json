@@ -1,0 +1,85 @@
+{
+  "id": "DP2",
+  "decision": "Which server-side language, runtime, and web framework should be used to implement the application?",
+  "category": "Tech stack",
+  "forced_by": ["R1", "C1", "A1", "A2"],
+  "cut_ref": "FD1",
+  "grounding": {
+    "existing_system": "n/a — greenfield (C3): no existing system to conform to",
+    "canon_status": "absent",
+    "source": "reasoned",
+    "note": "arch-canon.json absent; option set reasoned from established architecture first principles; candidate stacks verified current as of mid-2025; options must support OAuth library ecosystem (A2) and server-side PDF generation (A1)"
+  },
+  "options": [
+    {
+      "option": "Node.js (LTS) with Express or Fastify",
+      "summary": "JavaScript/TypeScript runtime (Node.js LTS) with a lightweight HTTP framework (Express 4/5 or Fastify 4); npm ecosystem provides OAuth libraries and PDF generation libraries.",
+      "source": "reasoned",
+      "reason_to_consider": "Largest ecosystem of OAuth middleware and PDF libraries (Puppeteer, PDFKit, pdfmake) directly satisfying A1 and A2; wide deployment platform support satisfies A6; actively maintained LTS releases; well-understood by a broad pool of developers.",
+      "tradeoffs": {
+        "strengths": [
+          "Rich npm ecosystem: mature OAuth libraries (Passport.js, openid-client) and PDF generation options (Puppeteer, PDFKit) directly address A2 and A1.",
+          "Broad PaaS/VPS/container support for hosting — no platform lock-in, consistent with A6.",
+          "Large developer community and extensive documentation reduce ramp-up time under C2.",
+          "JavaScript/TypeScript enables shared type definitions between server-rendered templates and any client-side code if DP6 leans toward SPA.",
+          "Lightweight framework means framework overhead is minimal at A13 scale."
+        ],
+        "costs": [
+          "JavaScript's dynamic typing can mask type errors at runtime unless TypeScript is adopted, which adds build-tooling configuration cost.",
+          "Express is minimally opinionated; teams must make more structural decisions (routing, middleware order, error handling) themselves.",
+          "Node.js single-threaded event loop is unsuitable for CPU-intensive workloads — PDF generation with headless browser (Puppeteer) can block the loop; must be managed (though A13 scale reduces concurrency pressure).",
+          "npm dependency graph can be large; supply-chain management is a recurring concern."
+        ]
+      },
+      "bears_on": ["R1", "C1", "C2", "A1", "A2", "A6", "A13", "AC1", "AC3", "AC5"]
+    },
+    {
+      "option": "Python with Django or Flask/FastAPI",
+      "summary": "Python 3 runtime with either a batteries-included framework (Django 4+) or a lightweight framework (Flask 3 / FastAPI 0.11x); pip ecosystem provides OAuth and PDF libraries.",
+      "source": "reasoned",
+      "reason_to_consider": "Mature OAuth libraries (social-auth-app-django, Authlib) and strong PDF generation options (WeasyPrint, ReportLab, xhtml2pdf) satisfy A1 and A2; Django in particular provides an ORM, admin, and session management that accelerate development under C2.",
+      "tradeoffs": {
+        "strengths": [
+          "Django's built-in ORM, session framework, and admin panel reduce boilerplate for the data model (E1–E7) and accelerate slice development under C2.",
+          "Strong server-side PDF libraries (WeasyPrint, ReportLab) are well-established and satisfy A1 (server-side PDF generation).",
+          "Mature OAuth integration libraries (social-auth-app-django, Authlib) satisfy A2.",
+          "Python is widely supported on PaaS and VPS platforms, maintaining A6 portability.",
+          "Django's conventions enforce project structure, reducing the number of open structural decisions."
+        ],
+        "costs": [
+          "Django's full-stack conventions may impose more structure than necessary for A13 personal-tool scale, leading to configuration overhead.",
+          "Flask/FastAPI are lighter but require more explicit wiring of auth, ORM, and session management — comparable effort to Node.js/Express.",
+          "Python's sync WSGI model (Django, Flask) has a per-request thread/process model; at A13 scale this is not a bottleneck, but deployment targets must support it (Gunicorn, uWSGI).",
+          "Weaker TypeScript-equivalent typing story than Node.js/TS for teams that want end-to-end type safety; mypy adoption adds tooling overhead."
+        ]
+      },
+      "bears_on": ["R1", "C1", "C2", "A1", "A2", "A6", "A13", "AC1", "AC3", "AC5"]
+    },
+    {
+      "option": "Ruby with Ruby on Rails",
+      "summary": "Ruby 3 runtime with Rails 7/8; convention-over-configuration full-stack framework with ActiveRecord ORM, session management, and rich gem ecosystem.",
+      "source": "reasoned",
+      "reason_to_consider": "Rails' convention-over-configuration model and built-in generators produce working CRUD scaffolding faster than most alternatives — directly beneficial under C2; Devise/OmniAuth gems cover OAuth (A2) and PDF gems (Prawn, Wicked PDF) satisfy A1.",
+      "tradeoffs": {
+        "strengths": [
+          "Rails' scaffold generators and ActiveRecord ORM deliver working CRUD slices rapidly — strong alignment with C2's two-month timeline.",
+          "OmniAuth gem ecosystem is one of the most mature OAuth integration surfaces available, directly satisfying A2.",
+          "PDF generation gems (Prawn for programmatic PDF, WickedPDF/PDFKit for HTML-to-PDF) satisfy A1.",
+          "Strong conventions reduce structural decisions, keeping development focused on aPRD features rather than framework wiring.",
+          "Broad PaaS support (Heroku, Render, Fly.io) and VPS-ready; compatible with A6."
+        ],
+        "costs": [
+          "Ruby runtime is slower than Node.js or Go for CPU-bound work; at A13 scale this is not a material concern, but it is a real characteristic.",
+          "Rails is an opinionated full-stack framework; departing from its conventions (e.g., using a SPA frontend from DP6) requires additional configuration.",
+          "Smaller active developer pool than JavaScript/Python in current (2025) market — hiring or onboarding may be harder.",
+          "gem ecosystem has seen consolidation; some older gems are unmaintained, requiring currency verification for OAuth and PDF dependencies."
+        ]
+      },
+      "bears_on": ["R1", "C1", "C2", "A1", "A2", "A6", "A13", "AC1", "AC3", "AC5"]
+    }
+  ],
+  "option_count": 3,
+  "degenerate": false,
+  "degenerate_reason": null,
+  "no_pick_note": "Live, unranked alternatives. EVALUATE-DECIDE scores against CONSTRAINTS / ACCEPTANCE / NFRs and picks (role 4); OPTION-GEN does not recommend."
+}

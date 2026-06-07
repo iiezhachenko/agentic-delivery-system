@@ -1,0 +1,82 @@
+{
+  "id": "DP7",
+  "decision": "Which OAuth provider type or set of providers should the system support for freelancer authentication?",
+  "category": "Cross-cutting",
+  "forced_by": ["R5", "A2", "AC5"],
+  "cut_ref": "FD2",
+  "grounding": {
+    "existing_system": "n/a — greenfield (C3): no existing system to conform to",
+    "canon_status": "absent",
+    "source": "reasoned",
+    "note": "arch-canon.json absent; option set reasoned from established architecture first principles; currency self-verified; all options are compliant with INV1 (OAuth delegation, no stored passwords); options scoped to single-server OAuth integration per INV6"
+  },
+  "options": [
+    {
+      "option": "Single OAuth provider — Google OAuth 2.0",
+      "summary": "Application supports exactly one OAuth provider (Google); the sign-in flow hardcodes Google's authorization endpoint, token endpoint, and redirect URI; no provider-selection UI required.",
+      "source": "reasoned",
+      "reason_to_consider": "Google OAuth is the most widely held provider account among freelancers; supporting one provider eliminates multi-provider routing complexity, simplifies the skeleton's authentication seam (FD2), and satisfies A2/R5/AC5 with the lowest integration surface area.",
+      "tradeoffs": {
+        "strengths": [
+          "Single provider means a single set of redirect URIs, callback handlers, and token shapes to implement — minimises skeleton authentication seam complexity (FD2) under C2.",
+          "Google accounts are near-universally held by freelancers, directly satisfying R5 (account creation and authentication) for the expected user base.",
+          "AC5 explicitly names Google as a candidate provider ('e.g. Google or GitHub'); selecting it is a direct, lowest-risk path to meeting the acceptance criterion.",
+          "No provider-selection UI, no routing logic between providers, no multi-provider token storage differences — all removed from the implementation.",
+          "Google's OAuth 2.0 / OIDC library ecosystem is the most mature and best-documented across all candidate DP2 stacks."
+        ],
+        "costs": [
+          "Freelancers without a Google account cannot authenticate; the system is functionally inaccessible to them.",
+          "Vendor dependency on Google's OAuth service availability and policy continuity; a Google account policy change (e.g., scope or consent screen change) directly impacts all users.",
+          "Harder to add a second provider later without refactoring the provider-specific code paths if the integration is built tightly around Google's endpoints."
+        ]
+      },
+      "bears_on": ["R5", "A2", "A6", "AC5", "INV1", "C2"]
+    },
+    {
+      "option": "Single OAuth provider — GitHub OAuth 2.0",
+      "summary": "Application supports exactly one OAuth provider (GitHub); the sign-in flow targets GitHub's authorization and token endpoints; intended for a developer/freelancer audience.",
+      "source": "reasoned",
+      "reason_to_consider": "AC5 explicitly names GitHub as a candidate provider; GitHub accounts are commonly held by technical freelancers (the likely primary user base for a time-tracking tool), and GitHub OAuth is equally simple to integrate as Google OAuth.",
+      "tradeoffs": {
+        "strengths": [
+          "GitHub accounts are commonly held by technical freelancers — high coverage for the likely primary user demographic.",
+          "AC5 explicitly names GitHub as an acceptable provider; selecting it directly satisfies the acceptance criterion.",
+          "Single provider means the same low integration surface area as the Google option — one redirect URI, one callback handler, one token shape.",
+          "GitHub OAuth 2.0 libraries are mature across all candidate DP2 stacks (Passport GitHub strategy, OmniAuth GitHub, python-social-auth)."
+        ],
+        "costs": [
+          "Non-technical freelancers (designers, writers, consultants) may not hold GitHub accounts, limiting accessibility for a broader freelancer audience.",
+          "GitHub accounts are less universally held than Google accounts for a general-freelancer user base — potentially narrower user coverage than Google.",
+          "Vendor dependency on GitHub/Microsoft's OAuth service availability and API policy.",
+          "Same provider lock-in characteristic as Google single-provider: adding a second provider later requires refactoring if built tightly around GitHub's endpoints."
+        ]
+      },
+      "bears_on": ["R5", "A2", "A6", "AC5", "INV1", "C2"]
+    },
+    {
+      "option": "Configurable multi-provider OAuth 2.0 / OIDC abstraction",
+      "summary": "Application integrates with a provider-agnostic OAuth 2.0/OIDC layer (e.g., Passport.js multi-strategy, OmniAuth, Authlib); which provider(s) are active is configurable via environment variables; the application itself is provider-neutral.",
+      "source": "reasoned",
+      "reason_to_consider": "A provider-agnostic abstraction allows the application to support Google, GitHub, or any OIDC-compatible provider without code changes — only configuration changes; this satisfies A6 (no lock-in to a single vendor dependency) and gives the operator flexibility to switch or add providers.",
+      "tradeoffs": {
+        "strengths": [
+          "Provider-neutral design: switching or adding providers requires only configuration changes, not code changes — aligns with A6's vendor-agnosticism principle.",
+          "A single OIDC abstraction layer can handle token normalization across providers, reducing per-provider divergence in the auth code path.",
+          "Lower risk of provider lock-in over the application's lifetime; a provider policy change forces only a configuration swap, not a code change.",
+          "Multi-strategy auth libraries (Passport.js, OmniAuth, Authlib) are mature and well-supported across all candidate DP2 stacks."
+        ],
+        "costs": [
+          "Higher initial implementation complexity than a single-provider approach: the multi-provider routing logic, provider-selection UI, and per-provider configuration management must all be built and tested under C2.",
+          "The aPRD names a personal-tool-scale single-freelancer application (A13, A7); configuring multiple providers for one user is operationally complex for minimal benefit.",
+          "More application state to manage: the freelancer's provider identity must record which provider was used, in case multiple providers are active.",
+          "Each additional provider registered on a given OAuth platform (Google Cloud Console, GitHub OAuth Apps) requires separate client ID/secret pairs to manage as secrets."
+        ]
+      },
+      "bears_on": ["R5", "A2", "A6", "A7", "A13", "AC5", "INV1", "C2"]
+    }
+  ],
+  "option_count": 3,
+  "degenerate": false,
+  "degenerate_reason": null,
+  "no_pick_note": "Live, unranked alternatives. EVALUATE-DECIDE scores against CONSTRAINTS / ACCEPTANCE / NFRs and picks (role 4); OPTION-GEN does not recommend."
+}
