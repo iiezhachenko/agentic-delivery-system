@@ -37,8 +37,7 @@ manually simulate how the agentic system would behave when it is built.
 - **IMPORTANT!!!** Your working directory is ./ You are prohibited to look anywhere outside of it.
 
 # SUBAGENT CONTRACT
-- Runner = Sonnet, High effort — the runtime target, NOT Opus (you, the orchestrator, are Opus; the system will run on Sonnet, so test on Sonnet). Set via a defined agent (`.claude/agents/step-runner.md` with `model: sonnet`, `effort: high`) — a generic spawn that only sets the model will NOT raise effort.
+- **Every subagent — runner AND verifier — is launched via the `step-runner` agent** (`agentic-systems/.claude/agents/step-runner.md`, `model: sonnet`, `effort: high`). Sonnet/High is the runtime target, NOT Opus (you, the orchestrator, are Opus; the system runs on Sonnet, so test on Sonnet). Subagents sandbox-cwd to `agentic-systems/`. A generic spawn that only sets the model will NOT raise effort — do not use one.
 - Runner gets the authored prompt verbatim + the _test_bench path. No orchestrator context leaks in. The operator's real session has only the pasted prompt; the test must match it exactly.
-- Verifier is a DIFFERENT subagent than the runner. A runner never grades its own output.
+- Verifier is a DIFFERENT spawn than the runner. A runner never grades its own output.
 - Subagent reply ≠ deliverable. The deliverable is the file on disk (D3). Always verify the file.
-- Every spawn keeps working dir ./
