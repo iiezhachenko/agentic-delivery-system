@@ -1,0 +1,200 @@
+{
+  "sources_ref": ".aprd/03-grounding/sources.json",
+  "class": "greenfield",
+  "stack": ["typescript", "react", "node"],
+  "rules": [
+    {
+      "id": "RULE1",
+      "source_ref": "SRC1",
+      "tier": 1,
+      "tool": "eslint",
+      "tool_version_pinned": "9.x",
+      "kind": "config",
+      "topic": "semicolons",
+      "rule": "Semicolons are required at statement ends.",
+      "setting": "\"semi\": [\"error\", \"always\"]",
+      "evidence": "\"semi\": [\"error\", \"always\"]"
+    },
+    {
+      "id": "RULE2",
+      "source_ref": "SRC1",
+      "tier": 1,
+      "tool": "eslint",
+      "tool_version_pinned": "9.x",
+      "kind": "config",
+      "topic": "quotes",
+      "rule": "Single quotes must be used for string literals.",
+      "setting": "\"quotes\": [\"error\", \"single\"]",
+      "evidence": "\"quotes\": [\"error\", \"single\"]"
+    },
+    {
+      "id": "RULE3",
+      "source_ref": "SRC1",
+      "tier": 1,
+      "tool": "eslint",
+      "tool_version_pinned": "9.x",
+      "kind": "config",
+      "topic": "no-unused-vars",
+      "rule": "Unused variables are forbidden.",
+      "setting": "\"no-unused-vars\": \"error\"",
+      "evidence": "\"no-unused-vars\": \"error\""
+    },
+    {
+      "id": "RULE4",
+      "source_ref": "SRC1",
+      "tier": 1,
+      "tool": "eslint",
+      "tool_version_pinned": "9.x",
+      "kind": "config",
+      "topic": "eqeqeq",
+      "rule": "Strict equality operator (===) must always be used; == is forbidden.",
+      "setting": "\"eqeqeq\": [\"error\", \"always\"]",
+      "evidence": "\"eqeqeq\": [\"error\", \"always\"]"
+    },
+    {
+      "id": "RULE5",
+      "source_ref": "SRC1",
+      "tier": 1,
+      "tool": "eslint",
+      "tool_version_pinned": "9.x",
+      "kind": "config",
+      "topic": "indent",
+      "rule": "Code must be indented with 2 spaces.",
+      "setting": "\"indent\": [\"error\", 2]",
+      "evidence": "\"indent\": [\"error\", 2]"
+    },
+    {
+      "id": "RULE6",
+      "source_ref": "SRC2",
+      "tier": 1,
+      "tool": "typescript",
+      "tool_version_pinned": "5.4",
+      "kind": "config",
+      "topic": "strict",
+      "rule": "TypeScript strict mode must be enabled.",
+      "setting": "\"strict\": true",
+      "evidence": "\"strict\": true"
+    },
+    {
+      "id": "RULE7",
+      "source_ref": "SRC2",
+      "tier": 1,
+      "tool": "typescript",
+      "tool_version_pinned": "5.4",
+      "kind": "config",
+      "topic": "no-implicit-any",
+      "rule": "Implicit any types are forbidden; all types must be explicit.",
+      "setting": "\"noImplicitAny\": true",
+      "evidence": "\"noImplicitAny\": true"
+    },
+    {
+      "id": "RULE8",
+      "source_ref": "SRC2",
+      "tier": 1,
+      "tool": "typescript",
+      "tool_version_pinned": "5.4",
+      "kind": "config",
+      "topic": "target",
+      "rule": "TypeScript must compile to ES2022.",
+      "setting": "\"target\": \"ES2022\"",
+      "evidence": "\"target\": \"ES2022\""
+    },
+    {
+      "id": "RULE9",
+      "source_ref": "SRC2",
+      "tier": 1,
+      "tool": "typescript",
+      "tool_version_pinned": "5.4",
+      "kind": "config",
+      "topic": "module",
+      "rule": "Module output format must be ESNext.",
+      "setting": "\"module\": \"ESNext\"",
+      "evidence": "\"module\": \"ESNext\""
+    },
+    {
+      "id": "RULE10",
+      "source_ref": "SRC3",
+      "tier": 2,
+      "tool": "house-style-guide",
+      "tool_version_pinned": "n/a",
+      "kind": "opinion",
+      "topic": "quotes",
+      "rule": "Use double quotes for string literals.",
+      "setting": null,
+      "evidence": "Always use double quotes for string literals. Consistent quoting reduces diff\nnoise and makes find-and-replace predictable across the codebase."
+    },
+    {
+      "id": "RULE11",
+      "source_ref": "SRC3",
+      "tier": 2,
+      "tool": "house-style-guide",
+      "tool_version_pinned": "n/a",
+      "kind": "opinion",
+      "topic": "semicolons",
+      "rule": "Always terminate statements with a semicolon.",
+      "setting": null,
+      "evidence": "Always terminate statements with a semicolon. Relying on automatic semicolon\ninsertion has historically produced subtle bugs around return statements and\nleading parentheses, which is why we are explicit."
+    },
+    {
+      "id": "RULE12",
+      "source_ref": "SRC3",
+      "tier": 2,
+      "tool": "house-style-guide",
+      "tool_version_pinned": "n/a",
+      "kind": "opinion",
+      "topic": "indent",
+      "rule": "Indent code with four spaces.",
+      "setting": null,
+      "evidence": "Indent code with four spaces. Earlier versions of this guide used two spaces;\nthe team voted to move to four for readability on dense nested JSX."
+    },
+    {
+      "id": "RULE13",
+      "source_ref": "SRC3",
+      "tier": 2,
+      "tool": "house-style-guide",
+      "tool_version_pinned": "n/a",
+      "kind": "opinion",
+      "topic": "indent",
+      "rule": "Do not use tabs for indentation.",
+      "setting": null,
+      "evidence": "Do not use tabs."
+    },
+    {
+      "id": "RULE14",
+      "source_ref": "SRC3",
+      "tier": 2,
+      "tool": "house-style-guide",
+      "tool_version_pinned": "n/a",
+      "kind": "opinion",
+      "topic": "variable-declarations",
+      "rule": "Prefer const over let for variable declarations.",
+      "setting": null,
+      "evidence": "Prefer `const` over `let`, and never use `var`. Most bindings are never\nreassigned; defaulting to `const` signals intent and lets the compiler catch\naccidental mutation."
+    },
+    {
+      "id": "RULE15",
+      "source_ref": "SRC3",
+      "tier": 2,
+      "tool": "house-style-guide",
+      "tool_version_pinned": "n/a",
+      "kind": "opinion",
+      "topic": "variable-declarations",
+      "rule": "Never use var for variable declarations.",
+      "setting": null,
+      "evidence": "Prefer `const` over `let`, and never use `var`. Most bindings are never\nreassigned; defaulting to `const` signals intent and lets the compiler catch\naccidental mutation."
+    }
+  ],
+  "unfetched_sources": [
+    {
+      "id": "SRC4",
+      "reason": "listed in sources.json but file manifests/prettier.config.json absent on disk — fetch incomplete; recorded, not extracted or recalled"
+    }
+  ],
+  "extraction_meta": {
+    "sources_total": 4,
+    "sources_extracted": 3,
+    "sources_unfetched": 1,
+    "rules_total": 15,
+    "by_tier": { "1": 9, "2": 6, "3": 0 }
+  }
+}

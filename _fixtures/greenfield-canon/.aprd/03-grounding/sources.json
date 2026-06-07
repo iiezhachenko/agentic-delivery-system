@@ -1,0 +1,43 @@
+{
+  "class": "greenfield",
+  "stack": ["typescript", "react", "node"],
+  "canon_version": "canon.v1",
+  "sources": [
+    {
+      "id": "SRC1",
+      "tier": 1,
+      "tool": "eslint",
+      "tool_version_pinned": "9.x",
+      "kind": "config",
+      "url": "https://example.org/eslint/recommended.config.json",
+      "file": "manifests/eslint.config.json"
+    },
+    {
+      "id": "SRC2",
+      "tier": 1,
+      "tool": "typescript",
+      "tool_version_pinned": "5.4",
+      "kind": "config",
+      "url": "https://example.org/tsconfig/base.json",
+      "file": "manifests/tsconfig.base.json"
+    },
+    {
+      "id": "SRC3",
+      "tier": 2,
+      "tool": "house-style-guide",
+      "tool_version_pinned": "n/a",
+      "kind": "doc",
+      "url": "https://example.org/style/typescript.md",
+      "file": "manifests/style-guide.md"
+    },
+    {
+      "id": "SRC4",
+      "tier": 1,
+      "tool": "prettier",
+      "tool_version_pinned": "3.x",
+      "kind": "config",
+      "url": "https://example.org/prettier/base.json",
+      "file": "manifests/prettier.config.json"
+    }
+  ]
+}
