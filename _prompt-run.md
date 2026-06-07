@@ -26,7 +26,13 @@ manually simulate how the agentic system would behave when it is built.
         5.3.1. After each step, verify (as 4.4).
         5.3.2. Flaw => fix that step's prompt. Input to downstream changes => CASCADE: clear that step's output forward, rerun it AND every downstream step IN THE WINDOW. Retry budget 3/step, then HALT. Return to #5.3.1.
     5.4. Window head must seed from a GOLDEN fixture — if N-2's input has no golden fixture in _fixtures/, author one first (or fall back to a wider window rooted at the nearest golden).
-6. Update the _tracker.md.
+6. Update the _tracker.md (record the shipped prompt).
+7. **Anti-bloat pass — LAST action before finishing, mandatory.** The tracker is a derived cache; left unchecked it bloats and drifts (it ballooned once already). Before you report done, re-read the tracker's Changelog header rules (0–4) + the YOU ARE HERE single-pointer rule and ENFORCE them on what you just wrote:
+    7.1. **YOU ARE HERE = current pointer only.** Move the pointer (last shipped + next); DELETE the superseded prior state — never stack a history of past "current" states there. It holds ONE current position.
+    7.2. **Changelog entry = POINTER not home.** Your new entry ≤ ~5 lines: output path (one clause) + the ONE load-bearing line + test verdict (`PASS Nretries — what the retry killed`; `PASS (0 retries)` with NO narrative when clean) + golden ref. Anything with a home elsewhere (full schema → the `.md` + golden; full rule set → the `.md` mandate; decisions → `D*`) is CITED BY NAME, never re-recorded.
+    7.3. **No double-bookkeeping.** A shipped prompt is described ONCE (its Changelog entry). If you find the same fact in two places, collapse to one + link by name.
+    7.4. **Diff-check for drift.** If this run EDITED a prompt's behavior (not just authored new), confirm no stale Changelog/YOU-ARE-HERE line now contradicts the `.md`. The `.md`+golden win; fix or delete the stale prose.
+    Only after this pass: report done.
 
 # RULES
 - Think, write, and reply using terse language like smart caveman. All technical substance stay. Only fluff dies.
