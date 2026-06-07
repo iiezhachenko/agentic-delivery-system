@@ -1,0 +1,187 @@
+{
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "lock_verified": true,
+  "class": "greenfield",
+  "skeleton_id": "S1",
+  "decision_points": [
+    {
+      "id": "DP1",
+      "decision": "Which architectural style should the system adopt: single-deployment monolith, modular monolith with enforced internal module boundaries, or some other single-server style?",
+      "category": "Architectural style",
+      "forced_by": ["R1", "C1", "AC1"],
+      "candidate_blast_radius": "foundational",
+      "blast_rationale": "Pre-draw, cross-box: the style determines what top-level components exist and how they relate before any box can be drawn in the HLD.",
+      "fork_evidence": "Both a traditional monolith and a modular monolith are viable at this scale and meet R1/C1/AC1; A13/INV6 rule out multi-service deployments but leave the monolith vs modular-monolith fork live.",
+      "cut_ref": "FD1"
+    },
+    {
+      "id": "DP2",
+      "decision": "Which server-side language, runtime, and web framework should be used to implement the application?",
+      "category": "Tech stack",
+      "forced_by": ["R1", "C1", "A1", "A2"],
+      "candidate_blast_radius": "foundational",
+      "blast_rationale": "Pre-draw, cross-box: every slice builds on the chosen runtime and framework; the stack must be set before any component can be constructed.",
+      "fork_evidence": "Node.js, Python, Ruby, Go, and others all support OAuth libraries and server-side PDF generation and meet R1/C1; A1 and A2 require server-side capability but do not pin a language.",
+      "cut_ref": "FD1"
+    },
+    {
+      "id": "DP3",
+      "decision": "Which server-side library or tool should generate the PDF invoice file?",
+      "category": "Tech stack",
+      "forced_by": ["A1", "R3", "AC3"],
+      "candidate_blast_radius": "local",
+      "blast_rationale": "Inside one box: the PDF generation library is an implementation detail of the invoice export component (S3); it does not constrain any other component in the HLD.",
+      "fork_evidence": "Headless-browser tools, native PDF libraries, and template-based renderers are all viable for server-side PDF generation as required by A1/R3/AC3; the contract does not pin a tool.",
+      "cut_ref": "deferred:S3"
+    },
+    {
+      "id": "DP4",
+      "decision": "Which datastore paradigm and technology should be used to persist all application state (freelancer identity, projects, time entries, invoices)?",
+      "category": "Persistence",
+      "forced_by": ["R7", "E1", "A2"],
+      "candidate_blast_radius": "foundational",
+      "blast_rationale": "Pre-draw, cross-box: the persistence choice determines the schema strategy and data-access layer shared by every slice; no slice can be designed until the datastore is chosen.",
+      "fork_evidence": "A relational database, a document store, and an embedded database are all viable at the scale fixed by A13 and meet R7/E1/A2 persistence requirements.",
+      "cut_ref": "FD3"
+    },
+    {
+      "id": "DP5",
+      "decision": "How should the application's internal modules be cut: by horizontal layer (controllers/services/repositories), by vertical feature slice, or by domain boundary?",
+      "category": "Boundary strategy",
+      "forced_by": ["R1", "R2", "R6", "R7"],
+      "candidate_blast_radius": "foundational",
+      "blast_rationale": "Pre-draw, cross-box: the boundary strategy determines which components appear in the HLD and how they interact; it must be settled before boxes are drawn.",
+      "fork_evidence": "Layered architecture, feature-sliced structure, and domain-driven boundary cuts are each viable for a web app with distinct functional areas (auth, project management, time logging, invoice export) as defined by R2/R6/R7.",
+      "cut_ref": null
+    },
+    {
+      "id": "DP6",
+      "decision": "How should the application's HTTP surface be shaped: a server-rendered multi-page application, a REST/JSON API backend consumed by a single-page frontend, or a hybrid approach?",
+      "category": "API style",
+      "forced_by": ["R1", "C1", "AC1", "A1"],
+      "candidate_blast_radius": "foundational",
+      "blast_rationale": "Pre-draw, cross-box: the API surface shape determines whether a separate frontend component exists alongside the backend; the HLD component count and interaction model depend on this choice.",
+      "fork_evidence": "Server-rendered MPA, REST API + SPA, and hybrid SSR-with-API-endpoints are all viable for R1/C1/AC1; A1 requires at least one server-side file-streaming endpoint but does not pin the broader rendering model.",
+      "cut_ref": "FD1"
+    },
+    {
+      "id": "DP7",
+      "decision": "Which OAuth provider type or set of providers should the system support for freelancer authentication?",
+      "category": "Cross-cutting",
+      "forced_by": ["R5", "A2", "AC5"],
+      "candidate_blast_radius": "foundational",
+      "blast_rationale": "Pre-draw: the chosen provider type determines the integration seam's redirect URIs, token shape, and callback contract before the skeleton's primary_external_integration seam can be designed.",
+      "fork_evidence": "Restricting to a single provider (e.g. Google), supporting multiple configurable providers, or using a generic OAuth2/OIDC abstraction are each viable implementations of A2/R5/AC5.",
+      "cut_ref": "FD2"
+    },
+    {
+      "id": "DP8",
+      "decision": "Which OAuth integration library or mechanism should handle the OAuth handshake, token exchange, and session establishment within the application?",
+      "category": "Cross-cutting",
+      "forced_by": ["R5", "A2", "AC5"],
+      "candidate_blast_radius": "local",
+      "blast_rationale": "Inside one box: the OAuth library choice is an implementation detail within the authentication component; it does not alter the HLD structure once the provider type is decided.",
+      "fork_evidence": "Passport.js, OmniAuth, framework-native OAuth middleware, and hand-rolled OAuth2 client code are each viable for completing the handshake required by A2/R5/AC5; the contract does not mandate a library.",
+      "cut_ref": "FD2"
+    },
+    {
+      "id": "DP9",
+      "decision": "How should application secrets and configuration (OAuth credentials, database connection strings, hosting environment values) be injected into the running application?",
+      "category": "Cross-cutting",
+      "forced_by": ["A2", "A6"],
+      "candidate_blast_radius": "local",
+      "blast_rationale": "Inside one box: config/secrets injection is a deployment-time concern within the hosting environment; it does not alter what HLD components exist.",
+      "fork_evidence": "Environment variables, a managed secrets service, and checked-in dotenv files (non-production) are all viable injection strategies compatible with A6's portability requirement; A2's OAuth credentials must be stored somewhere.",
+      "cut_ref": null
+    },
+    {
+      "id": "DP10",
+      "decision": "Which hosting and deployment target category should be used to serve the application: a PaaS platform, a VPS, a container platform, or another managed runtime?",
+      "category": "Deployment topology",
+      "forced_by": ["C1", "C2", "A6", "A13"],
+      "candidate_blast_radius": "foundational",
+      "blast_rationale": "Pre-draw, cross-box: the deployment target determines the runtime environment, build pipeline shape, and environment-variable strategy that every slice must conform to.",
+      "fork_evidence": "PaaS offerings, VPS with manual setup, and container-based platforms each satisfy A6 (no single-vendor lock-in) and A13 (single-server synchronous); C2's two-month timeline shapes evaluation but does not collapse the fork.",
+      "cut_ref": "FD4"
+    },
+    {
+      "id": "DP11",
+      "decision": "What build and test strategy should be used to mechanically prove each acceptance criterion is met: unit and integration tests, end-to-end browser automation, or a mixed approach?",
+      "category": "Build/test strategy",
+      "forced_by": ["AC1", "AC3", "AC5"],
+      "candidate_blast_radius": "local",
+      "blast_rationale": "Inside the build pipeline: the test strategy determines how CI is shaped but does not determine what HLD components exist.",
+      "fork_evidence": "Unit-plus-integration suites, browser-automation frameworks (Playwright, Cypress), and mixed pyramid strategies are all viable approaches to proving AC1 (browser render), AC3 (PDF file download), and AC5 (OAuth round-trip); the contract does not mandate a test toolchain.",
+      "cut_ref": null
+    }
+  ],
+  "checklist_coverage": [
+    {
+      "category": "Architectural style",
+      "fired": true,
+      "decision_points": ["DP1"],
+      "note": "R1/C1/AC1 force a web application; monolith vs modular monolith is a live fork. A13/INV6 close the services/multi-runtime option but leave the single-server style question open."
+    },
+    {
+      "category": "Tech stack",
+      "fired": true,
+      "decision_points": ["DP2", "DP3"],
+      "note": "DP2: R1/C1/A1/A2 force a server-side web runtime that supports OAuth and PDF generation, but do not pin language or framework. DP3: A1/R3/AC3 force server-side PDF generation but do not pin the library; deferred to S3 in the cut."
+    },
+    {
+      "category": "Persistence",
+      "fired": true,
+      "decision_points": ["DP4"],
+      "note": "R7/E1/A2 force durable persistence of freelancer identity and all application state; the datastore paradigm and technology are not pinned by the contract."
+    },
+    {
+      "category": "Sync vs async",
+      "fired": false,
+      "decision_points": [],
+      "note": "Closed by A13/INV6: single-server synchronous request cycle is fixed; no background queues or async messaging required. No live fork."
+    },
+    {
+      "category": "Boundary strategy",
+      "fired": true,
+      "decision_points": ["DP5"],
+      "note": "R1/R2/R6/R7 define distinct functional domains (auth, projects, time logging, invoices) that must be organised; the contract does not prescribe a module-cutting strategy."
+    },
+    {
+      "category": "API style",
+      "fired": true,
+      "decision_points": ["DP6"],
+      "note": "R1/C1/AC1 force browser delivery; A1 forces a server-side file-streaming endpoint; the rendering model (SSR MPA vs REST API + SPA vs hybrid) remains an open fork."
+    },
+    {
+      "category": "Cross-cutting",
+      "fired": true,
+      "decision_points": ["DP7", "DP8", "DP9"],
+      "note": "Auth model: A2/R5/AC5 force OAuth delegation (mechanism fixed); provider type (DP7) and integration library (DP8) are live forks. Error strategy: no aPRD element forces an error-handling decision — not fired. Observability: A9/A13 imply minimal needs; no aPRD element mandates an observability stack — not fired. Config/secrets: A2/A6 force credential management for OAuth and a portable deployment target — injection strategy is a live fork (DP9)."
+    },
+    {
+      "category": "Deployment topology",
+      "fired": true,
+      "decision_points": ["DP10"],
+      "note": "C1/C2/A6/A13 force a deployed, browser-reachable, single-server, low-cost, vendor-agnostic runtime; the hosting category (PaaS vs VPS vs container) is not pinned."
+    },
+    {
+      "category": "Build/test strategy",
+      "fired": true,
+      "decision_points": ["DP11"],
+      "note": "AC1/AC3/AC5 require proving browser render, PDF file download, and OAuth round-trip — these acceptance shapes force a question about how 'done' is mechanically verified; toolchain is not pinned."
+    },
+    {
+      "category": "Conformance",
+      "fired": false,
+      "decision_points": [],
+      "note": "Not applicable — greenfield build (C3); no existing system or codebase to conform to."
+    }
+  ],
+  "aprd_defects": [],
+  "decision_point_counts": {
+    "total": 11,
+    "foundational": 7,
+    "local": 4
+  }
+}
