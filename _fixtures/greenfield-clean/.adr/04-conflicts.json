@@ -1,0 +1,49 @@
+{
+  "decisions_index_ref": "03-options/decisions-index.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "class": "greenfield",
+  "skeleton_id": "S1",
+  "decisions_checked": ["DP1", "DP2", "DP4", "DP6", "DP7", "DP10"],
+  "undecided_carried": [],
+  "conflicts": [],
+  "constraint_violations": [],
+  "coverage": {
+    "adr_to_aprd": {
+      "all_traceable": true,
+      "untraceable": []
+    },
+    "aprd_to_adr": {
+      "in_scope_constraints": ["C1", "C2", "C3"],
+      "covered": [
+        {
+          "constraint": "C1",
+          "by": ["DP1", "DP2", "DP6", "DP10"]
+        },
+        {
+          "constraint": "C2",
+          "by": ["DP1", "DP2", "DP4", "DP6", "DP7", "DP10"]
+        }
+      ],
+      "deferred": [],
+      "premise": [
+        {
+          "constraint": "C3",
+          "why": "Net-new greenfield class fact — no existing system or codebase exists. Forces no architectural HOW; the constraint confirms absence of legacy/migration burden, not a design choice. No decision is needed to address it and none traces it; its satisfaction is entailed by the project class declaration itself."
+        }
+      ],
+      "gaps": []
+    }
+  },
+  "structural_defects": [],
+  "verdict": "coherent",
+  "blocking_count": 0,
+  "reconcile_counts": {
+    "decisions_checked": 6,
+    "conflicts": 0,
+    "constraint_violations": 0,
+    "coverage_gaps": 0,
+    "untraceable": 0,
+    "structural_defects": 0
+  }
+}

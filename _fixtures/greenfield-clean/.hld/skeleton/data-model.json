@@ -1,0 +1,191 @@
+{
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "adr_log_ref": ".adr/log/",
+  "components_ref": ".hld/skeleton/components.json",
+  "contracts_ref": ".hld/skeleton/contracts.json",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "lock_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton",
+  "skeleton_id": "S1",
+  "persistence": {
+    "adr_refs": ["ADR-0003"],
+    "store": "Relational database — PostgreSQL (managed)",
+    "persistence_component": "C1",
+    "model_basis": "Single PostgreSQL store; each entity has exactly one owning domain component as sole writer/producer; C1 provides storage for all persisted entities but owns none; field-level schemas deferred per cut (E2/E5/E6/E7 to S4, E3 to S2, E4 derived/layout to S3, E1 to S1)"
+  },
+  "entities": [
+    {
+      "id": "E1",
+      "name": "Freelancer",
+      "logical_description": "Primary user account; stores provider token and user profile reference from OAuth delegation; scopes all domain data; no stored credentials.",
+      "owner": "C2",
+      "owner_basis": "Identity & Auth governs freelancer account creation and authentication; C2 is sole writer of E1 via CT1 (shared_data write to C1).",
+      "persisted": true,
+      "accessed_by": [
+        { "component": "C2", "access": "read-write", "via": "CT1" },
+        { "component": "C3", "access": "read", "via": "CT3" },
+        { "component": "C6", "access": "read", "via": "CT8" }
+      ],
+      "relationships": [
+        { "to": "E2", "cardinality": "one-to-many", "basis": "One freelancer owns many client projects; ADR-0003 entity chain E1→E2 FK; INV2 (single freelancer per account)" }
+      ],
+      "field_schema_deferred_to": "S1",
+      "field_schema_note": "Skeleton seam FD3 — freelancer identity (provider token, user profile reference) schema committed at S1; field layout belongs to skeleton delivery.",
+      "honors_inv": ["INV1", "INV2"],
+      "traces": ["R5"]
+    },
+    {
+      "id": "E2",
+      "name": "Client Project",
+      "logical_description": "Named project owned by a freelancer on behalf of a client; carries a single currency designation and a single billable rate; all time entries and invoices for this project inherit these values.",
+      "owner": "C3",
+      "owner_basis": "Project Management creates, reads, updates, and deletes client project records; C3 is sole writer of E2 via CT2 (shared_data write to C1).",
+      "persisted": true,
+      "accessed_by": [
+        { "component": "C3", "access": "read-write", "via": "CT2" },
+        { "component": "C4", "access": "read", "via": "CT5" },
+        { "component": "C5", "access": "read", "via": "CT7" },
+        { "component": "C6", "access": "read", "via": "CT9" }
+      ],
+      "relationships": [
+        { "to": "E1", "cardinality": "many-to-one", "basis": "Many projects belong to one freelancer; ADR-0003 E1→E2 FK chain; INV2" },
+        { "to": "E3", "cardinality": "one-to-many", "basis": "One project contains many time entries; ADR-0003 E2→E3 FK chain; R7" },
+        { "to": "E5", "cardinality": "many-to-one", "basis": "Many projects may share a currency designation; each project carries exactly one currency; INV3" },
+        { "to": "E6", "cardinality": "many-to-one", "basis": "Many projects may be associated with one client; E2 references the client record to whom the invoice is addressed; R6" },
+        { "to": "E7", "cardinality": "one-to-one", "basis": "Each project has exactly one billable rate attached; ADR-0003 entity chain; INV4" }
+      ],
+      "field_schema_deferred_to": "S4",
+      "field_schema_note": "Client Project field layout (name, client reference, currency designation, billable rate) deferred to S4 per cut deferred[]; no project data created before S4.",
+      "honors_inv": ["INV2", "INV3", "INV4", "INV8"],
+      "traces": ["R4", "R6", "R9", "R10"]
+    },
+    {
+      "id": "E3",
+      "name": "Time Entry",
+      "logical_description": "Single logged unit of billable work (date, description, hours) tied to a project; inherits the project's currency and rate; no per-entry rate or currency field.",
+      "owner": "C4",
+      "owner_basis": "Time Logging accepts, persists, and displays time entries; C4 is sole writer of E3 via CT4 (shared_data write to C1).",
+      "persisted": true,
+      "accessed_by": [
+        { "component": "C4", "access": "read-write", "via": "CT4" },
+        { "component": "C5", "access": "read", "via": "CT6" }
+      ],
+      "relationships": [
+        { "to": "E2", "cardinality": "many-to-one", "basis": "Many time entries belong to one project; ADR-0003 E2→E3 FK chain; R7; entry inherits project-level currency and rate per INV3, INV4" }
+      ],
+      "field_schema_deferred_to": "S2",
+      "field_schema_note": "Time-entry field layout (date, description, hours, project association, freelancer association) deferred to S2 per cut deferred[]; no time entries created before S2.",
+      "honors_inv": ["INV3", "INV4", "INV7"],
+      "traces": ["R2", "R7", "R9"]
+    },
+    {
+      "id": "E4",
+      "name": "Invoice",
+      "logical_description": "Monthly PDF document aggregating billable hours for a client project; generated server-side on demand and streamed to the browser as a file download; not stored — derived on demand from E2 and E3.",
+      "owner": "C5",
+      "owner_basis": "Invoice Export is sole producer of E4; generates and streams the PDF artifact on demand; no store-write seam for E4 — correct for a derived entity.",
+      "persisted": false,
+      "accessed_by": [
+        { "component": "C5", "access": "read-write", "via": "CT11" },
+        { "component": "C6", "access": "read", "via": "CT11" }
+      ],
+      "relationships": [
+        { "to": "E2", "cardinality": "many-to-one", "basis": "An invoice is generated for exactly one project (and one calendar month); E4 reads project header data (currency, rate, client) from E2; INV5" },
+        { "to": "E3", "cardinality": "many-to-one", "basis": "An invoice aggregates many time entries for the selected month; E3 records are source inputs for invoice line items; R8, INV5" }
+      ],
+      "field_schema_deferred_to": "S3",
+      "field_schema_note": "Invoice PDF template layout and line-item aggregation logic deferred to S3 per cut deferred[]; E4 is derived (no stored schema); layout belongs to S3 producing slice.",
+      "honors_inv": ["INV5"],
+      "traces": ["R3", "R8", "R9"]
+    },
+    {
+      "id": "E5",
+      "name": "Currency",
+      "logical_description": "Currency designation (e.g. USD, EUR) applied at the project level; all time entries and invoices for a project use the same currency; no per-entry or per-invoice currency variation.",
+      "owner": "C3",
+      "owner_basis": "Project Management owns currency designation as part of project-level monetary configuration; C3 is sole writer of E5 via CT2 (shared_data write to C1).",
+      "persisted": true,
+      "accessed_by": [
+        { "component": "C3", "access": "read-write", "via": "CT2" },
+        { "component": "C4", "access": "read", "via": "CT5" },
+        { "component": "C5", "access": "read", "via": "CT7" }
+      ],
+      "relationships": [
+        { "to": "E2", "cardinality": "one-to-many", "basis": "One currency designation may be used by many projects; each project carries exactly one currency; INV3; R4" }
+      ],
+      "field_schema_deferred_to": "S4",
+      "field_schema_note": "Currency designation storage model deferred to S4 per cut deferred[] (multi-currency project selection UI and schema belong to S4).",
+      "honors_inv": ["INV3"],
+      "traces": ["R4", "R9"]
+    },
+    {
+      "id": "E6",
+      "name": "Client",
+      "logical_description": "Data record representing the party that owns a project and to whom an invoice is addressed; stores name, contact details, and billing address; no client login or portal.",
+      "owner": "C3",
+      "owner_basis": "Project Management creates and manages client records as part of project management flow; C3 is sole writer of E6 via CT2 (shared_data write to C1).",
+      "persisted": true,
+      "accessed_by": [
+        { "component": "C3", "access": "read-write", "via": "CT2" },
+        { "component": "C5", "access": "read", "via": "CT7" }
+      ],
+      "relationships": [
+        { "to": "E2", "cardinality": "one-to-many", "basis": "One client may be associated with many projects; E2 references its client record; R6; INV8" }
+      ],
+      "field_schema_deferred_to": "S4",
+      "field_schema_note": "Client record data shape (name, contact details, billing address) deferred to S4 per cut deferred[]; no client data created before S4.",
+      "honors_inv": ["INV8"],
+      "traces": ["R6"]
+    },
+    {
+      "id": "E7",
+      "name": "Billable Rate",
+      "logical_description": "Monetary hourly rate attached to a client project; all time entries in the project inherit this rate for invoice line-item computation; no per-entry rate variation.",
+      "owner": "C3",
+      "owner_basis": "Project Management owns project-level billable rate configuration; C3 is sole writer of E7 via CT2 (shared_data write to C1).",
+      "persisted": true,
+      "accessed_by": [
+        { "component": "C3", "access": "read-write", "via": "CT2" },
+        { "component": "C4", "access": "read", "via": "CT5" },
+        { "component": "C5", "access": "read", "via": "CT7" }
+      ],
+      "relationships": [
+        { "to": "E2", "cardinality": "one-to-one", "basis": "Each billable rate is attached to exactly one project; ADR-0003 entity chain; INV4" }
+      ],
+      "field_schema_deferred_to": "S4",
+      "field_schema_note": "Billable rate field layout deferred to S4 per cut deferred[] (included in Client Project entity schema deferred item).",
+      "honors_inv": ["INV4"],
+      "traces": ["R9", "R10"]
+    }
+  ],
+  "ownership": {
+    "E1": "C2",
+    "E2": "C3",
+    "E3": "C4",
+    "E4": "C5",
+    "E5": "C3",
+    "E6": "C3",
+    "E7": "C3"
+  },
+  "coverage": {
+    "entities_in_scope": ["E1", "E2", "E3", "E4", "E5", "E6", "E7"],
+    "entities_modeled": ["E1", "E2", "E3", "E4", "E5", "E6", "E7"],
+    "entity_orphans": [],
+    "owning_components": ["C2", "C3", "C4", "C5"],
+    "persisted_entities": ["E1", "E2", "E3", "E5", "E6", "E7"],
+    "derived_entities": ["E4"],
+    "single_owner_verified": true,
+    "shared_write_check": "pass"
+  },
+  "ownership_defects": [],
+  "structural_defects": [],
+  "data_model_counts": {
+    "entities": 7,
+    "owned": 7,
+    "owners": 4,
+    "with_relationship": 7,
+    "field_schemas_deferred": 7
+  }
+}

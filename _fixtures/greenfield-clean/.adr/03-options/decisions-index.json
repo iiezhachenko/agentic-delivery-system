@@ -1,0 +1,75 @@
+{
+  "options_index_ref": "03-options/index.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "class": "greenfield",
+  "skeleton_id": "S1",
+  "decisions": [
+    {
+      "id": "DP1",
+      "category": "Architectural style",
+      "decision_made": "Single-deployment monolith (flat structure)",
+      "options_ref": "03-options/DP1.json",
+      "decision_ref": "03-options/DP1.decision.json",
+      "option_count": 2,
+      "degenerate_forced": false,
+      "traces": ["R1", "C1", "AC1", "C2", "A13", "INV6"]
+    },
+    {
+      "id": "DP2",
+      "category": "Tech stack",
+      "decision_made": "Python with Django or Flask/FastAPI",
+      "options_ref": "03-options/DP2.json",
+      "decision_ref": "03-options/DP2.decision.json",
+      "option_count": 3,
+      "degenerate_forced": false,
+      "traces": ["R1", "C1", "A1", "A2", "C2", "A6", "A13", "AC3", "AC5", "INV6"]
+    },
+    {
+      "id": "DP4",
+      "category": "Persistence",
+      "decision_made": "Relational database — PostgreSQL",
+      "options_ref": "03-options/DP4.json",
+      "decision_ref": "03-options/DP4.decision.json",
+      "option_count": 3,
+      "degenerate_forced": false,
+      "traces": ["R7", "R8", "R9", "R10", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "A2", "A6", "A13", "C2", "AC7", "AC8", "AC9", "AC10", "INV3", "INV4", "INV6"]
+    },
+    {
+      "id": "DP6",
+      "category": "API style",
+      "decision_made": "Server-rendered multi-page application (MPA / SSR)",
+      "options_ref": "03-options/DP6.json",
+      "decision_ref": "03-options/DP6.decision.json",
+      "option_count": 3,
+      "degenerate_forced": false,
+      "traces": ["R1", "C1", "AC1", "A1", "C2", "A13", "A2", "INV6"]
+    },
+    {
+      "id": "DP7",
+      "category": "Cross-cutting",
+      "decision_made": "Single OAuth provider — Google OAuth 2.0",
+      "options_ref": "03-options/DP7.json",
+      "decision_ref": "03-options/DP7.decision.json",
+      "option_count": 3,
+      "degenerate_forced": false,
+      "traces": ["R5", "A2", "AC5", "INV1", "C2", "A7", "A13"]
+    },
+    {
+      "id": "DP10",
+      "category": "Deployment topology",
+      "decision_made": "PaaS platform (e.g., Render, Fly.io, Railway)",
+      "options_ref": "03-options/DP10.json",
+      "decision_ref": "03-options/DP10.decision.json",
+      "option_count": 3,
+      "degenerate_forced": false,
+      "traces": ["C1", "C2", "A6", "A13", "AC1", "INV6", "A1"]
+    }
+  ],
+  "undecided": [],
+  "decision_counts": {
+    "decisions_made": 6,
+    "degenerate_forced": 0,
+    "undecided": 0
+  }
+}
