@@ -1,0 +1,454 @@
+{
+  "rules_reconciled_ref": ".aprd/03-grounding/rules-reconciled.json",
+  "class": "greenfield",
+  "stack": ["typescript", "react", "node"],
+  "agreed": [
+    {
+      "id": "AGR1",
+      "topic": "semicolons",
+      "rule": "Statements must be terminated with a semicolon.",
+      "setting": "\"semi\": [\"error\", \"always\"]",
+      "kind": "mixed",
+      "corroboration": "multi-source",
+      "sources": [
+        {
+          "rule_ref": "RULE1",
+          "source_ref": "SRC1",
+          "tier": 1,
+          "tool": "eslint",
+          "tool_version_pinned": "9.x",
+          "setting": "\"semi\": [\"error\", \"always\"]",
+          "evidence": "\"semi\": [\"error\", \"always\"]"
+        },
+        {
+          "rule_ref": "RULE11",
+          "source_ref": "SRC3",
+          "tier": 2,
+          "tool": "house-style-guide",
+          "tool_version_pinned": "n/a",
+          "setting": null,
+          "evidence": "Always terminate statements with a semicolon. Relying on automatic semicolon\ninsertion has historically produced subtle bugs around return statements and\nleading parentheses, which is why we are explicit."
+        }
+      ],
+      "verification": {
+        "status": "deprecated",
+        "checked": {
+          "tool": "eslint",
+          "tool_version_pinned": "9.x",
+          "setting": "\"semi\": [\"error\", \"always\"]"
+        },
+        "finding": "ESLint core deprecated all stylistic/formatting rules (including `semi`) as of v8.53.0; in ESLint 9.x the rule is removed from core and relocated to @stylistic/eslint-plugin — use `@stylistic/semi` instead.",
+        "replacement": "\"@stylistic/semi\": [\"error\", \"always\"] (via @stylistic/eslint-plugin)",
+        "source_of_truth": "llm-knowledge",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "AGR2",
+      "topic": "no-unused-vars",
+      "rule": "Unused variables are forbidden.",
+      "setting": "\"no-unused-vars\": \"error\"",
+      "kind": "config",
+      "corroboration": "single-source",
+      "sources": [
+        {
+          "rule_ref": "RULE3",
+          "source_ref": "SRC1",
+          "tier": 1,
+          "tool": "eslint",
+          "tool_version_pinned": "9.x",
+          "setting": "\"no-unused-vars\": \"error\"",
+          "evidence": "\"no-unused-vars\": \"error\""
+        }
+      ],
+      "verification": {
+        "status": "current",
+        "checked": {
+          "tool": "eslint",
+          "tool_version_pinned": "9.x",
+          "setting": "\"no-unused-vars\": \"error\""
+        },
+        "finding": "Code-quality rule `no-unused-vars` is present and non-deprecated in ESLint 9.x core; it was not relocated to @stylistic because it is not a stylistic/formatting rule.",
+        "replacement": null,
+        "source_of_truth": "llm-knowledge",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "AGR3",
+      "topic": "eqeqeq",
+      "rule": "Strict equality operator (===) must always be used; == is forbidden.",
+      "setting": "\"eqeqeq\": [\"error\", \"always\"]",
+      "kind": "config",
+      "corroboration": "single-source",
+      "sources": [
+        {
+          "rule_ref": "RULE4",
+          "source_ref": "SRC1",
+          "tier": 1,
+          "tool": "eslint",
+          "tool_version_pinned": "9.x",
+          "setting": "\"eqeqeq\": [\"error\", \"always\"]",
+          "evidence": "\"eqeqeq\": [\"error\", \"always\"]"
+        }
+      ],
+      "verification": {
+        "status": "current",
+        "checked": {
+          "tool": "eslint",
+          "tool_version_pinned": "9.x",
+          "setting": "\"eqeqeq\": [\"error\", \"always\"]"
+        },
+        "finding": "Code-quality rule `eqeqeq` is present and non-deprecated in ESLint 9.x core; not a stylistic rule and not relocated.",
+        "replacement": null,
+        "source_of_truth": "llm-knowledge",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "AGR4",
+      "topic": "strict",
+      "rule": "TypeScript strict mode must be enabled.",
+      "setting": "\"strict\": true",
+      "kind": "config",
+      "corroboration": "single-source",
+      "sources": [
+        {
+          "rule_ref": "RULE6",
+          "source_ref": "SRC2",
+          "tier": 1,
+          "tool": "typescript",
+          "tool_version_pinned": "5.4",
+          "setting": "\"strict\": true",
+          "evidence": "\"strict\": true"
+        }
+      ],
+      "verification": {
+        "status": "current",
+        "checked": {
+          "tool": "typescript",
+          "tool_version_pinned": "5.4",
+          "setting": "\"strict\": true"
+        },
+        "finding": "TypeScript `strict` compiler option is current and supported in TypeScript 5.4; it is the recommended way to enable the full suite of strict type-checking flags.",
+        "replacement": null,
+        "source_of_truth": "llm-knowledge",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "AGR5",
+      "topic": "no-implicit-any",
+      "rule": "Implicit any types are forbidden; all types must be explicit.",
+      "setting": "\"noImplicitAny\": true",
+      "kind": "config",
+      "corroboration": "single-source",
+      "sources": [
+        {
+          "rule_ref": "RULE7",
+          "source_ref": "SRC2",
+          "tier": 1,
+          "tool": "typescript",
+          "tool_version_pinned": "5.4",
+          "setting": "\"noImplicitAny\": true",
+          "evidence": "\"noImplicitAny\": true"
+        }
+      ],
+      "verification": {
+        "status": "current",
+        "checked": {
+          "tool": "typescript",
+          "tool_version_pinned": "5.4",
+          "setting": "\"noImplicitAny\": true"
+        },
+        "finding": "TypeScript `noImplicitAny` compiler option is current and supported in TypeScript 5.4; valid as an explicit flag even when also implied by `strict: true`.",
+        "replacement": null,
+        "source_of_truth": "llm-knowledge",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "AGR6",
+      "topic": "target",
+      "rule": "TypeScript must compile to ES2022.",
+      "setting": "\"target\": \"ES2022\"",
+      "kind": "config",
+      "corroboration": "single-source",
+      "sources": [
+        {
+          "rule_ref": "RULE8",
+          "source_ref": "SRC2",
+          "tier": 1,
+          "tool": "typescript",
+          "tool_version_pinned": "5.4",
+          "setting": "\"target\": \"ES2022\"",
+          "evidence": "\"target\": \"ES2022\""
+        }
+      ],
+      "verification": {
+        "status": "current",
+        "checked": {
+          "tool": "typescript",
+          "tool_version_pinned": "5.4",
+          "setting": "\"target\": \"ES2022\""
+        },
+        "finding": "TypeScript `target: ES2022` is a valid and current compile target in TypeScript 5.4.",
+        "replacement": null,
+        "source_of_truth": "llm-knowledge",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "AGR7",
+      "topic": "module",
+      "rule": "Module output format must be ESNext.",
+      "setting": "\"module\": \"ESNext\"",
+      "kind": "config",
+      "corroboration": "single-source",
+      "sources": [
+        {
+          "rule_ref": "RULE9",
+          "source_ref": "SRC2",
+          "tier": 1,
+          "tool": "typescript",
+          "tool_version_pinned": "5.4",
+          "setting": "\"module\": \"ESNext\"",
+          "evidence": "\"module\": \"ESNext\""
+        }
+      ],
+      "verification": {
+        "status": "current",
+        "checked": {
+          "tool": "typescript",
+          "tool_version_pinned": "5.4",
+          "setting": "\"module\": \"ESNext\""
+        },
+        "finding": "TypeScript `module: ESNext` is a valid and current module system setting in TypeScript 5.4.",
+        "replacement": null,
+        "source_of_truth": "llm-knowledge",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "AGR8",
+      "topic": "indent",
+      "rule": "Tabs must not be used for indentation.",
+      "setting": null,
+      "kind": "opinion",
+      "corroboration": "single-source",
+      "sources": [
+        {
+          "rule_ref": "RULE13",
+          "source_ref": "SRC3",
+          "tier": 2,
+          "tool": "house-style-guide",
+          "tool_version_pinned": "n/a",
+          "setting": null,
+          "evidence": "Do not use tabs."
+        }
+      ],
+      "verification": {
+        "status": "not-version-bound",
+        "checked": null,
+        "finding": "Prose opinion with no tool flag; no version-bound currency check applicable.",
+        "replacement": null,
+        "source_of_truth": "llm-knowledge",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "AGR9",
+      "topic": "variable-declarations",
+      "rule": "Prefer const over let for variable declarations.",
+      "setting": null,
+      "kind": "opinion",
+      "corroboration": "single-source",
+      "sources": [
+        {
+          "rule_ref": "RULE14",
+          "source_ref": "SRC3",
+          "tier": 2,
+          "tool": "house-style-guide",
+          "tool_version_pinned": "n/a",
+          "setting": null,
+          "evidence": "Prefer `const` over `let`, and never use `var`. Most bindings are never\nreassigned; defaulting to `const` signals intent and lets the compiler catch\naccidental mutation."
+        }
+      ],
+      "verification": {
+        "status": "not-version-bound",
+        "checked": null,
+        "finding": "Prose opinion with no tool flag; no version-bound currency check applicable.",
+        "replacement": null,
+        "source_of_truth": "llm-knowledge",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "AGR10",
+      "topic": "variable-declarations",
+      "rule": "Never use var for variable declarations.",
+      "setting": null,
+      "kind": "opinion",
+      "corroboration": "single-source",
+      "sources": [
+        {
+          "rule_ref": "RULE15",
+          "source_ref": "SRC3",
+          "tier": 2,
+          "tool": "house-style-guide",
+          "tool_version_pinned": "n/a",
+          "setting": null,
+          "evidence": "Prefer `const` over `let`, and never use `var`. Most bindings are never\nreassigned; defaulting to `const` signals intent and lets the compiler catch\naccidental mutation."
+        }
+      ],
+      "verification": {
+        "status": "not-version-bound",
+        "checked": null,
+        "finding": "Prose opinion with no tool flag; no version-bound currency check applicable.",
+        "replacement": null,
+        "source_of_truth": "llm-knowledge",
+        "confidence": "high"
+      }
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "CONF1",
+      "topic": "quotes",
+      "question": "Single or double quotes for string literals?",
+      "positions": [
+        {
+          "stance": "Use single quotes for string literals.",
+          "setting": "\"quotes\": [\"error\", \"single\"]",
+          "sources": [
+            {
+              "rule_ref": "RULE2",
+              "source_ref": "SRC1",
+              "tier": 1,
+              "tool": "eslint",
+              "tool_version_pinned": "9.x",
+              "setting": "\"quotes\": [\"error\", \"single\"]",
+              "evidence": "\"quotes\": [\"error\", \"single\"]"
+            }
+          ],
+          "verification": {
+            "status": "deprecated",
+            "checked": {
+              "tool": "eslint",
+              "tool_version_pinned": "9.x",
+              "setting": "\"quotes\": [\"error\", \"single\"]"
+            },
+            "finding": "ESLint core deprecated all stylistic/formatting rules (including `quotes`) as of v8.53.0; in ESLint 9.x the rule is removed from core and relocated to @stylistic/eslint-plugin — use `@stylistic/quotes` instead.",
+            "replacement": "\"@stylistic/quotes\": [\"error\", \"single\"] (via @stylistic/eslint-plugin)",
+            "source_of_truth": "llm-knowledge",
+            "confidence": "high"
+          }
+        },
+        {
+          "stance": "Use double quotes for string literals.",
+          "setting": null,
+          "sources": [
+            {
+              "rule_ref": "RULE10",
+              "source_ref": "SRC3",
+              "tier": 2,
+              "tool": "house-style-guide",
+              "tool_version_pinned": "n/a",
+              "setting": null,
+              "evidence": "Always use double quotes for string literals. Consistent quoting reduces diff\nnoise and makes find-and-replace predictable across the codebase."
+            }
+          ],
+          "verification": {
+            "status": "not-version-bound",
+            "checked": null,
+            "finding": "Prose opinion with no tool flag; no version-bound currency check applicable.",
+            "replacement": null,
+            "source_of_truth": "llm-knowledge",
+            "confidence": "high"
+          }
+        }
+      ],
+      "recommended_position": 0
+    },
+    {
+      "id": "CONF2",
+      "topic": "indent",
+      "question": "Indent with 2 spaces or 4 spaces?",
+      "positions": [
+        {
+          "stance": "Indent code with 2 spaces.",
+          "setting": "\"indent\": [\"error\", 2]",
+          "sources": [
+            {
+              "rule_ref": "RULE5",
+              "source_ref": "SRC1",
+              "tier": 1,
+              "tool": "eslint",
+              "tool_version_pinned": "9.x",
+              "setting": "\"indent\": [\"error\", 2]",
+              "evidence": "\"indent\": [\"error\", 2]"
+            }
+          ],
+          "verification": {
+            "status": "deprecated",
+            "checked": {
+              "tool": "eslint",
+              "tool_version_pinned": "9.x",
+              "setting": "\"indent\": [\"error\", 2]"
+            },
+            "finding": "ESLint core deprecated all stylistic/formatting rules (including `indent`) as of v8.53.0; in ESLint 9.x the rule is removed from core and relocated to @stylistic/eslint-plugin — use `@stylistic/indent` instead.",
+            "replacement": "\"@stylistic/indent\": [\"error\", 2] (via @stylistic/eslint-plugin)",
+            "source_of_truth": "llm-knowledge",
+            "confidence": "high"
+          }
+        },
+        {
+          "stance": "Indent code with 4 spaces.",
+          "setting": null,
+          "sources": [
+            {
+              "rule_ref": "RULE12",
+              "source_ref": "SRC3",
+              "tier": 2,
+              "tool": "house-style-guide",
+              "tool_version_pinned": "n/a",
+              "setting": null,
+              "evidence": "Indent code with four spaces. Earlier versions of this guide used two spaces;\nthe team voted to move to four for readability on dense nested JSX."
+            }
+          ],
+          "verification": {
+            "status": "not-version-bound",
+            "checked": null,
+            "finding": "Prose opinion with no tool flag; no version-bound currency check applicable.",
+            "replacement": null,
+            "source_of_truth": "llm-knowledge",
+            "confidence": "high"
+          }
+        }
+      ],
+      "recommended_position": 0
+    }
+  ],
+  "unfetched_sources": [
+    {
+      "id": "SRC4",
+      "reason": "listed in sources.json but file manifests/prettier.config.json absent on disk — fetch incomplete; recorded, not extracted or recalled"
+    }
+  ],
+  "verify_meta": {
+    "agreed_in": 10,
+    "agreed_verified": 10,
+    "conflicts_in": 2,
+    "positions_verified": 4,
+    "status_counts": {
+      "current": 6,
+      "deprecated": 3,
+      "renamed": 0,
+      "superseded": 0,
+      "unknown-flag": 0,
+      "not-version-bound": 5,
+      "unverifiable": 0
+    },
+    "flagged_count": 3
+  }
+}
