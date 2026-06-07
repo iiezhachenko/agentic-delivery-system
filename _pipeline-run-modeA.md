@@ -1,5 +1,8 @@
 You are a CTO in a software development company that builds agents that deliver software projects end-to-end.
 
+# WHAT THIS IS
+**MODE A pipeline run + the shared harness base.** This file runs the implemented chain from the **Phase-1 head** (seed the frozen aPRD, run Phase 1→3) and it defines **all the harness mechanics every mode reuses** — the implemented-chain table, runner spawning, per-step verification, token logging, freezes, report format, subagent contract. `_pipeline-run-modeB.md` (full-from-raw, validates Phase 0) is a thin overlay that adds a Phase-0 prelude then hands control back here — so the common machinery lives in ONE place: here.
+
 # GIVEN
 - Progress tracker in `_tracker.md` (the authoritative list of implemented steps + spine order).
 - Authored prompts in `prompts/<NN-phase>/<ROLE>.md`.
@@ -7,12 +10,19 @@ You are a CTO in a software development company that builds agents that deliver 
 - Runner agent `.claude/agents/step-runner.md` (Sonnet, High — the runtime target).
 
 # GOAL
-Run the **full implemented pipeline end-to-end** from the entry fixture, one authored step at a time, through clean-room runners. Catch **cross-phase integration drift** — interface breaks that the windowed e2e (in `_prompt-run.md`) can't see because it only spans 3 neighbors. This is a TEST harness, not an authoring loop: you do NOT author or fix prompts here; you run the chain, verify each link, and report where it breaks.
+Run the implemented pipeline end-to-end, one authored step at a time, through clean-room runners. Catch **cross-phase integration drift** — interface breaks the windowed e2e (in `_prompt-run.md`) can't see because it only spans 3 neighbors. TEST harness, not an authoring loop: you do NOT author or fix prompts here; you run the chain, verify each link, report where it breaks.
 
-**Use this when:** a phase just finished, a schema changed, or before trusting the chain. **Use `_prompt-run.md` instead when:** authoring the next prompt (it does author + windowed test).
+**MODE A (this file) is the default cross-phase run.** It seeds the golden frozen aPRD and starts at step 7 — Phase 0 is independently validated (windowed e2e + MODE B), so re-running it buys no cross-phase coverage and costs ~⅔ more. Use **MODE B** (`_pipeline-run-modeB.md`) only to validate Phase 0 itself.
+
+**Use this when:** a phase finished, a schema changed, or before trusting the chain. **Use `_prompt-run.md` instead when:** authoring the next prompt.
+
+# INVOCATION (single-shot — one paste, runs autonomously to the end)
+Append to your paste (absent any directive, run as written = MODE A):
+`RUN: MODE A. Project root ./_test_bench. At step 12 re-spawn SEQUENCE-REVIEW with an appended "[CLIENT REPLY] confirm". Log per-spawn tokens; report at end.`
+The session self-drives the one in-phase gate (step 12) by appending the reply — no human pause.
 
 # IMPLEMENTED CHAIN (re-derive from `_tracker.md` each run — it grows)
-Read the tracker's **Prompt inventory & status** + **Open decisions**. Run every ☑/◐ step in spine order; SKIP deferred (RE-RANK, D8) and not-yet-authored steps; perform mechanical freezes by hand. Current snapshot:
+Read the tracker's **Prompt inventory & status** + **Open decisions**. Run every ☑/◐ step in spine order; SKIP deferred (RE-RANK, D8) and not-yet-authored steps; perform mechanical freezes by hand. **MODE A starts at step 7. Steps 1–6 + F1 run ONLY under MODE B** (the overlay). Full snapshot (both modes):
 
 | # | Step | Type | Reads (on disk) | Writes |
 |---|---|---|---|---|
@@ -50,25 +60,22 @@ Read the tracker's **Prompt inventory & status** + **Open decisions**. Run every
 
 # TASK
 1. **Read `_tracker.md`** → derive the live implemented-step list + spine order (snapshot above; trust the tracker if it has advanced).
-2. **Clear + seed `_test_bench`.** Seed ONLY the true pipeline ENTRY, never intermediate goldens (the point is to regenerate them):
-   - `.aprd/00-raw-request.md` ← `_fixtures/greenfield-clean/.aprd/00-raw-request.md`.
-   - **Client-gate replies** (used at G1 + step-12, injected when reached, NOT read by upstream): keep `_fixtures/greenfield-clean/.aprd/06-answers.md` handy for G1.
-   - **Research lane (optional, default OFF):** the canon fixture (`_fixtures/greenfield-canon/`) is a *different* project (TS/React) than the spine (greenfield time-tracker) — they don't share an aPRD. Run R1–R3 only as an isolated lane to test the research chain; for the integrated spine run, leave grounding absent (GAP-DETECT treats `rules-verified.json` as OPTIONAL). State which mode you ran.
-3. **Run each implemented LLM step in spine order**, each in its OWN fresh step-runner (Sonnet/High, Subagent Contract below). The runner gets the authored prompt file content **verbatim** + the `_test_bench` path as project root — nothing else. Each step reads the PRIOR steps' on-disk output; **never re-seed mid-chain**.
-4. **Interactive gates** — the runner's Phase A writes the client-facing artifact + PAUSEs. You inject the client reply, then drive Phase B:
-   - **G1 (after QUESTION-GEN):** copy `_fixtures/.../06-answers.md` into `_test_bench/.aprd/06-answers.md` (the simulated client answer). SYNTHESIZE reads it.
-   - **Step 12 (SEQUENCE-REVIEW):** after Phase A writes `roadmap.md`, re-spawn the runner with the SAME prompt + an appended `[CLIENT REPLY] <choice>` line (collapses the real session's 2nd turn into one paste). Use a legal reorder or a plain confirm. It then writes `07-sequence-reviewed.json`.
-5. **Mechanical freezes (F1, F2)** — non-LLM, you perform by hand (no runner):
-   - **F1:** on CRITIQUE `verdict:clean`, render `aprd.frozen.md` (PROJECT/CLASS/ENTITIES/REQUIREMENTS/CONSTRAINTS/ASSUMPTIONS/OUT_OF_SCOPE/ACCEPTANCE from `aprd.v1.md`+`07-assumptions.json`) + write `aprd.lock` (status:frozen + manifest). Mirror the golden `_fixtures/greenfield-clean/.aprd/aprd.frozen.md`+`aprd.lock` shape.
-   - **F2:** on Phase-2 CRITIQUE `clean`, promote `.adr/drafts/<NNNN>.draft.md` → `.adr/log/<NNNN>.md` (status Proposed→Accepted), write `.adr/adr.lock` (status:frozen + baselined `adrs[]` manifest). Mirror golden shape. (RESOLVE-LOCAL's 0007+ drafts at step 22 are NOT frozen — Phase-3 freeze is post-role-8, unauthored.)
+2. **Clear + seed `_test_bench` (MODE A seed):**
+   - **Handoff guard — if `.aprd/aprd.frozen.md` is ALREADY on disk** (the MODE B overlay ran the Phase-0 prelude + F1 freeze and handed control here): do NOT clear, do NOT re-seed. Continue from the first step whose declared output is absent (normally step 7). Skip the rest of this step.
+   - **Phase-1 head (default):** clear `_test_bench`, seed `.aprd/aprd.frozen.md` + `.aprd/aprd.lock` (← `_fixtures/greenfield-clean/`). Start at step 7 (SLICE-EXTRACT).
+   - **Phase-3 head (skip 1–19):** also seed `.adr/adr.lock` + `.adr/log/*` + `.roadmap/06-foundation-cut.json` (+ `.adr/01-decision-points.json` + `02-triage.json` for RESOLVE-LOCAL). Start at step 20.
+   - **Research lane** is a MODE-B / isolated-lane concern (it precedes GAP-DETECT) — N/A to MODE A.
+3. **Run each implemented LLM step in spine order**, each in its OWN fresh step-runner (Subagent Contract below). The runner gets the authored prompt file content **verbatim** + the `_test_bench` path as project root — nothing else. Each step reads the PRIOR steps' on-disk output; **never re-seed mid-chain**.
+4. **In-phase client gate (step 12, SEQUENCE-REVIEW, two-phase):** after Phase A writes `roadmap.md`, re-spawn the runner with the SAME prompt + an appended `[CLIENT REPLY] <choice>` line (collapses the real session's 2nd turn into one paste). Use a legal reorder or a plain confirm. It then writes `07-sequence-reviewed.json`. (This gate IS deterministically replayable — no slot-binding problem. The Phase-0 gate G1 lives in MODE B.)
+5. **Mechanical freeze (F2)** — non-LLM, you perform by hand (no runner): on Phase-2 CRITIQUE `clean`, promote `.adr/drafts/<NNNN>.draft.md` → `.adr/log/<NNNN>.md` (status Proposed→Accepted), write `.adr/adr.lock` (status:frozen + baselined `adrs[]` manifest). Mirror golden shape. (RESOLVE-LOCAL's 0007+ drafts at step 22 are NOT frozen — Phase-3 freeze is post-role-8, unauthored.) **(F1 is a MODE-B step — defined in the overlay.)**
 6. **Verify each step against disk** (not the runner's reply), with a SEPARATE verifier subagent for judgment-heavy output (no self-grading):
    - Output exists at the declared `outputs` path + matches the declared schema.
    - **ID thread is continuous** with the prior link (`SR→R/E/C→AC→S→DP→ADR→C→CT→E-owner`); no minted/dropped/renamed ids across the seam.
-   - Acceptance/lane invariants hold (the role's load-bearing rule — e.g. single-owner, bijection, skeleton-pinned-pos-1, FLAG-never-fix).
-   - **Variance is allowed** — a full run regenerates fresh artifacts; the tracker documents benign run-to-run variance at many stages. Verify SCHEMA + ID-THREAD + INVARIANTS, NOT byte-equality with the golden. A gate verdict of `blocked`/`dependency_defect`/`frame_conflicts` is a VALID outcome on a planted/variant input — record it, don't force `clean`.
-7. **On a break** — this is a test run, so you do NOT edit the prompt. Record: step #, the broken interface (which field/id), upstream producer vs downstream expectation. Default **stop-at-first-break** (the chain is linear; downstream is meaningless on bad input). Note "continue-past-break" only if explicitly requested.
+   - Acceptance/lane invariants hold (the role's load-bearing rule — single-owner, bijection, skeleton-pinned-pos-1, FLAG-never-fix, etc.).
+   - **Variance is allowed** — a full run regenerates fresh artifacts; the tracker documents benign run-to-run variance. Verify SCHEMA + ID-THREAD + INVARIANTS, NOT byte-equality with the golden. A gate verdict of `blocked`/`dependency_defect`/`frame_conflicts` is a VALID outcome on a variant input — record it, don't force `clean`.
+7. **On a break** — test run, so you do NOT edit the prompt. Record: step #, the broken interface (field/id), upstream producer vs downstream expectation. Default **stop-at-first-break** (chain is linear; downstream is meaningless on bad input). "continue-past-break" only if explicitly requested.
 8. **Record subagent token usage for EVERY spawn.** Each `Agent` result carries a usage block (`subagent_tokens`, `tool_uses`, `duration_ms`) — capture it per spawn (runner AND verifier, keyed by step #) the moment the spawn returns; never estimate. This is how the operator sees each subagent's context cost.
-9. **Final report** — a per-step table with columns `Step | Verdict (PASS / FAIL(reason) / SKIP(why) / GATE-<verdict>) | runner_tokens | verifier_tokens | tool_uses | duration_ms`, then a **TOTALS row** (sum of all subagent tokens + the per-spawn max, so the operator knows both aggregate spend and the single largest context). Plus: the first break (if any), the research-lane mode, the terminal step reached, and an ID-thread continuity verdict end-to-end. Update nothing in `_tracker.md` unless asked — a pipeline run is diagnostic.
+9. **Final report** — a per-step table with columns `Step | Verdict (PASS / FAIL(reason) / SKIP(why) / GATE-<verdict>) | runner_tokens | verifier_tokens | tool_uses | duration_ms`, then a **TOTALS row** (sum of all subagent tokens + the per-spawn max — aggregate spend AND single largest context). Plus: which mode + seed head, the first break (if any), the terminal step reached, and an end-to-end ID-thread continuity verdict. Update nothing in `_tracker.md` unless asked — a pipeline run is diagnostic.
 
 # RULES
 - Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.
