@@ -1,0 +1,27 @@
+{
+  "build_plan_ref": ".build/skeleton/build-plan.json", "oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
+  "oracle_ref": ".build/skeleton/oracle/oracle.json", "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock", "aprd_lock_ref": ".aprd/aprd.lock", "locks_verified": true,
+  "class": "greenfield", "mode": "skeleton-build", "slice": "S1", "build_set": ["C1", "C2", "C6"],
+  "build_units": [{
+    "component": "C1", "name": "Data Store", "module_namespace": "freelancer_app.data_store",
+    "implements_contracts": ["CT1"], "mocked_deps": [], "traces": ["R7", "R8", "R9", "R10"],
+    "files": ["src/freelancer_app/data_store/identity_record_store.py"], "contract_tests_greened": [],
+    "lld_notes": "save_identity returns None after writing (fire-and-forget); duplicate provider_id treated as a hard reject.",
+    "status": "blocked",
+    "escape": {
+      "failure_signature": "AssertionError in test_ct1_shape_persists_identity_record: 'save_identity must return a non-None acknowledgement' — impl returned None",
+      "classification": "contract",
+      "diagnosis": "CT1 cannot be built: the persistence write is fire-and-forget and cannot produce a return acknowledgement, so the shape test's non-None requirement is unsatisfiable.",
+      "route": "Phase 3",
+      "attempts": [
+        { "signature": "AssertionError: save_identity returned None", "net_new_passes": 0 },
+        { "signature": "AssertionError: save_identity returned None", "net_new_passes": 0 },
+        { "signature": "AssertionError: save_identity returned None", "net_new_passes": 0 }
+      ]
+    }
+  }],
+  "verification": { "contract": "fail", "method": "static-trace", "flow": "not-run", "acceptance": "not-run" },
+  "provenance": { "builder_role": "builder", "built_against": { "oracle_lock": ".build/skeleton/oracle/oracle.lock", "skeleton_lock": ".hld/skeleton.lock", "adr_lock": ".adr/adr.lock", "aprd_lock": ".aprd/aprd.lock", "build_plan": ".build/skeleton/build-plan.json" } },
+  "commits": [], "build_record_counts": { "build_units_green": 0, "build_units_blocked": 1, "build_units_total_in_set": 3, "contract_tests_greened": 0 }
+}

@@ -1,0 +1,21 @@
+{
+  "build_record_ref": ".build/skeleton/build-record.json", "flows_ref": ".hld/skeleton/flows.json",
+  "oracle_lock_ref": ".build/skeleton/oracle/oracle.lock", "oracle_ref": ".build/skeleton/oracle/oracle.json",
+  "contracts_ref": ".hld/skeleton/contracts.json", "components_ref": ".hld/skeleton/components.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock", "adr_lock_ref": ".adr/adr.lock", "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true, "class": "greenfield", "mode": "skeleton-build", "slice": "S1", "flow": "F1",
+  "walking_skeleton_path": ["C6", "C2", "C1"], "status": "blocked",
+  "escape": {
+    "failure_signature": "test_f1_failure_store_unavailable passes in isolation but fails when run after test_f1_happy_path_oauth_login_establishes_session — module-level session dict carried over from the prior test; outcome flips on test order, passes on re-run",
+    "classification": "missing-foundation",
+    "diagnosis": "Flow won't reliably compose; slice needs a session-store foundation the cut omitted.", "route": "Phase 1",
+    "attempts": [
+      { "signature": "test_f1_failure_store_unavailable: AssertionError redirect is None (ran after happy_path)", "net_new_passes": 0 },
+      { "signature": "PASS (ran in isolation)", "net_new_passes": 1 },
+      { "signature": "test_f1_failure_store_unavailable: AssertionError redirect is None (ran after happy_path)", "net_new_passes": 0 }
+    ]
+  },
+  "verification": { "flow": "fail", "method": "static-trace", "contract": "pass-inherited", "acceptance": "not-run" },
+  "provenance": { "integrator_role": "integrator", "built_against": { "oracle_lock": ".build/skeleton/oracle/oracle.lock", "skeleton_lock": ".hld/skeleton.lock", "adr_lock": ".adr/adr.lock", "aprd_lock": ".aprd/aprd.lock", "build_plan": ".build/skeleton/build-plan.json", "build_record": ".build/skeleton/build-record.json" } },
+  "commits": []
+}

@@ -1,0 +1,35 @@
+{
+  "artifact": ".hld/skeleton/",
+  "version": "v1",
+  "content_sha256": "c4e7a2f1908d6b5374e2c1d0b9a8f7e6d5c4b3a2918070f6e5d4c3b2a190877d",
+  "signer": "delivery-team:freelancer-time-tracking",
+  "signed_at": "2026-06-07T00:00:00Z",
+  "status": "frozen",
+  "gate": { "reconcile_critique_verdict": "clean" },
+  "class": "greenfield",
+  "mode": "skeleton",
+  "skeleton_id": "S1",
+  "built_against": {
+    "aprd_lock": ".aprd/aprd.lock",
+    "adr_lock": ".adr/adr.lock"
+  },
+  "artifacts": [
+    { "name": "components.json", "ref": ".hld/skeleton/components.json", "summary": "6 components C1-C6, 11 dependency edges, 7 entities owned" },
+    { "name": "contracts.json", "ref": ".hld/skeleton/contracts.json", "summary": "11 contracts CT1-CT11 (7 sync_api + 4 shared_data + 0 async), one per edge" },
+    { "name": "data-model.json", "ref": ".hld/skeleton/data-model.json", "summary": "7 entities E1-E7, single-owner, PostgreSQL relational persistence" },
+    { "name": "nfr-mechanisms.json", "ref": ".hld/skeleton/nfr-mechanisms.json", "summary": "8 NFRs inventoried, mechanisms [] (satisfied by frame under INV6/A13)" },
+    { "name": "flows.json", "ref": ".hld/skeleton/flows.json", "summary": "1 walking-skeleton flow F1 (slice S1), path C6->C2->C1, crosses 4 foundational seams" },
+    { "name": "test-specs.json", "ref": ".hld/skeleton/test-specs.json", "summary": "design-layer oracle: 11 contract tests + 26 failure assertions + 1 flow test" },
+    { "name": "build-dag.json", "ref": ".hld/skeleton/build-dag.json", "summary": "6 nodes, 11 edges, build_order C1->C2->C3->C4->C5->C6, 5 waves" },
+    { "name": "critique.json", "ref": ".hld/skeleton/critique.json", "summary": "adversarial gate verdict clean, 0 issues" }
+  ],
+  "build_dag": {
+    "build_order": ["C1", "C2", "C3", "C4", "C5", "C6"],
+    "nodes": 6,
+    "edges": 11,
+    "waves": 5,
+    "cycles": []
+  },
+  "walking_skeleton_flow": { "id": "F1", "slice": "S1", "path": ["C6", "C2", "C1"], "via": ["CT8", "CT1"] },
+  "skeleton_counts": { "components": 6, "contracts": 11, "entities": 7, "flows": 1 }
+}

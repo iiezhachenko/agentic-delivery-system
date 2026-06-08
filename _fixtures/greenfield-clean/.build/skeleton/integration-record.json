@@ -1,0 +1,191 @@
+{
+  "build_record_ref": ".build/skeleton/build-record.json",
+  "flows_ref": ".hld/skeleton/flows.json",
+  "oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
+  "oracle_ref": ".build/skeleton/oracle/oracle.json",
+  "contracts_ref": ".hld/skeleton/contracts.json",
+  "components_ref": ".hld/skeleton/components.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton-build",
+  "slice": "S1",
+  "flow": "F1",
+  "walking_skeleton_path": ["C6", "C2", "C1"],
+  "composition": {
+    "wsgi_entry": "freelancer_app.wsgi.application",
+    "files": [
+      "src/freelancer_app/wsgi.py",
+      "src/freelancer_app/identity_auth/oauth_provider.py"
+    ],
+    "framework": "Django",
+    "lld_notes": "Django configured programmatically (settings.configure) in wsgi.py — INSTALLED_APPS=[], MIDDLEWARE=[], DATABASES={}, SILENCED_SYSTEM_CHECKS=['*'], ROOT_URLCONF='freelancer_app.wsgi'. Framework carried from build-record lld_notes ('Framework: Django', ADR-0002), not re-picked. WSGI entry freelancer_app.wsgi.application = get_wsgi_application(). Routing (MPA/SSR, ADR-0004): GET / -> _view_entry_page (AC1: entry page, non-empty HTML; uses session_gate.check via CT8 seam to inspect session cookie); GET /auth/login -> _view_auth_login (AC5 step 1: redirect 302 to Google OAuth 2.0 authorization URL, ADR-0005); GET /auth/callback -> _view_auth_callback_safe (AC5 step 2: extracts code from QUERY_STRING, calls identity_auth.oauth_provider.exchange_code(code) — external seam patched by frozen mock_oauth_provider, then calls oauth_callback.handle_callback(provider, provider_id, profile_ref) — C2->C1 CT1 seam — then sets Set-Cookie: session=<provider_id> and redirects 302 to /; CT1:store-unavailable (ConnectionError) caught: no session cookie, redirect to /auth/login?error=store_unavailable). oauth_provider.py is the external Google OAuth 2.0 adapter seam module the frozen conftest mock_oauth_provider patches via monkeypatch.setattr('freelancer_app.identity_auth.oauth_provider', mock). Synchronous request handling, no async/queue (INV6). Later-slice deps C3/C4/C5 (CT9/CT10/CT11) not wired — stay mocked via frozen conftest."
+  },
+  "mock_swaps": [
+    {
+      "via": "CT8",
+      "from": "C6",
+      "to": "C2",
+      "seam": "ingress->domain",
+      "status": "swapped-real",
+      "detail": "session_gate.check(request.COOKIES) called in _view_entry_page; both C6 (Web Ingress, status:green) and C2 (Identity & Auth, status:green) are on-path — real callables wired. session_checker.check_session is the real implementation (returns None for absent/expired cookies)."
+    },
+    {
+      "via": "CT1",
+      "from": "C2",
+      "to": "C1",
+      "seam": "domain->persistence",
+      "status": "swapped-real",
+      "detail": "oauth_callback.handle_callback calls data_store.identity_record_store.save_identity at call time; both C2 (Identity & Auth, status:green) and C1 (Data Store, status:green) are on-path — real callables wired. In-memory dict store at contract layer; ConnectionError propagates from save_identity on CT1:store-unavailable."
+    }
+  ],
+  "mocks_retained": [
+    {
+      "boundary": "external",
+      "seam": "primary_external_integration",
+      "what": "Google OAuth 2.0 provider",
+      "via": null,
+      "reason": "External system — not a modeled component, no CT* covers this seam (flows.json step external:true, via:null). Accessed via identity_auth.oauth_provider.exchange_code() seam; frozen conftest mock_oauth_provider patches freelancer_app.identity_auth.oauth_provider at test time. Real Google OAuth credentials not available at walking-skeleton level."
+    },
+    {
+      "boundary": "later-slice",
+      "seam": "CT9",
+      "what": "Project Management request dispatch (C3)",
+      "via": "CT9",
+      "reason": "C3 not in walking-skeleton build set (status:mocked in build plan). Frozen conftest mock_ct9_project_management patches freelancer_app.project_management.request_handler. Not wired here — later-slice dep."
+    },
+    {
+      "boundary": "later-slice",
+      "seam": "CT10",
+      "what": "Time Logging request dispatch (C4)",
+      "via": "CT10",
+      "reason": "C4 not in walking-skeleton build set (status:mocked in build plan). Frozen conftest mock_ct10_time_logging patches freelancer_app.time_logging.request_handler. Not wired here — later-slice dep."
+    },
+    {
+      "boundary": "later-slice",
+      "seam": "CT11",
+      "what": "Invoice Export request dispatch (C5)",
+      "via": "CT11",
+      "reason": "C5 not in walking-skeleton build set (status:mocked in build plan). Frozen conftest mock_ct11_invoice_export patches freelancer_app.invoice_export.request_handler. Not wired here — later-slice dep."
+    }
+  ],
+  "flow_test": {
+    "file": "flow/test_F1.py",
+    "happy": {
+      "test": "test_f1_happy_path_oauth_login_establishes_session",
+      "asserts_ac": ["AC1", "AC5"],
+      "assertions": [
+        {
+          "id": "F1/AC1-response-started",
+          "assert": "response_started non-empty (WSGI app calls start_response)",
+          "result": "pass",
+          "trace": "GET / -> _view_entry_page -> HttpResponse(200) calls start_response"
+        },
+        {
+          "id": "F1/AC1-status-lt-400",
+          "assert": "status_code < 400",
+          "result": "pass",
+          "trace": "HttpResponse(status=200) -> status_code=200 < 400"
+        },
+        {
+          "id": "F1/AC1-body-non-empty",
+          "assert": "len(body) > 0",
+          "result": "pass",
+          "trace": "HttpResponse body = '<html><body>...</body></html>' -> len > 0"
+        },
+        {
+          "id": "F1/AC5-init-response",
+          "assert": "oauth_init_response non-empty",
+          "result": "pass",
+          "trace": "GET /auth/login -> _view_auth_login -> HttpResponseRedirect(302) calls start_response"
+        },
+        {
+          "id": "F1/AC5-init-status",
+          "assert": "init_status in (200, 301, 302, 303, 307, 308)",
+          "result": "pass",
+          "trace": "HttpResponseRedirect -> status 302 in allowed set"
+        },
+        {
+          "id": "F1/AC5-callback-response",
+          "assert": "callback_response non-empty",
+          "result": "pass",
+          "trace": "GET /auth/callback -> _view_auth_callback_safe -> HttpResponseRedirect(302) calls start_response"
+        },
+        {
+          "id": "F1/AC5-callback-status",
+          "assert": "callback_status in (200, 301, 302, 303, 307, 308)",
+          "result": "pass",
+          "trace": "on success: HttpResponseRedirect('/') -> status 302 in allowed set"
+        },
+        {
+          "id": "F1/AC5-session-cookie",
+          "assert": "'session' in set_cookie.lower() or callback_status in (302, 303)",
+          "result": "pass",
+          "trace": "response.set_cookie('session', value=provider_id) sets Set-Cookie: session=uid-f1-happy; ... -> 'session' in set_cookie.lower() = True; AND callback_status=302 in (302,303) also satisfies OR branch"
+        }
+      ],
+      "result": "pass"
+    },
+    "failure": {
+      "test": "test_f1_failure_store_unavailable",
+      "exercises": "CT1:store-unavailable",
+      "arrives_at": "OAuth callback cannot persist the identity record; no authenticated session is established; Web Ingress redirects the browser to the login entry point with an error",
+      "assertions": [
+        {
+          "id": "F1-failure-response",
+          "assert": "callback_response non-empty",
+          "result": "pass",
+          "trace": "save_identity raises ConnectionError; handle_callback propagates; _view_auth_callback raises; _view_auth_callback_safe catches ConnectionError -> HttpResponseRedirect('/auth/login?error=store_unavailable') calls start_response"
+        },
+        {
+          "id": "F1-failure-no-session",
+          "assert": "'session' not in set_cookie.lower() or callback_status >= 400",
+          "result": "pass",
+          "trace": "HttpResponseRedirect has no Set-Cookie header -> set_cookie='' -> 'session' not in ''.lower() = True -> condition satisfied"
+        },
+        {
+          "id": "F1-failure-redirect-to-login",
+          "assert": "if status in (301,302,303,307,308): 'login' or 'auth' or 'error' in location.lower()",
+          "result": "pass",
+          "trace": "callback_status=302 in redirect set; Location='/auth/login?error=store_unavailable' -> 'auth' in location.lower()=True AND 'login' in location.lower()=True -> assertion satisfied"
+        }
+      ],
+      "result": "pass"
+    }
+  },
+  "verification": {
+    "flow": "pass",
+    "method": "static-trace",
+    "static_trace_notes": "No Python interpreter in build harness (§5.7, Rule 6). Static trace of all flow test assertions: GET / -> _view_entry_page -> HttpResponse(200, body=non-empty HTML) satisfies AC1 (response_started, status<400, len(body)>0). GET /auth/login -> _view_auth_login -> HttpResponseRedirect(302) satisfies AC5 step 1 (response produced, status=302 in allowed set). GET /auth/callback?code=test-oauth-code -> identity_auth.oauth_provider.exchange_code('test-oauth-code') calls mock (monkeypatch.setattr('freelancer_app.identity_auth.oauth_provider', mock) -> identity_auth.oauth_provider is mock -> mock.exchange_code returns {'provider':'google','provider_id':'uid-f1-happy','profile':{...}}) -> oauth_callback.handle_callback('google','uid-f1-happy',{'email':'freelancer@example.com'}) -> data_store.identity_record_store.save_identity(...) -> in-memory dict store -> returns record -> response.set_cookie('session','uid-f1-happy') + HttpResponseRedirect('/') satisfies AC5 step 2 (callback_status=302, Set-Cookie: session=uid-f1-happy). Failure path: patch(save_identity, side_effect=ConnectionError) -> handle_callback propagates ConnectionError -> _view_auth_callback raises -> _view_auth_callback_safe catches -> HttpResponseRedirect('/auth/login?error=store_unavailable') -> no Set-Cookie -> callback_status=302, Location contains 'auth'/'login' -> all failure assertions satisfied. Authoritative execution owed to VERIFY-OUTPUT.",
+    "contract": "pass-inherited",
+    "acceptance": "not-run"
+  },
+  "status": "integrated",
+  "escape": null,
+  "provenance": {
+    "integrator_role": "integrator",
+    "built_against": {
+      "oracle_lock": ".build/skeleton/oracle/oracle.lock",
+      "skeleton_lock": ".hld/skeleton.lock",
+      "adr_lock": ".adr/adr.lock",
+      "aprd_lock": ".aprd/aprd.lock",
+      "build_plan": ".build/skeleton/build-plan.json",
+      "build_record": ".build/skeleton/build-record.json"
+    }
+  },
+  "commits": [
+    {
+      "message": "INTEGRATE F1: compose C6->C2->C1 walking skeleton — WSGI app (Django) + OAuth callback routing + oauth_provider seam",
+      "traces": ["R1", "R5", "AC1", "AC5"]
+    }
+  ],
+  "integration_counts": {
+    "path_hops": 3,
+    "hops_swapped_real": 2,
+    "mocks_retained": 4,
+    "flow_assertions_passed": 8,
+    "flow_assertions_failed": 0
+  }
+}

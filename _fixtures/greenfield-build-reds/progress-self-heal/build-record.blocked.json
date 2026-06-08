@@ -1,0 +1,26 @@
+{
+  "build_plan_ref": ".build/skeleton/build-plan.json", "oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
+  "oracle_ref": ".build/skeleton/oracle/oracle.json", "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock", "aprd_lock_ref": ".aprd/aprd.lock", "locks_verified": true,
+  "class": "greenfield", "mode": "skeleton-build", "slice": "S1", "build_set": ["C1", "C2", "C6"],
+  "build_units": [{
+    "component": "C2", "name": "Identity & Auth", "module_namespace": "freelancer_app.identity_auth",
+    "implements_contracts": ["CT8"], "mocked_deps": [], "traces": ["R5"],
+    "files": ["src/freelancer_app/identity_auth/oauth_callback.py"],
+    "contract_tests_greened": ["test_ct1_failure_store_unavailable", "test_ct1_failure_constraint_violation"],
+    "lld_notes": "oauth_callback delegates persistence to C1; propagating exceptions.",
+    "status": "blocked",
+    "escape": {
+      "failure_signature": "AssertionError in test_ct1_failure_partial_failure: get_identity must return None after rollback",
+      "classification": "contract", "diagnosis": "Three attempts used, escaping per retry budget.", "route": "Phase 3",
+      "attempts": [
+        { "signature": "ImportError: cannot import freelancer_app.identity_auth.oauth_callback", "net_new_passes": 0 },
+        { "signature": "AssertionError test_ct1_failure_store_unavailable: save_identity not called", "net_new_passes": 1 },
+        { "signature": "AssertionError test_ct1_failure_partial_failure: get_identity must return None after rollback", "net_new_passes": 2 }
+      ]
+    }
+  }],
+  "verification": { "contract": "fail", "method": "static-trace", "flow": "not-run", "acceptance": "not-run" },
+  "provenance": { "builder_role": "builder", "built_against": { "oracle_lock": ".build/skeleton/oracle/oracle.lock", "skeleton_lock": ".hld/skeleton.lock", "adr_lock": ".adr/adr.lock", "aprd_lock": ".aprd/aprd.lock", "build_plan": ".build/skeleton/build-plan.json" } },
+  "commits": [], "build_record_counts": { "build_units_green": 0, "build_units_blocked": 1, "build_units_total_in_set": 3, "contract_tests_greened": 2 }
+}

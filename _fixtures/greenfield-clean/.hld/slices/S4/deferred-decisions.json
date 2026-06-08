@@ -1,0 +1,65 @@
+{
+  "decision_points_ref": ".adr/01-decision-points.json",
+  "triage_ref": ".adr/02-triage.json",
+  "skeleton_ledger_ref": ".adr/deferred-decisions.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "slice_components_ref": ".hld/slices/S4/components.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "adr_log_ref": ".adr/log/",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "skeleton_frozen_verified": true,
+  "class": "greenfield",
+  "mode": "increment",
+  "slice_id": "S4",
+  "slice_name": "Create and manage client projects with currency and billable rate",
+  "introduced_components": ["C3"],
+  "touched_components": ["C3", "C1", "C2", "C6"],
+  "current_adr_max": "ADR-0008",
+  "slice_local_queue": [],
+  "resolutions": [],
+  "resolved": [],
+  "re_deferred": [],
+  "escalated": [],
+  "drained": [],
+  "new_local_adrs": [],
+  "inherited_local_adrs": [
+    {
+      "id": "ADR-0007",
+      "dp_id": "DP8",
+      "component": "C2",
+      "title": "Adopt framework-native OAuth library for OAuth handshake within Identity & Auth",
+      "scope": "local",
+      "mode": "slice",
+      "source": "skeleton"
+    },
+    {
+      "id": "ADR-0008",
+      "dp_id": "DP9",
+      "component": "C2",
+      "title": "Adopt environment variables as secrets and configuration injection strategy",
+      "scope": "local",
+      "mode": "slice",
+      "source": "skeleton"
+    }
+  ],
+  "foundational_routed": [
+    {
+      "dp_id": "DP5",
+      "defer_to": "S4",
+      "route": "Phase 2 (ADR slice increment)",
+      "reason": "DP5 (module boundary cut strategy) is FOUNDATIONAL per triage blast_radius; it was parked in triage slice_deferred[] routed to S4 as the earliest post-skeleton slice forcing it. Foundational forks are not this lane; routed to the S4 Phase-2 ADR slice increment."
+    }
+  ],
+  "escalations": [],
+  "note": "Slice S4 local queue is empty. The skeleton ledger re_deferred[] contains no entries with defer_to == 'S4' (DP3 defers to S3; DP11 defers to DERIVE-TESTS). No local forks were re-deferred to this slice; nothing to drain. Inherited two skeleton-resolved local ADRs on C2 (touched component). Foundational fork DP5 routed out to Phase 2 per triage slice_deferred[].",
+  "resolve_counts": {
+    "queue_in": 0,
+    "resolved": 0,
+    "re_deferred": 0,
+    "escalated": 0,
+    "new_local_adrs_emitted": 0,
+    "inherited_local_adrs": 2,
+    "foundational_routed": 1
+  }
+}

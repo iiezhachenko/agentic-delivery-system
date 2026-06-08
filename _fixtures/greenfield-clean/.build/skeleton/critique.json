@@ -1,0 +1,46 @@
+{
+  "verification_ref": ".build/skeleton/verification.json",
+  "build_record_ref": ".build/skeleton/build-record.json",
+  "integration_record_ref": ".build/skeleton/integration-record.json",
+  "build_plan_ref": ".build/skeleton/build-plan.json",
+  "contracts_ref": ".hld/skeleton/contracts.json",
+  "oracle_ref": ".build/skeleton/oracle/oracle.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "components_ref": ".hld/skeleton/components.json",
+  "oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton-build",
+  "slice": "S1",
+  "components_reviewed": ["C1", "C2", "C6"],
+  "files_reviewed": [
+    "src/freelancer_app/__init__.py",
+    "src/freelancer_app/data_store/__init__.py",
+    "src/freelancer_app/data_store/identity_record_store.py",
+    "src/freelancer_app/identity_auth/__init__.py",
+    "src/freelancer_app/identity_auth/oauth_callback.py",
+    "src/freelancer_app/identity_auth/session_checker.py",
+    "src/freelancer_app/identity_auth/oauth_provider.py",
+    "src/freelancer_app/web_ingress/__init__.py",
+    "src/freelancer_app/web_ingress/session_gate.py",
+    "src/freelancer_app/wsgi.py"
+  ],
+  "verdict": "clean",
+  "issues": [],
+  "issue_count": 0,
+  "critique_counts": {
+    "components_reviewed": 3,
+    "files_reviewed": 10,
+    "issues": 0,
+    "by_category": {
+      "hardcoded-fixture": 0,
+      "swallowed-failure": 0,
+      "stub-branch": 0,
+      "under-complexity": 0,
+      "gold-plating": 0
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "blocked_record_ref": ".build/skeleton/integration-record.json",
+  "oracle_ref": ".build/skeleton/oracle/oracle.json",
+  "contracts_ref": ".hld/skeleton/contracts.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton-build",
+  "slice": "S1",
+  "red_under_diagnosis": {
+    "from_role": "INTEGRATE",
+    "target": "F1",
+    "failing_tests": ["test_f1_happy_path_oauth_login_establishes_session"],
+    "failure_signature": "test_f1_happy_path_oauth_login_establishes_session: flow cannot compose — CT1 (C2->C1) declares kind:async_event requiring a message broker to deliver the identity-write event, but no broker is wired; the OAuth callback has no synchronous acknowledgement to establish the session on.",
+    "provisional_hint": { "classification": "my-code", "route": "IMPLEMENT" }
+  },
+  "flaky_check": {
+    "deterministic": true,
+    "evidence": "Failure asserts a structural composition impossibility: CT1.kind=async_event requires a broker that cannot exist under INV6 (single-server synchronous, no background job queues — A13/ADR-0001). Three identical signatures, zero variance across attempts. Deterministic.",
+    "action": null
+  },
+  "stall_analysis": {
+    "basis": "attempts-trajectory",
+    "same_signature_attempts": 3,
+    "net_new_passes_trend": "flat",
+    "progressing": false,
+    "stall_confirmed": true
+  },
+  "reflection_pass": {
+    "frozen_inputs_reread": [
+      "contracts.json#CT1",
+      ".build/skeleton/oracle/contract/test_CT1.py",
+      ".build/skeleton/oracle/flow/test_F1.py",
+      ".build/skeleton/oracle/conftest.py",
+      "aprd.frozen.md#A13",
+      ".adr/log/0001-adopt-single-deployment-monolith-flat-structure.md#INV6"
+    ],
+    "finding": "CT1 declares kind:async_event and shape 'publishes the identity-write event onto a queue and does not block on persistence.' This directly contradicts INV6 + A13 (single-server deployment with a synchronous request cycle; no background job queues) and ADR-0001 (no structure implying distributed components). The frozen oracle itself resolves CT1 as a synchronous shared_data seam (test_CT1.py calls save_identity directly; conftest patches identity_record_store with no broker fixture; test_F1.py patches save_identity directly). Wiring a broker to satisfy CT1.kind=async_event would both violate INV6 and break the frozen oracle. CT1.kind=async_event is the defect — unbuildable as frozen.",
+    "misread": false
+  },
+  "verdict": "escape",
+  "classification": "contract",
+  "routable_diagnosis": {
+    "classification": "contract",
+    "target_phase": "Phase 3",
+    "frozen_ref": "contracts.json#CT1",
+    "change_request": "Change CT1.kind from 'async_event' to 'shared_data'. Update CT1.shape to describe a synchronous in-process call: OAuth callback calls save_identity(provider, provider_id, profile_ref) and blocks on the acknowledgement before establishing the session; get_identity reads on session resolution. Honors INV6 (synchronous, no async/queue/broker). Rationale: INV6 + A13 prohibit background job queues; ADR-0001 forbids distributed structure; the frozen oracle already materializes CT1 as a synchronous shared_data seam; the implementation already calls save_identity synchronously. No other CT1 field requires change.",
+    "routable": true
+  },
+  "self_heal": null,
+  "quarantine": null,
+  "diagnosis_counts": { "frozen_inputs_reread": 6, "gates_to_verdict": 4 }
+}

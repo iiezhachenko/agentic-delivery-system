@@ -1,0 +1,199 @@
+{
+  "components_ref": ".hld/skeleton/components.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "adr_log_ref": ".adr/log/",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "lock_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton",
+  "skeleton_id": "S1",
+  "contracts": [
+    {
+      "id": "CT1",
+      "between": ["C2", "C1"],
+      "kind": "async_event",
+      "shape": "Freelancer identity record (E1) delivered from Identity & Auth to the Data Store via an asynchronous message-broker event; the OAuth callback publishes the identity-write event onto a queue and does not block on persistence.",
+      "failure_modes": [
+        "store-unavailable — PostgreSQL instance unreachable; OAuth callback cannot persist the identity record, login fails",
+        "constraint-violation — uniqueness constraint on provider identity (e.g. duplicate provider_id insert on concurrent callbacks); write fails",
+        "partial-failure — write begins but connection drops before commit; ACID transaction rolls back, no partial record persisted"
+      ],
+      "traces": ["R5"],
+      "honors_adr": ["ADR-0003", "ADR-0005"],
+      "honors_inv": ["INV1", "INV6"]
+    },
+    {
+      "id": "CT2",
+      "between": ["C3", "C1"],
+      "kind": "shared_data",
+      "shape": "Client Project and related entity records (E2 — Client Project, E5 — Currency designation, E6 — Client record, E7 — Billable Rate) — persisted and retrieved by Project Management to/from the Data Store. Access covers create, read (list + detail), update, and delete of project-level records. Field-level schemas for E2/E5/E6/E7 deferred to S4 per cut deferred[].",
+      "failure_modes": [
+        "store-unavailable — PostgreSQL instance unreachable; project create/read/update/delete operations fail",
+        "constraint-violation — FK integrity failure (e.g. orphaned project referencing deleted freelancer) or uniqueness violation on project name within owner scope",
+        "not-found — queried project record does not exist in the store (deleted or wrong owner scope)"
+      ],
+      "traces": ["R4", "R6", "R9", "R10"],
+      "honors_adr": ["ADR-0003"],
+      "honors_inv": ["INV3", "INV4", "INV6"]
+    },
+    {
+      "id": "CT3",
+      "between": ["C3", "C2"],
+      "kind": "sync_api",
+      "shape": "Authenticated freelancer session — Project Management calls Identity & Auth in-process to resolve the current session and obtain the freelancer identity (E1 reference) used to scope all project data reads and writes to the owning freelancer. No field-level session token design invented here; shape is the session presence signal and owner identity reference.",
+      "failure_modes": [
+        "no-valid-session — session absent or expired; Identity & Auth returns no authenticated identity; Project Management must reject the request (unauthorized)",
+        "callee-error — Identity & Auth raises an exception during session resolution (e.g. store lookup failure for identity record); Project Management cannot determine ownership and must fail the request"
+      ],
+      "traces": ["R5", "R6"],
+      "honors_adr": ["ADR-0001", "ADR-0005"],
+      "honors_inv": ["INV1", "INV2", "INV6"]
+    },
+    {
+      "id": "CT4",
+      "between": ["C4", "C1"],
+      "kind": "shared_data",
+      "shape": "Time Entry records (E3) — persisted and retrieved by Time Logging to/from the Data Store. Access covers create (new entry) and read (list entries per project). Association with project and freelancer is expressed via foreign-key references in E3. Field-level layout (date, description, hours columns) deferred to S2 per cut deferred[].",
+      "failure_modes": [
+        "store-unavailable — PostgreSQL instance unreachable; time entry cannot be persisted or retrieved",
+        "constraint-violation — FK constraint failure (e.g. referenced project does not exist or is deleted concurrently); write rejected",
+        "not-found — entry set queried for a project returns empty or the project association is missing"
+      ],
+      "traces": ["R2", "R7"],
+      "honors_adr": ["ADR-0003"],
+      "honors_inv": ["INV4", "INV6"]
+    },
+    {
+      "id": "CT5",
+      "between": ["C4", "C3"],
+      "kind": "sync_api",
+      "shape": "Client Project record reference (E2) including project-level Currency (E5) and Billable Rate (E7) — Time Logging calls Project Management in-process to validate the target project exists and is owned by the authenticated freelancer, and to inherit the project's currency and rate for the time entry association. Field-level project schema deferred to S4.",
+      "failure_modes": [
+        "not-found — referenced project does not exist or does not belong to the authenticated freelancer; Time Logging must reject the entry",
+        "callee-error — Project Management raises an exception during project lookup (e.g. transient store error); Time Logging cannot validate the association and must fail"
+      ],
+      "traces": ["R2", "R9", "R10"],
+      "honors_adr": ["ADR-0001", "ADR-0003"],
+      "honors_inv": ["INV3", "INV4", "INV6"]
+    },
+    {
+      "id": "CT6",
+      "between": ["C5", "C1"],
+      "kind": "shared_data",
+      "shape": "Time Entry records (E3) queried by Invoice Export from the Data Store — filtered by project reference and calendar month. Access is read-only (aggregate query for line-item generation). Field-level time-entry layout deferred to S2; aggregation query design deferred to S3 per cut deferred[].",
+      "failure_modes": [
+        "store-unavailable — PostgreSQL instance unreachable; invoice aggregation query cannot execute; export fails",
+        "not-found — no time entries exist for the given project and calendar month; zero-line-item result (edge case the export flow must handle)",
+        "partial-failure — query returns a partial result set due to a cursor or connection error mid-read; incomplete invoice line items"
+      ],
+      "traces": ["R3", "R8"],
+      "honors_adr": ["ADR-0003"],
+      "honors_inv": ["INV5", "INV6"]
+    },
+    {
+      "id": "CT7",
+      "between": ["C5", "C3"],
+      "kind": "sync_api",
+      "shape": "Client Project header data — Invoice Export calls Project Management in-process to read the project's Currency designation (E5), Billable Rate (E7), and Client record (E6) required to populate invoice line-item computations and invoice header. Field-level schemas for E5/E6/E7 deferred to S4.",
+      "failure_modes": [
+        "not-found — referenced project does not exist or is not accessible; invoice export cannot proceed without rate and currency",
+        "callee-error — Project Management raises an exception during project data retrieval; Invoice Export cannot compute monetary totals and must fail the request"
+      ],
+      "traces": ["R3", "R8", "R9", "R10"],
+      "honors_adr": ["ADR-0001", "ADR-0003"],
+      "honors_inv": ["INV3", "INV4", "INV5", "INV6"]
+    },
+    {
+      "id": "CT8",
+      "between": ["C6", "C2"],
+      "kind": "sync_api",
+      "shape": "Session presence signal — Web Ingress calls Identity & Auth in-process on each authenticated route to verify a valid session exists before dispatching to a domain component. Result is authenticated (session valid, freelancer identity available) or unauthenticated (redirect to login). No session token format designed here.",
+      "failure_modes": [
+        "no-valid-session — no session cookie present or session is expired; Web Ingress must redirect to the OAuth login entry point rather than dispatching to the domain component",
+        "callee-error — Identity & Auth raises an exception during session check (e.g. store lookup failure); Web Ingress must treat the request as unauthenticated and redirect"
+      ],
+      "traces": ["R1", "R5"],
+      "honors_adr": ["ADR-0001", "ADR-0004", "ADR-0005"],
+      "honors_inv": ["INV1", "INV6"]
+    },
+    {
+      "id": "CT9",
+      "between": ["C6", "C3"],
+      "kind": "sync_api",
+      "shape": "Project management page request dispatch — Web Ingress routes an authenticated HTTP request in-process to Project Management, which returns a server-rendered HTML response (project list, project detail, project create/edit/delete forms). No wire format or URL path schema invented here; shape is the request/response dispatch at the MPA routing seam.",
+      "failure_modes": [
+        "callee-error — Project Management raises an unhandled exception during request processing; Web Ingress must return an appropriate HTTP error response",
+        "not-found — requested project resource does not exist (e.g. detail view for a deleted project); Project Management returns a not-found result; Web Ingress renders a 404 page"
+      ],
+      "traces": ["R1", "R6"],
+      "honors_adr": ["ADR-0001", "ADR-0004"],
+      "honors_inv": ["INV6"]
+    },
+    {
+      "id": "CT10",
+      "between": ["C6", "C4"],
+      "kind": "sync_api",
+      "shape": "Time-logging page request dispatch — Web Ingress routes an authenticated HTTP request in-process to Time Logging, which returns a server-rendered HTML response (time entry form, time entry list per project). No wire format or URL path schema invented here; shape is the request/response dispatch at the MPA routing seam.",
+      "failure_modes": [
+        "callee-error — Time Logging raises an unhandled exception during request processing; Web Ingress must return an appropriate HTTP error response",
+        "not-found — requested project context for time logging does not exist; Time Logging returns a not-found result; Web Ingress renders a 404 page"
+      ],
+      "traces": ["R1", "R2"],
+      "honors_adr": ["ADR-0001", "ADR-0004"],
+      "honors_inv": ["INV6"]
+    },
+    {
+      "id": "CT11",
+      "between": ["C6", "C5"],
+      "kind": "sync_api",
+      "shape": "Invoice export request dispatch — Web Ingress routes an authenticated HTTP request in-process to Invoice Export, which streams a PDF binary response to the browser as a file download (content-type application/pdf). The PDF streaming response crosses this seam; no wire format or URL path schema invented here. PDF generation library deferred to S3 per cut deferred[].",
+      "failure_modes": [
+        "callee-error — Invoice Export raises an unhandled exception during PDF generation or aggregation; Web Ingress must return an appropriate HTTP error response instead of a partial or broken PDF",
+        "not-found — the specified project or calendar month yields no accessible data; Invoice Export cannot produce a valid invoice; Web Ingress renders an error response"
+      ],
+      "traces": ["R1", "R3"],
+      "honors_adr": ["ADR-0001", "ADR-0004"],
+      "honors_inv": ["INV5", "INV6"]
+    }
+  ],
+  "coverage": {
+    "edges_in_scope": [
+      "C2->C1",
+      "C3->C1",
+      "C3->C2",
+      "C4->C1",
+      "C4->C3",
+      "C5->C1",
+      "C5->C3",
+      "C6->C2",
+      "C6->C3",
+      "C6->C4",
+      "C6->C5"
+    ],
+    "edges_contracted": [
+      "C2->C1",
+      "C3->C1",
+      "C3->C2",
+      "C4->C1",
+      "C4->C3",
+      "C5->C1",
+      "C5->C3",
+      "C6->C2",
+      "C6->C3",
+      "C6->C4",
+      "C6->C5"
+    ],
+    "edge_orphans": [],
+    "contracts_without_edge": [],
+    "kind_distribution": { "sync_api": 7, "shared_data": 3, "async_event": 1 }
+  },
+  "frame_conflicts": [],
+  "structural_defects": [],
+  "contract_counts": {
+    "contracts": 11,
+    "edges_in_scope": 11,
+    "with_failure_mode": 11,
+    "with_trace": 11
+  }
+}

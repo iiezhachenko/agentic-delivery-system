@@ -1,0 +1,136 @@
+{
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "adr_log_ref": ".adr/log/",
+  "base_data_model_ref": ".hld/skeleton/data-model.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "slice_components_ref": ".hld/slices/S4/components.json",
+  "slice_contracts_ref": ".hld/slices/S4/contracts.json",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "skeleton_frozen_verified": true,
+  "class": "greenfield",
+  "mode": "increment",
+  "slice_id": "S4",
+  "slice_name": "Create and manage client projects with currency and billable rate",
+  "introduced_components": ["C3"],
+  "touched_components": ["C3", "C1", "C2", "C6"],
+  "persistence": {
+    "inherited_from": ".hld/skeleton/data-model.json",
+    "adr_refs": ["ADR-0003"],
+    "store": "Relational database — PostgreSQL (managed)",
+    "note": "single frozen store; slice introduces no new persistence component"
+  },
+  "slice_entities": [
+    {
+      "id": "E1",
+      "name": "Freelancer",
+      "owner": "C2",
+      "persisted": true,
+      "role": "referenced-read",
+      "status": "established",
+      "via_contracts": ["CT3"],
+      "relationships": [
+        { "to": "E2", "cardinality": "one-to-many", "basis": "One freelancer owns many client projects; ADR-0003 entity chain E1→E2 FK; INV2 (single freelancer per account)" }
+      ],
+      "field_schema_deferred_to": "S1",
+      "field_schema_owned_here": false,
+      "honors_inv": ["INV1", "INV2"],
+      "traces": ["R5"],
+      "in_scope_basis": "C3 reads E1 via CT3 (sync_api C3→C2) to resolve authenticated session and scope all project data to the owning freelancer; E1 owned by reused C2"
+    },
+    {
+      "id": "E2",
+      "name": "Client Project",
+      "owner": "C3",
+      "persisted": true,
+      "role": "owned-introduced",
+      "status": "established",
+      "via_contracts": ["CT2"],
+      "relationships": [
+        { "to": "E1", "cardinality": "many-to-one", "basis": "Many projects belong to one freelancer; ADR-0003 E1→E2 FK chain; INV2" },
+        { "to": "E3", "cardinality": "one-to-many", "basis": "One project contains many time entries; ADR-0003 E2→E3 FK chain; R7" },
+        { "to": "E5", "cardinality": "many-to-one", "basis": "Many projects may share a currency designation; each project carries exactly one currency; INV3" },
+        { "to": "E6", "cardinality": "many-to-one", "basis": "Many projects may be associated with one client; E2 references the client record to whom the invoice is addressed; R6" },
+        { "to": "E7", "cardinality": "one-to-one", "basis": "Each project has exactly one billable rate attached; ADR-0003 entity chain; INV4" }
+      ],
+      "field_schema_deferred_to": "S4",
+      "field_schema_owned_here": true,
+      "honors_inv": ["INV2", "INV3", "INV4", "INV8"],
+      "traces": ["R4", "R6", "R9", "R10"],
+      "in_scope_basis": "C3 (introduced, fleshed_this_slice:true) owns E2 via CT2 (shared_data C3→C1 read-write); sole writer confirmed; field schema deferred to this slice"
+    },
+    {
+      "id": "E5",
+      "name": "Currency",
+      "owner": "C3",
+      "persisted": true,
+      "role": "owned-introduced",
+      "status": "established",
+      "via_contracts": ["CT2"],
+      "relationships": [
+        { "to": "E2", "cardinality": "one-to-many", "basis": "One currency designation may be used by many projects; each project carries exactly one currency; INV3; R4" }
+      ],
+      "field_schema_deferred_to": "S4",
+      "field_schema_owned_here": true,
+      "honors_inv": ["INV3"],
+      "traces": ["R4", "R9"],
+      "in_scope_basis": "C3 (introduced, fleshed_this_slice:true) owns E5 via CT2 (shared_data C3→C1 read-write); sole writer confirmed; field schema deferred to this slice"
+    },
+    {
+      "id": "E6",
+      "name": "Client",
+      "owner": "C3",
+      "persisted": true,
+      "role": "owned-introduced",
+      "status": "established",
+      "via_contracts": ["CT2"],
+      "relationships": [
+        { "to": "E2", "cardinality": "one-to-many", "basis": "One client may be associated with many projects; E2 references its client record; R6; INV8" }
+      ],
+      "field_schema_deferred_to": "S4",
+      "field_schema_owned_here": true,
+      "honors_inv": ["INV8"],
+      "traces": ["R6"],
+      "in_scope_basis": "C3 (introduced, fleshed_this_slice:true) owns E6 via CT2 (shared_data C3→C1 read-write); sole writer confirmed; field schema deferred to this slice"
+    },
+    {
+      "id": "E7",
+      "name": "Billable Rate",
+      "owner": "C3",
+      "persisted": true,
+      "role": "owned-introduced",
+      "status": "established",
+      "via_contracts": ["CT2"],
+      "relationships": [
+        { "to": "E2", "cardinality": "one-to-one", "basis": "Each billable rate is attached to exactly one project; ADR-0003 entity chain; INV4" }
+      ],
+      "field_schema_deferred_to": "S4",
+      "field_schema_owned_here": true,
+      "honors_inv": ["INV4"],
+      "traces": ["R9", "R10"],
+      "in_scope_basis": "C3 (introduced, fleshed_this_slice:true) owns E7 via CT2 (shared_data C3→C1 read-write); sole writer confirmed; field schema deferred to this slice"
+    }
+  ],
+  "new_entities": [],
+  "slice_coverage": {
+    "slice_requirements": ["R4", "R6", "R9", "R10"],
+    "requirements_with_data": ["R4", "R6", "R9", "R10"],
+    "requirements_no_data_footprint": [],
+    "requirement_orphans": []
+  },
+  "ownership_fidelity": {
+    "re_owned_entities": [],
+    "remodeled_entities": [],
+    "verdict": "extends-not-re-models"
+  },
+  "ownership_defects": [],
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "increment_counts": {
+    "slice_entities": 5,
+    "owned_introduced": 4,
+    "referenced_read": 1,
+    "new_entities": 0,
+    "field_schemas_owned_here": 4
+  }
+}

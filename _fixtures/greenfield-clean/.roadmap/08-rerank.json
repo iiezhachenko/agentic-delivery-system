@@ -1,0 +1,130 @@
+{
+  "base_ref": ".roadmap/07-sequence-reviewed.json",
+  "build_dag_ref": ".hld/skeleton/build-dag.json",
+  "components_ref": ".hld/skeleton/components.json",
+  "slices_ref": ".roadmap/02-slices.json",
+  "completed_demo_refs": [".build/skeleton/demo/demo.json"],
+  "class": "greenfield",
+  "roadmap_version": 2,
+  "verdict": "re_ranked",
+  "completed": [
+    {
+      "position": 1,
+      "id": "S1",
+      "name": "Sign in via OAuth on the web application",
+      "status": "accepted",
+      "demo_ref": ".build/skeleton/demo/demo.json"
+    }
+  ],
+  "introduction_map": {
+    "skeleton_built": ["C1", "C2", "C6"],
+    "remaining": {
+      "S4": ["C3"],
+      "S2": ["C4"],
+      "S3": ["C5"]
+    }
+  },
+  "remaining_sequence": [
+    {
+      "position": 2,
+      "id": "S4",
+      "name": "Create and manage client projects with currency and billable rate",
+      "value": "high",
+      "retires_risk": null,
+      "components": ["C3"],
+      "coarse_depends_on": ["S1"],
+      "real_depends_on": ["S1"],
+      "depends_on_delta": {
+        "confirmed": ["S1"],
+        "removed": [],
+        "added": []
+      },
+      "cost_proxy": 6,
+      "moved": null,
+      "value_risk_change": null,
+      "rationale": "C3 (Project Management) depends on C1 and C2 — both skeleton-built (S1, completed, satisfied). S4 is the sole frontier item at this position; value high; no risk retired but unblocks both S2 and S3."
+    },
+    {
+      "position": 3,
+      "id": "S3",
+      "name": "Export a monthly PDF invoice with line items and monetary totals",
+      "value": "high",
+      "retires_risk": "Server-side PDF generation (A1): first exercise of the backend PDF library (e.g. Puppeteer or WeasyPrint); proves file generation and browser-stream delivery work before the feature is considered done.",
+      "components": ["C5"],
+      "coarse_depends_on": ["S1", "S2", "S4"],
+      "real_depends_on": ["S1", "S4"],
+      "depends_on_delta": {
+        "confirmed": ["S1", "S4"],
+        "removed": ["S2"],
+        "added": []
+      },
+      "cost_proxy": 8,
+      "moved": {
+        "from_position": 4,
+        "to_position": 3,
+        "basis": "Real DAG: C5 (Invoice Export) depends on C1 and C3 only — no dependency on C4 (Time Logging). Coarse dep on S2 removed. S3 is now dependency-legal as soon as S4 is placed; at the two-slice frontier {S2, S3} both have value=high, but S3 retires risk A1 (Server-side PDF generation) while S2 retires none — risk-retirement tiebreak (discriminator 5b) moves S3 ahead."
+      },
+      "value_risk_change": null,
+      "rationale": "C5 depends on C1 (skeleton-built) and C3 (S4, placed). Coarse dep on S2 removed by real DAG — C5 does not depend on C4. Value high; retires PDF generation risk A1; advances over S2 on the risk-retirement tiebreak."
+    },
+    {
+      "position": 4,
+      "id": "S2",
+      "name": "Log and persist billable time entries against a project",
+      "value": "high",
+      "retires_risk": null,
+      "components": ["C4"],
+      "coarse_depends_on": ["S1", "S4"],
+      "real_depends_on": ["S1", "S4"],
+      "depends_on_delta": {
+        "confirmed": ["S1", "S4"],
+        "removed": [],
+        "added": []
+      },
+      "cost_proxy": 4,
+      "moved": {
+        "from_position": 3,
+        "to_position": 4,
+        "basis": "S3's coarse dep on S2 was removed by the real DAG; S3 became dependency-legal at position 3 simultaneously with S2. At the frontier, S3 retires risk A1 and S2 retires none — discriminator 5b places S3 first, pushing S2 to position 4."
+      },
+      "value_risk_change": null,
+      "rationale": "C4 depends on C1 (skeleton-built) and C3 (S4, placed). Real deps unchanged from coarse. Value high; no risk retired; placed after S3 because S3 won the risk-retirement tiebreak at the shared frontier."
+    }
+  ],
+  "dependency_check": {
+    "acyclic": true,
+    "legal": true,
+    "against": "real_component_dag",
+    "cycles": [],
+    "dangling_real_depends_on": []
+  },
+  "changes": {
+    "reordered": ["S3", "S2"],
+    "dependency_refinements": [
+      {
+        "slice": "S3",
+        "removed": ["S2"],
+        "added": []
+      }
+    ],
+    "value_risk_changes": [],
+    "thrash_avoided": "S4 unchanged at position 2 — its real depends_on matches the coarse graph exactly (S1 confirmed, no removed or added deps)."
+  },
+  "coverage": {
+    "base_slices": ["S1", "S4", "S2", "S3"],
+    "completed": ["S1"],
+    "remaining_ranked": ["S4", "S3", "S2"],
+    "missing": [],
+    "duplicated": []
+  },
+  "structural_defects": [],
+  "aprd_defects": [],
+  "foundation_gaps": [],
+  "rerank_counts": {
+    "completed": 1,
+    "remaining": 3,
+    "reordered": 2,
+    "deps_removed": 1,
+    "deps_added": 0
+  }
+}

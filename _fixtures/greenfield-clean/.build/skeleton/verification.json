@@ -1,0 +1,231 @@
+{
+  "integration_record_ref": ".build/skeleton/integration-record.json",
+  "build_record_ref": ".build/skeleton/build-record.json",
+  "oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
+  "oracle_ref": ".build/skeleton/oracle/oracle.json",
+  "nfr_mechanisms_ref": ".hld/skeleton/nfr-mechanisms.json",
+  "components_ref": ".hld/skeleton/components.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton-build",
+  "slice": "S1",
+  "verification_method": "static-trace",
+  "ladder": {
+    "contract": {
+      "layer_verdict": "pass",
+      "tests": [
+        {
+          "id": "OCT-CT1",
+          "target": "CT1",
+          "provider": "C1",
+          "caller": "C2",
+          "module": "freelancer_app.data_store.identity_record_store",
+          "shape": {
+            "test": "test_ct1_shape_persists_identity_record",
+            "result": "pass",
+            "trace": "mock_data_store_ct1 patches freelancer_app.data_store.identity_record_store. Test imports the mock. save_identity returns non-None dict -> assert result is not None PASS. get_identity returns dict -> fetched not None PASS; isinstance(fetched, dict)=True -> assert hasattr(fetched,'provider') or isinstance(fetched,dict) PASS."
+          },
+          "failures": [
+            {
+              "test": "test_ct1_failure_store_unavailable",
+              "result": "pass",
+              "trace": "save_identity.side_effect=ConnectionError. oauth_callback.handle_callback calls data_store.identity_record_store.save_identity via attribute access -> mock raises ConnectionError -> propagates -> pytest.raises catches. mock.save_identity.called=True PASS. exc_info.value not None PASS."
+            },
+            {
+              "test": "test_ct1_failure_constraint_violation",
+              "result": "pass",
+              "trace": "save_identity.side_effect=ValueError. First handle_callback call raises ValueError -> pytest.raises catches -> call_count>=1 PASS. Second handle_callback in nested pytest.raises also raises ValueError -> caught PASS."
+            },
+            {
+              "test": "test_ct1_failure_partial_failure",
+              "result": "pass",
+              "trace": "save_identity.side_effect=RuntimeError. handle_callback raises RuntimeError -> pytest.raises catches PASS. mock.get_identity.return_value=None; mock.get_identity() returns None -> assert result is None PASS."
+            }
+          ]
+        },
+        {
+          "id": "OCT-CT8",
+          "target": "CT8",
+          "provider": "C2",
+          "caller": "C6",
+          "module": "freelancer_app.web_ingress.session_gate",
+          "shape": {
+            "test": "test_ct8_shape_session_presence_signal",
+            "result": "pass",
+            "trace": "mock_identity_auth_ct8 patches freelancer_app.identity_auth.session_checker. Authenticated: check_session.return_value={'authenticated':True,'identity_ref':'uid-shape-test'}. session_gate.check({'session':'valid-token'}) -> identity_auth.session_checker.check_session('valid-token') via attribute access -> mock returns session dict -> returned. result not None PASS; result.get('authenticated')=True -> assert is_authenticated PASS. Unauthenticated: check_session.return_value=None. session_gate.check({}) -> check_session(None) -> None -> {'authenticated':False}. is_authenticated_unauth=False -> assert not is_authenticated_unauth PASS."
+          },
+          "failures": [
+            {
+              "test": "test_ct8_failure_no_valid_session",
+              "result": "pass",
+              "trace": "check_session.return_value=None. handle_authenticated_request({}, 'project_management') -> check({}) -> check_session(None) -> None -> {'authenticated':False} -> not authenticated -> returns {'redirect':'/login','dispatched':False}. redirect_location='/login' not None PASS. dispatched=False -> assert not dispatched PASS."
+            },
+            {
+              "test": "test_ct8_failure_callee_error",
+              "result": "pass",
+              "trace": "check_session.side_effect=RuntimeError. handle_authenticated_request({'session':'maybe-valid'}, 'project_management') -> check() -> check_session('maybe-valid') raises RuntimeError -> propagates out of check() -> caught by except Exception in handle_authenticated_request -> returns {'redirect':'/login','dispatched':False}. redirect_location='/login' not None PASS. dispatched=False PASS."
+            }
+          ]
+        }
+      ]
+    },
+    "flow": {
+      "layer_verdict": "pass",
+      "tests": [
+        {
+          "id": "OF-F1",
+          "target": "F1",
+          "path": ["C6", "C2", "C1"],
+          "wsgi_entry": "freelancer_app.wsgi.application",
+          "happy": {
+            "test": "test_f1_happy_path_oauth_login_establishes_session",
+            "asserts_ac": ["AC1", "AC5"],
+            "result": "pass",
+            "assertions": [
+              {
+                "id": "F1/AC1-response-started",
+                "result": "pass",
+                "trace": "GET / -> _view_entry_page -> session_gate.check({}) -> session_checker.check_session(None) (real, no mock here) -> returns None -> {'authenticated':False} -> renders unauthenticated HTML -> HttpResponse(200) calls start_response -> response_started non-empty PASS."
+              },
+              {
+                "id": "F1/AC1-status-lt-400",
+                "result": "pass",
+                "trace": "HttpResponse(status=200) -> status_code=200 < 400 PASS."
+              },
+              {
+                "id": "F1/AC1-body-non-empty",
+                "result": "pass",
+                "trace": "Body = b'<html><body><h1>Freelancer Time Tracker</h1><p>Please sign in...</p><a href=\"/auth/login\">Sign in with Google</a></body></html>' -> len > 0 PASS."
+              },
+              {
+                "id": "F1/AC5-init-response",
+                "result": "pass",
+                "trace": "GET /auth/login -> _view_auth_login -> HttpResponseRedirect(oauth_auth_url) -> start_response called with '302 Found' -> oauth_init_response non-empty PASS."
+              },
+              {
+                "id": "F1/AC5-init-status",
+                "result": "pass",
+                "trace": "init_status=302 in (200,301,302,303,307,308) PASS."
+              },
+              {
+                "id": "F1/AC5-callback-response",
+                "result": "pass",
+                "trace": "GET /auth/callback?code=test-oauth-code&state=test-state -> _view_auth_callback_safe -> _view_auth_callback: exchange_code('test-oauth-code') -> mock returns {provider:'google',provider_id:'uid-f1-happy',...} -> handle_callback('google','uid-f1-happy',{...}) -> save_identity(...) -> real in-memory store -> returns record -> set_cookie('session','uid-f1-happy',...) -> HttpResponseRedirect('/') -> start_response called -> callback_response non-empty PASS."
+              },
+              {
+                "id": "F1/AC5-callback-status",
+                "result": "pass",
+                "trace": "HttpResponseRedirect -> status 302 in (200,301,302,303,307,308) PASS."
+              },
+              {
+                "id": "F1/AC5-session-cookie",
+                "result": "pass",
+                "trace": "response.set_cookie('session','uid-f1-happy',...) -> Set-Cookie header present -> set_cookie='session=uid-f1-happy; ...' -> 'session' in set_cookie.lower()=True -> assert satisfied PASS."
+              }
+            ]
+          },
+          "failure": {
+            "test": "test_f1_failure_store_unavailable",
+            "exercises": "CT1:store-unavailable",
+            "result": "pass",
+            "assertions": [
+              {
+                "id": "F1-failure-response",
+                "result": "pass",
+                "trace": "patch save_identity side_effect=ConnectionError. GET /auth/callback -> _view_auth_callback_safe -> _view_auth_callback: exchange_code -> mock returns uid-f1-failure data -> handle_callback -> save_identity raises ConnectionError -> propagates out of handle_callback -> _view_auth_callback raises ConnectionError -> caught by _view_auth_callback_safe except ConnectionError -> HttpResponseRedirect('/auth/login?error=store_unavailable') -> start_response called -> callback_response non-empty PASS."
+              },
+              {
+                "id": "F1-failure-no-session",
+                "result": "pass",
+                "trace": "HttpResponseRedirect has no Set-Cookie -> set_cookie='' -> 'session' not in ''.lower()=True -> assert satisfied PASS."
+              },
+              {
+                "id": "F1-failure-redirect-to-login",
+                "result": "pass",
+                "trace": "callback_status=302 in (301,302,...) -> location='/auth/login?error=store_unavailable' -> 'auth' in location.lower()=True AND 'login' in location.lower()=True -> assert satisfied PASS."
+              }
+            ]
+          },
+          "trace": "Walking skeleton flow C6->C2->C1 fully wired. GET / renders entry page (AC1: 200 non-empty HTML). /auth/login redirects 302 to OAuth provider (AC5 step 1). /auth/callback exchanges code via mock_oauth_provider -> handle_callback -> save_identity (real in-memory store) -> set_cookie(session, provider_id) + redirect 302 to / (AC5 step 2). Failure: ConnectionError from save_identity -> _view_auth_callback_safe catches -> redirect to /auth/login?error=store_unavailable, no session cookie (CT1:store-unavailable path fully satisfied)."
+        }
+      ]
+    },
+    "acceptance": {
+      "layer_verdict": "pass",
+      "per_ac": [
+        {
+          "ac": "AC1",
+          "req_ref": "R1",
+          "visible": {
+            "file": "acceptance/visible/test_AC1.py",
+            "result": "pass",
+            "trace": "GET / with HTTP scheme, localhost:8000, Mozilla UA -> _view_entry_page -> no session cookie -> session_gate.check({}) -> check_session(None) -> None -> {'authenticated':False} -> HttpResponse(200, non-empty HTML). response_started PASS; status_code=200<500 PASS; len(body)>0 PASS; 'itms-appss://' not in body PASS; 'market://details' not in body PASS."
+          },
+          "held_out": {
+            "file": "acceptance/held_out/test_AC1.py",
+            "result": "pass",
+            "trace": "GET / with HTTPS scheme, SERVER_NAME='app.freelancetool.internal', SERVER_PORT=443, HTTP_USER_AGENT='curl/7.88.1', HTTP_X_FORWARDED_PROTO=https, HTTP_X_FORWARDED_FOR set. Django WSGI ALLOWED_HOSTS=['*'] accepts any host. _view_entry_page does not inspect UA, host, or scheme — same code path. session_gate.check({}) -> check_session(None) -> None -> {'authenticated':False} -> HttpResponse(200, same non-empty HTML body). response_started PASS; status_code=200<500 PASS; len(body)>0 PASS; native-install strings absent PASS. Not hardcoded: _view_entry_page does not branch on host/UA/scheme; property holds for any client identity."
+          }
+        },
+        {
+          "ac": "AC5",
+          "req_ref": "R5",
+          "visible": {
+            "file": "acceptance/visible/test_AC5.py",
+            "result": "pass",
+            "trace": "GET /auth/login -> HttpResponseRedirect(302) -> login_status=302 in (200,...,308) PASS. mock_oauth_provider.exchange_code.return_value={'provider':'google','provider_id':'google-uid-visible-12345','profile':{'email':'alice@example.com','name':'Alice'}}. GET /auth/callback?code=4%2F0AbcXYZvisible&state=csrf-state-visible-abc -> _view_auth_callback_safe -> exchange_code('4/0AbcXYZvisible') -> mock returns uid='google-uid-visible-12345' -> handle_callback('google','google-uid-visible-12345',{...}) -> save_identity -> real store -> success -> set_cookie('session','google-uid-visible-12345',...) -> HttpResponseRedirect('/') -> callback_status=302<500 PASS; Set-Cookie contains 'session' -> 'session' in set_cookie.lower()=True PASS."
+          },
+          "held_out": {
+            "file": "acceptance/held_out/test_AC5.py",
+            "result": "pass",
+            "trace": "GET /auth/login with HTTPS host 'app.freelancetool.internal' -> _view_auth_login -> HttpResponseRedirect(302) -> login_status=302 in (200,...,308) PASS. mock_oauth_provider.exchange_code.return_value={'provider':'google','provider_id':'google-uid-heldout-9f3a7c2e','profile':{'email':'bob.contractor.heldout@gmail.com','name':'Bob Contractor'}}. GET /auth/callback?code=4%2F0XkQ9heldout3z7mNpRTv&state=csrf-heldout-7f2e9b1c on HTTPS host -> _view_auth_callback_safe -> exchange_code(code) -> mock returns held-out uid='google-uid-heldout-9f3a7c2e' -> handle_callback('google','google-uid-heldout-9f3a7c2e',{...}) -> save_identity -> real store -> success -> set_cookie('session','google-uid-heldout-9f3a7c2e',...) -> HttpResponseRedirect('/') -> callback_status=302<500 PASS; 'session' in set_cookie.lower()=True PASS. Anti-overfit: _view_auth_callback uses whatever provider_id the mock returns; does not hardcode visible uid 'google-uid-visible-12345' or visible code — the held-out identity succeeds identically."
+          }
+        }
+      ]
+    },
+    "class_ext": {
+      "layer_verdict": "n/a",
+      "kinds": [],
+      "note": "Greenfield skeleton — oracle.json class_ext=[] — oracle materialized no class extension (B13/§11)."
+    },
+    "nfr": {
+      "layer_verdict": "pass",
+      "mechanisms_checked": [],
+      "note": "nfr-mechanisms.json mechanisms=[] — all 8 NFRs satisfied-by-frame or not-applicable under INV6/A13; no M* requires a wiring check (MAP-NFR). NFR layer passes vacuously."
+    }
+  },
+  "per_ac_summary": [
+    { "ac": "AC1", "visible": "pass", "held_out": "pass" },
+    { "ac": "AC5", "visible": "pass", "held_out": "pass" }
+  ],
+  "verdict": "verified",
+  "escape": null,
+  "provenance": {
+    "verifier_role": "verifier",
+    "built_against": {
+      "oracle_lock": ".build/skeleton/oracle/oracle.lock",
+      "skeleton_lock": ".hld/skeleton.lock",
+      "adr_lock": ".adr/adr.lock",
+      "aprd_lock": ".aprd/aprd.lock",
+      "build_plan": ".build/skeleton/build-plan.json",
+      "build_record": ".build/skeleton/build-record.json",
+      "integration_record": ".build/skeleton/integration-record.json"
+    }
+  },
+  "verification_counts": {
+    "contract_tests": 2,
+    "contract_assertions": 7,
+    "flow_assertions": 11,
+    "acceptance_acs": 2,
+    "acceptance_visible_passed": 2,
+    "acceptance_held_out_passed": 2,
+    "class_ext_layers": 0,
+    "mechanisms_checked": 0,
+    "layers_applicable": 4,
+    "layers_passed": 4,
+    "layers_failed": 0
+  }
+}
