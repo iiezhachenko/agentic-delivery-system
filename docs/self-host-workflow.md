@@ -1,33 +1,33 @@
 # The Self-Host Workflow — Making the System Build Itself
 
-> How the delivery system is pointed at its own project — "build the agentic delivery system" — so that the pipeline authors the rest of the pipeline.
-> Audience: the operator running the self-host (the CTO / system owner). Assumes you've read the end-user [generic-workflow.md](generic-workflow.md); this is its reflexive special case.
-> Companion to **`self-host-usage-guide.md`** (which explains *how you set it up and run it*). This doc is the *workflow narrative* — how the run flows.
+> Delivery system pointed at own project — "build the agentic delivery system" — so pipeline authors rest of pipeline.
+> Audience: operator running self-host (CTO / system owner). Assumes you read end-user [generic-workflow.md](generic-workflow.md); this = its reflexive special case.
+> Companion to **`self-host-usage-guide.md`** (explains *how you set up + run it*). This doc = *workflow narrative* — how run flows.
 
 ---
 
 ## 1. What this workflow is
 
-The generic workflow takes *your* request and delivers *your* product. This workflow does the same thing with one substitution: **the request is "build the agentic delivery system," and the product is the system itself.**
+Generic workflow takes *your* request, delivers *your* product. This workflow does same with one substitution: **request = "build the agentic delivery system," product = system itself.**
 
-Nothing about the engine changes. The same five-phase spine — Understand → Plan → Decide → Design → Build — runs, the same checkpoints exist, the same "nothing is done until verified" law holds. What makes this run special is only **what flows through it**:
+Engine unchanged. Same five-phase spine — Understand → Plan → Decide → Design → Build — runs, same checkpoints exist, same "nothing done until verified" law holds. Special only in **what flows through it**:
 
-- The **request** is the system's own mission.
-- The **deliverable** the Build phase emits is **prompt `.md` files** (the system's own parts), not application code. `prompts/` plays the `src/` role.
-- The **product owner** at the checkpoints is **you, the operator**.
+- **Request** = system's own mission.
+- **Deliverable** Build phase emits = **prompt `.md` files** (system's own parts), not application code. `prompts/` plays `src/` role.
+- **Product owner** at checkpoints = you, operator.
 
-This is dogfooding at the deepest level: the pipeline that delivers client software is turned on the project that *is* the pipeline. When it works, the delivery system is authoring the delivery system, through the very same engine that delivers anything else.
+Dogfooding at deepest level: pipeline that delivers client software turned on project that *is* pipeline. When works, delivery system authors delivery system, through same engine that delivers anything else.
 
-This repo *is* a canonical Agentic Delivery Pipeline project — the engine reads its frozen artifact trees directly at the repo root. Self-host is not a special mode; it is the ordinary pipeline run on this repo.
+This repo *is* canonical Agentic Delivery Pipeline project — engine reads its frozen artifact trees directly at repo root. Self-host not special mode; = ordinary pipeline run on this repo.
 
 ---
 
-## 2. The mental shift — two product levels
+## 2. Mental shift — two product levels
 
-The one idea that makes this workflow click is that **there are two products stacked on top of each other**, and the upper one is judged through the lower one.
+One idea makes workflow click: **two products stacked on top of each other**, upper judged through lower.
 
-- **Level A — the delivered product.** A fixture app (the freelancer marketplace in `_fixtures/greenfield-clean`). Its value: the app works — it passes its acceptance criteria.
-- **Level B — the system itself.** The prompt library. Its value: its prompts *correctly deliver Level-A products*.
+- **Level A — delivered product.** Fixture app (freelancer marketplace in `_fixtures/greenfield-clean`). Value: app works — passes acceptance criteria.
+- **Level B — system itself.** Prompt library. Value: prompts *correctly deliver Level-A products*.
 
 ```mermaid
 flowchart TD
@@ -44,17 +44,17 @@ flowchart TD
     class VERDICT good;
 ```
 
-**Level B is validated through Level A.** You never invent a separate "is this prompt any good?" judge. A self-authored prompt earns the label *correct* if, and only if, running it against the fixture products yields the correct value. **The fixture-product run is the oracle** — the same test model the system has always used, applied one level up.
+**Level B validated through Level A.** Never invent separate "is this prompt good?" judge. Self-authored prompt earns *correct* iff running it against fixture products yields correct value. **Fixture-product run = oracle** — same test model system always used, applied one level up.
 
-This is why the workflow doesn't get caught in an infinite regress: the recursion bottoms out at real, runnable product value.
+So workflow dodges infinite regress: recursion bottoms out at real runnable product value.
 
 ---
 
-## 3. The journey at a glance
+## 3. Journey at a glance
 
-The same five phases as the generic workflow — but here, **four of the five are already settled.** The system's upstream phases already exist as frozen artifacts — the canonical trees at the repo root — instead of being produced live by this run:
+Same five phases as generic workflow — but here **four of five already settled.** Upstream phases exist as frozen artifacts — canonical trees at repo root — instead of produced live by this run:
 
-| Phase | Generic workflow produces… | Self-host: already frozen at the repo root as… |
+| Phase | Generic workflow produces… | Self-host: already frozen at repo root as… |
 |---|---|---|
 | 1 · Understand | agreed requirements | `.aprd/` (`aprd.frozen.md` + `aprd.lock`) |
 | 2 · Plan | roadmap of increments | `.roadmap/` (`roadmap.md` + `08-rerank.json`) |
@@ -62,7 +62,7 @@ The same five phases as the generic workflow — but here, **four of the five ar
 | 4 · Design | how the pieces fit | `.hld/` (`skeleton.frozen.md` + `skeleton/*`) |
 | 5 · Build | verified software | `prompts/*` shipped + `_fixtures/` goldens |
 
-So this workflow is **not build-from-zero.** The four upstream phases are already frozen on disk; only the fifth (Build) runs live, authoring the remaining prompts.
+So workflow **not build-from-zero.** Four upstream phases already frozen on disk; only fifth (Build) runs live, authoring remaining prompts.
 
 ```mermaid
 flowchart TD
@@ -98,29 +98,29 @@ flowchart TD
     class STEP faded;
 ```
 
-**Two rhythms, same as always.** The frozen trees play the role of the "walking skeleton" — except here the skeleton was settled long ago and already lives in the tree the prompts read. Then the system fills itself in **one prompt at a time** — each remaining prompt a small, complete unit that is designed, authored, verified, and shipped before the next begins.
+**Two rhythms, same as always.** Frozen trees play "walking skeleton" role — except here skeleton settled long ago, already lives in tree prompts read. Then system fills itself in **one prompt at a time** — each remaining prompt small complete unit designed, authored, verified, shipped before next begins.
 
 ---
 
-## 4. The upstream phases are already frozen
+## 4. Upstream phases already frozen
 
-Understand / Plan / Decide / Design are already settled for the self-project, so **re-running them buys nothing and risks churn.** They are not regenerated — they already exist as the frozen canonical trees the engine reads directly at the repo root:
+Understand / Plan / Decide / Design already settled for self-project, so **re-running them buys nothing + risks churn.** Not regenerated — already exist as frozen canonical trees engine reads directly at repo root:
 
-- `.aprd/` — the frozen requirements (`aprd.frozen.md` + `aprd.lock`).
-- `.adr/` — the decision records (`log/<NNNN>.md` + `adr-index.json` index + `adr.lock`), **including the stack decision** that pins the deliverable to "prompt library" (the analog of pinning Python in the fixture).
-- `.hld/` — the design skeleton (`skeleton.frozen.md` + `skeleton/*` — the prompt scaffold, AB1–AB6, PR1–PR4).
-- `.roadmap/` — the roadmap (`roadmap.md` + `08-rerank.json`) whose remaining sequence is **the unshipped prompts**.
-- `prompts/*` already shipped → the built skeleton; `_fixtures/*` → the oracle baseline.
+- `.aprd/` — frozen requirements (`aprd.frozen.md` + `aprd.lock`).
+- `.adr/` — decision records (`log/<NNNN>.md` + `adr-index.json` index + `adr.lock`), **including stack decision** pinning deliverable to "prompt library" (analog of pinning Python in fixture).
+- `.hld/` — design skeleton (`skeleton.frozen.md` + `skeleton/*` — prompt scaffold, AB1–AB6, PR1–PR4).
+- `.roadmap/` — roadmap (`roadmap.md` + `08-rerank.json`) whose remaining sequence = **unshipped prompts**.
+- `prompts/*` already shipped → built skeleton; `_fixtures/*` → oracle baseline.
 
-These trees are frozen artifacts: signed, immutable, never overwritten. A change is a new version + change request, never a hand-edit of a frozen body.
+These trees = frozen artifacts: signed, immutable, never overwritten. Change = new version + change request, never hand-edit of frozen body.
 
-The one part the Build phase leans on is the **agentic-delivery-pipeline coding-canon profile** (`code-canon/agentic-delivery-pipeline.md`) — selected by the stack ADR (the analog of the ADR that pins Python in the fixture). It tells the Build phase how to scaffold, write, and *verify* a prompt, the same way a future Terraform or TypeScript canon profile will. It lives in the `code-canon/` store the spec already defines (scaffolds/idioms per stack), **not a new registry**. The verify mechanism it registers already exists and is proven: the clean-room runner simulation. The profile doesn't invent it — it *names an existing procedure* as this deliverable's verify method.
+One part Build phase leans on = **agentic-delivery-pipeline coding-canon profile** (`code-canon/agentic-delivery-pipeline.md`) — selected by stack ADR (analog of ADR pinning Python in fixture). Tells Build phase how to scaffold, write, *verify* a prompt, same way future Terraform or TypeScript canon profile will. Lives in `code-canon/` store spec already defines (scaffolds/idioms per stack), **not new registry**. Verify mechanism it registers already exists + proven: clean-room runner simulation. Profile doesn't invent it — *names existing procedure* as this deliverable's verify method.
 
 ---
 
-## 5. The self-slice loop — how each prompt gets built
+## 5. Self-slice loop — how each prompt gets built
 
-The system fills itself in. Each remaining prompt is one "slice," and it travels the loop end-to-end:
+System fills itself in. Each remaining prompt = one "slice," travels loop end-to-end:
 
 ```mermaid
 flowchart LR
@@ -132,94 +132,94 @@ flowchart LR
     S --> DONE([Done = clean-room run delivers<br/>correct fixture value])
 ```
 
-1. **RE-RANK picks the next prompt** — reading the roadmap's remaining sequence and the on-disk state (the first slice whose output is absent), replacing any hand-read "you are here" pointer.
-2. **Design the contract** — the per-role spec section + the design skeleton + the relevant decisions define what this prompt must do.
-3. **IMPLEMENT writes the prompt** — the one genuinely *generative* step: synthesize the prompt `.md` from its contract.
-4. **Verify by running it** — a fresh clean-room runner gets the new prompt verbatim and must produce a schema-valid, ID-threaded artifact against the fixtures. A *separate* verifier (not the author) checks it.
-5. **Freeze / ship** — passing prompts are promoted into `prompts/`; "shipped" is the freeze on disk plus git, not a narrative changelog.
+1. **RE-RANK picks next prompt** — reads roadmap's remaining sequence + on-disk state (first slice whose output absent), replacing any hand-read "you are here" pointer.
+2. **Design contract** — per-role spec section + design skeleton + relevant decisions define what prompt must do.
+3. **IMPLEMENT writes prompt** — one genuinely *generative* step: synthesize prompt `.md` from contract.
+4. **Verify by running it** — fresh clean-room runner gets new prompt verbatim, must produce schema-valid ID-threaded artifact against fixtures. *Separate* verifier (not author) checks it.
+5. **Freeze / ship** — passing prompts promoted into `prompts/`; "shipped" = freeze on disk plus git, not narrative changelog.
 
-**State is derived, never tracked.** There is no progress file to maintain. "What's done" is computed by scanning the artifact tree on demand; "what's next" is RE-RANK over the roadmap. State derived from disk has no duplicate to drift.
+**State derived, never tracked.** No progress file to maintain. "What's done" computed by scanning artifact tree on demand; "what's next" = RE-RANK over roadmap. State derived from disk has no duplicate to drift.
 
 ---
 
-## 6. How a prompt is judged "good" — the oracle
+## 6. How a prompt judged "good" — the oracle
 
-This is the heart of the workflow and the answer to "but how do you grade a prompt?"
+Heart of workflow + answer to "how do you grade a prompt?"
 
-**A prompt is good iff it produces correct value when run.** Concretely: take the freshly authored prompt, drop it into a clean-room runner that has never seen the rest of the conversation, point it at the fixture product, and check the artifact it emits:
+**Prompt good iff produces correct value when run.** Concretely: take freshly authored prompt, drop into clean-room runner that never saw rest of conversation, point at fixture product, check artifact it emits:
 
-- Is it **schema-valid** (the right shape for that role's output)?
-- Is it **ID-threaded** (every requirement traceable through design → code → tests)?
-- Does it **satisfy acceptance** — does the fixture product still come out correct?
+- **Schema-valid** (right shape for that role's output)?
+- **ID-threaded** (every requirement traceable through design → code → tests)?
+- **Satisfies acceptance** — does fixture product still come out correct?
 
-Both directions are tested: a known-good prompt must PASS, and a *planted-defect* copy of it must FAIL. If the verifier can't tell them apart, the verifier is broken.
+Both directions tested: known-good prompt must PASS, *planted-defect* copy must FAIL. Verifier can't tell them apart → verifier broken.
 
-The deliverable is "just text," so it has no compiler — its correctness is **behavioral**, observed by running it, exactly the way the system tests any other deliverable. This is also why the workflow is deliverable-agnostic in the same breath: a Python app, a Terraform module, and a prompt library are all judged identically — *deliver a fixture product in that technology and check the value.*
+Deliverable = "just text," so no compiler — correctness **behavioral**, observed by running it, exactly way system tests any other deliverable. Also why workflow deliverable-agnostic in same breath: Python app, Terraform module, prompt library all judged identically — *deliver fixture product in that technology, check value.*
 
 ---
 
 ## 7. Your role — judge value first, then step back
 
-In the generic workflow you have three checkpoints (clarify, review roadmap, accept demos). In the self-host workflow your involvement is concentrated into a single, shifting role: **the external judge that guards against the system grading its own grading.**
+Generic workflow: three checkpoints (clarify, review roadmap, accept demos). Self-host workflow: involvement concentrated into single shifting role: **external judge guarding against system grading own grading.**
 
-- **While the loop is unproven (through the first closed loop):** *you* are the judge. When a self-authored prompt comes out of verify, you confirm its value — that it delivers correct fixture value. The orchestrator (Opus) sits in this seat with you. The system does not yet grade its own grading.
-- **The first prompt is the proof:** the first self-built prompt — the RECONCILE/CRITIQUE increment — must, run clean-room, deliver correct value against the fixtures. Confirming this once is the proof the loop works.
-- **After that:** you **step back.** The loop drains the remaining prompts on its own, each success hardening it. Your role narrows to spot-checks and to feeding any defect you find back into the decisions/rules — the system editing its own design.
+- **While loop unproven (through first closed loop):** *you* = judge. When self-authored prompt comes out of verify, you confirm value — delivers correct fixture value. Orchestrator (Opus) sits in this seat with you. System doesn't yet grade own grading.
+- **First prompt = proof:** first self-built prompt — RECONCILE/CRITIQUE increment — must, run clean-room, deliver correct value against fixtures. Confirming this once = proof loop works.
+- **After that:** you **step back.** Loop drains remaining prompts on own, each success hardening it. Role narrows to spot-checks + feeding any defect you find back into decisions/rules — system editing own design.
 
-You are never asked to grade prompts in the abstract. You are asked: *did the product it built come out right?*
+Never asked to grade prompts in abstract. Asked: *did product it built come out right?*
 
 ---
 
 ## 8. Why self-reference doesn't bite
 
-The obvious objection: "to run the pipeline on itself, the pipeline must be finished — but it isn't (the Build-phase slice prompts are exactly what's unwritten)."
+Obvious objection: "to run pipeline on itself, pipeline must be finished — but it isn't (Build-phase slice prompts = exactly what's unwritten)."
 
-It dissolves because **self-hosting the authoring loop needs only three things**, and all three are available now:
+Dissolves because **self-hosting authoring loop needs only three things**, all available now:
 
-1. a **controller** to pick the next prompt (RE-RANK — already shipped),
-2. an **oracle** to judge a prompt (the clean-room sim — already running today),
-3. a **synthesizer** to write the prompt (IMPLEMENT under the agentic-delivery-pipeline target).
+1. **controller** to pick next prompt (RE-RANK — already shipped),
+2. **oracle** to judge prompt (clean-room sim — already running today),
+3. **synthesizer** to write prompt (IMPLEMENT under agentic-delivery-pipeline target).
 
-It does **not** need the finished generic Build phase, because the agentic-delivery-pipeline deliverable profile brings its *own* build-and-verify mechanism, independent of any other. So the loop can run immediately — and once running, it authors the very Build-phase prompts that were missing. The system pulls itself up by writing its own remaining rungs.
+Does **not** need finished generic Build phase, because agentic-delivery-pipeline deliverable profile brings *own* build-and-verify mechanism, independent of any other. So loop runs immediately — and once running, authors the very Build-phase prompts that were missing. System pulls itself up by writing own remaining rungs.
 
 ---
 
 ## 9. What "done" looks like
 
-Self-host is achieved when:
+Self-host achieved when:
 
-1. the next prompt to build is chosen by **RE-RANK**, not by a human reading a tracker;
-2. at least one remaining prompt was **authored by the pipeline and shipped without hand-authoring**, because it delivered correct value against the fixture product (the oracle gate, cleared); and
-3. the loop then **drains the rest** of the unshipped prompts the same way.
+1. next prompt to build chosen by **RE-RANK**, not human reading tracker;
+2. at least one remaining prompt **authored by pipeline + shipped without hand-authoring**, because delivered correct value against fixture product (oracle gate cleared); and
+3. loop then **drains rest** of unshipped prompts same way.
 
-It is **fully** validated one step further: a **second, different deliverable profile** — say Terraform or TypeScript — also runs through the *unchanged* engine and passes its own verify. That proves the system is genuinely deliverable-agnostic, not secretly agentic-delivery-pipeline-special. At that point the loop also begins feeding its own build failures back into its decisions and rules — the reflexive, two-loop improvement applied to itself.
+**Fully** validated one step further: **second different deliverable profile** — say Terraform or TypeScript — also runs through *unchanged* engine + passes own verify. Proves system genuinely deliverable-agnostic, not secretly agentic-delivery-pipeline-special. At that point loop also begins feeding own build failures back into decisions + rules — reflexive two-loop improvement applied to itself.
 
-When all of this holds, the delivery pipeline is authoring the delivery pipeline through the same engine that delivers any other product. The system builds itself.
+When all holds, delivery pipeline authors delivery pipeline through same engine that delivers any other product. System builds itself.
 
 ---
 
-## 10. Resilience — interrupting and resuming a self-build
+## 10. Resilience — interrupting + resuming a self-build
 
-The self-build runs on the same crash-safe guarantees as any delivery (decision **D20**). Because state is derived from disk and never cached, you can lose connection or kill a running agent mid-prompt and lose nothing committed:
+Self-build runs on same crash-safe guarantees as any delivery (decision **D20**). Because state derived from disk + never cached, you can lose connection or kill running agent mid-prompt + lose nothing committed:
 
-- The **disk tree is the single source of truth.** Artifacts are written atomically (temp then rename), so you never resume onto a half-written file.
-- **Frozen artifacts are immutable**; steps only add.
-- **Resume re-derives the frontier from disk** — it scans the tree, validates the latest outputs, and continues at the first prompt whose output is absent or invalid. Re-running a step that already finished is harmless.
+- **Disk tree = single source of truth.** Artifacts written atomically (temp then rename), so never resume onto half-written file.
+- **Frozen artifacts immutable**; steps only add.
+- **Resume re-derives frontier from disk** — scans tree, validates latest outputs, continues at first prompt whose output absent or invalid. Re-running finished step harmless.
 
-So an interrupted self-build is resumed exactly the way a fresh one is started: point the orchestrator at the repo and say *continue.* It reads where it is from what's on disk and picks up.
+So interrupted self-build resumed exactly way fresh one started: point orchestrator at repo, say *continue.* Reads where it is from what's on disk, picks up.
 
 ---
 
 ## 11. Glossary (self-host specifics)
 
-- **Frozen tree:** an already-decided upstream phase (Understand/Plan/Decide/Design) living on disk as the canonical artifact the prompts read, instead of being re-run live. The four trees are `.aprd/ .roadmap/ .adr/ .hld/` at the repo root.
-- **Level A / Level B:** the delivered fixture product (A) and the system that delivers it (B); B is validated *through* A.
-- **Deliverable target (stack target):** the pluggable adapter for one kind of deliverable, realized as a **stack ADR** (pins which deliverable/stack) + a **coding-canon profile** (scaffold, conventions, build idiom, and **verify mechanism**) in the `code-canon/` store. "Prompt library" (`code-canon/agentic-delivery-pipeline.md`) is the active one; Python, Terraform, TypeScript are others.
-- **Clean-room run:** giving a freshly authored prompt to a fresh runner with no prior context, and judging it by the artifact it produces against the fixtures.
-- **Oracle gate:** the proof — the first self-authored prompt must deliver correct value against the fixtures, both directions (known-good PASS, planted-defect FAIL).
-- **Derived state:** progress is computed from the artifact tree on demand, never stored in a hand-maintained file.
+- **Frozen tree:** already-decided upstream phase (Understand/Plan/Decide/Design) living on disk as canonical artifact prompts read, instead of re-run live. Four trees = `.aprd/ .roadmap/ .adr/ .hld/` at repo root.
+- **Level A / Level B:** delivered fixture product (A) + system that delivers it (B); B validated *through* A.
+- **Deliverable target (stack target):** pluggable adapter for one kind of deliverable, realized as **stack ADR** (pins which deliverable/stack) + **coding-canon profile** (scaffold, conventions, build idiom, **verify mechanism**) in `code-canon/` store. "Prompt library" (`code-canon/agentic-delivery-pipeline.md`) = active one; Python, Terraform, TypeScript = others.
+- **Clean-room run:** giving freshly authored prompt to fresh runner with no prior context, judging it by artifact it produces against fixtures.
+- **Oracle gate:** the proof — first self-authored prompt must deliver correct value against fixtures, both directions (known-good PASS, planted-defect FAIL).
+- **Derived state:** progress computed from artifact tree on demand, never stored in hand-maintained file.
 - **Self-slice loop:** RE-RANK → design contract → write prompt → clean-room verify → freeze, repeated per unshipped prompt.
 
 ---
 
-*In short: the four phases the system already settled live as frozen trees at the repo root; hand it the one adapter it needs (the agentic-delivery-pipeline canon profile), then let it write its own remaining prompts — each one proven by delivering a real fixture product correctly, until the pipeline is building the pipeline.*
+*In short: four phases system already settled live as frozen trees at repo root; hand it one adapter it needs (agentic-delivery-pipeline canon profile), then let it write own remaining prompts — each one proven by delivering real fixture product correctly, until pipeline builds pipeline.*

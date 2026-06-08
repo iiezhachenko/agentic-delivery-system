@@ -1,37 +1,37 @@
 # Working With the System — End-User Guide
 
-> How to take a software idea from a rough request to verified, working software — using the delivery system.
-> Audience: the person who wants something built (the client/product owner). No engineering background assumed.
+> Take software idea from rough request to verified working software — via delivery system.
+> Audience: person who wants thing built (client/product owner). No engineering background assumed.
 
 ---
 
-## 1. What this system does
+## 1. What system does
 
-You describe what you want. The system designs it, builds it, tests it, and shows you working software running on a staging environment — delivered in small, reviewable increments rather than one big drop at the end.
+You describe what you want. System designs it, builds it, tests it, shows working software running on staging — delivered in small reviewable increments, not one big drop at end.
 
-It is a team of AI agents organized as a pipeline. Each stage has a job, hands its result to the next, and checks the work along the way. **Nothing is declared "done" until it has been verified to actually work** — every increment ships with tests that prove it does what was asked.
+Team of AI agents as pipeline. Each stage has job, hands result to next, checks work along way. **Nothing "done" until verified to actually work** — every increment ships with tests proving it does what asked.
 
-**What you get:** a verified, demoable application running on staging, plus a clean paper trail — what was agreed (requirements), why each major technical choice was made (decision records), how it's structured (design), and proof it works (passing tests).
+**What you get:** verified demoable app on staging, plus clean paper trail — what agreed (requirements), why each major technical choice made (decision records), how structured (design), proof it works (passing tests).
 
-**What it builds:** any kind of software product — a web or mobile app, a backend service, infrastructure (e.g. cloud/Terraform), a data pipeline, and more. The technology is chosen for your project, not fixed in advance.
+**What it builds:** any software product — web/mobile app, backend service, infrastructure (e.g. cloud/Terraform), data pipeline, more. Technology chosen for your project, not fixed in advance.
 
 ---
 
 ## 2. Before you start — what to bring
 
-You do **not** need a polished spec. Bring whatever you have:
+No polished spec needed. Bring whatever you have:
 
-- **Your request, in plain language.** "A marketplace where clients post jobs and freelancers apply." Rough is fine — refining it is the system's first job.
-- **Anything that constrains the solution**, if you know it: budget, deadline, required technology, regions/compliance, scale expectations, existing systems it must work with.
-- **Existing materials**, if any: current code, designs, documents, or a brand/style guide. (For changes to an existing product, the system reads the code first.)
+- **Your request, plain language.** "Marketplace where clients post jobs, freelancers apply." Rough fine — refining it = system's first job.
+- **Anything that constrains solution**, if known: budget, deadline, required technology, regions/compliance, scale expectations, existing systems it must work with.
+- **Existing materials**, if any: current code, designs, documents, brand/style guide. (For changes to existing product, system reads code first.)
 
-If you don't have some of these, that's expected — the system will ask.
+Missing some? Expected — system asks.
 
 ---
 
-## 3. The journey at a glance
+## 3. Journey at a glance
 
-The work moves through five phases. You are involved at **three checkpoints**; the rest runs on its own.
+Work moves through five phases. You involved at **three checkpoints**; rest runs on own.
 
 ```mermaid
 flowchart TD
@@ -67,70 +67,70 @@ flowchart TD
     class CA,CB,CC you;
 ```
 
-**Two rhythms.** First the system builds a thin **end-to-end skeleton** of the whole product once (so the shape is real and connected early). Then it fills in the product **one slice at a time** — each slice a small, working, demoable piece of functionality that goes all the way through (design → build → test → demo).
+**Two rhythms.** First system builds thin **end-to-end skeleton** of whole product once (shape real + connected early). Then fills product **one slice at a time** — each slice small working demoable piece going all way through (design → build → test → demo).
 
-**You won't be pestered.** The system only stops to involve you at the three checkpoints below. Everywhere else it works autonomously and reads from what was already agreed.
+**You won't be pestered.** System stops to involve you only at three checkpoints below. Everywhere else works autonomously, reads from what already agreed.
 
 ---
 
-## 4. Your three checkpoints (this is the part you do)
+## 4. Your three checkpoints (part you do)
 
 ### Checkpoint A — Clarifying questions (early)
-After reading your request (and any existing code/materials), the system identifies the **genuine gaps** — the things it cannot safely assume — and asks you a short, prioritized set of questions.
+After reading request (and any existing code/materials), system finds **genuine gaps** — things it can't safely assume — asks short prioritized question set.
 
-- It asks **only what matters**, highest-impact first (e.g. "Single region or global? This changes the architecture").
-- It will **not** guess silently on anything that affects structure, cost, or scope.
-- Answer in plain language. Where you're unsure, say so — the system records it as an explicit assumption you can revisit.
+- Asks **only what matters**, highest-impact first (e.g. "Single region or global? Changes architecture").
+- Will **not** guess silently on anything affecting structure, cost, scope.
+- Answer plain language. Unsure? Say so — system records as explicit assumption you can revisit.
 
-**Result:** an agreed statement of *what* will be built (requirements + what "done" means for each). This is then frozen — a stable reference everyone builds against.
+**Result:** agreed statement of *what* gets built (requirements + what "done" means each). Then frozen — stable reference everyone builds against.
 
-### Checkpoint B — Review the roadmap
-The system slices the work into a sequence of small increments and shows you the plan: what comes first, what builds on what, and where the foundational pieces sit.
+### Checkpoint B — Review roadmap
+System slices work into sequence of small increments, shows plan: what comes first, what builds on what, where foundational pieces sit.
 
-- You can **confirm** the sequence or **reorder** it (within what's technically possible — some pieces must precede others).
-- This is where you steer priorities: "I need the payments flow demoable before the admin tools."
+- **Confirm** sequence or **reorder** (within technically possible — some pieces must precede others).
+- Here you steer priorities: "Need payments flow demoable before admin tools."
 
-**Result:** an agreed roadmap that drives the rest of delivery.
+**Result:** agreed roadmap driving rest of delivery.
 
 ### Checkpoint C — Demo & accept (repeats, once per increment)
-This is the heartbeat of delivery. For each increment, the system builds it, verifies it, deploys it to staging, and **shows you a working demo**.
+Heartbeat of delivery. Each increment, system builds it, verifies it, deploys to staging, **shows working demo**.
 
-- You see the real thing running, not a status report.
-- You **accept** it (it's done and counts as delivered) or give feedback that feeds the next round.
-- Then the next increment begins. Progress is visible and continuous.
+- You see real thing running, not status report.
+- You **accept** (done, counts as delivered) or give feedback feeding next round.
+- Then next increment begins. Progress visible + continuous.
 
-**Result (cumulative):** a growing, working product on staging — each piece proven before the next starts.
+**Result (cumulative):** growing working product on staging — each piece proven before next starts.
 
 ---
 
-## 5. What happens between checkpoints (so you can trust it)
+## 5. What happens between checkpoints (so you trust it)
 
-You don't need to manage these, but here's what runs on its own:
+Don't manage these, but here's what runs on own:
 
-- **Understand:** turns your rough request into precise requirements, fills gaps from the cheapest reliable source (existing code, established best practices) before asking you, and runs an adversarial review to catch ambiguity and missing acceptance criteria.
-- **Decide:** makes the significant technical choices — including the **technology stack** — weighs options, and **records each as a short decision with its rationale** so nothing important is decided silently or forgotten.
-- **Design:** lays out the components, how they talk to each other (contracts), the data, and the cross-cutting concerns (security, performance), then derives the tests each piece must pass.
-- **Build:** writes the code against the agreed design, with a separate step authoring the tests (so the builder can't grade its own homework), runs the full test ladder, and includes an anti-cheat pass that flags fake or hollow implementations.
+- **Understand:** turns rough request into precise requirements, fills gaps from cheapest reliable source (existing code, established best practices) before asking you, runs adversarial review catching ambiguity + missing acceptance criteria.
+- **Decide:** makes significant technical choices — including **technology stack** — weighs options, **records each as short decision + rationale** so nothing important decided silently or forgotten.
+- **Design:** lays out components, how they talk (contracts), data, cross-cutting concerns (security, performance), then derives tests each piece must pass.
+- **Build:** writes code against agreed design, separate step authors tests (builder can't grade own homework), runs full test ladder, anti-cheat pass flags fake/hollow implementations.
 
-Throughout, a thread of identifiers links every requirement to the design, the code, and the tests that prove it — so any piece is traceable back to the reason it exists.
+Throughout, thread of identifiers links every requirement to design, code, tests proving it — any piece traceable back to reason it exists.
 
 ---
 
 ## 6. What you receive
 
-| Deliverable | What it is | Why it's useful to you |
+| Deliverable | What it is | Why useful to you |
 |---|---|---|
-| **Agreed requirements** | The frozen statement of what's being built + acceptance criteria | The contract everyone works to; what "done" means |
-| **Roadmap** | The increment sequence | See where the work is going and reprioritize |
-| **Decision records** | Each major choice + its rationale | Understand *why* it was built this way; onboard others |
-| **Design** | How the system is structured | A map for future change |
-| **Verified software on staging** | The running product, increment by increment | The actual value — and proof (passing tests) that it works |
+| **Agreed requirements** | Frozen statement of what's built + acceptance criteria | Contract everyone works to; what "done" means |
+| **Roadmap** | Increment sequence | See where work goes; reprioritize |
+| **Decision records** | Each major choice + rationale | Understand *why* built this way; onboard others |
+| **Design** | How system structured | Map for future change |
+| **Verified software on staging** | Running product, increment by increment | Actual value — plus proof (passing tests) it works |
 
 ---
 
-## 7. The slice rhythm — why increments, and what "done" means
+## 7. Slice rhythm — why increments, what "done" means
 
-The product is delivered as a series of **vertical slices**. A slice is a thin, complete piece of functionality that runs end-to-end (for example, "a freelancer can apply to a job" — touching the screen, the logic, and the data, all working together).
+Product delivered as series of **vertical slices**. Slice = thin complete piece of functionality running end-to-end (e.g. "freelancer applies to job" — touching screen, logic, data, all working together).
 
 ```mermaid
 flowchart LR
@@ -141,60 +141,60 @@ flowchart LR
     SL --> DONE([Done = tests pass<br/>AND you accepted the demo])
 ```
 
-Each slice cuts top-to-bottom through the whole product, so what you accept is genuinely working — not a screen with nothing behind it, nor backend code you can't see.
+Each slice cuts top-to-bottom through whole product, so what you accept genuinely works — not screen with nothing behind it, nor backend code you can't see.
 
-For each slice, **"done" means two things at once:**
-1. its acceptance criteria pass (the tests prove it behaves as agreed), **and**
-2. you've seen it demoed and accepted it.
+Each slice, **"done" means two things at once:**
+1. acceptance criteria pass (tests prove it behaves as agreed), **and**
+2. you've seen it demoed + accepted it.
 
-Why this way: you get working software early and often, problems surface in small pieces (not at the end), and you can change direction between slices at low cost.
+Why this way: working software early + often, problems surface in small pieces (not at end), change direction between slices at low cost.
 
 ---
 
 ## 8. Scope & boundaries
 
-- **The finish line is an accepted demo on staging.** That verified staging build is the final deliverable.
-- **Production release, deployment to your own environment, and post-launch operations are out of scope** — a deliberate boundary. The system delivers proven software ready for that step; it does not perform the live release itself.
-- **For changes to existing products**, the system reads and conforms to your current code and conventions, and guards against breaking what already works (regression checks).
+- **Finish line = accepted demo on staging.** That verified staging build = final deliverable.
+- **Production release, deployment to your own environment, post-launch ops out of scope** — deliberate boundary. System delivers proven software ready for that step; doesn't perform live release itself.
+- **For changes to existing products**, system reads + conforms to current code + conventions, guards against breaking what works (regression checks).
 
 ---
 
 ## 9. Works with any technology
 
-The technology is a **decision made for your project** (at the "Decide" phase), based on your requirements and constraints — not a fixed default. The same process delivers a TypeScript web app, a Python service, cloud infrastructure, or a data pipeline. If you have a required stack, say so up front (Checkpoint A) and it becomes a constraint the design must honor.
+Technology = **decision made for your project** (at "Decide" phase), based on requirements + constraints — not fixed default. Same process delivers TypeScript web app, Python service, cloud infrastructure, data pipeline. Required stack? Say up front (Checkpoint A) → becomes constraint design must honor.
 
 ---
 
-## 10. Getting the best results
+## 10. Getting best results
 
-- **Be concrete about outcomes, flexible about implementation.** Tell the system *what success looks like*; let it choose *how*. ("Users check out in under 3 steps" beats "use library X.")
-- **Surface real constraints early** (deadline, budget, must-use tech, compliance). They shape the architecture; late constraints cause rework.
-- **Be decisive at checkpoints.** Clear answers and a confirmed roadmap keep delivery moving. Unsure? Say "assume X for now" — it's recorded and revisitable.
-- **Review demos actively.** The demo is your steering wheel. Concrete feedback ("the filter should default to open jobs") shapes the next slice precisely.
-- **Reprioritize between slices, not mid-slice.** Let a slice finish; redirect at the next roadmap touch. It's cheaper and cleaner.
+- **Concrete about outcomes, flexible about implementation.** Tell system *what success looks like*; let it choose *how*. ("Users check out in under 3 steps" beats "use library X.")
+- **Surface real constraints early** (deadline, budget, must-use tech, compliance). They shape architecture; late constraints cause rework.
+- **Decisive at checkpoints.** Clear answers + confirmed roadmap keep delivery moving. Unsure? Say "assume X for now" — recorded + revisitable.
+- **Review demos actively.** Demo = your steering wheel. Concrete feedback ("filter should default to open jobs") shapes next slice precisely.
+- **Reprioritize between slices, not mid-slice.** Let slice finish; redirect at next roadmap touch. Cheaper + cleaner.
 
 ---
 
 ## 11. Common situations
 
-- **"My request is actually several things"** (e.g. "fix the upload bug, make it faster, and add PDF support"). The system detects this, splits it into atomic pieces, classifies each (bug fix / performance / feature), and confirms the breakdown with you before proceeding.
-- **"I changed my mind about a requirement."** Raise it at the next checkpoint. The change updates the agreed requirements and re-plans the affected slices — the paper trail keeps everything consistent.
-- **"How do I know it really works and isn't faked?"** Every slice ships with tests authored by a role separate from the builder, run against the live build, plus an anti-cheat review that flags hollow or hard-coded implementations. "Done" requires passing, not claiming.
-- **"This is a change to an existing system, not a new build."** Supported. The system reads your codebase first, conforms to its conventions, and adds regression guards so existing behavior stays green.
-- **"I don't know the answer to a clarifying question."** Say so. It becomes an explicit, recorded assumption you can change later — never a silent guess.
+- **"My request is actually several things"** (e.g. "fix upload bug, make it faster, add PDF support"). System detects this, splits into atomic pieces, classifies each (bug fix / performance / feature), confirms breakdown with you before proceeding.
+- **"Changed my mind about a requirement."** Raise at next checkpoint. Change updates agreed requirements + re-plans affected slices — paper trail keeps everything consistent.
+- **"How do I know it really works, isn't faked?"** Every slice ships with tests authored by role separate from builder, run against live build, plus anti-cheat review flagging hollow/hard-coded implementations. "Done" requires passing, not claiming.
+- **"This is change to existing system, not new build."** Supported. System reads codebase first, conforms to conventions, adds regression guards so existing behavior stays green.
+- **"Don't know answer to clarifying question."** Say so. Becomes explicit recorded assumption you can change later — never silent guess.
 
 ---
 
 ## 12. Glossary (light)
 
-- **Requirements (frozen):** the agreed, stable statement of what's being built and what "done" means.
-- **Slice:** a small, complete, demoable piece of functionality delivered end-to-end.
-- **Skeleton (walking skeleton):** a thin version of the whole product wired together early, so the shape is real before details are filled in.
-- **Decision record:** a short note capturing a significant technical choice and why it was made.
-- **Design:** the structure — components, how they connect, the data, and cross-cutting concerns.
-- **Staging:** a production-like environment where you see and accept working software; the delivery finish line.
-- **Acceptance criteria:** the concrete, testable conditions that define "done" for a requirement or slice.
+- **Requirements (frozen):** agreed stable statement of what's built + what "done" means.
+- **Slice:** small complete demoable piece of functionality delivered end-to-end.
+- **Skeleton (walking skeleton):** thin version of whole product wired together early, shape real before details filled in.
+- **Decision record:** short note capturing significant technical choice + why made.
+- **Design:** structure — components, how they connect, data, cross-cutting concerns.
+- **Staging:** production-like environment where you see + accept working software; delivery finish line.
+- **Acceptance criteria:** concrete testable conditions defining "done" for requirement or slice.
 
 ---
 
-*In short: describe what you want, answer a few sharp questions, confirm a plan, then watch working software arrive in reviewable increments — each one proven before the next begins.*
+*In short: describe what you want, answer few sharp questions, confirm plan, then watch working software arrive in reviewable increments — each one proven before next begins.*
