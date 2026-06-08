@@ -105,8 +105,9 @@ D1–D4 — foundational conventions (one-role-one-prompt, greenfield-first, sel
 - **D17** — MAP-NFR increment calls (inherit-governing-by-reference + frame-fidelity). RESOLVED.
 - **D18** — MODEL-FLOWS increment calls (compose-against-frozen + flow-is-new). RESOLVED.
 - **D19** — DERIVE-TESTS increment calls (inherit-tests-by-reference + flow-test-is-new + DAG-is-skeleton-only). RESOLVED.
+- **D20** — pipeline idempotency & crash-safe resume (atomic writes + immutable-frozen + validate-frontier-on-resume + persist-gate-replies); binds BUILD-phase prompts + orchestrator. RESOLVED.
 
-_D1–D19 resolved. Reopen forks in `_decisions.md`; add the index line here._
+_D1–D20 resolved. Reopen forks in `_decisions.md`; add the index line here._
 
 ---
 
