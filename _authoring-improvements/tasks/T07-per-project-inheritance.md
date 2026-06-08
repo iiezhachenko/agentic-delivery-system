@@ -62,3 +62,41 @@ For a hypothetical non-self-host project (e.g. terraform), confirm it gets econo
 ## OUT OF SCOPE
 
 Defining P13/INV (T02). Building lint/auditor (T04/T05). Wiring mechanics (T06). Re-authoring prompts (T08–T10).
+
+---
+
+## STATUS — DONE (not committed)
+
+Makes the EXISTING economy canon + gate cross-project + inherited-by-default. No P13/INV redefine (T02), no lint/auditor build (T04/T05), no wiring mechanics (T06), no bloat re-author (T08–T10). Standing-INV addition is the wiring DO 2 sanctions ("or its spec §"), same category as T06's `_orchestrator` edit — not remediation.
+
+### Deps confirmed
+- **T02 DONE** — `P13` (spec-00 §2 table) + §2.1 economy invariant (`A-ECON` NFR + cross-slice `INV-ECON` + universal/stack-local split). Universal layer (the economy RULE) already in spec.
+- **T03 DONE** — coding-canon AB1–AB6 framed as prompt-stack placement idioms; AB7–AB9 CITE `P13`/`A-ECON`, do not re-own.
+- **T04 DONE** — `tools/economy-lint/` parameterized `{artifact-type, thresholds}`; prompt thresholds in `lint.mjs PROFILES`, non-prompt belong in stack profile.
+- **T06 DONE** — ONE shared `ECONOMY-AUDIT` + lint wired into every phase gate; routing keystone (`fix DELETE|REWRITE`, no patch path).
+
+### Changes (5 edits, 3 files)
+
+**`.aprd/specs/01-automated-roadmap-pipeline-spec.md`:**
+1. **§5.7** — `cross_slice_invariants` now TWO sources: aPRD-read (unchanged) + **engine-standing** `INV-ECON` (spec-00 §2.1, grounded `P13`/`A-ECON`) cut by DEFAULT into EVERY project, cross-cutting like security, stack-independent (P3) — VERIFY-OUTPUT NFR check measures economy in ANY stack, not opt-in.
+2. **§6.1 schema** — `cross_slice_invariants` comment names the two sources + standing default.
+3. **Version 0.1→0.2 + Change log** — change = new version (P8); downstream: `FOUNDATION-CUT` emits `INV-ECON[0]`.
+
+**`prompts/01-roadmap/FOUNDATION-CUT.md`** (REALIZES the default — surgical wiring, not bloat re-author):
+4. Discriminator 4 + Rule 4 + Task step 4 + output schema — `cross_slice_invariants[0]` ALWAYS engine-standing `INV-ECON` (default, grounded `P13`/`A-ECON`, carried-not-minted), then aPRD-read invariants (read, never invent). New project inherits economy without manual wiring; stack-independent (emitted by spine prompt, NOT read from profile → swap can't drop it).
+
+**`code-canon/agentic-delivery-pipeline.md`:**
+5. **Stack profile contract** section — every sibling profile (this, `terraform.md`, `typescript.md`) MUST: (a) CITE `P13`/`A-ECON` (never re-state — meta-AB1), (b) fill stack-local "one home" def, (c) supply per-artifact-type lint thresholds. Omitting any = incomplete. Active profile DEMONSTRATES: "one home" = a prompt SECTION (AB1); non-prompt thresholds table (adr/aprd/hld/roadmap 200/400, C1·C4·C7·C8·C9; prompt thresholds cited in `lint.mjs`, not restated); new stack REUSES shared auditor/lint parameterized `{artifact-type, stack thresholds}`, never re-authors. Stack-swap = no spine edit (invariant #1).
+
+### Acceptance — MET (hypothetical terraform project)
+- [x] **1. P13 inherited via spec** → SYNTHESIZE reads spec-00 §2 principles; `A-ECON` NFR §2.1 carries into aPRD synthesis (T02; engine-universal, stack-blind).
+- [x] **2. Economy INV cut by default, no manual wiring** → `FOUNDATION-CUT` emits `INV-ECON[0]` regardless of stack/aPRD (spec-01 §5.7 engine-standing source; realized on disk).
+- [x] **3. Stack profile cites P13 + fills terraform "one home" (.tf resource) + thresholds** → stack profile contract (a)/(b)/(c) documented + named (`.tf` resource = terraform's "one home"); active profile demonstrates.
+- [x] **4. Shared ECONOMY-AUDIT at every phase gate** → T06 five-callers wiring; profile note: new stack parameterizes shared auditor, never re-authors.
+- [x] **Stack-swap test** → `INV-ECON` emitted by spine prompt + economy RULE in spec; profile holds only stack-local realization → swap inherits economy FREE, no spine edit (invariant #1). If swap needed spine change = leak → fix spine (P3).
+- [x] **Economy RULE ONE home (meta-AB1)** → spec-00 §2.1 owns the rule; spec-01 §5.7, `FOUNDATION-CUT`, profile all CITE `P13`/`A-ECON`, none re-state it.
+
+### Verify
+- `grep -rln "INV-ECON" .aprd/specs/ prompts/ code-canon/` = spec-00, spec-01, `FOUNDATION-CUT`, `_economy-audit`, profile (threaded, rule not duplicated).
+- `node tools/economy-lint/selftest.mjs` = PASS (lint untouched). Lint on the 3 touched files: pre-existing BLOCKs only (FOUNDATION-CUT frontmatter `format:` clauses + role-identity "when in doubt"; profile `caveman-footer-dup` rows) — all at lines NOT in T07 edits; my additions introduced ZERO new violations. Pre-existing bloat = T08–T10 remediation, out of T07 scope.
+- DO-NOT-COMMIT honored.

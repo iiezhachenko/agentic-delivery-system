@@ -3,11 +3,14 @@
 | | |
 |---|---|
 | **Status** | Draft |
-| **Version** | 0.1 |
-| **Date** | 2026-06-06 |
+| **Version** | 0.2 |
+| **Date** | 2026-06-08 |
 | **Audience** | Engineers building system; agents executing it |
 | **Scope** | Stage slices frozen aPRD set into vertical demoable increments, sequences them, controls foundation + slice delivery loops |
 | **Predecessor** | Phase 0 — `00-automated-aprd-pipeline-spec.md` (produces frozen aPRD set this phase slices) |
+
+**Change log**
+- **v0.2** (2026-06-08) — §5.7 + §6.1: `cross_slice_invariants` gains TWO sources — aPRD-read (unchanged) + **engine-standing** `INV-ECON` (spec-00 §2.1, grounded P13/`A-ECON`) cut by DEFAULT into EVERY project, cross-cutting like security, stack-independent. Makes economy inherited per-project automatically (consumes T02 P13/INV). New version = the change request (P8). Downstream: `FOUNDATION-CUT` emits `INV-ECON[0]` by default.
 
 ---
 
@@ -166,9 +169,12 @@ Find thinnest end-to-end slice touching **every foundational seam once** (ingres
 Order remaining slices by **value × risk / cost**, constrained by dependency graph (slice never precedes one it depends on). Riskiest-and-most-valuable first; skeleton always leads. Output sequence + one-line rationale per position.
 
 ### 5.7 Define the foundation cut
-From slice-1 (skeleton) + obvious cross-slice invariants, name **minimum** to decide and build once:
+From slice-1 (skeleton) + cross-slice invariants, name **minimum** to decide and build once:
 - `foundational_decisions` → categories Phase 2 must resolve in **foundation pass** (style, stack, persistence, boundary strategy, cross-cutting invariants).
 - `skeleton_seams` → contracts Phase 3 must establish in **skeleton pass**.
+- `cross_slice_invariants` → properties decided once, every slice inherits. TWO sources:
+  - **aPRD-read** — auth/tenancy/scale/compliance properties, read verbatim from frozen CONSTRAINTS/ASSUMPTIONS, never invented (P11).
+  - **engine-standing** — `INV-ECON` (spec-00 §2.1, grounded P13/`A-ECON`) cut by DEFAULT into EVERY project, cross-cutting like security — NOT aPRD-derived, NOT opt-in. So VERIFY-OUTPUT's NFR check measures every stage's output against economy in ANY stack (terraform/typescript), not just self-host. Stack-independent (P3): swapping the stack profile never drops it.
 Everything not in cut deferred to slice that first needs it (RM9). Cut deliberately thin — widening later cheaper than building wrong foundation.
 
 ### 5.8 Client review of the sequence
@@ -237,7 +243,7 @@ SLICES:
 FOUNDATION_CUT:
   foundational_decisions: [ <categories the first slices need> ]   # → Phase 2 foundation pass
   skeleton_seams:         [ <contracts the skeleton must establish> ] # → Phase 3 skeleton pass
-  cross_slice_invariants: [ <auth model, error strategy, observability — decided once> ]
+  cross_slice_invariants: [ <decided once>; aPRD-read (auth/tenancy/scale) + engine-standing INV-ECON (default, §5.7) ]
 SEQUENCE: [S1, S2, S3, …]            # value/risk-ordered, dependency-legal, LIVING
 COVERAGE: <every aPRD R* lands in >=1 slice>   # no requirement orphaned
 VERSION:  <roadmap version; re-ranks bump it>

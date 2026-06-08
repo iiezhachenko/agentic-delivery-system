@@ -42,3 +42,22 @@ verify mechanism      clean-room runner simulation (a fresh Sonnet runner gets t
 - **Outputs promoted, never written in place.** Self-authored prompt lands in scratch path, verified clean-room, only on gate-accept promoted to `prompts/` (shipped prompts immutable — invariant #2).
 - **No new state file.** Status derived from disk (scan `prompts/` + `_fixtures/` + locks); profile names no tracker (D20). `lint.json` + `economy-audit.json` are gate VERDICTS (disk-in/disk-out, like every gate), NOT trackers — the next STEP-0 scan re-derives from them, no status pointer / changelog added.
 - **Authoring-quality gate = ONE shared auditor, five callers (no copy-5×).** Every phase gate (00-aprd VERIFY/CRITIQUE, 01-roadmap SEQUENCE-REVIEW, 02-adr CRITIQUE, 03-hld RECONCILE-CRITIQUE, 04-build VERIFY-OUTPUT/CRITIQUE) DELEGATES its economy dimension to the shared `ECONOMY-AUDIT` (`prompts/_economy-audit.md`, the general `{artifact, economy-canon}` capability — frontmatter `phase: every-verify`). ONE home for the check, five invocation points; copying the check into each gate would itself break AB1. Lint thresholds per artifact-type (prompt/adr/aprd/hld/roadmap) come from THIS profile, not hard-coded in a gate. A bloat/starvation finding routes to the PRODUCING stage's re-author; `fix` is `DELETE|REWRITE`, never `ADD` — no patch path (the routing keystone).
+
+## Stack profile contract (universal — every sibling profile MUST honor)
+
+Economy is engine-universal (spec-00 `P13` + `A-ECON`/`INV-ECON`, §2.1), NOT owned here. Every stack profile (this one, `terraform.md`, `typescript.md`, …) MUST:
+- **(a) CITE `P13` + `A-ECON`** — never re-state the rule (meta-AB1: economy rule has ONE home = the spec; profile that restates it bloats).
+- **(b) fill the stack-local "one home" definition** — what unit a fact lives in ONCE for THIS stack.
+- **(c) supply per-artifact-type lint thresholds** — T04 `lint.mjs` reads `{artifact-type, thresholds}`.
+
+Profile omitting any of (a)/(b)/(c) = incomplete. Swap the profile → economy inherited FREE, no spine edit (invariant #1). Swap needing a spine change to keep economy = abstraction leaked → fix spine once (P3), not profile.
+
+- **This stack's "one home" (field b) = a prompt SECTION.** One fact lives in exactly one section of one prompt `.md` (AB1) — the prompt-stack analog of one `.tf` resource / one TS module. Realized by AB1–AB9 (`.hld/skeleton/coding-canon.md`), which CITE `P13`/`A-ECON`, never re-own.
+- **Per-artifact-type lint thresholds (field c — non-prompt live HERE).** Prompt thresholds ship in `tools/economy-lint/lint.mjs` `PROFILES.prompt` (150/220 line, role ≤3, format ≤25w, dup 3/4, + frontmatter checks C2/C3/C5/C6) — cited, not restated (AB1). Non-prompt:
+
+  | artifact-type | line warn/block | dup-phrase warn/block | checks |
+  |---|---|---|---|
+  | adr · aprd · hld · roadmap | 200 / 400 | 3 / 4 | C1·C4·C7·C8·C9 (frontmatter checks C2/C3/C5/C6 skipped) |
+
+  RULE (economy) fixed + universal; only this stack-local MEASURE flexes. Tune per type w/ justification.
+- **New stack REUSES the shared auditor — never re-authors it.** Sibling profile does NOT write its own auditor/lint; it PARAMETERIZES the shared `prompts/_economy-audit.md` + `tools/economy-lint/` with `{artifact-type, stack thresholds}`. ONE auditor, every project (cross-project extension of the five-callers note above). And `INV-ECON` is cut into EVERY project's foundation-cut by default (spec-01 §5.7 / `FOUNDATION-CUT`), so VERIFY-OUTPUT's NFR check measures economy in any stack — not wired per project.
