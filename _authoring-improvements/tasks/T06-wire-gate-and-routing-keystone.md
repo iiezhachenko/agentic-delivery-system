@@ -102,3 +102,36 @@ Orchestrator repeatedly bans "anti-bloat ceremony / bookkeeping". This gate is N
 ## OUT OF SCOPE
 
 Building lint/auditor (T04/T05). Per-project foundation-cut INV (T07). Re-authoring (T08–T10).
+
+---
+
+## STATUS: DONE (not committed)
+
+Wiring-only. No tool/prompt re-authored (T04/T05/T08–T10 out of scope). 5 phase-gate prompt bodies untouched (re-author = T08–T10) — generalization declared as delegation CONTRACT in the shared home, not copied into gates.
+
+### Changes (4 edits, 2 files)
+
+**`code-canon/agentic-delivery-pipeline.md` (the designed extension point):**
+1. **Field 6 (verify mechanism) cell** — appended authoring-quality gate: Layer-1 lint + Layer-2 ECONOMY-AUDIT BEFORE clean-room sim (P5); both write disk verdicts (`lint.json`, `economy-audit.json`), both both-directions, `blocked` short-circuits the sim. Source col gains `tools/economy-lint/` + `prompts/_economy-audit.md`. No other field touched.
+2. **Verbatim-shape block** — mirrored: sim PRECEDED by the gate (same field, one home).
+3. **Notes** — two notes: (a) verdicts are gate artifacts NOT trackers (STEP-0 re-derives); (b) **ONE shared auditor, five callers** — every phase gate (00→04) DELEGATES economy to shared `ECONOMY-AUDIT` `{artifact, economy-canon}`; copying 5× would break AB1; lint thresholds per artifact-type from THIS profile; finding → producing-stage re-author, `fix DELETE|REWRITE` never `ADD`.
+
+**`prompts/_orchestrator.md`:**
+4. **STEP 4** — reframed as THREE layers cheapest-first: 4.0a lint→`lint.json` (`blocked`→STEP 3, skip rest); 4.0b ECONOMY-AUDIT→`economy-audit.json` only if lint clean (`blocked`→STEP 3); 4.1+ clean-room sim (existing 1–5, unchanged) on prose-clean scratch only. Intro addresses the ceremony objection inline (pre-promote/automated/verdict vs retired post-promote/manual/status).
+5. **STEP 4 item 5 — routing keystone** — extended verbatim to bind ALL layers: behavior OR prose/bloat/starvation flaw → defect in PROMPT → re-author against DRY skeleton, scratch DISCARDED + IMPLEMENT re-runs, `fix DELETE|REWRITE` never `ADD`, no patch path, ONE shared retry budget (3 → HALT).
+6. **RULES "no anti-bloat ceremony" line** — clarified gate ≠ banned ceremony (avoids self-contradiction).
+
+### Acceptance check
+
+- [x] field 6 names the gate; no other field special-cased.
+- [x] STEP 4 runs lint → AUDIT → clean-room in order; `blocked` at any layer → STEP 3.
+- [x] keystone extended: prose defect → re-author, `fix` never `ADD`, no patch path.
+- [x] `lint.json`+`economy-audit.json` = disk verdicts, STEP-0 re-derives, no status pointer/changelog added.
+- [x] shared auditor invoked by all 5 phase gates; ONE home (delegation contract, no copy-5×).
+- [x] both-directions still mandatory (Layer-3 item 4 unchanged; field 6 binds both layers both-directions).
+
+### Invariants respected
+
+- #1 (configure, don't special-case): change lands in the profile (spine's extension point) + the one orchestrator verify step that reads it; no per-gate special-casing.
+- #2 (frozen immutable): only `code-canon/` + `_orchestrator.md` (live spine) edited; no frozen lock / shipped phase-gate prompt mutated.
+- AB1 (one home): the economy check has ONE home (ECONOMY-AUDIT) referenced by 5 callers; not copied.

@@ -63,13 +63,19 @@ This is the contract IMPLEMENT specializes; canon is never the source of truth (
 Dispatch IMPLEMENT under the `agentic-delivery-pipeline` target. It synthesizes the prompt text from the STEP-2 contract against the scaffold (DRY skeleton) + coding canon (AB1–AB6 + PR1–PR4 + caveman block) the profile names.
 - **Write to a SCRATCH path, never over the shipped file** (invariant #2; profile note "outputs are promoted, never written in place"). Atomic write — temp then rename (D20 guarantee 2).
 
-## STEP 4 — Verify clean-room against the fixtures (the oracle; both directions)
-The verify mechanism the profile registers (`D21` field 6). Do NOT reinvent it.
+## STEP 4 — Verify: authoring-quality gate THEN clean-room (the oracle; both directions, cheapest-source-first P5)
+The verify mechanism the profile registers (`D21` field 6). Do NOT reinvent it. THREE layers, cheapest first — a layer's `blocked` short-circuits the rest → STEP 3 re-author; only a prose-clean scratch reaches the expensive sim. Both gate verdicts are DISK ARTIFACTS the next STEP-0 scan reads — no new state file, idempotent, resume-safe (D20). NOT a tracker/changelog (the retired ceremony ran AFTER promote + hand-looped; this runs BEFORE promote, automated, disk-in/disk-out — the missing half of ADR-0010, not a reversal).
+
+**STEP 4.0a — Layer 1: lint (deterministic, ms, no tokens).** Run the linter (`tools/economy-lint/lint.mjs`, artifact-type inferred from path, thresholds from the stack profile) on the scratch → `lint.json` beside it. `verdict: blocked` → route to STEP 3 re-author, SKIP Layers 2–3 (don't spend tokens on structural bloat).
+
+**STEP 4.0b — Layer 2: ECONOMY-AUDIT (adversarial LLM, residue only).** Only if lint `clean`: spawn the shared ECONOMY-AUDIT (`prompts/_economy-audit.md`) on the scratch, parameterized `{artifact: scratch, economy-canon: AB1–AB9 + spec §2/§2.1}` → `economy-audit.json` beside it. `verdict: blocked` → route to STEP 3 re-author.
+
+**STEP 4.1+ — Layer 3: clean-room value-verify (expensive sim — prose-clean scratch only):**
 1. Clear the `_test_bench` root. Seed the fixture this build needs from `_fixtures/` (the declared `inputs`, on disk) — runner reads `_test_bench`, never `_fixtures` directly.
 2. Spawn a **runner** subagent (step-runner; Sonnet/High) — its entire prompt = the scratch `.md` content **verbatim** + the `_test_bench` path. No orchestrator context leaks in (clean room or the test lies).
 3. Verify **against disk, not the reply** (the artifact the runner wrote): exists at the declared `outputs` path, schema-valid, IDs threaded, acceptance satisfied, matches the golden on **value**. For judgment-heavy output, spawn a **separate verifier** subagent (fresh context, given only artifact + schema + criteria) — no self-grading.
 4. **Both directions** (mandatory; profile note): a known-good prompt PASSes AND a planted-defect copy FAILs. If the verifier can't tell them apart, it is broken — STOP, fix it, before trusting any self-build.
-5. Flaw ⇒ the defect is in the PROMPT, not the artifact. Re-author (STEP 3). Never hand-patch the artifact. Retry budget 3 → HALT, report, do not promote.
+5. **Routing keystone (binds ALL three layers).** Any flaw — behavior defect (Layer 3) OR prose/bloat/starvation finding (Layer 1/2) — ⇒ the defect is in the PROMPT, not the artifact. Re-author (STEP 3) against the DRY skeleton; the scratch is DISCARDED + IMPLEMENT re-runs. `fix` is always `DELETE | REWRITE` — there is NO patch path, never ADD an instruction, never hand-patch the artifact (P1/AB9 made mechanical: an agent physically cannot fix bloat by adding a line). ONE shared retry budget across all layers: 3 → HALT, report which layer + the offending artifact, do not promote.
 
 ## STEP 5 — Pause at the operator gate (value / parity)
 Present the verify result. The operator confirms, in priority order (usage §C1):
@@ -99,7 +105,7 @@ On accept: atomically move the scratch `.md` to its `prompts/<NN-phase>/<ROLE>.m
 - Think, write, reply terse like smart caveman (Register block above). Artifact content (the authored prompt) stays caveman — PR4, no exception.
 - **IMPORTANT!!!** Working directory is the repo root (`agentic-systems/`). Do not look outside it. Runner subagents stay inside their `_test_bench` root.
 - Controller, not builder (RM11): pick / dispatch / verify / gate / promote. Never hand-author the deliverable, never hand-patch a runner's artifact.
-- No bookkeeping file, ever — no status file, no changelog, no anti-bloat ceremony. Re-introducing one re-introduces the drift it caused.
+- No bookkeeping file, ever — no status file, no changelog, no anti-bloat ceremony. Re-introducing one re-introduces the drift it caused. (The STEP-4 authoring-quality gate is NOT this: that retired ceremony was a post-promote MANUAL compression loop + status file; the gate is a pre-promote AUTOMATED verify writing a gate verdict like every gate. Distinction in STEP 4 intro.)
 - Engine unchanged (invariant #1): you configure + dispatch; if wiring the target forces a spine edit, the abstraction leaked — fix the spine once (P3), never patch the target.
 
 # STOP condition
