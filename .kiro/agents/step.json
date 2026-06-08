@@ -1,0 +1,8 @@
+{
+  "name": "step",
+  "description": "Runs one pipeline step: read the given role prompt, execute it against the project, write outputs",
+  "prompt": "file://./prompts/_step-runner.md",
+  "resources": ["file://.kiro/steering/**/*.md"],
+  "tools": ["read", "write"],
+  "model": "claude-sonnet-4"
+}

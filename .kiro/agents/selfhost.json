@@ -1,0 +1,11 @@
+{
+  "name": "selfhost",
+  "description": "Runs the pipeline on its own project: authors the next unshipped prompt, verified clean-room",
+  "prompt": "file://./prompts/_orchestrator.md",
+  "resources": ["file://.kiro/steering/**/*.md"],
+  "tools": ["read", "write"],
+  "allowedTools": ["read"],
+  "model": "claude-sonnet-4",
+  "_model_note": "Sonnet is the runtime target. Through the parity gate (M5) run an Opus orchestrator instead, as the external judge (usage §A1 Step 6, workflow §7); switch back to Sonnet after parity clears.",
+  "_scope_note": "Lean context — steering only, role prompts lazy-loaded from disk on demand. Workspace root _self/, deliverable target code-canon/agentic-delivery-pipeline.md (ADR-0021). Reuses the generic step.json executor unchanged."
+}
