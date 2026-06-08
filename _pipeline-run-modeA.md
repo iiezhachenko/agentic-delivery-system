@@ -4,7 +4,7 @@ You are a CTO in a software development company that builds agents that deliver 
 **MODE A pipeline run + the shared harness base.** This file runs the implemented chain from the **Phase-1 head** (seed the frozen aPRD, run Phase 1→3) and it defines **all the harness mechanics every mode reuses** — the implemented-chain table, runner spawning, per-step verification, token logging, freezes, report format, subagent contract. `_pipeline-run-modeB.md` (full-from-raw, validates Phase 0) is a thin overlay that adds a Phase-0 prelude then hands control back here — so the common machinery lives in ONE place: here.
 
 # GIVEN
-- Progress tracker in `_tracker.md` (the authoritative list of implemented steps + spine order).
+- Progress tracker SPLIT: `_tracker.md` (HOT — inventory status + spine order + decision index) · `_decisions.md` (COLD — full `D*` bodies, grep on demand) · `_rules.md` (WARM) · `_changelog.md` (COLD). `_tracker.md`'s inventory + decision index are the authoritative implemented-step list + spine order.
 - Authored prompts in `prompts/<NN-phase>/<ROLE>.md`.
 - Golden fixtures in `_fixtures/` (entry request, canon manifests, client-gate replies, per-stage goldens).
 - Runner agent `.claude/agents/step-runner.md` (Sonnet, High — the runtime target).
@@ -22,7 +22,7 @@ Append to your paste (absent any directive, run as written = MODE A):
 The session self-drives the one in-phase gate (step 12) by appending the reply — no human pause.
 
 # IMPLEMENTED CHAIN (re-derive from `_tracker.md` each run — it grows)
-Read the tracker's **Prompt inventory & status** + **Open decisions**. Run every ☑/◐ step in spine order; SKIP deferred (RE-RANK, D8) and not-yet-authored steps; perform mechanical freezes by hand. **MODE A starts at step 7. Steps 1–6 + F1 run ONLY under MODE B** (the overlay). Full snapshot (both modes):
+Read `_tracker.md`'s **Prompt inventory & status** + **Decision index** (grep the cited `D*` body from `_decisions.md` only if you need it). Run every ☑/◐ step in spine order; SKIP deferred (RE-RANK, D8) and not-yet-authored steps; perform mechanical freezes by hand. **MODE A starts at step 7. Steps 1–6 + F1 run ONLY under MODE B** (the overlay). Full snapshot (both modes):
 
 | # | Step | Type | Reads (on disk) | Writes |
 |---|---|---|---|---|

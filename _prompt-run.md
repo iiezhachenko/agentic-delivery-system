@@ -1,7 +1,7 @@
 You are a CTO in a sowftware development company that specializes on creating agents that are able to deliver software development projects end-to-end.
 
 # GIVEN
-Progress tracker in _tracker.md
+Progress tracker SPLIT by access temperature: `_tracker.md` (HOT nav — pointer + inventory status + decision index + changelog-maintenance rules; read every run) · `_rules.md` (WARM — PR1–4, caveman block, DRY skeleton, AB1–6, conventions; load when authoring) · `_decisions.md` (COLD — full `D*` bodies; grep the one you cite) · `_changelog.md` (COLD — append-only shipped-prompt entries; read only for the drift diff-check).
 
 # GOAL
 We are going to flesh out this system one prompt at a time. The current objective is to transform these design docs into actual AI prompts that the operator can paste into his harness chat and
@@ -9,9 +9,9 @@ manually simulate how the agentic system would behave when it is built.
 - Each prompt will be pasted into a fresh session.
 
 # TASK
-1. Read the tracker file.
-2. Identify the next step.
-3. Author the prompt (the deliverable).
+1. Read `_tracker.md` (HOT nav only — pointer + inventory + decision index). Do NOT bulk-load the sidecars; pull them by need: `_rules.md` at step 3, the cited `D*` from `_decisions.md` when a step references it, `_changelog.md` only at step 7.4.
+2. Identify the next step (from YOU ARE HERE + inventory).
+3. Author the prompt (the deliverable). Load `_rules.md` (skeleton + AB1–6 + PR1–4 + caveman) + grep `_decisions.md` for any `D*` the step cites.
 4. Run an isolated test — clean-room sim of operator pasting the prompt into a fresh session.
     4.1. Clear _test_bench.
     4.2. Seed: copy the fixture this step needs from _fixtures/ into _test_bench/ — its declared `inputs`, on disk. Mid-pipeline steps seed from a golden upstream fixture. Runner reads _test_bench, never _fixtures directly.
@@ -26,12 +26,12 @@ manually simulate how the agentic system would behave when it is built.
         5.3.1. After each step, verify (as 4.4).
         5.3.2. Flaw => fix that step's prompt. Input to downstream changes => CASCADE: clear that step's output forward, rerun it AND every downstream step IN THE WINDOW. Retry budget 3/step, then HALT. Return to #5.3.1.
     5.4. Window head must seed from a GOLDEN fixture — if N-2's input has no golden fixture in _fixtures/, author one first (or fall back to a wider window rooted at the nearest golden).
-6. Update the _tracker.md (record the shipped prompt).
-7. **Anti-bloat pass — LAST action before finishing, mandatory.** The tracker is a derived cache; left unchecked it bloats and drifts (it ballooned once already). Before you report done, re-read the tracker's Changelog header rules (0–4) + the YOU ARE HERE single-pointer rule and ENFORCE them on what you just wrote:
+6. Record the shipped prompt: APPEND the entry to `_changelog.md` + move the YOU ARE HERE pointer + flip the inventory status in `_tracker.md`. New decision fork → append the body to `_decisions.md` + add its index line in `_tracker.md`. (Three small writes, not one big rewrite — that is the point of the split.)
+7. **Anti-bloat pass — LAST action before finishing, mandatory.** The tracker is a derived cache; left unchecked it bloats and drifts (it ballooned once already). Before you report done, re-read `_tracker.md`'s **Changelog maintenance rules** (0–4) + the YOU ARE HERE single-pointer rule and ENFORCE them on what you just wrote (the entry lives in `_changelog.md`):
     7.1. **YOU ARE HERE = current pointer only.** Move the pointer (last shipped + next); DELETE the superseded prior state — never stack a history of past "current" states there. It holds ONE current position.
     7.2. **Changelog entry = POINTER not home.** Your new entry ≤ ~5 lines: output path (one clause) + the ONE load-bearing line + test verdict (`PASS Nretries — what the retry killed`; `PASS (0 retries)` with NO narrative when clean) + golden ref. Anything with a home elsewhere (full schema → the `.md` + golden; full rule set → the `.md` mandate; decisions → `D*`) is CITED BY NAME, never re-recorded.
     7.3. **No double-bookkeeping.** A shipped prompt is described ONCE (its Changelog entry). If you find the same fact in two places, collapse to one + link by name.
-    7.4. **Diff-check for drift.** If this run EDITED a prompt's behavior (not just authored new), confirm no stale Changelog/YOU-ARE-HERE line now contradicts the `.md`. The `.md`+golden win; fix or delete the stale prose.
+    7.4. **Diff-check for drift.** If this run EDITED a prompt's behavior (not just authored new), grep `_changelog.md` + the `_tracker.md` YOU ARE HERE for any stale line that now contradicts the `.md`. The `.md`+golden win; fix or delete the stale prose. (Grep the one line — do NOT reload all of `_changelog.md`.)
     Only after this pass: report done.
 
 # RULES
