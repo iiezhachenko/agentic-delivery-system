@@ -15,15 +15,15 @@
 
 ## YOU ARE HERE
 
-- **Phase:** Phase 0 ✅ · Phase 1 ✅ 7/7 · Phase 2 ✅ 7/7 · **Phase 3 (HLD) SKELETON chain ✅ 8/8 + FROZEN** · **Phase 4 (Build) SKELETON-BUILD chain ✅ 8/8.** Every greenfield once/skeleton pass shipped. **Phase-3 INCREMENT chain: DERIVE-COMPONENTS ✅ + DEFINE-CONTRACTS ✅ + RESOLVE-LOCAL ✅ + MODEL-DATA ✅ + MAP-NFR ✅ + MODEL-FLOWS ✅ (6/8).** Remaining = increment/slice modes (Phase-3 INCREMENT roles 7–8 D9/D14, Phase-4 SLICE-BUILD D11).
+- **Phase:** Phase 0 ✅ · Phase 1 ✅ 7/7 · Phase 2 ✅ 7/7 · **Phase 3 (HLD) SKELETON chain ✅ 8/8 + FROZEN** · **Phase 4 (Build) SKELETON-BUILD chain ✅ 8/8.** Every greenfield once/skeleton pass shipped. **Phase-3 INCREMENT chain: DERIVE-COMPONENTS ✅ + DEFINE-CONTRACTS ✅ + RESOLVE-LOCAL ✅ + MODEL-DATA ✅ + MAP-NFR ✅ + MODEL-FLOWS ✅ + DERIVE-TESTS ✅ (7/8).** Remaining = increment RECONCILE/CRITIQUE (role 8, D9/D14) + Phase-4 SLICE-BUILD modes (D11).
 
-- **Last shipped: MODEL-FLOWS increment mode** → `prompts/03-hld/MODEL-FLOWS.md` (now dual-mode: skeleton|increment, dispatched on frozen-skeleton presence — D14 pattern; new calls D18). Draws THE slice as one flow F* (§5.7 centerpiece — the ONE increment that mints a new artifact), composing its vertical path against the FROZEN skeleton contracts (via CT* by reference) incl. failure variant; walks ONLY touched boxes/contracts; `traces` R*=full slice set / AC*=demonstrably-reached. Shipped — see Changelog; design/rules/schema/test in the `.md`.
+- **Last shipped: DERIVE-TESTS increment mode** → `prompts/03-hld/DERIVE-TESTS.md` (now dual-mode: skeleton|increment, dispatched on frozen-skeleton presence — D14 pattern; new calls D19). Per-slice design-layer oracle (§5.9): ONE NEW flow test `T-F*` (carried verbatim from the slice flow) + the frozen contract tests its touched seams INHERIT by reference (`new_contract_tests`=[] greenfield); NO build-DAG (skeleton-only, H7). Shipped — see Changelog; design/rules/schema/test in the `.md`.
 
-- **Next: DERIVE-TESTS increment mode** (Phase-3 role 7/8) — per-slice design-layer oracle (the slice's contract + flow test specs; §5.9). Make `DERIVE-TESTS.md` dual-mode (D14 pattern); seed from golden `.hld/slices/S4/{components,contracts,flows}.json` + frozen skeleton `test-specs.json`/`contracts.json`/`flows.json` + rerank.
+- **Next: RECONCILE/CRITIQUE increment mode** (Phase-3 role 8/8, LAST Phase-3 increment) — per-slice adversarial gate incl. H14 skeleton-fidelity check (§8). Make `RECONCILE.md`/`CRITIQUE.md` dual-mode (D14 pattern; reuse D19 inherit-by-reference framing); seed from golden `.hld/slices/S4/{components,contracts,deferred-decisions,data-model,nfr-mechanisms,flows,test-specs}.json` + frozen skeleton set + rerank. Test BOTH directions (clean + planted-defect).
 
 - **Deferred (forward-blocked):** Phase-4 SLICE-BUILD modes (D11 — needs a per-slice HLD increment, which the Phase-3 INCREMENT chain must produce first; built-skeleton fixture EXISTS).
 
-- **Last updated:** 2026-06-08 (MODEL-FLOWS increment mode shipped + golden `.hld/slices/S4/flows.json` promoted; Phase-3 INCREMENT chain 6/8; D18 resolved).
+- **Last updated:** 2026-06-08 (DERIVE-TESTS increment mode shipped + golden `.hld/slices/S4/test-specs.json` promoted; Phase-3 INCREMENT chain 7/8; D19 resolved).
 
 ---
 
@@ -70,7 +70,7 @@ Status: ☐ todo · ◐ drafting · ☑ done
 > **D10 retrofit (2026-06-07):** ALL Phase 0–3 prompt TEXTS rewritten to the DRY skeleton (−29% total). Re-test pending across all (skipped by operator); goldens unchanged, behavior assumed preserved until re-run. New full-chain test harness: `_pipeline-run.md`.
 - ☑ MAP-NFR — **SKELETON + INCREMENT both done + tested + golden promoted.** Dual-mode prompt (dispatch on frozen-skeleton presence; D14/D17).
 - ☑ MODEL-FLOWS — **SKELETON + INCREMENT both done + tested + golden promoted.** Dual-mode prompt (dispatch on frozen-skeleton presence; D14/D18).
-- ◐ DERIVE-TESTS — **SKELETON pass done + tested + golden promoted.** Increment mode (per-slice test specs) not yet authored (see D9).
+- ☑ DERIVE-TESTS — **SKELETON + INCREMENT both done + tested + golden promoted.** Dual-mode prompt (dispatch on frozen-skeleton presence; D14/D19).
 - ◐ RECONCILE/CRITIQUE — **SKELETON pass done + tested BOTH directions + golden promoted.** Increment mode (per-slice gate incl. H14 skeleton-fidelity) not yet authored (see D9).
 
 ### Phase 4 — Build
@@ -83,7 +83,7 @@ Status: ☐ todo · ◐ drafting · ☑ done
 - ◐ CRITIQUE (anti-cheat) — **SKELETON-BUILD pass done + tested BOTH directions + golden promoted.** SLICE-BUILD mode not yet authored (a slice's diff against a built prior slice; see D11).
 - ◐ DEMO-GEN (client demo+accept gate, interactive:true) — **SKELETON-BUILD pass done + tested BOTH Phase-B paths + golden promoted.** SLICE-BUILD mode not yet authored (a slice's demo against a built prior slice; see D11).
 
-**Totals:** 29 / 39 fully done (DERIVE-COMPONENTS + DEFINE-CONTRACTS + RESOLVE-LOCAL + MODEL-DATA + MAP-NFR + MODEL-FLOWS both modes) + 2 Phase-3 skeleton-only roles (◐×2 — DERIVE-TESTS, RECONCILE/CRITIQUE; increment modes pending D9/D14) + **Phase-4 ALL 8 roles (◐×8, skeleton-build pass COMPLETE; slice-build pending D11).** (VERIFY-OUTPUT counted once, in Phase 4 — D6 de-duplicated the Phase-0 listing; inventory 40→39. **Phase 1: 7/7 COMPLETE — RE-RANK shipped.** **Phase 2: 7/7 COMPLETE.** **Phase 3: SKELETON chain 8/8 COMPLETE + frozen.** **Phase 4: SKELETON-BUILD chain 8/8 COMPLETE.** Every greenfield phase's skeleton/once-pass authored + the deferred RE-RANK; remaining = increment/slice modes only — Phase-3 INCREMENT D9, Phase-4 SLICE-BUILD D11.)
+**Totals:** 30 / 39 fully done (DERIVE-COMPONENTS + DEFINE-CONTRACTS + RESOLVE-LOCAL + MODEL-DATA + MAP-NFR + MODEL-FLOWS + DERIVE-TESTS both modes) + 1 Phase-3 skeleton-only role (◐×1 — RECONCILE/CRITIQUE; increment mode pending D9/D14) + **Phase-4 ALL 8 roles (◐×8, skeleton-build pass COMPLETE; slice-build pending D11).** (VERIFY-OUTPUT counted once, in Phase 4 — D6 de-duplicated the Phase-0 listing; inventory 40→39. **Phase 1: 7/7 COMPLETE — RE-RANK shipped.** **Phase 2: 7/7 COMPLETE.** **Phase 3: SKELETON chain 8/8 COMPLETE + frozen.** **Phase 4: SKELETON-BUILD chain 8/8 COMPLETE.** Every greenfield phase's skeleton/once-pass authored + the deferred RE-RANK; remaining = increment/slice modes only — Phase-3 INCREMENT D9, Phase-4 SLICE-BUILD D11.)
 
 
 ## Decision index (bodies → `_decisions.md`; grep the id)
@@ -103,8 +103,10 @@ D1–D4 — foundational conventions (one-role-one-prompt, greenfield-first, sel
 - **D15** — RESOLVE-LOCAL increment calls (inherit-by-reference + foundational-route-out). RESOLVED.
 - **D16** — MODEL-DATA increment calls (owned/referenced scope + carry-by-reference). RESOLVED.
 - **D17** — MAP-NFR increment calls (inherit-governing-by-reference + frame-fidelity). RESOLVED.
+- **D18** — MODEL-FLOWS increment calls (compose-against-frozen + flow-is-new). RESOLVED.
+- **D19** — DERIVE-TESTS increment calls (inherit-tests-by-reference + flow-test-is-new + DAG-is-skeleton-only). RESOLVED.
 
-_D1–D17 resolved. Reopen forks in `_decisions.md`; add the index line here._
+_D1–D19 resolved. Reopen forks in `_decisions.md`; add the index line here._
 
 ---
 
