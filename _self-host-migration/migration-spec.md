@@ -13,19 +13,19 @@
 **Goal.** Replace the hand-authoring loop with the self-hosting loop, *without changing the engine*, so that:
 
 1. The next prompt to build is chosen by **RE-RANK**, not by a human reading `_tracker.md`.
-2. The remaining prompts are **authored by the pipeline** (IMPLEMENT under the prompt-library target) and verified clean-room against `_fixtures/`, not hand-written.
+2. The remaining prompts are **authored by the pipeline** (IMPLEMENT under the agentic-delivery-pipeline target) and verified clean-room against `_fixtures/`, not hand-written.
 3. Progress state is **derived from disk** (`prompts/` + `_fixtures/` + locks), not hand-maintained in `_tracker.md` / `_changelog.md`.
 4. The operator's job collapses to **one gate** (value/parity), then stepping back.
 
 **Done when** — the migration is complete the moment all of the following hold (this is exactly the North Star's "what done looks like", made operational):
 
-- [ ] The deliverable adapter exists: `code-canon/prompt-library.md` + a **stack ADR** pinning `stack = prompt-library`.
+- [ ] The deliverable adapter exists: `code-canon/agentic-delivery-pipeline.md` + a **stack ADR** pinning `stack = agentic-delivery-pipeline`.
 - [ ] The frozen `_self/` tree exists and validates against the schemas the prompts read.
-- [ ] An orchestrator prompt + launcher exist and boot (`/self-host` for Claude Code; `selfhost` agent for Kiro), scoped to `_self/` + the prompt-library target.
+- [ ] An orchestrator prompt + launcher exist and boot (`/self-host` for Claude Code; `selfhost` agent for Kiro), scoped to `_self/` + the agentic-delivery-pipeline target.
 - [ ] **The cutover proof has cleared once** (§7): one prompt was authored by the pipeline, verified clean-room, and promoted to `prompts/` — with parity confirmed against a twin.
 - [ ] The hand loop is decommissioned: `_prompt-run.md`, `_tracker.md`, `_changelog.md` retired; state is derived.
 
-**Fully validated** one step further (§6, M7): a *second* canon profile runs the unchanged spine — proving deliverable-agnosticism, not prompt-library-specialness.
+**Fully validated** one step further (§6, M7): a *second* canon profile runs the unchanged spine — proving deliverable-agnosticism, not agentic-delivery-pipeline-specialness.
 
 ---
 
@@ -46,7 +46,7 @@ What exists in `agentic-systems/` today:
 | `_test_bench`, `_pipeline-run.md` | Clean-room test harness + full-chain runner | **Kept** — the verify mechanism the adapter *names*, not reinvents |
 | `.claude/agents/step-runner.md` | Sonnet/High step executor | **Kept** — reused unchanged for self-host steps |
 
-**What does NOT exist today** (the gap the migration fills): no `_self/` tree, no `code-canon/prompt-library.md`, no stack ADR, no orchestrator prompt on disk (`_prompt-run.md` is driven by a human Opus), no `/self-host` launcher.
+**What does NOT exist today** (the gap the migration fills): no `_self/` tree, no `code-canon/agentic-delivery-pipeline.md`, no stack ADR, no orchestrator prompt on disk (`_prompt-run.md` is driven by a human Opus), no `/self-host` launcher.
 
 **Where the work stands** (per `_tracker.md`, 2026-06-08): 30/39 prompts fully done. Remaining = the **RECONCILE/CRITIQUE increment** (Phase-3 role 8/8, the next-unshipped) + the **Phase-4 SLICE-BUILD modes** (8 roles, blocked on the Phase-3 increment chain finishing). This remainder is exactly what the self-host loop will author.
 
@@ -61,7 +61,7 @@ flowchart TD
     SRC["Source of truth (kept):<br/>_initial_design/00–04 · _rules.md · _decisions.md · _fixtures/"]
     FREEZE["Freeze (mechanical, no LLM)"]
     SELF["_self/ — frozen workspace<br/>.aprd .adr .hld .roadmap<br/>(rebuildable cache)"]
-    CANON["code-canon/prompt-library.md<br/>+ stack ADR (stack = prompt-library)"]
+    CANON["code-canon/agentic-delivery-pipeline.md<br/>+ stack ADR (stack = agentic-delivery-pipeline)"]
     ORCH["Orchestrator + launcher<br/>(/self-host · selfhost agent)"]
     RR[RE-RANK picks next unshipped prompt]
     IMPL["IMPLEMENT authors the prompt .md"]
@@ -89,11 +89,11 @@ Six concrete artifacts to build, plus the decommission. Each maps to a migration
 
 | # | Deliverable | What it is | North Star ref |
 |---|---|---|---|
-| **D-1** | `code-canon/prompt-library.md` | The coding-canon profile: 6 fields (scaffold, canon, "code" unit, oracle materialization, build idiom, verify mechanism). The verify mechanism *names* the existing clean-room sim — it does not invent one. | usage §A1 Step 2; workflow §4 |
-| **D-2** | The **stack ADR** | A new decision (next free id, e.g. `D21`) pinning `stack = prompt-library`, frozen into `_self/.adr/`. The analog of the ADR that pins Python in the fixture. | usage §A1 Step 3; workflow §3,§4 |
+| **D-1** | `code-canon/agentic-delivery-pipeline.md` | The coding-canon profile: 6 fields (scaffold, canon, "code" unit, oracle materialization, build idiom, verify mechanism). The verify mechanism *names* the existing clean-room sim — it does not invent one. | usage §A1 Step 2; workflow §4 |
+| **D-2** | The **stack ADR** | A new decision (next free id, e.g. `D21`) pinning `stack = agentic-delivery-pipeline`, frozen into `_self/.adr/`. The analog of the ADR that pins Python in the fixture. | usage §A1 Step 3; workflow §3,§4 |
 | **D-3** | The **freeze tool** + `_self/` tree | A mechanical (no-LLM) render of phases 0–3 from the kept source files into `_self/{.aprd,.adr,.hld,.roadmap}`. Gitignored, rebuildable cache. | usage §A1 Step 3, §4; workflow §4 |
 | **D-4** | The **orchestrator prompt** | `prompts/_orchestrator.md` (+ `prompts/_step-runner.md` for Kiro): codifies the `_prompt-run.md` control loop **minus the bookkeeping** (no tracker/changelog writes; state derived). RE-RANK is the next-picker. | usage §A1 Step 4; workflow §5 |
-| **D-5** | The **launcher** | Claude: `.claude/skills/self-host/SKILL.md`. Kiro: `.kiro/agents/selfhost.json` + `.kiro/steering/10-self-host.md`. Scoped to `_self/` + the prompt-library target. | usage §A1 Step 5, §B4–B5 |
+| **D-5** | The **launcher** | Claude: `.claude/skills/self-host/SKILL.md`. Kiro: `.kiro/agents/selfhost.json` + `.kiro/steering/10-self-host.md`. Scoped to `_self/` + the agentic-delivery-pipeline target. | usage §A1 Step 5, §B4–B5 |
 | **D-6** | **Decommission** | Retire `_prompt-run.md`, `_tracker.md`, `_changelog.md`; switch the orchestrator Opus→Sonnet after parity. | usage §7 FAQ; workflow §5,§7 |
 
 ---
@@ -102,7 +102,7 @@ Six concrete artifacts to build, plus the decommission. Each maps to a migration
 
 Non-negotiable; every phase below is checked against these.
 
-1. **The engine does not change.** The migration *configures* and *adds adapters*; it never edits the spine to make self-host work. If wiring the prompt-library target forces a spine edit, the deliverable-agnostic abstraction leaked — fix the spine *once* (P3), do not patch the target.
+1. **The engine does not change.** The migration *configures* and *adds adapters*; it never edits the spine to make self-host work. If wiring the agentic-delivery-pipeline target forces a spine edit, the deliverable-agnostic abstraction leaked — fix the spine *once* (P3), do not patch the target.
 2. **Shipped prompts are immutable.** The 30 done prompts in `prompts/` are the built skeleton + the source of golden twins. The migration never overwrites them; self-builds land in scratch first and are *promoted*.
 3. **The oracle is unchanged.** A prompt is judged by **running it clean-room against `_fixtures/`** — the existing harness (`_test_bench`, the Sonnet runner). The adapter registers this; it invents no new judge.
 4. **Disk is the source of truth (D20).** All state is derived from `_self/` + `prompts/` + locks. Atomic writes, immutable frozen artifacts, validate-frontier-on-resume, persisted gate replies. The migration must not introduce a new hand-maintained state file.
@@ -144,8 +144,8 @@ flowchart LR
 **Deliverable:** D-1 + D-2.
 
 **Steps:**
-1. Author `code-canon/prompt-library.md` with the six fields (verbatim shape in usage §A1 Step 2). The **verify mechanism** field names the existing clean-room runner sim — *register, do not reinvent*.
-2. Add the stack-ADR decision to `_decisions.md` (next free id) pinning `stack = prompt-library`; add its index line where the decision index lives. Body: why a prompt `.md` is the "code" unit, why the verify mechanism is the clean-room sim, the build idiom (synthesize from the HLD-increment contract + per-role spec §).
+1. Author `code-canon/agentic-delivery-pipeline.md` with the six fields (verbatim shape in usage §A1 Step 2). The **verify mechanism** field names the existing clean-room runner sim — *register, do not reinvent*.
+2. Add the stack-ADR decision to `_decisions.md` (next free id) pinning `stack = agentic-delivery-pipeline`; add its index line where the decision index lives. Body: why a prompt `.md` is the "code" unit, why the verify mechanism is the clean-room sim, the build idiom (synthesize from the HLD-increment contract + per-role spec §).
 
 **Acceptance:** the profile's six fields each resolve to a real, existing mechanism (no dangling "TBD"); the stack ADR reads as a sibling of the (hypothetical) Python/Terraform stack ADRs, not a special case.
 
@@ -179,7 +179,7 @@ flowchart LR
 **Deliverable:** D-5.
 
 **Steps:**
-1. **Claude Code:** `.claude/skills/self-host/SKILL.md` (verbatim shape in usage §A1 Step 5) → runs the orchestrator with workspace root `_self/` + target `code-canon/prompt-library.md`.
+1. **Claude Code:** `.claude/skills/self-host/SKILL.md` (verbatim shape in usage §A1 Step 5) → runs the orchestrator with workspace root `_self/` + target `code-canon/agentic-delivery-pipeline.md`.
 2. **Kiro:** `.kiro/agents/selfhost.json` (lean context — steering only, role prompts lazy-loaded) + `.kiro/steering/10-self-host.md` (workspace root, target, verify = clean-room not pytest, RE-RANK + derived state). `00-exclusive.md` still applies; `step.json` reused.
 3. Set the orchestrator to **Opus through the parity gate** (external judge), Sonnet after.
 
@@ -203,10 +203,10 @@ The one-way gate. Detailed separately because it is the migration's load-bearing
 
 ### M7 — Full validation (agnosticism)
 
-**Deliverable:** proof the spine is deliverable-agnostic, not prompt-library-special.
+**Deliverable:** proof the spine is deliverable-agnostic, not agentic-delivery-pipeline-special.
 
 **Steps:**
-1. After the prompt-library loop drains, author a *second* canon profile (`code-canon/terraform.md` or `code-canon/typescript.md`) + its stack ADR.
+1. After the agentic-delivery-pipeline loop drains, author a *second* canon profile (`code-canon/terraform.md` or `code-canon/typescript.md`) + its stack ADR.
 2. Run a tiny greenfield through the **unchanged** spine. If it passes its own verify with zero engine edits, agnosticism is proven. Any forced spine edit = a leak; fix the spine once (P3).
 
 **Acceptance:** a second deliverable type ships through the unchanged engine.
@@ -219,7 +219,7 @@ This is where the hand loop is actually replaced. It has two beats.
 
 ```mermaid
 flowchart TD
-    START([Launcher boots, scoped to _self/ + prompt-library target])
+    START([Launcher boots, scoped to _self/ + agentic-delivery-pipeline target])
     A[M5a · Parity A/B dry-run<br/>re-author a twin-bearing shipped prompt into scratch]
     AC{Clean-room value correct<br/>AND parity vs golden twin holds?}
     B[M5b · First net-new self-build<br/>RE-RANK picks RECONCILE/CRITIQUE increment]
@@ -283,7 +283,7 @@ The kept source files are *not* obsolete — the freeze renders `_self/` *from* 
 | **No twin for RECONCILE/CRITIQUE increment** — the North Star's named parity target has no hand-built twin. | Parity A/B has nothing to compare against. | Split M5 (§7): A/B on a twin-bearing prompt; net-new judged on value. |
 | **`prompts/_orchestrator.md` / `prompts/_step-runner.md` don't exist on disk** — the North Star + generic guide reference them as if present; today the loop is a human-driven `_prompt-run.md`. | Launcher (M4) would point at missing files. | M2 deliverable: author them before M4. |
 | **Dangling `D20` cite** (resolved) — `_decisions.md` D20 cited the deleted `_self-host-migration/_self-host-migration.md §3`. | Was a dead reference in a live decision. | **Done** — repointed to `self-host-workflow.md §10` (the live disk-as-truth home). |
-| **Spine leak under the prompt-library target** — wiring the adapter forces a spine edit. | Breaks invariant #1 (deliverable-agnostic). | Fix the spine *once* (P3) so verify-method/build-idiom is read from the target; never patch the target to dodge it. M7 second profile is the real proof it didn't leak. |
+| **Spine leak under the agentic-delivery-pipeline target** — wiring the adapter forces a spine edit. | Breaks invariant #1 (deliverable-agnostic). | Fix the spine *once* (P3) so verify-method/build-idiom is read from the target; never patch the target to dodge it. M7 second profile is the real proof it didn't leak. |
 | **`_self/` drifts from source mid-loop** — a source edit lands while `_self/` is in use. | Controller plans against stale truth. | Re-freeze before the next prompt (usage §4 stale-freeze guard). Never hand-edit `_self/`. |
 | **Decision index orphaned at M6** — it currently rides in `_tracker.md`. | Decision pointers lost when the tracker dies. | M6 step 2: relocate the index alongside `_decisions.md` first. |
 
@@ -293,7 +293,7 @@ The kept source files are *not* obsolete — the freeze renders `_self/` *from* 
 
 ```
 M0 [ ] baseline committed + tagged; proof-twin re-tested green
-M1 [ ] code-canon/prompt-library.md (6 fields, verify = existing clean-room sim)
+M1 [ ] code-canon/agentic-delivery-pipeline.md (6 fields, verify = existing clean-room sim)
    [ ] stack ADR added to _decisions.md (+ index line)
 M2 [ ] prompts/_orchestrator.md (control loop, no bookkeeping)
    [ ] prompts/_step-runner.md (Kiro); step-runner reused (Claude)

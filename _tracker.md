@@ -106,8 +106,9 @@ D1–D4 — foundational conventions (one-role-one-prompt, greenfield-first, sel
 - **D18** — MODEL-FLOWS increment calls (compose-against-frozen + flow-is-new). RESOLVED.
 - **D19** — DERIVE-TESTS increment calls (inherit-tests-by-reference + flow-test-is-new + DAG-is-skeleton-only). RESOLVED.
 - **D20** — pipeline idempotency & crash-safe resume (atomic writes + immutable-frozen + validate-frontier-on-resume + persist-gate-replies); binds BUILD-phase prompts + orchestrator. RESOLVED.
+- **D21** — stack ADR: `stack = agentic-delivery-pipeline` (self-host deliverable target; binds `code-canon/agentic-delivery-pipeline.md`; "code" unit = prompt `.md`, verify = clean-room sim not pytest; sibling of python/terraform stack ADRs). RESOLVED.
 
-_D1–D20 resolved. Reopen forks in `_decisions.md`; add the index line here._
+_D1–D21 resolved. Reopen forks in `_decisions.md`; add the index line here._
 
 ---
 

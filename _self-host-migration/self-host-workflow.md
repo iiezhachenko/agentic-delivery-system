@@ -69,7 +69,7 @@ flowchart TD
     subgraph SEED [Done once, by hand: seed-from-frozen]
         direction TB
         F1[Freeze Understand / Plan / Decide / Design<br/>hand artifacts → on-disk tree]
-        F2[Author the prompt-library<br/>coding-canon profile + stack ADR]
+        F2[Author the agentic-delivery-pipeline<br/>coding-canon profile + stack ADR]
         F1 --- F2
     end
 
@@ -112,7 +112,7 @@ Because Understand / Plan / Decide / Design are already settled for the self-pro
 
 The frozen `_self/` tree is a **rebuildable cache, never hand-edited** — if a source file changes, re-run the freeze; don't patch the frozen copy.
 
-Alongside the freeze, one genuinely new part is authored by hand: the **prompt-library coding-canon profile** — selected by a **stack ADR** (the analog of the ADR that pins Python in the fixture). It tells the Build phase how to scaffold, write, and *verify* a prompt, the same way a future Terraform or TypeScript canon profile will. It lives in the `code-canon` store the spec already defines (spec 04 §10 — scaffolds/idioms per stack), **not a new registry**. The verify mechanism it registers already exists and is proven: the clean-room runner simulation. The profile doesn't invent it — it *names an existing procedure* as this deliverable's verify method.
+Alongside the freeze, one genuinely new part is authored by hand: the **agentic-delivery-pipeline coding-canon profile** — selected by a **stack ADR** (the analog of the ADR that pins Python in the fixture). It tells the Build phase how to scaffold, write, and *verify* a prompt, the same way a future Terraform or TypeScript canon profile will. It lives in the `code-canon` store the spec already defines (spec 04 §10 — scaffolds/idioms per stack), **not a new registry**. The verify mechanism it registers already exists and is proven: the clean-room runner simulation. The profile doesn't invent it — it *names an existing procedure* as this deliverable's verify method.
 
 ---
 
@@ -176,9 +176,9 @@ It dissolves because **self-hosting the authoring loop needs only three things**
 
 1. a **controller** to pick the next prompt (RE-RANK — already shipped),
 2. an **oracle** to judge a prompt (the clean-room sim — already running today),
-3. a **synthesizer** to write the prompt (IMPLEMENT under the prompt-library target).
+3. a **synthesizer** to write the prompt (IMPLEMENT under the agentic-delivery-pipeline target).
 
-It does **not** need the finished generic Build phase, because the prompt-library deliverable profile brings its *own* build-and-verify mechanism, independent of any other. So the bootstrap can start immediately — and once started, the loop authors the very Build-phase prompts that were missing. The system pulls itself up by writing its own remaining rungs.
+It does **not** need the finished generic Build phase, because the agentic-delivery-pipeline deliverable profile brings its *own* build-and-verify mechanism, independent of any other. So the bootstrap can start immediately — and once started, the loop authors the very Build-phase prompts that were missing. The system pulls itself up by writing its own remaining rungs.
 
 ---
 
@@ -190,7 +190,7 @@ Self-host is achieved when:
 2. at least one remaining prompt was **authored by the pipeline and shipped without hand-authoring**, because it delivered correct value against the fixture product (the parity gate, cleared); and
 3. the loop then **drains the rest** of the unshipped prompts the same way.
 
-It is **fully** validated one step further: a **second, different deliverable profile** — say Terraform or TypeScript — also runs through the *unchanged* engine and passes its own verify. That proves the system is genuinely deliverable-agnostic, not secretly prompt-library-special. At that point the loop also begins feeding its own build failures back into its decisions and rules — the reflexive, two-loop improvement applied to itself.
+It is **fully** validated one step further: a **second, different deliverable profile** — say Terraform or TypeScript — also runs through the *unchanged* engine and passes its own verify. That proves the system is genuinely deliverable-agnostic, not secretly agentic-delivery-pipeline-special. At that point the loop also begins feeding its own build failures back into its decisions and rules — the reflexive, two-loop improvement applied to itself.
 
 When all of this holds, the delivery pipeline is authoring the delivery pipeline through the same engine that delivers any other product. The system builds itself.
 

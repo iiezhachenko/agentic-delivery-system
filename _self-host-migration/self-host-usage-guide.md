@@ -11,12 +11,12 @@
 
 You are pointing the **existing** delivery system at the project *"build the agentic delivery system."* Nothing about the engine changes — you are configuring **two new things** and then running the ordinary Build loop:
 
-1. **A deliverable target** — the **prompt-library coding-canon profile** (`code-canon/prompt-library.md`), selected by a **stack ADR** — that tells the Build phase how to scaffold, write, and **verify** a prompt `.md` (the same slot a future Terraform or TypeScript canon profile will fill).
+1. **A deliverable target** — the **agentic-delivery-pipeline coding-canon profile** (`code-canon/agentic-delivery-pipeline.md`), selected by a **stack ADR** — that tells the Build phase how to scaffold, write, and **verify** a prompt `.md` (the same slot a future Terraform or TypeScript canon profile will fill).
 2. **A frozen self-workspace** — `_self/` — the on-disk artifact tree produced by *seeding from frozen*: the four already-hand-built phases (Understand / Plan / Decide / Design) mechanically rendered into the shape the prompts read, so only the Build phase runs live.
 
 | You provide | The harness provides | The self-host setup adds |
 |---|---|---|
-| the existing repo, your judgment at the parity gate | the agent runtime + file access | the prompt-library target + the frozen `_self/` tree + a controller that picks the next unshipped prompt |
+| the existing repo, your judgment at the parity gate | the agent runtime + file access | the agentic-delivery-pipeline target + the frozen `_self/` tree + a controller that picks the next unshipped prompt |
 
 **The product being delivered is the system's own prompts.** A self-authored prompt is judged not by inspecting its text but by **running it clean-room against the `_fixtures/` products** and checking it delivers correct value (workflow §2, §6). The fixture run is the oracle — you don't build a separate "is this prompt good?" judge.
 
@@ -29,7 +29,7 @@ Same two harnesses, same trade-offs as the generic guide. The difference is pure
 | | **Claude Code** | **Kiro** |
 |---|---|---|
 | Form | Terminal CLI | Full IDE + chat panel |
-| Self-host driver | `/self-host` skill → orchestrator scoped to `_self/` + prompt-library target | CLI custom agent `selfhost` → same scope, run exclusively |
+| Self-host driver | `/self-host` skill → orchestrator scoped to `_self/` + agentic-delivery-pipeline target | CLI custom agent `selfhost` → same scope, run exclusively |
 | Best when | scripted/automatable bootstrap runs | visual view of the `_self/` tree + authored prompts |
 | Built-in spec flow | n/a | **not used** — the system runs exclusively (as in the generic guide) |
 
@@ -45,7 +45,7 @@ Pick one; the **operator gate is identical** (Part C). Deploy/use differ — Par
 
 **Step 1 — Have the generic deploy in place.** Claude Code installed; `prompts/<phase>/<ROLE>.md`, `CLAUDE.md`, and `.claude/{settings.json,agents/,skills/}` present per `generic-usage-guide.md` §A1. Self-host builds on that.
 
-**Step 2 — Author the prompt-library coding-canon profile.** Create `code-canon/prompt-library.md` (the per-stack canon store spec 04 §10 already defines — **not** a new registry), selected by the stack ADR you freeze in Step 3. It holds the six fields:
+**Step 2 — Author the agentic-delivery-pipeline coding-canon profile.** Create `code-canon/agentic-delivery-pipeline.md` (the per-stack canon store spec 04 §10 already defines — **not** a new registry), selected by the stack ADR you freeze in Step 3. It holds the six fields:
 ```
 scaffold              the DRY prompt skeleton (frontmatter + caveman block + Role/Rules/Task/Schema/Stop)
 coding canon          AB1–AB6 + PR1–PR4 + caveman block (the prompt-domain idioms)
@@ -62,14 +62,14 @@ The verify mechanism **already exists and is proven** — it is the clean-room r
 _self/
 ├── .aprd/   aprd.frozen.md + aprd.lock     ← _initial_design/00–04 + _rules.md Mission
 ├── .adr/    log/<NNNN>.md + adr.lock        ← _decisions.md D1–D20, INCLUDING a new stack ADR
-│                                              pinning stack = prompt-library
+│                                              pinning stack = agentic-delivery-pipeline
 ├── .hld/    skeleton.lock + skeleton/*      ← _rules.md DRY skeleton + AB1–6 + PR1–4
 └── .roadmap/ roadmap.md + 08-rerank.json    ← _tracker.md inventory; remaining_sequence =
                                                the unshipped prompts (RECONCILE/CRITIQUE increment first)
 ```
 `prompts/*` already shipped is the "built skeleton"; `_fixtures/*` is the oracle baseline. **Treat `_self/` as a rebuildable cache** — never hand-edit it; if a source file (`_decisions.md`, `_rules.md`, …) changes, re-run the freeze. Add `_self/` to `.gitignore` like `_test_bench`.
 
-**Step 4 — Point the orchestrator at the self-project.** Tell the orchestrator agent (or a dedicated copy) two things: **workspace root = `_self/`** (read frozen inputs there) and **deliverable target = the prompt-library coding-canon profile (`code-canon/prompt-library.md`)** (so Build writes prompts and verifies via clean-room sim, not pytest). Outputs (the authored prompts) are promoted to the real `prompts/` tree.
+**Step 4 — Point the orchestrator at the self-project.** Tell the orchestrator agent (or a dedicated copy) two things: **workspace root = `_self/`** (read frozen inputs there) and **deliverable target = the agentic-delivery-pipeline coding-canon profile (`code-canon/agentic-delivery-pipeline.md`)** (so Build writes prompts and verifies via clean-room sim, not pytest). Outputs (the authored prompts) are promoted to the real `prompts/` tree.
 
 **Step 5 — The `/self-host` entry point.** Create `.claude/skills/self-host/SKILL.md`:
 ```markdown
@@ -78,7 +78,7 @@ name: self-host
 description: Run the delivery pipeline on its own project — author the next unshipped prompt
 argument-hint: "[optional: a specific role to target, else RE-RANK picks the next]"
 ---
-Run the orchestrator with workspace root _self/ and deliverable target code-canon/prompt-library.md.
+Run the orchestrator with workspace root _self/ and deliverable target code-canon/agentic-delivery-pipeline.md.
 Seed phases 0–3 from the frozen _self/ tree (do NOT re-run them). Let RE-RANK pick the next
 unshipped prompt from .roadmap/08-rerank.json, author it (IMPLEMENT), verify it clean-room
 against _fixtures/, and pause at the parity/value gate before promoting it to prompts/.
@@ -112,13 +112,13 @@ RE-RANK reads `_self/.roadmap/` and picks the first unshipped prompt (today: the
 
 # PART B — Kiro
 
-As in the generic guide, **Kiro's built-in spec flow is not used.** A CLI custom agent runs the self-host pipeline exclusively. Self-host adds the prompt-library target, the `_self/` scope, and a steering file declaring the deliverable target.
+As in the generic guide, **Kiro's built-in spec flow is not used.** A CLI custom agent runs the self-host pipeline exclusively. Self-host adds the agentic-delivery-pipeline target, the `_self/` scope, and a steering file declaring the deliverable target.
 
 ## B1. Deploy (one-time setup)
 
 **Step 1 — Have the generic Kiro deploy in place** (per `generic-usage-guide.md` §B1: `kiro-cli`, `prompts/`, `.kiro/agents/{delivery.json,step.json}`, `.kiro/steering/*`).
 
-**Step 2 — Author the prompt-library coding-canon profile** `code-canon/prompt-library.md` — identical content to §A1 Step 2 (it's harness-independent).
+**Step 2 — Author the agentic-delivery-pipeline coding-canon profile** `code-canon/agentic-delivery-pipeline.md` — identical content to §A1 Step 2 (it's harness-independent).
 
 **Step 3 — Seed the `_self/` workspace from frozen** — identical to §A1 Step 3 (the freeze is a mechanical render, not a harness feature). Gitignore `_self/`.
 
@@ -141,7 +141,7 @@ As in the generic guide, **Kiro's built-in spec flow is not used.** A CLI custom
 # Self-host: build the system on itself
 - Workspace root is _self/. Read frozen phases 0–3 from _self/.aprd .adr .hld .roadmap.
   Do NOT re-run aPRD/Roadmap/ADR/HLD — they are seeded from frozen.
-- Deliverable target is the prompt-library coding-canon profile (code-canon/prompt-library.md). The "code" unit is a prompt .md;
+- Deliverable target is the agentic-delivery-pipeline coding-canon profile (code-canon/agentic-delivery-pipeline.md). The "code" unit is a prompt .md;
   Build writes to prompts/<phase>/<ROLE>.md.
 - Verify mechanism is the clean-room runner simulation against _fixtures/ — NOT pytest.
 - RE-RANK over _self/.roadmap/08-rerank.json picks the next unshipped prompt. Status is derived
@@ -149,7 +149,7 @@ As in the generic guide, **Kiro's built-in spec flow is not used.** A CLI custom
 ```
 The existing `00-exclusive.md` still applies (don't touch Kiro's built-in specs). The generic step agent `step.json` is reused unchanged — it runs any role prompt; for self-host it just happens to write a prompt `.md`.
 
-**Step 6 — Verification (mandatory).** Same gate as the generic guide §B6 — separate oracle author, build, full ladder, anti-cheat — but the **mechanism is swapped by target**: the ladder runs the clean-room runner sim against `_fixtures/` instead of pytest. The spine roles are identical; only the verify mechanism comes from the prompt-library profile. If wiring this forces a spine edit, the deliverable-agnostic abstraction leaked — fix the spine once, not the target (P3).
+**Step 6 — Verification (mandatory).** Same gate as the generic guide §B6 — separate oracle author, build, full ladder, anti-cheat — but the **mechanism is swapped by target**: the ladder runs the clean-room runner sim against `_fixtures/` instead of pytest. The spine roles are identical; only the verify mechanism comes from the agentic-delivery-pipeline profile. If wiring this forces a spine edit, the deliverable-agnostic abstraction leaked — fix the spine once, not the target (P3).
 
 ## B2. Use (run the bootstrap)
 
@@ -166,7 +166,7 @@ This runs the **system's own pipeline** on `_self/` — not Kiro's spec flow. RE
 
 **Manual stepping (optional).** Drive one role yourself with the generic step agent, scoped to `_self/`:
 ```bash
-kiro-cli chat --agent step "Run prompts/04-build/IMPLEMENT.md against _self/ with target code-canon/prompt-library.md, producing prompts/03-hld/RECONCILE.md (increment mode)."
+kiro-cli chat --agent step "Run prompts/04-build/IMPLEMENT.md against _self/ with target code-canon/agentic-delivery-pipeline.md, producing prompts/03-hld/RECONCILE.md (increment mode)."
 ```
 
 **Resuming:** re-run `--agent selfhost "continue"`; state is the `_self/` tree + `prompts/`, so it continues from the frontier. See §3.
@@ -241,7 +241,7 @@ The four seeded phases live in `_self/` as a **rebuildable cache of the hand art
 - **A self-built prompt fails its own clean-room test** — it does **not** ship; IMPLEMENT re-runs. The oracle is the safety net for the one genuinely generative step (workflow §6). Repeated failure → the contract or canon is wrong; fix it and re-author.
 - **Wiring the target forced a spine edit** — the deliverable-agnostic abstraction leaked (P3). Fix the **spine once** so the verify-method/build-idiom is read from the target, then re-run. Don't patch the target to dodge it.
 - **Parity diff is large but value is correct** — accept it. Behavior is the bar; the hand-authored text was never canonical (value is the bar; §C1). Large *and* value-wrong → reject and re-author.
-- **Prove agnosticism** — once the prompt-library loop drains, author a **second** canon profile (`code-canon/terraform.md` or `code-canon/typescript.md`) and run a tiny greenfield through the **unchanged** spine. If it passes its own verify with zero engine edits, the system is genuinely deliverable-agnostic, not prompt-library-special.
+- **Prove agnosticism** — once the agentic-delivery-pipeline loop drains, author a **second** canon profile (`code-canon/terraform.md` or `code-canon/typescript.md`) and run a tiny greenfield through the **unchanged** spine. If it passes its own verify with zero engine edits, the system is genuinely deliverable-agnostic, not agentic-delivery-pipeline-special.
 - **Interrupted mid-prompt** — restart and re-run the orchestrator; it continues from the frontier, redoing at most the one prompt in flight (§3).
 
 ## 6. Do's and don'ts
@@ -253,21 +253,21 @@ The four seeded phases live in `_self/` as a **rebuildable cache of the hand art
 
 - **How is a prompt judged "good"?** By running it clean-room against `_fixtures/` and checking it delivers correct value — schema-valid, ID-threaded, acceptance satisfied. Not by inspecting the text (workflow §6).
 - **Do I re-run aPRD / Roadmap / ADR / HLD?** No — those four phases are **seeded from frozen** (`_self/`). Only the Build phase runs live. Re-running settled phases buys nothing and risks churn (workflow §4).
-- **Why can the bootstrap start before the generic Build phase is finished?** Because self-hosting needs only a controller, an oracle, and a synthesizer — all available now — and the prompt-library profile brings its own build+verify mechanism (workflow §8).
+- **Why can the bootstrap start before the generic Build phase is finished?** Because self-hosting needs only a controller, an oracle, and a synthesizer — all available now — and the agentic-delivery-pipeline profile brings its own build+verify mechanism (workflow §8).
 - **When am I "done"?** RE-RANK picks the next prompt (not a human), at least one prompt was authored+shipped by the pipeline because it delivered correct fixture value (parity gate cleared), and the loop drained the rest (workflow §9). Fully validated when a **second** deliverable profile also runs through the unchanged spine.
 - **Claude Code or Kiro — does the self-build differ?** No. Same target, same `_self/` tree, same parity gate, same authored prompts; only the surface (terminal vs IDE) and the launcher differ.
 - **What about the old `_tracker.md` / `_prompt-run.md`?** Gone — in the self-hosted system there is no hand-maintained tracker, changelog, or run-loop file. State is **derived from disk** (workflow §5): "what's done" is scanned from `prompts/` + `_fixtures/` + locks, "what's next" is RE-RANK over the roadmap. The hand-maintained duplicate (and the anti-bloat ceremony that re-synced it) is deleted, not ported.
 
 ## 8. The shortest version
 
-> **Deploy:** on top of the generic deploy, add (1) the prompt-library **coding-canon profile** `code-canon/prompt-library.md` (selected by a stack ADR), (2) the frozen **`_self/`** tree (seed phases 0–3 from the hand artifacts), and (3) a launcher scoped to both (Claude Code `/self-host`; Kiro `--agent selfhost`). **Use:** run the launcher — RE-RANK picks the next unshipped prompt, IMPLEMENT writes it, the clean-room runner verifies it against `_fixtures/`. **Judge:** at the one gate, confirm the prompt **delivers correct fixture value** (parity is a secondary glance); accept → it's promoted to `prompts/`. Clear that gate once (the bootstrap proof), then **step back** and let the loop drain the rest. The system is building the system.
+> **Deploy:** on top of the generic deploy, add (1) the agentic-delivery-pipeline **coding-canon profile** `code-canon/agentic-delivery-pipeline.md` (selected by a stack ADR), (2) the frozen **`_self/`** tree (seed phases 0–3 from the hand artifacts), and (3) a launcher scoped to both (Claude Code `/self-host`; Kiro `--agent selfhost`). **Use:** run the launcher — RE-RANK picks the next unshipped prompt, IMPLEMENT writes it, the clean-room runner verifies it against `_fixtures/`. **Judge:** at the one gate, confirm the prompt **delivers correct fixture value** (parity is a secondary glance); accept → it's promoted to `prompts/`. Clear that gate once (the bootstrap proof), then **step back** and let the loop drain the rest. The system is building the system.
 
 ---
 
 ## References
 
 - Self-build conceptual model: [self-host-workflow.md](self-host-workflow.md).
-- Decisions: `_decisions.md` (D20 idempotency; the stack ADR pinning `stack = prompt-library`). Coding-canon store: spec 04 §10.
+- Decisions: `_decisions.md` (D20 idempotency; the stack ADR pinning `stack = agentic-delivery-pipeline`). Coding-canon store: spec 04 §10.
 - Harness mechanics (install, agents, steering, permissions): [generic-usage-guide.md](generic-usage-guide.md) Parts A/B + its References.
 
 *Self-host adds a target and a frozen workspace on top of the generic deploy; the harness mechanics are unchanged — verify harness specifics against the generic guide's linked docs if anything has moved.*
