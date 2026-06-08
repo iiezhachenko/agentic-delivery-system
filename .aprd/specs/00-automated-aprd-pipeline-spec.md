@@ -5,67 +5,67 @@
 | **Status** | Draft |
 | **Version** | 0.3 |
 | **Date** | 2026-06-06 |
-| **Audience** | Engineers building the system; the agents executing it |
-| **Scope** | The intake-to-delivery pipeline that turns any client request into verified software |
+| **Audience** | Engineers building system; agents executing it |
+| **Scope** | Intake-to-delivery pipeline. Turns any client request into verified software |
 
 ---
 
 ## 1. Purpose
 
-Build a pipeline that converts **any** client request — vague, any class (new build, feature-add, bug fix, refactor, migration, perf, integration, investigation) — into **delivered, verified software**.
+Build pipeline. Converts **any** client request — vague, any class (new build, feature-add, bug fix, refactor, migration, perf, integration, investigation) — into **delivered, verified software**.
 
-Three facts drive the whole design:
+Three facts drive whole design:
 
-1. **Vague input is the normal case.** Clients don't know what they want until they see it. The request is a hypothesis, not a contract.
-2. **"Done" is usually undefined.** Most delivery failures are failures to define "done" in testable terms before building.
-3. **WHAT is mapped broad; HOW is built thin.** Knowing the whole WHAT up front is cheap and prevents architectural dead-ends. *Building* it whole is waterfall — the client sees nothing until the end. So Phase 0 captures the entire WHAT, then **Phase 1 (Roadmap)** slices it into vertical, demoable increments that the downstream design/build loop delivers one at a time.
+1. **Vague input = normal case.** Clients don't know what they want until they see it. Request = hypothesis, not contract.
+2. **"Done" usually undefined.** Most delivery failures = failures to define "done" in testable terms before building.
+3. **WHAT mapped broad; HOW built thin.** Knowing whole WHAT up front = cheap, prevents architectural dead-ends. *Building* it whole = waterfall — client sees nothing until end. So Phase 0 captures entire WHAT, then **Phase 1 (Roadmap)** slices into vertical demoable increments. Downstream design/build loop delivers one at a time.
 
-The pipeline's job: compile vagueness into a **frozen, testable contract** (the aPRD), hand it to the roadmap to be sliced, then execute **one vertical slice at a time**. The build phase never sees the vagueness — it's been compiled away.
+Pipeline job: compile vagueness → **frozen testable contract** (aPRD), hand to roadmap for slicing, then execute **one vertical slice at a time**. Build phase never sees vagueness — compiled away.
 
 ### 1.1 Goals
 
 - Accept any request class through one entry point.
-- Produce a machine-executable, human-verifiable contract before any code changes.
-- Minimize expensive human (client) interaction without building the wrong thing.
-- Make every downstream artifact traceable to a requirement.
-- Feed a roadmap that slices the WHAT into vertical, demoable increments — never a big-bang build.
-- Add new request classes without touching the engine.
+- Produce machine-executable, human-verifiable contract before any code changes.
+- Minimize expensive human (client) interaction without building wrong thing.
+- Make every downstream artifact traceable to requirement.
+- Feed roadmap that slices WHAT into vertical demoable increments — never big-bang build.
+- Add new request classes without touching engine.
 
 ### 1.2 Non-goals
 
-- **Zero-question autonomy.** Impossible with vague input. Goal is *cheap* clarification, not none.
-- **Reusing human PRDs as-is.** Prose PRDs are an *input* to extract from, not the executable contract.
-- **A single mega-prompt.** Roles are separated for failure isolation and quality.
-- **Building the whole WHAT at once.** The aPRD is broad by design but is *sliced before it is built*. Big-bang delivery is the waterfall this pipeline exists to avoid (see Phase 1 — Roadmap).
+- **Zero-question autonomy.** Impossible with vague input. Goal = *cheap* clarification, not none.
+- **Reusing human PRDs as-is.** Prose PRDs = *input* to extract from, not executable contract.
+- **Single mega-prompt.** Roles separated for failure isolation + quality.
+- **Building whole WHAT at once.** aPRD broad by design but *sliced before built*. Big-bang delivery = waterfall this pipeline exists to avoid (see Phase 1 — Roadmap).
 
 ---
 
 ## 2. Core principles
 
-These are load-bearing. Violating one breaks the system.
+Load-bearing. Violate one → breaks system.
 
 | # | Principle | Consequence if violated |
 |---|---|---|
-| P1 | Treat the request as a hypothesis, not a contract | Build the wrong thing confidently |
-| P2 | "Done" is always a testable contract, never prose | Undefined done → infinite rework |
+| P1 | Treat request as hypothesis, not contract | Build wrong thing confidently |
+| P2 | "Done" always testable contract, never prose | Undefined done → infinite rework |
 | P3 | One spine, swappable playbooks (strategy pattern) | Pipeline becomes branching spaghetti |
-| P4 | The first gap to detect is the request **class** | Misroute → entire wrong pipeline runs |
+| P4 | First gap to detect = request **class** | Misroute → entire wrong pipeline runs |
 | P5 | Exhaust cheap truth before expensive — **read before ask** | Burn client patience on answerable questions |
-| P6 | Rank gaps by **blast radius**; ask only architecture/scope gaps | Either annoy client or build wrong |
+| P6 | Rank gaps by **blast radius**; ask only architecture/scope gaps | Annoy client or build wrong |
 | P7 | Client UX = recognition over recall (multiple-choice + defaults) | High friction, low completion |
-| P8 | Frozen contract is immutable; change = new version + re-trigger | Silent scope creep corrupts the build |
+| P8 | Frozen contract immutable; change = new version + re-trigger | Silent scope creep corrupts build |
 | P9 | Stable IDs (R1, AC1, A1) thread spec → code → test | Lose traceability; can't trace drift |
 | P10 | Adversarial critique before freeze | Residual ambiguity reaches build |
-| P11 | LLM reconciles and verifies; it is **not** the source of truth | Stale/hallucinated facts ship |
-| P12 | WHAT mapped broad, HOW built thin — the aPRD is sliced into vertical increments, never built whole | Big-bang waterfall; client sees nothing until the end |
+| P11 | LLM reconciles + verifies; **not** source of truth | Stale/hallucinated facts ship |
+| P12 | WHAT mapped broad, HOW built thin — aPRD sliced into vertical increments, never built whole | Big-bang waterfall; client sees nothing until end |
 
 ---
 
 ## 3. Architecture overview
 
-### 3.1 The whole pipeline — two loops, not one waterfall
+### 3.1 Whole pipeline — two loops, not one waterfall
 
-The pipeline is **not** a single linear pass (that would be waterfall). It is one broad WHAT, then a thin **foundation loop** run once, then a **slice loop** run per vertical increment. Each slice ends in something the client can see run.
+Pipeline **not** single linear pass (= waterfall). One broad WHAT, then thin **foundation loop** run once, then **slice loop** run per vertical increment. Each slice ends in something client can see run.
 
 ```mermaid
 flowchart TD
@@ -82,11 +82,11 @@ flowchart TD
     DM -.aPRD/decision defect.-> P0
 ```
 
-**Foundation is decided once and thin** (only what the first slice needs + obvious cross-slice invariants). **Everything else is built one vertical slice at a time** — each slice cuts through every layer it needs to become demoable. This is the structure that keeps the phase chain from collapsing into a waterfall; Phase 1 (Roadmap) is its controller.
+**Foundation decided once + thin** (only what first slice needs + obvious cross-slice invariants). **Everything else built one vertical slice at a time** — each slice cuts through every layer it needs to become demoable. Structure keeps phase chain from collapsing into waterfall; Phase 1 (Roadmap) = controller.
 
-### 3.2 The intake spine
+### 3.2 Intake spine
 
-One **spine** (written once) plus per-class **playbooks** (pluggable config). The spine runs every request. The playbook injects what differs.
+One **spine** (written once) + per-class **playbooks** (pluggable config). Spine runs every request. Playbook injects what differs.
 
 ```mermaid
 flowchart TD
@@ -105,20 +105,20 @@ flowchart TD
     PBDEF -.-> SYN
 ```
 
-**Spine** (invariant, Phase 0): classify, ground, gap-detect, clarify, synthesize, critique, freeze. Execution is downstream and **per slice** (Phases 2–4), driven by the roadmap.
+**Spine** (invariant, Phase 0): classify, ground, gap-detect, clarify, synthesize, critique, freeze. Execution downstream + **per slice** (Phases 2–4), driven by roadmap.
 **Playbook** (variant): grounding corpus, prompt overlays, AC template, verify method.
 
-Test of correct abstraction: *adding a new request class must be adding a playbook file, never editing the engine.*
+Test of correct abstraction: *adding new request class = adding playbook file, never editing engine.*
 
 ---
 
 ## 4. Request taxonomy & playbooks
 
-Four axes shift per class. Everything else is shared.
+Four axes shift per class. Everything else shared.
 
 | Class | Source of truth | Grounding action | Acceptance shape ("done") | Dominant risk |
 |---|---|---|---|---|
-| **Greenfield** | Client intent | Research **external** canon | New behavior is testable | Scope creep |
+| **Greenfield** | Client intent | Research **external** canon | New behavior testable | Scope creep |
 | **Feature-add** | Existing code + conventions + client intent | Read existing code/patterns first → ask residue → canon for new tech | New behavior testable; **no regression; matches conventions** | Regression; convention drift; integration break |
 | **Bugfix** | Existing code + reproduction | Reproduce → localize → root-cause | Failing test now passes; **no regression** | Wrong root cause; regression |
 | **Refactor** | **Current behavior** | Characterize; build safety net | Behavior **identical**; quality metric improved | Silent behavior change |
@@ -127,7 +127,7 @@ Four axes shift per class. Everything else is shared.
 | **Integration** | External API contract + our seams | Read API + read our code | Data flows end-to-end; failures handled | API misunderstood |
 | **Investigation** | Reality (code/data/runtime) | Explore | Question answered **with evidence** | Answer without evidence |
 
-### 4.1 The unifying insight — "done" is always a test; only its *generator* differs
+### 4.1 Unifying insight — "done" always a test; only its *generator* differs
 
 ```
 Greenfield   →  generate tests from INTENT
@@ -140,7 +140,7 @@ Integration  →  generate end-to-end CONTRACT tests
 Investigation→  evidence is the deliverable (no code AC)
 ```
 
-The verify stage is universal *because* acceptance criteria are universal. That is why one spine accommodates every class.
+Verify stage universal *because* acceptance criteria universal. That's why one spine accommodates every class.
 
 ---
 
@@ -148,7 +148,7 @@ The verify stage is universal *because* acceptance criteria are universal. That 
 
 ### 5.1 Intake & Classify (+ decompose)
 
-The first gap is the class itself. Real requests are often **compound** ("app crashes on upload, and while you're there make it faster and support PDFs" = bugfix + perf + feature). Decompose into atomic subrequests, classify each, route each.
+First gap = class itself. Real requests often **compound** ("app crashes on upload, and while you're there make it faster and support PDFs" = bugfix + perf + feature). Decompose into atomic subrequests, classify each, route each.
 
 ```mermaid
 flowchart TD
@@ -165,11 +165,11 @@ flowchart TD
 
 - **Input:** raw request text + any attachments.
 - **Output:** `{class, confidence, is_compound, subrequests[]}`.
-- **Rule:** never guess the class silently. Low confidence or compound → confirm with client first.
+- **Rule:** never guess class silently. Low confidence or compound → confirm with client first.
 
 ### 5.2 Ground — exhaust cheap truth before expensive
 
-Close gaps using the cheapest source that can. The client is the **most expensive** source (human latency). Read before ask; ask only the residue the codebase/runtime cannot answer.
+Close gaps using cheapest capable source. Client = **most expensive** source (human latency). Read before ask; ask only residue codebase/runtime cannot answer.
 
 ```mermaid
 flowchart LR
@@ -179,13 +179,13 @@ flowchart LR
 This **flips stage order by class**:
 
 - **Greenfield:** no code exists → ask client first, then research external canon.
-- **Brownfield** (feature-add/bug/refactor/perf/integration): read code first (reproduce / root-cause / characterize per class) → then ask only the residue.
+- **Brownfield** (feature-add/bug/refactor/perf/integration): read code first (reproduce / root-cause / characterize per class) → then ask only residue.
 
-"Research" generalizes to: *close gaps from the cheapest available corpus.* Greenfield closes via external canon (§7); bugfix closes via code + reproduction. Same function, different corpus.
+"Research" generalizes to: *close gaps from cheapest available corpus.* Greenfield closes via external canon (§7); bugfix closes via code + reproduction. Same function, different corpus.
 
 ### 5.3 Gap detection & ranking
 
-Find every place a competent engineer could build two different things. Rank by **blast radius**:
+Find every place competent engineer could build two different things. Rank by **blast radius**:
 
 - **architecture** — changes structure / stack / deliverable → **must ask**
 - **scope** — changes what's in/out → **must ask**
@@ -193,7 +193,7 @@ Find every place a competent engineer could build two different things. Rank by 
 
 - **Output:** ranked `gaps[]` with `{gap, interpretations[], blast_radius, reason}`.
 
-### 5.4 Clarify — the client loop
+### 5.4 Clarify — client loop
 
 Batched, minimal-touch, recognition over recall.
 
@@ -216,23 +216,23 @@ sequenceDiagram
     Sys->>Sys: freeze + lock
 ```
 
-Rules: ≤ ~6 questions per batch, each multiple-choice with a recommended default; propose concrete options instead of open questions; one review gate on the draft; assume + announce everything low-blast.
+Rules: ≤ ~6 questions per batch, each multiple-choice with recommended default; propose concrete options instead of open questions; one review gate on draft; assume + announce everything low-blast.
 
 ### 5.5 Synthesize aPRD
 
-Produce the contract (§6). Every requirement gets a binary, testable acceptance criterion. Every assumption traces to a gap. A requirement that cannot get a testable AC is flagged, not shipped.
+Produce contract (§6). Every requirement gets binary testable acceptance criterion. Every assumption traces to gap. Requirement that cannot get testable AC = flagged, not shipped.
 
 ### 5.6 Critique (adversarial)
 
-A hostile-reviewer pass before freeze. Finds: requirements that could build two ways, ACs that aren't binary-testable, scope not bounded by OUT_OF_SCOPE. Emits blocking issues only; loops back to synthesize until clean.
+Hostile-reviewer pass before freeze. Finds: requirements that could build two ways, ACs not binary-testable, scope not bounded by OUT_OF_SCOPE. Emits blocking issues only; loops back to synthesize until clean.
 
 ### 5.7 Freeze
 
-On client sign-off: render the immutable `aprd.frozen.md` + `aprd.lock` (content hash + signer + timestamp + version). After freeze, no edits — a scope change is a **new version** + change request that re-triggers affected downstream stages.
+On client sign-off: render immutable `aprd.frozen.md` + `aprd.lock` (content hash + signer + timestamp + version). After freeze, no edits — scope change = **new version** + change request, re-triggers affected downstream stages.
 
-### 5.8 Hand off to the roadmap + downstream loop
+### 5.8 Hand off to roadmap + downstream loop
 
-Phase 0 ends at freeze. The frozen aPRD set is handed to **Phase 1 (Roadmap)**, which slices it into vertical increments and drives the downstream phases. Design (Phases 2–3), build (Phase 4), and verification happen **per slice**, not over the whole product at once. "Done" for a slice = its acceptance-criteria artifacts (AC tests / benchmarks / parity checks) pass **and** the client has seen it demoed. The build phase reads **only** the frozen aPRD (by R/AC id) and the slice's design — never the original vagueness.
+Phase 0 ends at freeze. Frozen aPRD set handed to **Phase 1 (Roadmap)**, slices into vertical increments + drives downstream phases. Design (Phases 2–3), build (Phase 4), verification happen **per slice**, not over whole product at once. "Done" for slice = its acceptance-criteria artifacts (AC tests / benchmarks / parity checks) pass **and** client saw it demoed. Build phase reads **only** frozen aPRD (by R/AC id) + slice's design — never original vagueness.
 
 ### 5.9 Pipeline state machine
 
@@ -260,7 +260,7 @@ stateDiagram-v2
 
 ## 6. The aPRD artifact
 
-The frozen spec — single source of truth every downstream agent reads. Structured and typed (not prose) so a machine can execute it; rendered readable so a client can sign it. Dual audience.
+Frozen spec — single source of truth every downstream agent reads. Structured + typed (not prose) so machine can execute it; rendered readable so client can sign it. Dual audience.
 
 ### 6.1 Schema — shared skeleton + class extensions
 
@@ -295,17 +295,17 @@ ACCEPTANCE:                             # binary, testable
 
 ### 6.2 Why this form
 
-- **Acceptance criteria are the real payload** — they *are* the contract. Build = make AC pass. Test = verify AC. Without them "done" is undefined.
-- **Assumptions logged, not buried** — audit trail; client challenges cheaply; wrong assumptions are traceable to the decision, not hidden in code.
-- **Out-of-scope is load-bearing** — bounds the agent, stops gold-plating and creep.
-- **Stable atomic IDs** — architecture cites R3, test cites AC2, commit cites both. Drift = any code not traceable to a requirement.
-- **Atomic requirements are sliceable units** — Phase 1 (Roadmap) groups R*/AC* into vertical increments. Atomicity is what lets a slice cut cleanly through the stack; a monolithic requirement cannot be sliced vertically.
+- **Acceptance criteria = real payload** — they *are* contract. Build = make AC pass. Test = verify AC. Without them "done" undefined.
+- **Assumptions logged, not buried** — audit trail; client challenges cheaply; wrong assumptions traceable to decision, not hidden in code.
+- **Out-of-scope load-bearing** — bounds agent, stops gold-plating + creep.
+- **Stable atomic IDs** — architecture cites R3, test cites AC2, commit cites both. Drift = any code not traceable to requirement.
+- **Atomic requirements = sliceable units** — Phase 1 (Roadmap) groups R*/AC* into vertical increments. Atomicity lets slice cut cleanly through stack; monolithic requirement cannot be sliced vertically.
 
 ---
 
 ## 7. Research sub-pipeline (greenfield + feature-add canon grounding)
 
-When grounding requires **external canon** (e.g. "follow TypeScript best practices"), this is not open-ended web search. It is **manifest mining + reconciliation**, because best practices already exist as code (lint rule configs, tsconfig bases). Fetch the authoritative manifests; the LLM reconciles and verifies but is never the source.
+When grounding requires **external canon** (e.g. "follow TypeScript best practices"), not open-ended web search. = **manifest mining + reconciliation**, because best practices already exist as code (lint rule configs, tsconfig bases). Fetch authoritative manifests; LLM reconciles + verifies but never source.
 
 ```mermaid
 flowchart TD
@@ -332,20 +332,20 @@ flowchart TD
 |---|---|
 | Bounded, curated allowlist | Kills web-search noise + latency |
 | Fetch code/manifests, not prose | Ground truth, no summarization loss |
-| **Cache the canon, version it** | Research once, reuse every project (biggest lever) |
+| **Cache canon, version it** | Research once, reuse every project (biggest lever) |
 | Parallel fetch | Wall-clock |
 | LLM reconciles/verifies, never recalls | No stale or hallucinated rules |
 | Verify against pinned tool versions | Output actually runs |
 
-**The cache is the real efficiency answer.** First project pays full research cost; subsequent projects load `canon.vN.json` and fetch only deltas. Per-project research collapses to retrieval. **Verify stage is mandatory** — it catches hallucinated rule names and deprecated/superseded flags that training recall introduces.
+**Cache = real efficiency answer.** First project pays full research cost; later projects load `canon.vN.json` + fetch only deltas. Per-project research collapses to retrieval. **Verify stage mandatory** — catches hallucinated rule names + deprecated/superseded flags training recall introduces.
 
-This is the **first application of the canon lever**, reused at every downstream phase — slicing patterns (Phase 1), decision option-sets (Phase 2), reference architectures (Phase 3), coding scaffolds (Phase 4) — the system-wide efficiency engine.
+**First application of canon lever**, reused at every downstream phase — slicing patterns (Phase 1), decision option-sets (Phase 2), reference architectures (Phase 3), coding scaffolds (Phase 4) — system-wide efficiency engine.
 
 ---
 
 ## 8. Prompt library
 
-Roles are separated. Each downstream role is the *same role* with a playbook-injected domain block + AC template — the engine is not rewritten per class.
+Roles separated. Each downstream role = *same role* with playbook-injected domain block + AC template — engine not rewritten per class.
 
 **CLASSIFIER**
 ```
@@ -404,19 +404,19 @@ Report pass/fail per AC id. On any fail, return to execute with the failing AC.
 
 ## 9. Client interaction model
 
-- **Batch**, don't drip. Client attention is the scarce resource.
-- **Multiple-choice > open-ended.** Offer options + a recommended default.
-- **Propose, don't interrogate.** For canon approval, show the concrete list; client edits/deletes faster than they author.
-- **One review gate** on the draft aPRD; sign-off = freeze.
+- **Batch**, don't drip. Client attention = scarce resource.
+- **Multiple-choice > open-ended.** Offer options + recommended default.
+- **Propose, don't interrogate.** For canon approval, show concrete list; client edits/deletes faster than authors.
+- **One review gate** on draft aPRD; sign-off = freeze.
 - **Assume + announce** everything low-blast.
 
-Principle: the autonomous promise is not *zero* questions — it is *cheap* questions. Two minutes of client time should remove the bulk of build risk.
+Principle: autonomous promise not *zero* questions — *cheap* questions. Two minutes of client time should remove bulk of build risk.
 
 ---
 
 ## 10. Artifact storage & versioning
 
-Everything in version control. The aPRD is the repository's root of truth.
+Everything in version control. aPRD = repository's root of truth.
 
 ```
 project/
@@ -439,11 +439,11 @@ project/
 
 **Rules**
 
-- **Intermediates kept, append-only.** They are the audit trail: dispute resolution ("why build X?" → trace to `06-answers.md`), agent debugging, and run resumability.
-- **Frozen aPRD is immutable.** Change = new version + change request + re-trigger of affected downstream stages. This is what stops silent scope creep.
+- **Intermediates kept, append-only.** = audit trail: dispute resolution ("why build X?" → trace to `06-answers.md`), agent debugging, run resumability.
+- **Frozen aPRD immutable.** Change = new version + change request + re-trigger of affected downstream stages. Stops silent scope creep.
 - **Stable IDs everywhere.** Plan cites R3, test cites AC2, commit cites both — spec → code → test stays threaded.
-- **Machine + human form.** JSON for agent stages; rendered Markdown for the client. The aPRD itself is structured Markdown serving both readers.
-- **Lock file is the signature.** Tamper-evident contract.
+- **Machine + human form.** JSON for agent stages; rendered Markdown for client. aPRD itself = structured Markdown serving both readers.
+- **Lock file = signature.** Tamper-evident contract.
 
 ---
 
@@ -463,7 +463,7 @@ flowchart LR
     REG --> DONE["Engine unchanged"]
 ```
 
-A playbook is `{classifier hints, active stages, grounding corpus, prompt overlays, AC template, verify method, aPRD extension fields}`. If a new class forces an engine edit, the abstraction is wrong — fix the spine, not the playbook.
+Playbook = `{classifier hints, active stages, grounding corpus, prompt overlays, AC template, verify method, aPRD extension fields}`. If new class forces engine edit, abstraction wrong — fix spine, not playbook.
 
 ---
 
@@ -488,15 +488,15 @@ A playbook is `{classifier hints, active stages, grounding corpus, prompt overla
 
 ## 13. Glossary
 
-- **aPRD** — agent-PRD. The frozen, typed, testable contract; the compiled output of intake.
-- **Playbook** — per-class config plugged into the spine (corpus, prompts, AC template, verify method).
-- **Spine** — the invariant pipeline written once and run for every request.
-- **Blast radius** — how much an unresolved gap changes the build (architecture / scope / cosmetic).
-- **Acceptance criterion (AC)** — a binary, testable statement defining part of "done."
+- **aPRD** — agent-PRD. Frozen, typed, testable contract; compiled output of intake.
+- **Playbook** — per-class config plugged into spine (corpus, prompts, AC template, verify method).
+- **Spine** — invariant pipeline written once, run for every request.
+- **Blast radius** — how much unresolved gap changes build (architecture / scope / cosmetic).
+- **Acceptance criterion (AC)** — binary testable statement defining part of "done."
 - **Canon** — cached, versioned external best-practice ruleset used for greenfield grounding.
-- **Grounding** — closing gaps from the cheapest capable source before asking the client.
-- **Vertical slice** — a thin increment that cuts through every layer it needs to deliver one demoable, user-visible capability (opposite of a horizontal/by-layer cut). Defined and sequenced in Phase 1 (Roadmap).
-- **Foundation loop / slice loop** — the once-only thin foundation pass (foundational ADRs + skeleton HLD) vs the per-slice design/build/demo loop; see Phase 1.
+- **Grounding** — closing gaps from cheapest capable source before asking client.
+- **Vertical slice** — thin increment cutting through every layer it needs to deliver one demoable, user-visible capability (opposite of horizontal/by-layer cut). Defined + sequenced in Phase 1 (Roadmap).
+- **Foundation loop / slice loop** — once-only thin foundation pass (foundational ADRs + skeleton HLD) vs per-slice design/build/demo loop; see Phase 1.
 
 ---
 
@@ -504,6 +504,6 @@ A playbook is `{classifier hints, active stages, grounding corpus, prompt overla
 
 - Threshold values: classifier confidence cutoff, max questions per batch.
 - Canon cache invalidation policy (time-based vs tool-release-triggered).
-- Human gate placement for high-risk brownfield changes (does freeze need a second reviewer?).
+- Human gate placement for high-risk brownfield changes (does freeze need second reviewer?).
 - Multi-subrequest sequencing: parallel vs dependency-ordered execution of decomposed compound requests.
-- **Scope (resolved):** the pipeline terminates at an accepted STAGING demo (Phase 4 is terminal). Production release, client-environment handoff, and post-handoff rollback are out of scope.
+- **Scope (resolved):** pipeline terminates at accepted STAGING demo (Phase 4 terminal). Production release, client-environment handoff, post-handoff rollback out of scope.

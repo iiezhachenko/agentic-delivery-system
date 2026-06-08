@@ -5,37 +5,37 @@
 | **Status** | Draft |
 | **Version** | 0.1 |
 | **Date** | 2026-06-06 |
-| **Audience** | Engineers building the system; the agents executing it |
-| **Scope** | The stage that slices the frozen aPRD set into vertical, demoable increments, sequences them, and controls the foundation + slice delivery loops |
-| **Predecessor** | Phase 0 — `00-automated-aprd-pipeline-spec.md` (produces the frozen aPRD set this phase slices) |
+| **Audience** | Engineers building system; agents executing it |
+| **Scope** | Stage slices frozen aPRD set into vertical demoable increments, sequences them, controls foundation + slice delivery loops |
+| **Predecessor** | Phase 0 — `00-automated-aprd-pipeline-spec.md` (produces frozen aPRD set this phase slices) |
 
 ---
 
 ## 1. Purpose
 
-Phase 0 froze the **whole WHAT**. Building it whole is waterfall — design every layer, build every layer, integrate at the end, and the client sees nothing until then. Phase 1 prevents that. It slices the WHAT into **vertical, demoable increments**, orders them by value and risk under dependency constraints, names the **walking skeleton**, and then acts as the **controller** that runs the downstream phases in two loops: a **foundation loop** (once, thin) and a **slice loop** (one vertical increment per pass).
+Phase 0 froze **whole WHAT**. Build whole = waterfall — design every layer, build every layer, integrate at end, client sees nothing until then. Phase 1 prevents that. Slices WHAT into **vertical demoable increments**, orders by value + risk under dependency constraints, names **walking skeleton**, then acts as **controller** running downstream phases in two loops: **foundation loop** (once, thin) and **slice loop** (one vertical increment per pass).
 
-Four facts drive the design:
+Four facts drive design:
 
-1. **Horizontal slicing is waterfall.** Cutting by layer/artifact — all data models, then all services, then all UI; or all ADRs, then a full HLD, then build everything — defers all value to the end. Cutting **vertically** (one user-visible capability through every layer it needs) yields something demoable each pass.
-2. **Not everything changes at slice speed.** Foundational decisions and the architectural skeleton are decided **once**; per-slice behavior is built **repeatedly**. The blast-radius lever (Phase 0 P6) sorts what is foundation from what is slice.
-3. **A slice is vertical iff it has a passing black-box acceptance test.** A horizontal cut ("all DB tables") has no user-observable AC and cannot pass one. Phase 0's done-is-a-test contract (P2) is therefore the *enforcer* of verticality — no new machinery is needed.
-4. **The roadmap is living, not frozen-once.** Slices reveal information — above all, the walking skeleton firms the real dependency graph. Re-rank the remaining slices each pass.
+1. **Horizontal slicing = waterfall.** Cut by layer/artifact — all data models, then all services, then all UI; or all ADRs, then full HLD, then build everything — defers all value to end. Cut **vertically** (one user-visible capability through every layer it needs) yields demoable each pass.
+2. **Not everything changes at slice speed.** Foundational decisions + architectural skeleton decided **once**; per-slice behavior built **repeatedly**. Blast-radius lever (Phase 0 P6) sorts foundation from slice.
+3. **Slice vertical iff it has passing black-box acceptance test.** Horizontal cut ("all DB tables") has no user-observable AC, cannot pass one. Phase 0 done-is-a-test contract (P2) is *enforcer* of verticality — no new machinery needed.
+4. **Roadmap living, not frozen-once.** Slices reveal information — above all, walking skeleton firms real dependency graph. Re-rank remaining slices each pass.
 
 ### 1.1 Goals
 
-- Slice the frozen aPRD set into vertical increments — each demoable, each tracing to ≥1 AC.
-- Sequence by value × risk, dependency-constrained; put the walking skeleton first.
-- Define the **foundation cut** — the minimal foundational decisions + skeleton structure to build once, before slicing.
-- Drive the foundation loop and dispatch slices through Phases 2–4; re-rank as slices complete and reveal information.
-- Give the client the artifact they care about most: the order, and what they see first.
+- Slice frozen aPRD set into vertical increments — each demoable, each tracing to ≥1 AC.
+- Sequence by value × risk, dependency-constrained; walking skeleton first.
+- Define **foundation cut** — minimal foundational decisions + skeleton structure to build once, before slicing.
+- Drive foundation loop, dispatch slices through Phases 2–4; re-rank as slices complete + reveal information.
+- Give client artifact they care about most: order, and what they see first.
 
 ### 1.2 Non-goals
 
-- **Designing or building.** Phase 1 decides *which slice, in what order*. Phases 2–4 decide HOW and build. It is a controller, not a designer.
-- **Detailing the whole HOW up front.** Only the foundation cut is resolved before slicing; per-slice design/build is just-in-time.
-- **Freezing the sequence forever.** The roadmap is versioned and *living* — it re-ranks on learning. (Completed-slice records are immutable; the *sequence* is not.)
-- **A single mega-prompt.** Roles are separated for failure isolation and quality, as in Phase 0.
+- **Designing or building.** Phase 1 decides *which slice, what order*. Phases 2–4 decide HOW + build. Controller, not designer.
+- **Detailing whole HOW up front.** Only foundation cut resolved before slicing; per-slice design/build just-in-time.
+- **Freezing sequence forever.** Roadmap versioned + *living* — re-ranks on learning. (Completed-slice records immutable; *sequence* not.)
+- **Single mega-prompt.** Roles separated for failure isolation + quality, as Phase 0.
 
 ---
 
@@ -52,35 +52,35 @@ flowchart LR
     SLICE -. defect surfaced in a slice .-> P0
 ```
 
-- **Input:** the frozen aPRD set (`aprd.frozen.md` + `aprd.lock` per subrequest).
-- **Output:** the **roadmap** — a vertical slice sequence + the foundation cut — plus per-slice dispatch into Phases 2–4 and continuous re-ranking.
-- **Controller role:** Phase 1 does **not** end when the sequence is first drawn. It runs for the life of delivery: it triggers the foundation loop once, then dispatches each slice and re-ranks the remainder after every demo.
+- **Input:** frozen aPRD set (`aprd.frozen.md` + `aprd.lock` per subrequest).
+- **Output:** **roadmap** — vertical slice sequence + foundation cut — plus per-slice dispatch into Phases 2–4 and continuous re-ranking.
+- **Controller role:** Phase 1 does **not** end when sequence first drawn. Runs for life of delivery: triggers foundation loop once, then dispatches each slice and re-ranks remainder after every demo.
 
 ---
 
 ## 3. Core principles
 
-Inherits Phase 0's P-series. These are the roadmap-specific additions; each is load-bearing.
+Inherits Phase 0 P-series. Roadmap-specific additions; each load-bearing.
 
 | # | Principle | Consequence if violated | Echoes |
 |---|---|---|---|
-| RM1 | Slice **vertically**, never horizontally — each slice cuts through every layer it needs to be demoable | Waterfall; value only at the end | P2 |
-| RM2 | A slice is valid **iff** it maps to ≥1 black-box, user-observable acceptance test (AC) | Horizontal cuts masquerade as progress | P2 |
-| RM3 | **Two loops** — foundation (once, thin) vs slice (×N); split by blast radius | Re-decide foundations every slice, or big-bang the whole HOW | P6 |
-| RM4 | First slice = **walking skeleton** — thinnest end-to-end path touching every foundational seam once | Integration risk discovered last, when it is most expensive | — |
-| RM5 | Sequence by **value × risk, dependency-constrained** — riskiest-valuable first (after the skeleton) | Low-value or blocked work built first; risk deferred | P6 |
-| RM6 | The roadmap is **living** — re-rank remaining slices as each completes and reveals information | A stale plan drives the build off a cliff | — |
-| RM7 | A slice **is a flow** — its vertical path traverses the component graph along one flow F*, not across a layer | Slices drift back to horizontal (layer) cuts | — |
+| RM1 | Slice **vertically**, never horizontally — each slice cuts through every layer it needs to be demoable | Waterfall; value only at end | P2 |
+| RM2 | Slice valid **iff** maps to ≥1 black-box, user-observable acceptance test (AC) | Horizontal cuts masquerade as progress | P2 |
+| RM3 | **Two loops** — foundation (once, thin) vs slice (×N); split by blast radius | Re-decide foundations every slice, or big-bang whole HOW | P6 |
+| RM4 | First slice = **walking skeleton** — thinnest end-to-end path touching every foundational seam once | Integration risk discovered last, when most expensive | — |
+| RM5 | Sequence by **value × risk, dependency-constrained** — riskiest-valuable first (after skeleton) | Low-value or blocked work built first; risk deferred | P6 |
+| RM6 | Roadmap **living** — re-rank remaining slices as each completes + reveals information | Stale plan drives build off cliff | — |
+| RM7 | Slice **is a flow** — vertical path traverses component graph along one flow F*, not across a layer | Slices drift back to horizontal (layer) cuts | — |
 | RM8 | **WHAT broad, HOW thin** — detail each slice's design/build just-in-time | Premature full design = waterfall | P12 |
-| RM9 | **Foundation is minimal** — decide only what the first slices + cross-slice invariants need; defer the rest to the slice that needs it | Over-decided up front (waterfall), or under-decided (slice blocked) | P6 |
-| RM10 | **Slice size by INVEST** — smallest increment that is demoable AND delivers value or retires a named risk | Too big → mini-waterfall; too small → integration thrash | — |
-| RM11 | Roadmap is a **controller**, not a builder — it drives loops and dispatches slices; it never designs or implements | Phase boundaries blur; the slicer starts deciding HOW | P3 |
+| RM9 | **Foundation minimal** — decide only what first slices + cross-slice invariants need; defer rest to slice that needs it | Over-decided up front (waterfall), or under-decided (slice blocked) | P6 |
+| RM10 | **Slice size by INVEST** — smallest increment demoable AND delivers value or retires named risk | Too big → mini-waterfall; too small → integration thrash | — |
+| RM11 | Roadmap is **controller**, not builder — drives loops + dispatches slices; never designs or implements | Phase boundaries blur; slicer starts deciding HOW | P3 |
 
 ---
 
 ## 4. What a slice is
 
-A slice is a **vertical** increment: one user-visible capability, built through every layer it needs (data → logic → interface), demoable on its own. It is not a layer, a component, or a sprint of "backend work."
+Slice is **vertical** increment: one user-visible capability, built through every layer it needs (data → logic → interface), demoable on its own. Not a layer, component, or sprint of "backend work."
 
 ### 4.1 The unifying insight — verticality is a test property, not a judgment call
 
@@ -90,16 +90,16 @@ Vertical cut     →  "one capability, end-to-end"    →  ≥1 black-box AC goe
 Walking skeleton →  thinnest vertical cut that touches every foundational seam once  →  slice #1
 ```
 
-The acceptance oracle from Phase 0 (P2) is the discriminator. A slice you **cannot write a passing black-box AC for is not vertical** — "all DB tables" has no user-facing pass/fail condition. No separate verticality machinery is needed: the same test that defines "done" defines "demoable." This is why slicing reuses the aPRD's `AC*` directly as the slice gate.
+Acceptance oracle from Phase 0 (P2) is discriminator. Slice you **cannot write passing black-box AC for is not vertical** — "all DB tables" has no user-facing pass/fail condition. No separate verticality machinery needed: same test defining "done" defines "demoable." Why slicing reuses aPRD `AC*` directly as slice gate.
 
 ### 4.2 Slice catalog
 
 | Kind | Purpose | Example |
 |---|---|---|
-| **walking_skeleton** | Prove the architecture composes end-to-end; retire integration risk first | One request flows ingress → domain → store → response; everything else hardcoded |
+| **walking_skeleton** | Prove architecture composes end-to-end; retire integration risk first | One request flows ingress → domain → store → response; everything else hardcoded |
 | **capability** | Deliver one user-visible capability | "User can reset their password" |
-| **risk_spike** | Retire a specific named risk early | "Prove the third-party rate limit is survivable under expected load" |
-| **hardening** | Pay non-functional debt a prior slice deferred | "Add the cache the latency NFR requires" |
+| **risk_spike** | Retire specific named risk early | "Prove third-party rate limit survivable under expected load" |
+| **hardening** | Pay non-functional debt prior slice deferred | "Add cache latency NFR requires" |
 
 ### 4.3 Vertical vs horizontal
 
@@ -122,7 +122,7 @@ flowchart TB
 
 ## 5. Pipeline stages
 
-One **spine** (written once), per-class **playbook** overlays (§11) — identical philosophy to Phase 0.
+One **spine** (written once), per-class **playbook** overlays (§11) — identical philosophy as Phase 0.
 
 ```mermaid
 flowchart TD
@@ -148,48 +148,48 @@ flowchart TD
 ```
 
 ### 5.1 Load & verify
-Read the frozen aPRD set; verify each `aprd.lock` (tamper-evident). Assemble the full `R*` / `AC*` / `ENTITIES` / `CONSTRAINTS` inventory to be sliced.
+Read frozen aPRD set; verify each `aprd.lock` (tamper-evident). Assemble full `R*` / `AC*` / `ENTITIES` / `CONSTRAINTS` inventory to slice.
 
 ### 5.2 Build the requirement dependency graph (coarse)
-Derive a first-pass dependency graph from the aPRD alone: shared `ENTITIES`, `INTEGRATION_SEAMS`, explicit "R depends on R" references. This is **coarse** — the authoritative dependency DAG only exists after the HLD skeleton (§5.11). Good enough to sequence a provisional plan.
+Derive first-pass dependency graph from aPRD alone: shared `ENTITIES`, `INTEGRATION_SEAMS`, explicit "R depends on R" references. **Coarse** — authoritative dependency DAG only exists after HLD skeleton (§5.11). Good enough to sequence provisional plan.
 
 ### 5.3 Cluster into candidate vertical slices
-Group `R*`/`AC*` into candidate slices, each a coherent demoable capability. A slice pulls *some* of every layer it needs — never "all of one layer." Each candidate carries its `requirements`, its `acceptance` (the demo gate), value, and any named risk it retires.
+Group `R*`/`AC*` into candidate slices, each coherent demoable capability. Slice pulls *some* of every layer it needs — never "all of one layer." Each candidate carries `requirements`, `acceptance` (demo gate), value, and any named risk it retires.
 
 ### 5.4 Verticality check
-Reject any candidate without ≥1 black-box, user-observable AC (§4.1) — that is a horizontal cut. Send it back to clustering to be re-cut or merged into a vertical neighbor. This gate is what mechanically prevents horizontal slicing.
+Reject any candidate without ≥1 black-box, user-observable AC (§4.1) — that is horizontal cut. Send back to clustering to re-cut or merge into vertical neighbor. Gate mechanically prevents horizontal slicing.
 
 ### 5.5 Identify the walking skeleton
-Find the thinnest end-to-end slice that touches **every foundational seam once** (ingress, domain, persistence, the primary external integration). It carries minimal behavior — its job is to prove the architecture composes and retire integration risk before any feature depth is built. This becomes slice #1.
+Find thinnest end-to-end slice touching **every foundational seam once** (ingress, domain, persistence, primary external integration). Carries minimal behavior — job is prove architecture composes and retire integration risk before any feature depth built. Becomes slice #1.
 
 ### 5.6 Score & sequence
-Order the remaining slices by **value × risk / cost**, constrained by the dependency graph (a slice never precedes one it depends on). Riskiest-and-most-valuable first; the skeleton always leads. Output the sequence + a one-line rationale per position.
+Order remaining slices by **value × risk / cost**, constrained by dependency graph (slice never precedes one it depends on). Riskiest-and-most-valuable first; skeleton always leads. Output sequence + one-line rationale per position.
 
 ### 5.7 Define the foundation cut
-From slice-1 (the skeleton) + obvious cross-slice invariants, name the **minimum** to decide and build once:
-- `foundational_decisions` → the categories Phase 2 must resolve in its **foundation pass** (style, stack, persistence, boundary strategy, the cross-cutting invariants).
-- `skeleton_seams` → the contracts Phase 3 must establish in its **skeleton pass**.
-Everything not in the cut is deferred to the slice that first needs it (RM9). The cut is deliberately thin — widening it later is cheaper than building the wrong foundation.
+From slice-1 (skeleton) + obvious cross-slice invariants, name **minimum** to decide and build once:
+- `foundational_decisions` → categories Phase 2 must resolve in **foundation pass** (style, stack, persistence, boundary strategy, cross-cutting invariants).
+- `skeleton_seams` → contracts Phase 3 must establish in **skeleton pass**.
+Everything not in cut deferred to slice that first needs it (RM9). Cut deliberately thin — widening later cheaper than building wrong foundation.
 
 ### 5.8 Client review of the sequence
-Sequence is the client's prerogative — they are paying and they care intensely about what comes first. Present it recognition-over-recall (here is the order and the first demo; reorder?). One gate. (Contrast: the *decisions* and *structure* downstream are internal — see §9.)
+Sequence is client's prerogative — they pay and care intensely what comes first. Present recognition-over-recall (here is order + first demo; reorder?). One gate. (Contrast: *decisions* + *structure* downstream internal — see §9.)
 
 ### 5.9 Baseline the roadmap (living)
-Version and store the roadmap. Unlike the aPRD/ADR/HLD, it is **not frozen-immutable** — it is a living, versioned plan. Re-ranks bump the version; the history is append-only. Completed-slice records, once accepted, are immutable.
+Version + store roadmap. Unlike aPRD/ADR/HLD, **not frozen-immutable** — living, versioned plan. Re-ranks bump version; history append-only. Completed-slice records, once accepted, immutable.
 
 ### 5.10 Drive the foundation loop (once)
-Dispatch the foundation cut: Phase 2 resolves the foundational ADRs; Phase 3 draws the skeleton HLD (component graph + foundational contracts + NFR mechanisms). This runs **once**. Its output is the frame every slice extends.
+Dispatch foundation cut: Phase 2 resolves foundational ADRs; Phase 3 draws skeleton HLD (component graph + foundational contracts + NFR mechanisms). Runs **once**. Output = frame every slice extends.
 
 ### 5.11 Re-rank with the real dependency DAG
-The skeleton HLD yields the true component dependency graph (= build DAG). Replace the coarse graph from §5.2; re-rank the remaining slices against real dependencies before dispatching them.
+Skeleton HLD yields true component dependency graph (= build DAG). Replace coarse graph from §5.2; re-rank remaining slices against real dependencies before dispatching them.
 
 ### 5.12 Dispatch the slice loop (×N)
-For each slice in order: Phase 3 extends the skeleton (HLD increment, emitting local ADRs via Phase 2), Phase 4 builds it against frozen contracts, verify (the slice's AC tests + design-layer tests), **demo**. After each demo: mark the slice accepted, capture learning (new dependencies, scope discoveries, risk outcomes), and re-rank the remainder (§5.11 loop).
+For each slice in order: Phase 3 extends skeleton (HLD increment, emitting local ADRs via Phase 2), Phase 4 builds against frozen contracts, verify (slice's AC tests + design-layer tests), **demo**. After each demo: mark slice accepted, capture learning (new dependencies, scope discoveries, risk outcomes), re-rank remainder (§5.11 loop).
 
 ### 5.13 Escape hatches
-- **A capability cannot be cut into a demoable vertical slice** (its AC depends on un-built foundation): either fold the missing foundation into the cut / a skeleton extension, or re-slice.
-- **A slice's AC reveals the aPRD is ambiguous or wrong:** change request → Phase 0 → new aPRD version → re-slice. Phase 1 never patches the WHAT.
-- **A flood of mid-slice foundational surprises** = the foundation cut was too thin → re-open a foundation mini-pass (Phase 2 foundational) and tune the cut. This is the feedback the HLD spec's "local-ADR flood" signal feeds.
+- **Capability cannot be cut into demoable vertical slice** (AC depends on un-built foundation): either fold missing foundation into cut / skeleton extension, or re-slice.
+- **Slice's AC reveals aPRD ambiguous or wrong:** change request → Phase 0 → new aPRD version → re-slice. Phase 1 never patches WHAT.
+- **Flood of mid-slice foundational surprises** = foundation cut too thin → re-open foundation mini-pass (Phase 2 foundational) + tune cut. This is feedback HLD spec's "local-ADR flood" signal feeds.
 
 ### 5.14 Pipeline state machine
 
@@ -217,7 +217,7 @@ stateDiagram-v2
 
 ## 6. The roadmap artifact
 
-Dual audience: a machine-readable slice list downstream phases dispatch from; a rendered sequence + demo plan the client signs off.
+Dual audience: machine-readable slice list downstream phases dispatch from; rendered sequence + demo plan client signs off.
 
 ### 6.1 Schema
 
@@ -256,16 +256,16 @@ flowchart LR
 
 ### 6.3 Why this form
 
-- **Acceptance is the verticality proof.** A slice without a black-box AC is not a slice (RM2). Reusing the aPRD's `AC*` keeps the demo gate honest and traceable.
-- **The sequence is living.** Re-ranking on learning is a feature, not drift (RM6). Versioning the plan (not freezing it) is the deliberate contrast with every other phase artifact.
-- **Coverage prevents orphans.** Every `R*` must land in ≥1 slice, or it will never be built. Coverage is the slice-layer analog of Phase 0's requirement-completeness check.
-- **The foundation cut is the anti-waterfall lever.** Naming the *minimum* to decide once is what lets the rest stay thin and incremental (RM8, RM9).
+- **Acceptance is verticality proof.** Slice without black-box AC is not a slice (RM2). Reusing aPRD `AC*` keeps demo gate honest + traceable.
+- **Sequence living.** Re-ranking on learning is feature, not drift (RM6). Versioning plan (not freezing) is deliberate contrast with every other phase artifact.
+- **Coverage prevents orphans.** Every `R*` must land in ≥1 slice, or never built. Coverage = slice-layer analog of Phase 0 requirement-completeness check.
+- **Foundation cut = anti-waterfall lever.** Naming *minimum* to decide once lets rest stay thin + incremental (RM8, RM9).
 
 ---
 
 ## 7. Grounding — value, dependency, and risk sourcing
 
-Sequencing is a grounding problem: value, dependencies, and risk each come from the cheapest capable source.
+Sequencing is grounding problem: value, dependencies, risk each come from cheapest capable source.
 
 ```mermaid
 flowchart TD
@@ -284,15 +284,15 @@ flowchart TD
     CAN[("Slicing-pattern canon<br/>(versioned, reused)")] -. templates .-> SL
 ```
 
-- **Value is the one input the client owns.** Decisions (Phase 2) and structure (Phase 3) are internal, but *order* belongs to the client (§9).
-- **Dependencies are coarse then refined.** The aPRD gives a first pass; the HLD skeleton gives the authoritative DAG — which is why the roadmap re-ranks after the foundation loop (§5.11). Same exploratory-sketch → baseline pattern the ADR↔HLD boundary uses.
-- **The canon lever, second reuse.** Slicing patterns recur (auth-first, walking-skeleton-first, CRUD-per-entity, read-before-write). Cache reference slice plans per project archetype as versioned canon — the second application of the lever after Phase 0's best-practice canon (Phases 2–4 extend it: decision option-sets, reference architectures, coding scaffolds).
+- **Value = the one input client owns.** Decisions (Phase 2) + structure (Phase 3) internal, but *order* belongs to client (§9).
+- **Dependencies coarse then refined.** aPRD gives first pass; HLD skeleton gives authoritative DAG — why roadmap re-ranks after foundation loop (§5.11). Same exploratory-sketch → baseline pattern ADR↔HLD boundary uses.
+- **Canon lever, second reuse.** Slicing patterns recur (auth-first, walking-skeleton-first, CRUD-per-entity, read-before-write). Cache reference slice plans per project archetype as versioned canon — second application of lever after Phase 0 best-practice canon (Phases 2–4 extend it: decision option-sets, reference architectures, coding scaffolds).
 
 ---
 
 ## 8. Prompt library
 
-Roles separated, same as Phase 0. Each is the same role with a playbook-injected class block.
+Roles separated, same as Phase 0. Each is same role with playbook-injected class block.
 
 **SLICE-EXTRACT**
 ```
@@ -349,18 +349,18 @@ Capture the client's priority overrides.
 
 ## 9. Interaction & gate model
 
-- **Client-facing — by design, unlike Phases 2–3.** The roadmap is where the client re-engages after sign-off, because **order is their prerogative**: what gets built first, what they see demoed, where value lands soonest.
-- **One gate** on the initial sequence; subsequent re-ranks are surfaced as updates (and as a fresh demo each slice), not re-negotiated from scratch.
-- **The phase symmetry:** Phase 0 client-facing (the WHAT), **Phase 1 client-facing (the order/WHEN)**, Phases 2–3 internal (the HOW), Phase 4 client-facing again at the demo (the RESULT). The client owns the what, the when, and sign-off on the result; the delivery team owns the how.
-- **Defects route, not patch.** A bad WHAT goes back to Phase 0 (§5.13); the roadmap never silently reinterprets the contract.
+- **Client-facing — by design, unlike Phases 2–3.** Roadmap is where client re-engages after sign-off, because **order is their prerogative**: what gets built first, what they see demoed, where value lands soonest.
+- **One gate** on initial sequence; subsequent re-ranks surfaced as updates (and fresh demo each slice), not re-negotiated from scratch.
+- **Phase symmetry:** Phase 0 client-facing (WHAT), **Phase 1 client-facing (order/WHEN)**, Phases 2–3 internal (HOW), Phase 4 client-facing again at demo (RESULT). Client owns what, when, sign-off on result; delivery team owns how.
+- **Defects route, not patch.** Bad WHAT goes back to Phase 0 (§5.13); roadmap never silently reinterprets contract.
 
-Principle carried from Phase 0: cheap human touch, not zero. The client spends minutes ordering value, not hours specifying build.
+Principle carried from Phase 0: cheap human touch, not zero. Client spends minutes ordering value, not hours specifying build.
 
 ---
 
 ## 10. Artifact storage & versioning
 
-Sibling to `.aprd/`. The roadmap is the delivery plan's root of truth.
+Sibling to `.aprd/`. Roadmap = delivery plan's root of truth.
 
 ```
 project/
@@ -381,25 +381,25 @@ project/
 
 **Rules**
 
-- **The plan is living; the records are not.** The *sequence* re-ranks (versioned, append-only history). A *completed slice's* record is immutable once accepted — the audit trail of what was demoed and signed off.
-- **Coverage is enforced.** Every aPRD `R*` must appear in ≥1 slice; an orphan requirement is a slicing defect.
-- **Foundation cut is a contract** with Phases 2 and 3 — the explicit minimum to build once.
-- **Machine + human form** — JSON slice list for dispatch; rendered Markdown sequence + demo plan for the client.
-- **Lock = the current baseline signature** the foundation loop and slice loop dispatch against.
+- **Plan living; records not.** *Sequence* re-ranks (versioned, append-only history). *Completed slice's* record immutable once accepted — audit trail of what was demoed + signed off.
+- **Coverage enforced.** Every aPRD `R*` must appear in ≥1 slice; orphan requirement is slicing defect.
+- **Foundation cut = contract** with Phases 2 and 3 — explicit minimum to build once.
+- **Machine + human form** — JSON slice list for dispatch; rendered Markdown sequence + demo plan for client.
+- **Lock = current baseline signature** foundation loop + slice loop dispatch against.
 
 ---
 
 ## 11. Extensibility — depth per class (playbook-toggled)
 
-Roadmap depth scales with class blast radius, set by the same playbook driving Phase 0.
+Roadmap depth scales with class blast radius, set by same playbook driving Phase 0.
 
 | Class | Phase 1 depth |
 |---|---|
 | **Greenfield / large feature-add** | Full roadmap — many slices, skeleton-first, full foundation cut |
 | **Migration** | Slices = parity-by-module increments; skeleton = thinnest end-to-end migrated path |
-| **Integration** | Slices = per-endpoint / per-flow; each demoable against the external API |
-| **Bugfix / Perf / small refactor** | Single slice — the change is already a thin vertical increment; roadmap is trivial |
-| **Investigation** | No slices; the investigation plan is the artifact (skip) |
+| **Integration** | Slices = per-endpoint / per-flow; each demoable against external API |
+| **Bugfix / Perf / small refactor** | Single slice — change already thin vertical increment; roadmap trivial |
+| **Investigation** | No slices; investigation plan is the artifact (skip) |
 
 ```mermaid
 flowchart LR
@@ -413,7 +413,7 @@ flowchart LR
     REG --> DONE["Engine unchanged"]
 ```
 
-If a new class forces an engine edit, the abstraction is wrong — fix the spine, not the playbook. (Same test as Phase 0.)
+If new class forces engine edit, abstraction wrong — fix spine, not playbook. (Same test as Phase 0.)
 
 ---
 
@@ -421,16 +421,16 @@ If a new class forces an engine edit, the abstraction is wrong — fix the spine
 
 | Failure mode | Guardrail |
 |---|---|
-| Horizontal slicing (by layer) | Verticality check (RM2); a slice needs a black-box AC or it is rejected |
-| Big-bang waterfall | Two-loop split (RM3); foundation thin (RM9), then slice-by-slice with a demo gate |
+| Horizontal slicing (by layer) | Verticality check (RM2); slice needs black-box AC or rejected |
+| Big-bang waterfall | Two-loop split (RM3); foundation thin (RM9), then slice-by-slice with demo gate |
 | Foundation too thin (mid-slice surprises) | Re-rank + foundation gap escape (§5.13); local-ADR flood signal from Phase 3 |
-| Foundation too thick (over-decided up front) | Cut covers only the first slices + invariants (RM9); bias thin |
+| Foundation too thick (over-decided up front) | Cut covers only first slices + invariants (RM9); bias thin |
 | Slice too big (mini-waterfall) | INVEST sizing (RM10); split until demoable-and-small |
-| Slice too small (integration thrash) | INVEST sizing (RM10); merge into a vertical neighbor |
-| Sequence ignores dependencies (slice blocked) | Dependency-constrained ordering (RM5); cycle flagged as a defect |
+| Slice too small (integration thrash) | INVEST sizing (RM10); merge into vertical neighbor |
+| Sequence ignores dependencies (slice blocked) | Dependency-constrained ordering (RM5); cycle flagged as defect |
 | Integration risk discovered late | Walking skeleton first (RM4) retires it up front |
 | Requirement never built (orphan) | Coverage check — every R* in ≥1 slice |
-| Client surprised by order | Client gate on the sequence (§9) |
+| Client surprised by order | Client gate on sequence (§9) |
 | Plan frozen too hard, can't adapt | Living, versioned roadmap (RM6); re-rank on learning |
 | Roadmap starts deciding HOW | Controller-not-builder boundary (RM11); HOW belongs to Phases 2–4 |
 
@@ -438,24 +438,24 @@ If a new class forces an engine edit, the abstraction is wrong — fix the spine
 
 ## 13. Glossary
 
-- **Vertical slice** — a thin increment cutting through every layer it needs to deliver one demoable capability. The unit Phase 1 emits and sequences.
-- **Horizontal slice** — a by-layer cut (all data, all services, …) with no user-observable AC; the waterfall antipattern this phase rejects.
-- **Walking skeleton** — the thinnest vertical slice that touches every foundational seam once; slice #1, retires integration risk.
-- **Foundation loop / slice loop** — the once-only thin foundation pass (foundational ADRs + skeleton HLD) vs the per-slice design/build/demo loop.
-- **Foundation cut** — the minimum to decide and build once before slicing; a contract with Phases 2 and 3.
-- **Verticality check** — the gate that rejects any slice lacking a black-box AC.
+- **Vertical slice** — thin increment cutting through every layer it needs to deliver one demoable capability. Unit Phase 1 emits + sequences.
+- **Horizontal slice** — by-layer cut (all data, all services, …) with no user-observable AC; waterfall antipattern this phase rejects.
+- **Walking skeleton** — thinnest vertical slice touching every foundational seam once; slice #1, retires integration risk.
+- **Foundation loop / slice loop** — once-only thin foundation pass (foundational ADRs + skeleton HLD) vs per-slice design/build/demo loop.
+- **Foundation cut** — minimum to decide + build once before slicing; contract with Phases 2 and 3.
+- **Verticality check** — gate rejecting any slice lacking black-box AC.
 - **INVEST** — slice-quality canon: Independent, Negotiable, Valuable, Estimable, Small, Testable.
-- **Living roadmap** — a versioned, re-rankable sequence (not a frozen artifact); completed-slice records are immutable.
-- **Demo gate** — a slice is done only when its AC passes *and* the client has seen it run.
+- **Living roadmap** — versioned, re-rankable sequence (not frozen artifact); completed-slice records immutable.
+- **Demo gate** — slice done only when AC passes *and* client has seen it run.
 
 ---
 
 ## 14. Open questions
 
-- **Slice granularity threshold** — how small is "demoable and small enough," and who calibrates it per class (mirrors Phase 0's classifier-confidence open question).
-- **Foundation-cut sizing** — how much to decide once vs defer; the cut/defer threshold ties directly to Phase 2's foundational/local boundary.
-- **Re-rank stability** — how to re-rank on learning without thrashing the plan every slice; minimum-material-change rule.
-- **Value elicitation** — cheapest way to extract a value ranking from the client (MoSCoW? pairwise? buy-a-feature?).
-- **Walking-skeleton scope** — how thin is too thin; it must touch every foundational seam, but how much behavior is the minimum to prove composition.
-- **Shared-contract slices** — when two slices touch the same contract, the build-order + mock strategy (ties to Phase 3's contracts-frozen / parallel-build property).
-- **Slice-level rollback** — semantics when a demoed slice is rejected by the client post-demo: re-slice, supersede, or revert.
+- **Slice granularity threshold** — how small is "demoable and small enough," who calibrates per class (mirrors Phase 0 classifier-confidence open question).
+- **Foundation-cut sizing** — how much to decide once vs defer; cut/defer threshold ties directly to Phase 2 foundational/local boundary.
+- **Re-rank stability** — how to re-rank on learning without thrashing plan every slice; minimum-material-change rule.
+- **Value elicitation** — cheapest way to extract value ranking from client (MoSCoW? pairwise? buy-a-feature?).
+- **Walking-skeleton scope** — how thin is too thin; must touch every foundational seam, but how much behavior is minimum to prove composition.
+- **Shared-contract slices** — when two slices touch same contract, build-order + mock strategy (ties to Phase 3 contracts-frozen / parallel-build property).
+- **Slice-level rollback** — semantics when demoed slice rejected by client post-demo: re-slice, supersede, or revert.
