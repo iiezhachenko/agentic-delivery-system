@@ -1,9 +1,9 @@
 {
   "artifact": ".hld/skeleton/",
-  "version": "v2",
-  "content_sha256": "279f89e35211e018cfa6d6112277968866cef4f9c541b5d4866590da402ae659",
+  "version": "v3",
+  "content_sha256": "58a7063a6fda73c98cd29ce4da75bdadd43cb979f7552f655e26baa80eaaa2bb",
   "signer": "self-host:agentic-delivery-pipeline",
-  "signed_at": "2026-06-08T12:00:00Z",
+  "signed_at": "2026-06-08T14:30:00Z",
   "status": "frozen",
   "gate": {
     "reconcile_critique_verdict": "clean"

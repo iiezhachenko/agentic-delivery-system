@@ -1,7 +1,7 @@
 {
   "artifact": "build-dag.json",
   "class": "self-host",
-  "note": "Phase build order 0→1→2→3→4 (each phase consumes the prior phase's artifact format; _rules.md Build order). Within a phase: spine-stage order.",
+  "note": "Phase build order 0→1→2→3→4 (each phase consumes the prior phase's artifact format; .hld/skeleton/* Build order). Within a phase: spine-stage order.",
   "build_order": [
     "00-aprd",
     "01-roadmap",
