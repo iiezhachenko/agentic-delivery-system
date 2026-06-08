@@ -57,22 +57,22 @@ freeze\.mjs  parity gate  bootstrap  seed-from-frozen  D-[1-6]  cutover  \bM(0|1
 
 | # | Task | Acceptance | Status |
 |---|---|---|---|
-| T0 | Confirm M9 cleared (engine reads root; no migration mention in kept tree) | M9 done | ☐ |
-| T1 | `mkdir docs/`; move the 4 files in (preserve the 2 D20-cited filenames exactly) | 4 files at `docs/<name>.md`; gone from `_self-host-migration/` | ☐ |
-| T2 | Rewrite each free of migration framing (purge list above; keep reflexive content) | no dead-scaffold refs; self-host special-casing collapsed into "run pipeline on this repo"; canonical-tree paths correct | ☐ |
-| T3 | Verify token-set grep over `docs/` = ZERO (carve-outs logged) | grep clean; D20-cited paths resolve | ☐ |
-| T4 | Confirm no kept file references the old `_self-host-migration/<doc>.md` paths | grep `_self-host-migration/.*\.md` over kept tree (excl. the still-living `_self-host-migration/` spec+M-tasks) = 0 doc-path hits | ☐ |
+| T0 | Confirm M9 cleared (engine reads root; no migration mention in kept tree) | M9 done | ☑ verified: no `_self/`, no `freeze*.mjs`, trees `.aprd .adr .hld .roadmap` at root, D20 cites `docs/` |
+| T1 | `mkdir docs/`; move the 4 files in (preserve the 2 D20-cited filenames exactly) | 4 files at `docs/<name>.md`; gone from `_self-host-migration/` | ☑ `git mv` all 4 → `docs/`; gone from workdir (renames staged, uncommitted) |
+| T2 | Rewrite each free of migration framing (purge list above; keep reflexive content) | no dead-scaffold refs; self-host special-casing collapsed into "run pipeline on this repo"; canonical-tree paths correct | ☑ generics token-clean (moved as-is); self-host pair rewritten — `_self/` cache + seed-from-frozen + bootstrap + parity-gate purged; upstream phases = frozen trees at repo root; Level-A/B + oracle + RE-RANK + launchers kept |
+| T3 | Verify token-set grep over `docs/` = ZERO (carve-outs logged) | grep clean; D20-cited paths resolve | ☑ token-set grep = 0 (+ extra purge terms = 0); `docs/self-host-workflow.md` §10 + `docs/generic-usage-guide.md` §3 resolve |
+| T4 | Confirm no kept file references the old `_self-host-migration/<doc>.md` paths | grep `_self-host-migration/.*\.md` over kept tree (excl. the still-living `_self-host-migration/` spec+M-tasks) = 0 doc-path hits | ☑ grep over kept tree = 0 doc-path hits |
 
 ## M10 acceptance — MET when
 
-- [ ] 4 surviving docs live in `docs/` (the 2 D20-cited at exact paths) and read clean (no migration trace — T3 grep)
-- [ ] no kept file references the old `_self-host-migration/<doc>.md` paths (T4)
-- [ ] `_self-host-migration/` still EXISTS — it holds `migration-spec.md` + `M0–M12` task files until M11's closing act (`M11.14`) deletes it
+- [x] 4 surviving docs live in `docs/` (the 2 D20-cited at exact paths) and read clean (no migration trace — T3 grep)
+- [x] no kept file references the old `_self-host-migration/<doc>.md` paths (T4)
+- [x] `_self-host-migration/` still EXISTS — it holds `migration-spec.md` + `M0–M12` task files until M11's closing act (`M11.14`) deletes it
 
 ## Done-checklist line
 
 ```
-M10 [ ] surviving docs relocated to canonical home (docs/) + rewritten clean
+M10 [x] surviving docs relocated to canonical home (docs/) + rewritten clean
 ```
 
 ## Notes
