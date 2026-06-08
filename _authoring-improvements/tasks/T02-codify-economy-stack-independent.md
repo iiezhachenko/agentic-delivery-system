@@ -62,3 +62,23 @@ Does NOT build the linter/auditor (T04/T05) nor wire them (T06). This task gives
 ## OUT OF SCOPE
 
 AB7–AB9 prompt-stack rules (T03). Linter (T04). Auditor role (T05). Wiring (T06).
+
+## STATUS — DONE (not committed)
+
+Spec-level only (gives gate its ORACLE-at-spec-level; no linter/auditor/wiring). 2 spec edits + 1 CR record:
+
+1. **P13** — `.aprd/specs/00` §2 principles table, after P12. Stack-independent wording; column matches actual table header ("Consequence if violated"): *"Every produced artifact is downstream context — author to context-economy" / "Bloat compounds along chain; each stage's output dilutes every downstream agent's attention."* One home.
+2. **§2.1 Economy invariant** — new subsection, spec 00. Defines `A-ECON` (NFR-force assumption, sibling to security `A2` / scale `A13`) + cross-slice `INV-ECON` foundation-cut carries. Threaded `R → AC → gate` like security. VERIFY-OUTPUT NFR check = gate hook (same as `M*`). TESTABLE acceptance: fact-once + statement→reader-action + single-interpretation; both-directions (planted-duplicate FAILs, planted-omission FAILs); substance floor named (economy ≠ truncation). Universal-vs-stack-local split stated once (universal = the RULE; stack-local = what "one home" MEANS per stack; profile CITES, never re-owns). Caveman-register distinction restated as separate consumer-independent absolute.
+3. **Spec version** v0.3 → v0.4 (date 2026-06-08) — requirement-source new version (draft versioning ritual).
+4. **CR-001** — `.aprd/change-requests/CR-001-economy-canon.md`. Honors immutability: `aprd.frozen.md`/`aprd.lock` NOT overwritten (frozen body references specs by path, no content delta); re-lock v3→v4 deferred to next freeze; downstream re-trigger table (coding-canon→T03, foundation-cut→T07, MAP-NFR→T06/T07, VERIFY-OUTPUT→T06).
+
+Spec carries NO task ids (T-ids = transient authoring, not canon); CR + this STATUS hold the T03/T06/T07 hand-off.
+
+ACCEPTANCE check:
+- P13 in §2 table, stack-independent, one home → ✅.
+- Economy INV = `A-ECON` NFR, testable acceptance (both-directions + substance floor) → ✅ (§2.1).
+- Split (universal vs stack-local) stated once → ✅ (§2.1 bullet; T03 cites, T07 inherits — clean source).
+- Change-request path honored: frozen aPRD not overwritten; new version + lock noted; downstream re-trigger noted → ✅ (spec v0.4 + CR-001).
+- No duplication: P13 once, INV once, coding-canon CITES not copies (left to T03) → ✅.
+
+Verify: `grep "P13" .aprd/specs/00*.md` = principle row + §2.1 anchor only (stated once). `aprd.frozen.md`/`aprd.lock` unchanged (not touched). DO-NOT-COMMIT honored.

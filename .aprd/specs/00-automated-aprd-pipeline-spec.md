@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | **Status** | Draft |
-| **Version** | 0.3 |
-| **Date** | 2026-06-06 |
+| **Version** | 0.4 |
+| **Date** | 2026-06-08 |
 | **Audience** | Engineers building system; agents executing it |
 | **Scope** | Intake-to-delivery pipeline. Turns any client request into verified software |
 
@@ -58,6 +58,19 @@ Load-bearing. Violate one → breaks system.
 | P10 | Adversarial critique before freeze | Residual ambiguity reaches build |
 | P11 | LLM reconciles + verifies; **not** source of truth | Stale/hallucinated facts ship |
 | P12 | WHAT mapped broad, HOW built thin — aPRD sliced into vertical increments, never built whole | Big-bang waterfall; client sees nothing until end |
+| P13 | Every produced artifact is downstream context — author to context-economy | Bloat compounds along chain; each stage's output dilutes every downstream agent's attention |
+
+### 2.1 Economy invariant (P13 enforced) — cross-cutting NFR
+
+P13 = principle. Engine enforces it as cross-cutting NFR injected into every project, threaded `R → AC → gate` like security/auth:
+
+- **id `A-ECON`** — NFR-force assumption (like security `A2`, scale `A13`). Cross-slice invariant `INV-ECON` foundation-cut carries → decided once, every slice inherits, never per-slice re-derived.
+- **Gate** — VERIFY-OUTPUT NFR check measures each stage's emitted artifact against `A-ECON` (same hook `M*` mechanisms use). Bloat in any stage's output = next agent's prompt bloat one step removed, same cost — compounds along chain (more reads, more agents than a single prompt).
+- **Acceptance (testable — P2):** for artifact X — every load-bearing fact appears exactly once; every statement maps to a downstream-reader action; no statement readable two ways (else marked `judgment call:`). Both-directions: planted-duplicate FAILs, planted-omission FAILs. Substance floor: economy ≠ truncation.
+- **Universal vs stack-local split** (one home each):
+  - **Universal (spec, here):** the economy RULE — invariant across stacks (prompt, terraform, typescript).
+  - **Stack-local (code-canon profile):** only what "one home" MEANS per stack — a prompt section vs a `.tf` resource vs a TS module. Profile CITES `A-ECON`; never re-owns it.
+- **Distinct from caveman register** (CLAUDE.md / coding-canon PR4): register = terse style, economy = substance discipline. Both absolute, both consumer-independent, bind independently — terse-but-repetitive fails economy; DRY-but-full-prose fails register.
 
 ---
 
