@@ -17,6 +17,8 @@ node lint.mjs <target.md> [--type prompt|adr|aprd|hld|roadmap] [--out lint.json]
 node selftest.mjs        # both-directions discrimination + determinism
 ```
 
+`selftest.mjs` golden = `tools/fixtures/economy-lint/reference.md` (deterministic-tool fixtures live under `tools/fixtures/<tool>/`).
+
 Exit 0 = clean, 1 = blocked, 2 = usage. Type inferred from path (`/prompts/`→prompt, `/.adr/`→adr…); `--type` overrides.
 
 ## `lint.json` contract (T06 consumes)

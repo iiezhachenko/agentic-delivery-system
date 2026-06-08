@@ -1,0 +1,12 @@
+{
+  "target": "/workspace/_fixtures/economy/audit/planted-bloat.md",
+  "type": "prompt",
+  "verdict": "clean",
+  "violations": [],
+  "warnings": [],
+  "counts": {
+    "lines_total": 52,
+    "by_rule": {},
+    "warnings": 0
+  }
+}

@@ -86,8 +86,8 @@ Built deterministic linter (Node, no LLM). Lives `tools/economy-lint/` (PERMANEN
 
 ### Deliverables (`tools/economy-lint/`)
 - `lint.mjs` — linter + CLI + exported `lint(target,type)`. Emits `lint.json`. C1–C9 all implemented.
-- `selftest.mjs` — both-directions discrimination + determinism harness.
-- `fixtures/reference.md` — clean golden prompt (real corpus prompts already carry bloat, so authored fresh).
+- `selftest.mjs` — both-directions discrimination + determinism harness. Reads its golden from `tools/fixtures/economy-lint/reference.md`.
+- `tools/fixtures/economy-lint/reference.md` — clean golden prompt (real corpus prompts already carry bloat, so authored fresh). Deterministic-tool fixtures live under `tools/fixtures/<tool>/` (operator directive — location signals "fixtures for a deterministic tool", distinct from `_fixtures/` clean-room/prompt oracles).
 - `README.md` — `lint.json` contract (T06 consumes) + check table + per-artifact generalization.
 ### Enabling decision — ADR-0022 / D22 (RATIFIED, operator-approved 2026-06-08)
 Linter = FIRST deterministic-code component in an otherwise 100%-prompt-driven pipeline → needed an enabling ADR. Operator approved + directed tool-agnostic. Authored as a CLASS, not a one-off; then made permanent via the system's mechanical-freeze flow (SYNTHESIZE-ADR design call: draft → review → mechanical freeze promotes to log + writes lock):

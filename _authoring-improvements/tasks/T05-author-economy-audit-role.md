@@ -77,3 +77,36 @@ Goal = RIGHT-SIZED-for-consumer, not shortest. Over-compression that drops a loa
 ## OUT OF SCOPE
 
 Deterministic structural checks (T04). Orchestrator/phase-gate wiring (T06). Re-authoring prompts (T08–T10).
+
+---
+
+## DONE (2026-06-08, not committed)
+
+Authored Layer-2 ECONOMY-AUDIT role + both-directions self-test. Discriminates tight vs bloat vs omission clean-room.
+
+### Deliverable — `prompts/_economy-audit.md`
+- Role `ECONOMY-AUDIT` (general capability `{artifact, economy-canon}`); `PROMPT-AUDIT` = prompt-stack caller-view. Underscore-prefix = cross-cutting (like `_orchestrator`/`_step-runner`); invoked every phase verify step (T06 wires). Only prompt-stack instantiation authored (greenfield-first idiom); other stacks via T07 profile + non-prompt-type guard.
+- Hostile, blocking-grade, FLAG-not-fix. Six categories: `duplicate-fact` (AB1, SEMANTIC — names home + N-1 copies), `no-objective` (AB7, delete-test), `mandate-narration` (AB6, >3 lines), `ambiguous` (AB8, two-way / unmarked hedge), `re-spec` (AB3), `starvation` (§2.1 floor — UNDER direction, dropped load-bearing fact).
+- Keystone: every issue routes PRODUCING stage (default `RE-AUTHOR`; `canon` only when root = wrong AB), `fix: DELETE|REWRITE` — **never ADD** (enforced in schema). Loop offers no patch path (T06).
+- Lane vs lint: lint = STRUCTURE (Layer-1, runs first), AUDIT = MEANING on lint-clean residue (P5). Guards HALT if lint absent/not-clean.
+- Anti-false-positive: dual-mode shared-vs-delta (only flag un-factored SHARED copy, never genuine per-pass delta); consume-clause vs schema re-spec.
+
+### Self-test — PASS (record in `tools/economy-audit/README.md`; mirrors `economy-lint/`)
+Fixtures live under `_fixtures/economy/audit/{reference-tight,planted-bloat,planted-omission}.md` — clean-room/prompt oracle (AUDIT is an LLM role, not a deterministic tool), so they sit in `_fixtures/` beside the `greenfield-*` trees. (Lint IS a deterministic tool → its golden lives under `tools/fixtures/economy-lint/` instead; operator directive — fixture LOCATION signals deterministic-tool vs clean-room oracle.) Each fixture lint-CLEAN first (residue precondition — Layer-1's n-gram misses semantic dup; omission isn't a bloat trigger). Clean-room run (fresh step-runner per fixture, against FINAL prompt):
+
+| fixture | lint | AUDIT | category | discrimination |
+|---|---|---|---|---|
+| reference-tight | clean | **clean** | — | tight → clean ✓ |
+| planted-bloat | clean | **blocked** | `duplicate-fact` (+bonus `ambiguous`) | Rule-2 fact reworded into 3 extra homes so n-gram misses; names home (Rules) + copies, fix DELETE ✓ |
+| planted-omission | clean | **blocked** | `starvation` | `skeleton.lock` input decl dropped (escapes + role still depend); flags dropped load-bearing fact, fix REWRITE ✓ |
+
+Held across 3 rounds. No issue ever `fix: ADD` (schema-checked). Auditor prompt itself lint-CLEAN (98 lines, 0 violations) — exemplary; dropped a non-load-bearing resumability guard (T06 owns re-invocation) to clear C6, fixed 2 own prose defects.
+
+### ACCEPTANCE — MET
+- tight → clean ✓ · planted-bloat (reworded, lint-missed) → blocked, names dup + home + copies ✓ · planted-omission → blocked via `starvation` ✓ · issues never carry `fix: ADD` (schema-reject) ✓ · discriminates tight-from-bloat + catches omission ✓.
+
+### Notes for downstream
+- T06 consumes `economy-audit.json` contract (= `tools/economy-audit/README.md`): blocked → route re-author (DELETE/REWRITE), skip sim; clean → clean-room sim. Wires after lint in STEP-4 verify.
+- T07 inherits same role + fixtures; stack-local profile defines what "one home" MEANS per stack (prompt section vs `.tf` resource vs TS module) — CITES `A-ECON`, never re-owns.
+- Borderline-phrase variance: hostile auditor sometimes adds an `ambiguous` flag (e.g. "state units ordered") on bloat run — bonus catch, doesn't break discrimination (reference stays clean across runs).
+- DO-NOT-COMMIT honored.

@@ -1,0 +1,12 @@
+{
+  "target": "/workspace/_fixtures/economy/audit/planted-omission.md",
+  "type": "prompt",
+  "verdict": "clean",
+  "violations": [],
+  "warnings": [],
+  "counts": {
+    "lines_total": 51,
+    "by_rule": {},
+    "warnings": 0
+  }
+}

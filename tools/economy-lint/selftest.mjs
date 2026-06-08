@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { lint } from "./lint.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const REF = path.join(here, "fixtures", "reference.md");
+const REF = path.join(here, "..", "fixtures", "economy-lint", "reference.md");  // deterministic-tool fixtures live under tools/fixtures/
 const ref = fs.readFileSync(REF, "utf8");
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "lint-selftest-"));
 const write = (name, body) => { const f = path.join(tmp, name); fs.writeFileSync(f, body); return f; };
