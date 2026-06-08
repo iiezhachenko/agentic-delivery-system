@@ -6,8 +6,11 @@
 //
 //   node _self-host-migration/freeze.mjs [outDir=_self]
 //
-// Reads (read-only): _rules.md, _decisions.md, _tracker.md, _initial_design/00-04,
+// Reads (read-only): _rules.md, _decisions.md, _initial_design/00-04,
 // prompts/<phase>/<ROLE>.md. Writes: <outDir>/{.aprd,.adr,.hld,.roadmap}.
+// (_tracker.md retired at M6 — the decision index now lives in _decisions.md;
+//  the roadmap frontier is the hardcoded remaining_sequence below, position
+//  derived from disk sentinels. Status is never read from a tracker — spec §8.)
 
 import { readFileSync, writeFileSync, mkdirSync, rmSync, readdirSync, existsSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -65,7 +68,6 @@ if (existsSync(OUT)) rmSync(OUT, { recursive: true, force: true });
 
 const rules = read("_rules.md");
 const decisions = read("_decisions.md");
-const tracker = read("_tracker.md");
 
 // ── .aprd/ ───────────────────────────────────────────────────────────────────
 // The WHAT of the self-host deliverable: build the agentic delivery prompt set.
@@ -110,9 +112,9 @@ ${buildOrder}
 // ── .adr/ ────────────────────────────────────────────────────────────────────
 // Decisions D1–D21 → one ADR log per decision. D21 = the stack ADR (ADR-0021).
 // D1–D4 are the foundational conventions (live in _rules.md Conventions, indexed
-// in _tracker.md); D5–D21 bodies live in _decisions.md.
+// in _decisions.md Decision index — relocated there at M6); D5–D21 bodies live in _decisions.md.
 {
-  // D1–D4 — foundational conventions (from _tracker.md index + _rules.md Conventions)
+  // D1–D4 — foundational conventions (from _decisions.md Decision index + _rules.md Conventions)
   const conv = [
     ["D1", "One role = one prompt", "Role separation is load-bearing (failure isolation, every spec §8). May split a role further if justified. Source: _rules.md Conventions."],
     ["D2", "Storage layout", "Authored prompts at prompts/<NN-phase>/<ROLE>.md; sim workspace holds .aprd/.roadmap/.adr/.hld/.build/src trees. Source: _rules.md Storage layout."],
@@ -147,8 +149,8 @@ ${buildOrder}
     const c = conv.find((x) => x[0] === `D${n}`);
     if (c) {
       title = c[1];
-      source = "_rules.md Conventions · _tracker.md Decision index";
-      body = `## Decision\n\n${c[2]}\n\n## Context\n\nFoundational authoring convention (D${n}), baselined before the spine was built. Indexed in _tracker.md (D1–D4 → _rules.md Conventions).`;
+      source = "_rules.md Conventions · _decisions.md Decision index";
+      body = `## Decision\n\n${c[2]}\n\n## Context\n\nFoundational authoring convention (D${n}), baselined before the spine was built. Indexed in _decisions.md Decision index (D1–D4 → _rules.md Conventions).`;
     } else if (byN.has(n)) {
       const d = byN.get(n);
       title = d.title;
@@ -333,9 +335,10 @@ Producer/consumer (PR2): output schema of step N == input schema of step N+1 —
 
 // ── .roadmap/ ────────────────────────────────────────────────────────────────
 // remaining_sequence = the unshipped prompts (RECONCILE/CRITIQUE increment first),
-// each with a done_sentinel. Mechanical render of _tracker.md "Prompt inventory &
-// status" (30/39 done; remaining = the RECONCILE/CRITIQUE increment + 8 Phase-4
-// SLICE-BUILD modes). This is the self-host repurposing of the RE-RANK 08 schema
+// each with a done_sentinel. The frontier is declared below (the ordered prompt-build
+// list; remaining = the RECONCILE/CRITIQUE increment + 8 Phase-4 SLICE-BUILD modes) —
+// position is derived from disk (the done_sentinel scan), never read from a tracker
+// (_tracker.md retired at M6). This is the self-host repurposing of the RE-RANK 08 schema
 // (D21): each "slice" = one prompt-build; done_sentinel = the disk path whose
 // presence+validity == that build shipped (the orchestrator STEP-0 derived-state key).
 {
@@ -394,7 +397,7 @@ Producer/consumer (PR2): output schema of step N == input schema of step N+1 —
     class: "agentic-delivery-pipeline",
     roadmap_version: 2,
     verdict: "re_ranked",
-    _note: "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each 'slice' = one remaining PROMPT-BUILD, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). Rendered from _tracker.md 'Prompt inventory & status' by freeze.mjs.",
+    _note: "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each 'slice' = one remaining PROMPT-BUILD, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). Order = the declared frontier in freeze.mjs (base_ref 07-sequence-reviewed); position is derived from disk, never from a tracker (_tracker.md retired at M6).",
     completed,
     remaining_sequence,
     dependency_check: { acyclic: true, legal: true, against: "build_order", cycles: [], dangling_real_depends_on: [] },

@@ -65,9 +65,9 @@ rr.completed.every((c) => "done_sentinel" in c && "unit" in c)
   && rr.remaining_sequence.every((r) => "done_sentinel" in r && "unit" in r && "id" in r)
   ? ok("08-rerank: every entry has done_sentinel + unit + id (STEP-0 keys)") : no("08-rerank entry missing STEP-0 key");
 rr.completed.length === 1 && rr.remaining_sequence.length === 9
-  ? ok("08-rerank: 1 completed + 9 remaining (tracker inventory)") : no(`08-rerank counts ${rr.completed.length}/${rr.remaining_sequence.length}`);
+  ? ok("08-rerank: 1 completed + 9 remaining (declared frontier; position derived from disk)") : no(`08-rerank counts ${rr.completed.length}/${rr.remaining_sequence.length}`);
 rr.remaining_sequence[0].id === "P-RECONCILE-CRITIQUE-INC"
-  ? ok("08-rerank: frontier = RECONCILE/CRITIQUE increment first") : no("08-rerank frontier wrong");
+  ? ok("08-rerank: remaining_sequence order head = RECONCILE/CRITIQUE increment (frozen base order; live position derived from disk)") : no("08-rerank order head wrong");
 
 // ── Acceptance 3: prompts/* + _fixtures/* recognized ─────────────────────────
 console.log("\n[3] prompts/* = built-skeleton, _fixtures/* = oracle baseline (recognized)");
@@ -80,9 +80,16 @@ const unitPath = (u) => u.replace(/ \(.*\)$/, "");
 const allUnits = [...rr.completed, ...rr.remaining_sequence].map((e) => unitPath(e.unit));
 const unitsOk = allUnits.every((u) => existsSync(join(ROOT, u)));
 unitsOk ? ok(`every unit resolves to a real prompts/ file (${allUnits.length})`) : no("a unit path dangles");
-// frontier sentinel correctly ABSENT (RECONCILE/CRITIQUE not yet shipped)
-!existsSync(join(ROOT, rr.remaining_sequence[0].done_sentinel))
-  ? ok("frontier sentinel (reconcile.json) correctly absent → unshipped") : no("frontier sentinel unexpectedly present");
+// live frontier is DERIVED from disk (not read from the static remaining_sequence order):
+// post-M5-cutover remaining_sequence[0] (RECONCILE/CRITIQUE) IS shipped — its sentinel is
+// present; the live frontier = first remaining entry whose sentinel is ABSENT.
+existsSync(join(ROOT, rr.remaining_sequence[0].done_sentinel))
+  ? ok(`remaining_sequence[0] (${rr.remaining_sequence[0].id}) sentinel present → shipped at M5 cutover`)
+  : no("remaining_sequence[0] sentinel absent — expected present post-cutover");
+const liveFrontier = rr.remaining_sequence.find((r) => !existsSync(join(ROOT, r.done_sentinel)));
+liveFrontier && liveFrontier.id === "P-BUILD-PLAN-SLICE"
+  ? ok(`live frontier derived from disk = ${liveFrontier.id} (next unshipped — status never read from a tracker)`)
+  : no(`live frontier wrong: ${liveFrontier ? liveFrontier.id : "none (loop drained?)"}`);
 // components.json roles all resolve to real prompt files
 const comp = rj("_self/.hld/skeleton/components.json");
 const compOk = comp.phases.every((p) => p.roles.every((r) => existsSync(join(ROOT, "prompts", p.phase, r + ".md"))));

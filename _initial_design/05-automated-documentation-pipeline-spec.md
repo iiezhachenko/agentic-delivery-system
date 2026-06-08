@@ -1,6 +1,6 @@
 # Spine D — Automated Documentation Pipeline (existing system + doc goal → verified documentation set)
 
-> **Status:** design sketch. Built AFTER the greenfield delivery pipeline (Phases 0–4) completes, per `_tracker.md` build order. Authored prompt-by-prompt the same way (one role = one prompt, fresh-session sim, artifacts chain on disk, golden fixtures).
+> **Status:** design sketch. Built AFTER the greenfield delivery pipeline (Phases 0–4) completes, per the roadmap build order (`_self/.roadmap/`; status derived from disk, not a tracker). Authored prompt-by-prompt the same way (one role = one prompt, fresh-session sim, artifacts chain on disk, golden fixtures).
 >
 > **Register note:** clean prose inside this spec (it is a deliverable). Authored prompts carry the canonical caveman block.
 

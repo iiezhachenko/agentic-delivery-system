@@ -20,4 +20,4 @@ scratch path, the clean-room runner (`.claude/agents/step-runner.md`, Sonnet/Hig
 both directions) verifies it against `_fixtures/`, then **pause at the parity/value gate** before
 promoting it to `prompts/`.
 
-Orchestrator stays **Opus through the parity gate** (external judge); drop to Sonnet after parity clears.
+Orchestrator runs **Sonnet** — M5 parity cleared and the loop is trusted, so the Opus-through-the-parity-gate bootstrap (external judge) is retired (migration-spec M6).

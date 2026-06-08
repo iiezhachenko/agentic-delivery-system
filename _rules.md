@@ -1,6 +1,6 @@
 # Authoring Rules & Conventions (stable)
 
-> Stable reference for authoring a prompt. Loaded at step 3 (author), not every run. Pointer lives in `_tracker.md`. Edits here are rare (a new PR/AB rule or convention).
+> Stable reference for authoring a prompt — the canon the freeze renders into `_self/.hld/` + `.aprd/` and IMPLEMENT specializes (D21 fields: scaffold + coding canon). Loaded when authoring, not every run. Edits here are rare (a new PR/AB rule or convention); on edit, re-freeze `_self/` (it is a cache, never hand-edited — migration-spec invariant #5).
 
 ---
 
