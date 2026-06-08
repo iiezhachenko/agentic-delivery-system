@@ -1,14 +1,14 @@
 # Self-host: build the system on itself
-- Workspace root is `_self/`. Read frozen phases 0–3 from `_self/.aprd .adr .hld .roadmap`.
-  Do NOT re-run aPRD/Roadmap/ADR/HLD — they are seeded from frozen (rebuildable cache;
-  re-freeze on source edit via `node _self-host-migration/freeze.mjs`, never hand-edit `_self/`).
+- Workspace root is the repo root (`.`). Read phases 0–3 from the committed root trees
+  `.aprd .adr .hld .roadmap`. Do NOT re-run aPRD/Roadmap/ADR/HLD — they are committed source
+  the orchestrator reads like any project's trees; only the Build phase runs live.
 - Deliverable target is the agentic-delivery-pipeline coding-canon profile
   (`code-canon/agentic-delivery-pipeline.md`, pinned by `ADR-0021`/`D21`). The "code" unit is a
   prompt `.md`; Build writes to `prompts/<phase>/<ROLE>.md` (promoted from scratch after the gate).
 - Verify mechanism is the clean-room runner simulation against `_fixtures/` — NOT pytest.
   Fresh runner gets the prompt verbatim + a `_test_bench` root, must emit a schema-valid,
   ID-threaded artifact matching the golden on value; both directions (good PASS + defect FAIL).
-- RE-RANK over `_self/.roadmap/08-rerank.json` picks the next unshipped prompt. Status is derived
+- RE-RANK over `.roadmap/08-rerank.json` picks the next unshipped prompt. Status is derived
   from disk (scan `prompts/` + `_fixtures/` + locks; done iff `done_sentinel` present + valid);
   do NOT maintain a tracker/changelog file.
 - Orchestrator stays Opus through the parity gate (external judge), Sonnet after.

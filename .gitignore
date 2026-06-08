@@ -1,6 +1,5 @@
 # Canonical artifact trees (.aprd .adr .hld .roadmap) are COMMITTED SOURCE, not ignored (M7).
 _test_bench/
 _m2-acceptance-mock/
-_self/
 agent.log
 _self-host-scratch/
