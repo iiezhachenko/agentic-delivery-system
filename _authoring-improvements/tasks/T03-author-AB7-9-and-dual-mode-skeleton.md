@@ -89,3 +89,29 @@ Does NOT build linter (T04) or auditor (T05) — those reference these rules as 
 ## OUT OF SCOPE
 
 Linter (T04). Auditor role (T05). Pipeline wiring (T06). Actual prompt re-authoring (T08–T10).
+
+## STATUS — DONE (not committed)
+
+v4 canon authored in live `skeleton/*.md`. Freeze ritual (new frozen.md + re-lock) DEFERRED to T08 per step-7 ordering — see CR below.
+
+### Landed
+- `coding-canon.md` caveman block (PR4, verbatim) — delta line added inside fence: `Fix by cutting, never by adding (AB9). If a statement reads two ways, rewrite it (AB8). Every line earns its place (AB7).` Propagates to every prompt at paste-time.
+- `coding-canon.md` AB section — header `AB1–AB6` → `AB1–AB9`; AB7/AB8/AB9 added paste-ready; lead note frames AB1–6 = placement idioms, AB7–9 = prompt-stack realization of spec **P13** (CITE `A-ECON`, do not re-own; universal rule lives spec §2.1).
+- `coding-canon.md` D10 line ref `AB1–AB6` → `AB1–AB9`.
+- `prompt-skeleton.md` intro ref `AB1–AB6` → `AB1–AB9`; dual-mode Rules rule added as scoped section (`pass: skeleton|increment`, D9/D14): ONE shared `## Rules` above mode split + per-mode DELTA only, never copy shared rule into both (AB1). Killed the two-pass duplication AT THE SOURCE.
+
+### CR — skeleton v3→v4 (immutability honored, mirrors T02 path)
+- Frozen v3 NOT overwritten: `skeleton.frozen.md` (FROZEN v3) + `skeleton.lock` (v3) untouched. Same precedent as T02 (advanced live source, left frozen/lock, deferred re-lock to next freeze).
+- Step-6 vs step-7 reconcile (judgment call): step 6 names a frozen.md "## CODING CANON" line-edit; step 7 + CLAUDE.md forbid overwriting frozen v3 and forbid premature freeze. Resolved toward immutability — frozen v3 left intact (BOTH its `AB1–AB6` refs: SCAFFOLD L9 + CODING CANON L12). The `AB1–AB6` → `AB1–AB9` reference lands in the NEW `skeleton.frozen.md` (FROZEN v4) + new `skeleton.lock` (v4, fresh content_sha256, signed_at, gate verdict) authored at the **T08** freeze ritual — only AFTER gate (T04/T05/T06) exists + both-directions self-test holds.
+- Downstream re-trigger (named, not done here): T04 linter oracle = AB1–AB9; T05 auditor oracle = AB1–AB9; T08–T10 re-author every prompt against v4 + dual-mode rule.
+
+### ACCEPTANCE check
+- AB7/AB8/AB9 present, each ONE home, paste-ready + gateable (each carries a mechanical test) → ✅.
+- Caveman delta single line in verbatim block, no narration → ✅.
+- Dual-mode Rules rule in prompt-skeleton — shared-once + per-mode-delta → ✅.
+- coding-canon CITES P13, does not duplicate universal rule → ✅ (lead note + AB7/AB9 parentheticals point to spec §2.1/P13).
+- No frozen-v3 overwrite; v4 authored as live canon, signed v4 freeze deferred to T08 → ✅.
+- Economy self-check: no AB restates another; AB9 ≠ AB1 stated in-rule (AB1 = placement, AB9 = fix action) → ✅. AB7 generalizes AB3/AB5/AB6 (named), does not re-state them.
+
+### Verify
+`grep -n "AB7\|AB8\|AB9" .hld/skeleton/coding-canon.md` = block + delta + lead note. `grep "AB1–AB6" .hld/skeleton/coding-canon.md .hld/skeleton/prompt-skeleton.md` = only the lead-note contrast line (intentional). Frozen v3 unchanged (`AB1–AB6` still present in `skeleton.frozen.md` — correct, immutable). DO-NOT-COMMIT honored.

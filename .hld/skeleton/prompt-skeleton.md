@@ -1,6 +1,6 @@
 # Prompt scaffold (DRY skeleton, D10)
 
-> Single scaffold every authored prompt follows. Frozen from .hld design canon "Standard prompt skeleton". One home per fact (AB1–AB6).
+> Single scaffold every authored prompt follows. Frozen from .hld design canon "Standard prompt skeleton". One home per fact (AB1–AB9).
 
 ```
 ---
@@ -24,3 +24,6 @@ escapes: [ {when, target} ]  # THE single home for guards (AB2). Compact: condit
 ## Output schema — <path>      # JSON/YAML w/ inline comments = SINGLE field documentation (AB5). Constraints that don't fit comment go in comment-adjacent line, NOT separate Field-rules section.
 ## Stop condition              # terminal outcomes only (clean / defect-routed / halt), one line each. References guards by name; does NOT re-list them. Clean line states write path (no separate Write-to-disk section).
 ```
+
+## Rules in dual-mode prompts (`pass: skeleton|increment`, D9/D14)
+ONE shared `## Rules` block + a per-mode DELTA block. Shared rules (lane, grounding, named-not-designed, invent-nothing) live ONCE above the mode split. Each mode section carries ONLY its delta (rules that differ skeleton vs increment). Never copy a shared rule into both — AB1.
