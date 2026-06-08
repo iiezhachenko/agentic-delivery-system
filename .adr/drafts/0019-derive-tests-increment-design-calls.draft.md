@@ -1,0 +1,16 @@
+---
+id: ADR-0019
+title: DERIVE-TESTS increment design calls
+status: Proposed
+date: 2026-06-08
+class: self-host
+scope: global
+mode: foundation
+source: _decisions.md
+supersedes: null
+superseded_by: null
+---
+
+## Decision
+
+- **D19 — DERIVE-TESTS increment design calls (RESOLVED 2026-06-08, under D14 pattern).** Made authoring the 7th Phase-3 increment (DERIVE-TESTS). **(1) The slice oracle = ONE NEW flow test + inherited frozen contract tests — a HYBRID of the two prior increment shapes.** Like MODEL-FLOWS (D18), the per-slice FLOW TEST `T-F*` is genuinely new each slice (asserts_ac/failure_path/traces carried VERBATIM from the slice's flow F*). Like the carry-by-reference increments (D15/D16/D17), the CONTRACT tests are INHERITED: for each CT* in the slice's `touched_contracts`, cite the frozen `T-CT*` from the skeleton `test-specs.json` by reference (`{id,target,between,contract_kind,source_ref}` — `shape_assertion`/`failure_assertions` live in the frozen file, NEVER copied here, H14). `skeleton_fidelity.re_authored_contract_tests`/`re_tested_flows` MUST be empty; re-authoring a frozen `T-CT*` / re-testing F1 → `frame_conflicts[]` → Phase 2. **(2) The build DAG is SKELETON-ONLY (H7) — the increment does NOT re-emit it.** The skeleton DERIVE-TESTS emits TWO artifacts (test-specs.json + build-dag.json); the increment emits ONE (test-specs.json). The DAG is drawn once; a slice activates a vertical PATH through it (the flow, already in `flows.json`), so `build_dag_re_emitted:false`. **(3) `new_contract_tests`=[] in greenfield (CORRECT, cf `new_components`/`new_contracts`/`new_entities`/`new_mechanisms`=[]):** the skeleton tested the FULL frozen CT* set (bijection); a slice inherits a subset. Authored only for a slice's `new_contracts` (brownfield/thin-skeleton). A new contract with empty failure_modes → `structural_defects[]` → DEFINE-CONTRACTS; a touched CT* with no frozen T-CT* → `structural_defects[]` → DERIVE-TESTS skeleton. **DERIVE-TESTS NEVER invents a failure_mode/AC/contract/flow** — references the slice flow's + frozen contracts' own declarations; a flow tracing no AC* → `aprd_defects[]` → Phase 0. **(4) The exclusion (the D14/D16/D17/D18 trap at the test level):** cover ONLY the slice's `touched_contracts` (inherited) + its own flow F*; a frozen CT* a DIFFERENT slice introduces (CT4-CT7/CT10/CT11 for S4) is in the frozen test-specs but NOT this slice's oracle — excluded (inherited by ITS owning slice). Membership gate = `touched_contracts` + flow. **(5) `asserts_ac` references the AC by ID, never re-states the AC text** (Phase 0 owns it; design-layer oracle ≠ aPRD black-box oracle, H8) — `traces` carried verbatim from the slice flow (e2e proof: the chained run carried the on-disk flow's actual AC set, not a memorized golden). **(6) Output `.hld/slices/<slice_id>/test-specs.json`** (§10 tree; resumability sentinel = its presence; auto-select gate = flows.json + contracts.json present, test-specs.json absent — minimal consumed set, MODEL-DATA/RESOLVE-LOCAL/MAP-NFR outputs NOT consumed). **Reuse this inherit-tests-by-reference + flow-test-is-new + DAG-is-skeleton-only pattern for RECONCILE/CRITIQUE increment.** Reopen to author the last Phase-3 increment mode (RECONCILE/CRITIQUE).

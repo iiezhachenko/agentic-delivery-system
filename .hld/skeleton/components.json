@@ -1,0 +1,87 @@
+{
+  "artifact": "components.json",
+  "class": "self-host",
+  "note": "Role library = the build-DAG nodes of the agentic-delivery-pipeline deliverable. Scanned from prompts/ (the built skeleton). One role = one prompt (D1).",
+  "phases": [
+    {
+      "phase": "00-aprd",
+      "name": "aPRD (Understand)",
+      "roles": [
+        "CLASSIFIER",
+        "CRITIQUE",
+        "EXTRACT",
+        "EXTRACT-RULES",
+        "GAP-DETECT",
+        "QUESTION-GEN",
+        "RECONCILE",
+        "SYNTHESIZE",
+        "VERIFY"
+      ],
+      "role_count": 9,
+      "unit_path": "prompts/00-aprd/<ROLE>.md"
+    },
+    {
+      "phase": "01-roadmap",
+      "name": "Roadmap (Plan)",
+      "roles": [
+        "FOUNDATION-CUT",
+        "RE-RANK",
+        "SEQUENCE",
+        "SEQUENCE-REVIEW",
+        "SKELETON-IDENTIFY",
+        "SLICE-EXTRACT",
+        "VERTICALITY-CHECK"
+      ],
+      "role_count": 7,
+      "unit_path": "prompts/01-roadmap/<ROLE>.md"
+    },
+    {
+      "phase": "02-adr",
+      "name": "ADR (Decide)",
+      "roles": [
+        "CRITIQUE",
+        "DECISION-EXTRACT",
+        "EVALUATE-DECIDE",
+        "OPTION-GEN",
+        "RECONCILE",
+        "SYNTHESIZE-ADR",
+        "TRIAGE"
+      ],
+      "role_count": 7,
+      "unit_path": "prompts/02-adr/<ROLE>.md"
+    },
+    {
+      "phase": "03-hld",
+      "name": "HLD (Design)",
+      "roles": [
+        "DEFINE-CONTRACTS",
+        "DERIVE-COMPONENTS",
+        "DERIVE-TESTS",
+        "MAP-NFR",
+        "MODEL-DATA",
+        "MODEL-FLOWS",
+        "RECONCILE-CRITIQUE",
+        "RESOLVE-LOCAL"
+      ],
+      "role_count": 8,
+      "unit_path": "prompts/03-hld/<ROLE>.md"
+    },
+    {
+      "phase": "04-build",
+      "name": "Build (Deliver)",
+      "roles": [
+        "BUILD-PLAN",
+        "CRITIQUE",
+        "DEMO-GEN",
+        "DIAGNOSE",
+        "IMPLEMENT",
+        "INTEGRATE",
+        "MATERIALIZE-ORACLE",
+        "VERIFY-OUTPUT"
+      ],
+      "role_count": 8,
+      "unit_path": "prompts/04-build/<ROLE>.md"
+    }
+  ],
+  "component_count": 39
+}

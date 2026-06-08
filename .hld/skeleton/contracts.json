@@ -1,0 +1,33 @@
+{
+  "artifact": "contracts.json",
+  "class": "self-host",
+  "note": "Producer/consumer chain (PR2): each prompt writes the exact place+format the next reads; output schema of step N == input schema of step N+1. IDs thread R→AC→S→ADR→C→CT→F→commit.",
+  "rule": "PR2",
+  "chain": [
+    {
+      "from": "00-aprd",
+      "to": "01-roadmap",
+      "contract": "00-aprd.outputs == 01-roadmap.inputs"
+    },
+    {
+      "from": "01-roadmap",
+      "to": "02-adr",
+      "contract": "01-roadmap.outputs == 02-adr.inputs"
+    },
+    {
+      "from": "02-adr",
+      "to": "03-hld",
+      "contract": "02-adr.outputs == 03-hld.inputs"
+    },
+    {
+      "from": "03-hld",
+      "to": "04-build",
+      "contract": "03-hld.outputs == 04-build.inputs"
+    },
+    {
+      "from": "04-build",
+      "to": null,
+      "contract": "terminal (accepted staging demo)"
+    }
+  ]
+}

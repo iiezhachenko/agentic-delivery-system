@@ -1,0 +1,195 @@
+{
+  "base_ref": ".roadmap/07-sequence-reviewed.json",
+  "class": "agentic-delivery-pipeline",
+  "roadmap_version": 2,
+  "verdict": "re_ranked",
+  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each 'slice' = one remaining PROMPT-BUILD, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). Order = the declared frontier in freeze.mjs (base_ref 07-sequence-reviewed); position is derived from disk, never from a tracker (_tracker.md retired at M6).",
+  "completed": [
+    {
+      "position": 1,
+      "id": "P-DERIVE-TESTS-INC",
+      "name": "DERIVE-TESTS increment mode",
+      "status": "shipped",
+      "unit": "prompts/03-hld/DERIVE-TESTS.md (increment)",
+      "done_sentinel": "_fixtures/greenfield-clean/.hld/slices/S4/test-specs.json"
+    }
+  ],
+  "remaining_sequence": [
+    {
+      "position": 2,
+      "id": "P-RECONCILE-CRITIQUE-INC",
+      "name": "RECONCILE/CRITIQUE increment mode",
+      "value": "high",
+      "retires_risk": "phase-3-increment-chain-incomplete",
+      "unit": "prompts/03-hld/RECONCILE-CRITIQUE.md (increment)",
+      "done_sentinel": "_fixtures/greenfield-clean/.hld/slices/S4/reconcile.json",
+      "rationale": "Phase-3 role 8/8, last Phase-3 increment (D9/D14); unblocks the Phase-4 SLICE-BUILD modes. First net-new self-build (migration-spec §7 M5b).",
+      "coarse_depends_on": [
+        "P-DERIVE-TESTS-INC"
+      ],
+      "real_depends_on": [
+        "P-DERIVE-TESTS-INC"
+      ]
+    },
+    {
+      "position": 3,
+      "id": "P-BUILD-PLAN-SLICE",
+      "name": "BUILD-PLAN slice-build mode",
+      "value": "high",
+      "retires_risk": null,
+      "unit": "prompts/04-build/BUILD-PLAN.md (slice-build)",
+      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/build-plan.json",
+      "rationale": "Phase-4 slice-build (D11); blocked on the Phase-3 increment chain finishing.",
+      "coarse_depends_on": [
+        "P-RECONCILE-CRITIQUE-INC"
+      ],
+      "real_depends_on": [
+        "P-RECONCILE-CRITIQUE-INC"
+      ]
+    },
+    {
+      "position": 4,
+      "id": "P-MATERIALIZE-ORACLE-SLICE",
+      "name": "MATERIALIZE-ORACLE slice-build mode",
+      "value": "high",
+      "retires_risk": null,
+      "unit": "prompts/04-build/MATERIALIZE-ORACLE.md (slice-build)",
+      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/oracle.json",
+      "rationale": "Phase-4 slice-build (D11).",
+      "coarse_depends_on": [
+        "P-BUILD-PLAN-SLICE"
+      ],
+      "real_depends_on": [
+        "P-BUILD-PLAN-SLICE"
+      ]
+    },
+    {
+      "position": 5,
+      "id": "P-IMPLEMENT-SLICE",
+      "name": "IMPLEMENT slice-build mode",
+      "value": "high",
+      "retires_risk": null,
+      "unit": "prompts/04-build/IMPLEMENT.md (slice-build)",
+      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/build-record.json",
+      "rationale": "Phase-4 slice-build (D11).",
+      "coarse_depends_on": [
+        "P-MATERIALIZE-ORACLE-SLICE"
+      ],
+      "real_depends_on": [
+        "P-MATERIALIZE-ORACLE-SLICE"
+      ]
+    },
+    {
+      "position": 6,
+      "id": "P-INTEGRATE-SLICE",
+      "name": "INTEGRATE slice-build mode",
+      "value": "med",
+      "retires_risk": null,
+      "unit": "prompts/04-build/INTEGRATE.md (slice-build)",
+      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/integration-record.json",
+      "rationale": "Phase-4 slice-build (D11).",
+      "coarse_depends_on": [
+        "P-IMPLEMENT-SLICE"
+      ],
+      "real_depends_on": [
+        "P-IMPLEMENT-SLICE"
+      ]
+    },
+    {
+      "position": 7,
+      "id": "P-DIAGNOSE-SLICE",
+      "name": "DIAGNOSE slice-build mode",
+      "value": "med",
+      "retires_risk": null,
+      "unit": "prompts/04-build/DIAGNOSE.md (slice-build)",
+      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/diagnosis.json",
+      "rationale": "Phase-4 slice-build (D11).",
+      "coarse_depends_on": [
+        "P-INTEGRATE-SLICE"
+      ],
+      "real_depends_on": [
+        "P-INTEGRATE-SLICE"
+      ]
+    },
+    {
+      "position": 8,
+      "id": "P-VERIFY-OUTPUT-SLICE",
+      "name": "VERIFY-OUTPUT slice-build mode",
+      "value": "high",
+      "retires_risk": null,
+      "unit": "prompts/04-build/VERIFY-OUTPUT.md (slice-build)",
+      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/verify-output.json",
+      "rationale": "Phase-4 slice-build (D11).",
+      "coarse_depends_on": [
+        "P-DIAGNOSE-SLICE"
+      ],
+      "real_depends_on": [
+        "P-DIAGNOSE-SLICE"
+      ]
+    },
+    {
+      "position": 9,
+      "id": "P-CRITIQUE-SLICE",
+      "name": "CRITIQUE slice-build mode",
+      "value": "med",
+      "retires_risk": null,
+      "unit": "prompts/04-build/CRITIQUE.md (slice-build)",
+      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/critique.json",
+      "rationale": "Phase-4 slice-build (D11).",
+      "coarse_depends_on": [
+        "P-VERIFY-OUTPUT-SLICE"
+      ],
+      "real_depends_on": [
+        "P-VERIFY-OUTPUT-SLICE"
+      ]
+    },
+    {
+      "position": 10,
+      "id": "P-DEMO-GEN-SLICE",
+      "name": "DEMO-GEN slice-build mode",
+      "value": "high",
+      "retires_risk": null,
+      "unit": "prompts/04-build/DEMO-GEN.md (slice-build)",
+      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/demo/demo.json",
+      "rationale": "Phase-4 slice-build (D11), interactive demo+accept gate.",
+      "coarse_depends_on": [
+        "P-CRITIQUE-SLICE"
+      ],
+      "real_depends_on": [
+        "P-CRITIQUE-SLICE"
+      ]
+    }
+  ],
+  "dependency_check": {
+    "acyclic": true,
+    "legal": true,
+    "against": "build_order",
+    "cycles": [],
+    "dangling_real_depends_on": []
+  },
+  "coverage": {
+    "completed": [
+      "P-DERIVE-TESTS-INC"
+    ],
+    "remaining_ranked": [
+      "P-RECONCILE-CRITIQUE-INC",
+      "P-BUILD-PLAN-SLICE",
+      "P-MATERIALIZE-ORACLE-SLICE",
+      "P-IMPLEMENT-SLICE",
+      "P-INTEGRATE-SLICE",
+      "P-DIAGNOSE-SLICE",
+      "P-VERIFY-OUTPUT-SLICE",
+      "P-CRITIQUE-SLICE",
+      "P-DEMO-GEN-SLICE"
+    ],
+    "missing": [],
+    "duplicated": []
+  },
+  "rerank_counts": {
+    "completed": 1,
+    "remaining": 9,
+    "reordered": 0,
+    "deps_removed": 0,
+    "deps_added": 0
+  }
+}

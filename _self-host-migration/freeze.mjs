@@ -96,6 +96,13 @@ ${specsInScope}
 ${buildOrder}
 `;
   emit(".aprd/aprd.frozen.md", frozen);
+  // specs/ — the requirements-source corpus: the design specs land VERBATIM (full
+  // prose preserved, not just referenced) — the requirements source a fixture .aprd
+  // models. 00–04 in-scope (greenfield); 05–06 sibling spines (out of build scope,
+  // kept as requirement source). (migration-spec §6 M7 step 1: _initial_design/00–06 → .aprd/)
+  const specDir = join(ROOT, "_initial_design");
+  const specFiles = readdirSync(specDir).filter((f) => f.endsWith(".md")).sort();
+  for (const f of specFiles) emit(`.aprd/specs/${f}`, read(`_initial_design/${f}`));
   emit(
     ".aprd/aprd.lock",
     jstr({
@@ -179,9 +186,29 @@ superseded_by: null
 ${body}
 `;
     emit(`.adr/log/${fname}`, content);
+    // drafts/ — the pre-freeze ADR form (status Proposed), as the fixtures show.
+    const draftName = `${String(n).padStart(4, "0")}-${slug(title)}.draft.md`;
+    emit(`.adr/drafts/${draftName}`, content.replace("status: Accepted", "status: Proposed"));
     logBodies.push([fname, content]);
-    adrs.push({ id, dn: `D${n}`, title, status: "Accepted", log_ref: `log/${fname}` });
+    adrs.push({
+      id, dn: `D${n}`, title, status: "Accepted", mode: "foundation", scope: "global",
+      source, supersedes: null, superseded_by: null,
+      draft_ref: `drafts/${draftName}`, log_ref: `log/${fname}`,
+      ...(stack ? { stack: "agentic-delivery-pipeline" } : {}),
+    });
   }
+
+  // adr-index.json — the CANONICAL decision index (relocated from the _decisions.md
+  // markdown header to JSON at M7; the home a fixture project uses — NOT a md header).
+  emit(".adr/adr-index.json", jstr({
+    decisions_index_ref: "adr-index.json",
+    class: "self-host",
+    stack_adr: "ADR-0021",
+    gate: { reconcile_verdict: "coherent", critique_verdict: "clean" },
+    note: "Canonical decision index (D1–D21 → ADR-0001..0021). D1–D4 are the foundational conventions; D21 is the stack ADR. The index lives HERE as JSON, never as a markdown header (canonical fixture layout).",
+    adrs,
+    adr_counts: { rendered: adrs.length, degenerate_forced: 0, undecided_skipped: 0 },
+  }));
 
   logBodies.sort((a, b) => a[0].localeCompare(b[0]));
   const adrHash = sha256(logBodies.map((x) => x[1]).join(""));
