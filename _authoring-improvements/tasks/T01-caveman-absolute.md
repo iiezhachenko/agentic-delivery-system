@@ -69,3 +69,23 @@ Make caveman absolute in canon: DELETE the register exception from the canonical
 ## OUT OF SCOPE
 
 AB7–AB9 text (T03). Spec principle P13 (T02). Re-authoring prompts / deleting propagated copies (T08–T10).
+
+## STATUS — DONE (not committed)
+
+Source edits (3), no 39-prompt hand-edit:
+
+1. **Canonical caveman block** — `.hld/skeleton/coding-canon.md` L14. Old "Applies to ALL prose…/never breaks data/code" closing line REPLACED (not appended — AB9) with absolute mandate: NO exception, incl human-facing + external-rewrite escape + economy named separate absolute. (Rides T03 skeleton-v4 change-request; not frozen separately.)
+2. **CLAUDE.md Register** — "Applies to" bullet rewritten → "Applies ABSOLUTE — NO exception … incl human-facing"; external-restyle escape stated; new bullet states Register+Economy = two separate consumer-independent absolutes + their independence (terse-but-bloated fails economy; economical-but-full-prose fails register). Same voice as canonical block, one home.
+3. **`_orchestrator.md` L99** — "stays clean prose — PR4" → "stays caveman — PR4, no exception".
+
+Verify: `grep` for `stays clean|clean and complete|clean prose` in canon (CLAUDE.md + coding-canon + orchestrator) = 0 hits. Exception gone from canon, deleted not reframed.
+
+Propagation NAMED for remediation (T08–T10, NOT edited here): `prompts/04-build/DEMO-GEN.md` ("client-facing prose stays clean") + prompt carrying "governs narration, not the deliverable". Get corrected PR4 block on re-author.
+
+ACCEPTANCE check:
+- Caveman ABSOLUTE on every artifact incl human-facing, one voice, one home → ✅ (canonical block + CLAUDE.md aligned).
+- Exception NOWHERE in canon → ✅ (0 grep hits, deleted).
+- External-rewrite escape stated once → ✅ (canonical block; CLAUDE.md mirrors same rule).
+- Register + economy both absolute + consumer-independent, independence stated → ✅ (CLAUDE.md new bullet + canonical block economy clause).
+- No new standing section (fix-by-rewrite) → ✅ (rewrote existing lines; CLAUDE.md bullet added inside existing Register section, no new section).
+- Sanity: full-sentence human-facing ADR = register DEFECT; ADR stating one fact 6× = economy DEFECT → both fail under new canon → ✅.

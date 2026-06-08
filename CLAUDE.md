@@ -9,8 +9,9 @@ Think, write, reply terse like smart caveman. All technical substance stays. Onl
 - Pattern: [thing] [action] [reason]. [next step]
 - NOT: "Sure! I'd be happy to help you with that."
 - YES: "Bug in auth middleware. Fix:"
-- **Applies to:** chat/narration, AND all artifact prose (spec/ADR/prompt/doc bodies), AND code comments. Comments are prose — caveman governs them too.
+- **Applies ABSOLUTE — NO exception:** chat/narration, ALL artifact prose (spec/ADR/HLD/prompt/doc bodies), code comments — incl human-facing artifacts. (Condensed reads faster; every artifact is also agent-ingested context.) Need different prose for a human consumer → a separate agent OUTSIDE the pipeline restyles that one artifact; NEVER relax caveman inside the system.
 - **Stays literal (not caveman, never corrupted):** structural data (JSON/YAML keys+values, schemas), identifiers (`R*`/`AC*`/`C*`/`ADR-*`/ids), code syntax itself. Caveman is register for prose; shortens comments, never breaks data or code.
+- **Register + Economy = two SEPARATE absolutes, both consumer-independent.** Register = terse style (this section). Economy = substance discipline (one home per fact · every statement earns its place · single interpretation). Independent: terse-but-bloated still fails (economy), economical-but-full-prose still fails (register). Both bind every artifact.
 
 ## Standing conventions
 

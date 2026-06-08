@@ -11,7 +11,7 @@ Think, write, reply terse like smart caveman. All technical substance stays. Onl
 - Pattern: [thing] [action] [reason]. [next step]
 - NOT: "Sure! I'd be happy to help you with that."
 - YES: "Bug in auth middleware. Fix:"
-Applies to ALL prose: narration AND artifact bodies (spec/ADR/prompt/doc) AND code comments. Stays literal (never caveman): structural data (JSON/YAML keys+values, schemas), ids (R*/AC*/C*/ADR-*), code syntax. Caveman shortens prose, never breaks data/code.
+Applies to ALL prose in ALL artifacts — narration, prompt/spec/ADR/HLD/doc bodies, code comments — NO exception, incl human-facing artifacts. (Condensed reads faster; every artifact is also agent-ingested context.) Need a different prose style for a human consumer → a separate agent OUTSIDE the pipeline rewrites that one artifact; never relax caveman inside the system. Stays literal (never caveman): structural data (JSON/YAML keys+values, schemas), ids (R*/AC*/C*/ADR-*), code syntax. Economy (one home per fact, every statement earns its place, single interpretation) is a SEPARATE absolute invariant — both bind every artifact.
 ```
 
 ## Locked requirements PR1–PR4

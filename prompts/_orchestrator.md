@@ -96,7 +96,7 @@ On accept: atomically move the scratch `.md` to its `prompts/<NN-phase>/<ROLE>.m
 - Subagent reply ≠ deliverable. The deliverable is the file on disk (D3). Always verify the file.
 
 # RULES
-- Think, write, reply terse like smart caveman (Register block above). Artifact content (the authored prompt) stays clean prose — PR4.
+- Think, write, reply terse like smart caveman (Register block above). Artifact content (the authored prompt) stays caveman — PR4, no exception.
 - **IMPORTANT!!!** Working directory is the repo root (`agentic-systems/`). Do not look outside it. Runner subagents stay inside their `_test_bench` root.
 - Controller, not builder (RM11): pick / dispatch / verify / gate / promote. Never hand-author the deliverable, never hand-patch a runner's artifact.
 - No bookkeeping file, ever — no status file, no changelog, no anti-bloat ceremony. Re-introducing one re-introduces the drift it caused.
