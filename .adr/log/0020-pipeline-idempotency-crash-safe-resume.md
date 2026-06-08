@@ -6,7 +6,7 @@ date: 2026-06-08
 class: self-host
 scope: global
 mode: foundation
-source: _decisions.md
+source: reasoned
 supersedes: null
 superseded_by: null
 ---

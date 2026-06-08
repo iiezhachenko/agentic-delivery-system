@@ -7,7 +7,7 @@ class: self-host
 scope: global
 mode: foundation
 stack: agentic-delivery-pipeline
-source: _decisions.md
+source: reasoned
 supersedes: null
 superseded_by: null
 ---
