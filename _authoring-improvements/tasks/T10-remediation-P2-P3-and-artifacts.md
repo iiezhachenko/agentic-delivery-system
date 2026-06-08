@@ -58,7 +58,7 @@ P2/P3 recurring prompt cuts + non-prompt artifact cuts. Last in sequence (lowest
 
 For each prompt file: keep canonical home, delete copies, trim `format:` clauses, rewrite ambiguity. Scratch → gate → clean-room value-verify → promote.
 
-For each non-prompt artifact: route through ECONOMY-AUDIT at its phase gate (T06). Where the artifact is frozen (specs under aPRD, signed ADR bodies), the cut is a CHANGE-REQUEST producing a new version — never an in-place overwrite. Apply the substance floor (T05 starvation check): a spec/ADR must keep every load-bearing fact — only the repeats die.
+For each non-prompt artifact: route through ECONOMY-AUDIT at its phase gate (T06). Where the artifact is frozen (specs under aPRD, signed ADR bodies), the cut is a CHANGE-REQUEST producing a new version — never an in-place overwrite. **The new version IS the change-request (P8): bump the artifact version + lock + add an inline Change log line; NEVER author a `change-requests/CR-*.md` side-file** (00-INDEX hard rule). Apply the substance floor (T05 starvation check): a spec/ADR must keep every load-bearing fact — only the repeats die.
 
 ## ACCEPTANCE
 
@@ -66,7 +66,7 @@ For each non-prompt artifact: route through ECONOMY-AUDIT at its phase gate (T06
 - Specs: each rule one home (principle-table); prompt-blocks LINK not re-document; H14 stated once.
 - Docs: caveman register (no full-prose exception — T01); idempotency/oracle facts once; rhetorical narration cut; intentional teaching restatements marked `judgment call:`.
 - ADRs: Decision blocks record decisions, no session-narration/TODOs; shared patterns cited not re-derived.
-- Frozen artifacts: changed only via new version + change-request; no in-place overwrite of `*.frozen.md` / signed `.adr/log/*` / locks.
+- Frozen artifacts: changed only via new version (= the change-request) + lock bump + inline Change log line; no in-place overwrite of `*.frozen.md` / signed `.adr/log/*` / locks; no `change-requests/CR-*.md` side-file.
 - **Substance invariant:** every cut artifact still carries all load-bearing facts (run T05 starvation direction); downstream prompts that read it still PASS value-verify.
 
 ## DEPENDS ON / BLOCKS

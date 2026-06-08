@@ -52,6 +52,6 @@ flowchart TD
 
 - **Routing keystone (the keystone of the whole improvement):** every bloat finding carries `fix: DELETE | REWRITE` — NEVER `ADD`. Loop offers no patch path. Re-author from DRY skeleton is the only move. This IS P1/AB9 made mechanical.
 - **Both-directions discrimination** (mirror verify mandate): each gate proves it discriminates — tight prose PASSes, planted-bloat FAILs, AND planted-omission FAILs (substance floor: economy ≠ truncation).
-- **Immutability:** frozen artifacts (`aprd.frozen.md`, `skeleton.frozen.md`, `.adr/log/*`, `*.lock`) never overwritten in place. A change = new signed version + change-request re-triggering downstream. T02/T03 carry this.
+- **Immutability + NO CR side-file:** frozen artifacts (`aprd.frozen.md`, `skeleton.frozen.md`, `.adr/log/*`, `*.lock`) never overwritten in place. A change-request = **the new version itself** (P8: new version IS the CR) — author the new versioned artifact (spec v+1 / skeleton v4 / new ADR draft) + bump its lock + record the delta as an inline **Change log line** in that artifact, naming the downstream re-trigger. System defines **NO change-request file artifact** — NEVER create `change-requests/CR-*.md` (CR-001 was authored that way then deleted; folded into spec-00 v0.4 Change log). T02/T03 carry this.
 - **Every cut goes THROUGH the gate + clean-room verify** — behavior invariant (only duplication dies). Never cut-and-promote blind.
 - **Do-not-commit.** All tasks analysis/planning artifacts; no git commit unless operator says so.

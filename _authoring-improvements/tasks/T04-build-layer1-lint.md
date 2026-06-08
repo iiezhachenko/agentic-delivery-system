@@ -77,3 +77,42 @@ Linter MUST prove it discriminates before trusted:
 ## OUT OF SCOPE
 
 Semantic duplication / no-objective / general ambiguity (T05). Orchestrator wiring (T06). Re-authoring prompts (T08–T10).
+
+---
+
+## DONE (2026-06-08)
+
+Built deterministic linter (Node, no LLM). Lives `tools/economy-lint/` (PERMANENT home — `_authoring-improvements/` is throwaway, so the runtime gate component can't sit there). Not git-committed (T04 do-not-commit); placement settled so value transfers when T06 wires it.
+
+### Deliverables (`tools/economy-lint/`)
+- `lint.mjs` — linter + CLI + exported `lint(target,type)`. Emits `lint.json`. C1–C9 all implemented.
+- `selftest.mjs` — both-directions discrimination + determinism harness.
+- `fixtures/reference.md` — clean golden prompt (real corpus prompts already carry bloat, so authored fresh).
+- `README.md` — `lint.json` contract (T06 consumes) + check table + per-artifact generalization.
+### Enabling decision — ADR-0022 / D22 (RATIFIED, operator-approved 2026-06-08)
+Linter = FIRST deterministic-code component in an otherwise 100%-prompt-driven pipeline → needed an enabling ADR. Operator approved + directed tool-agnostic. Authored as a CLASS, not a one-off; then made permanent via the system's mechanical-freeze flow (SYNTHESIZE-ADR design call: draft → review → mechanical freeze promotes to log + writes lock):
+- ADR-0022/D22: deterministic helper tools = sanctioned component class; spine may shell out (contract: deterministic · disk-in/out JSON verdict · NO LLM · profile-registered · FLAGS-not-authors · self-proving). LINT = first instance; future tools (schema validators, ID-thread checkers, DAG-cycle detectors) inherit.
+- **Frozen:** `.adr/drafts/0022-deterministic-helper-tools.draft.md` (Proposed) → `.adr/log/0022-deterministic-helper-tools.md` (Accepted); `adr-index.json` rendered 21→22; `adr.lock` v3→v4 with REAL `content_sha256` (= sha256 of `.adr/log/*.md` concat in sorted-name order — reproduced v3 to confirm the algo, then recomputed over 22). Review gate = operator approval (spec §5.8 human reviewer), recorded honestly in `adr.lock.amendment` (not a faked agent CRITIQUE). ids contiguous 0001..0022.
+- **No CR side-file.** System defines NO change-request file artifact — new version IS the CR (P8; same correction T02 applied to the deleted CR-001).
+- Additive + orthogonal: ADR-0001..0021 unchanged; `skeleton.lock` references `adr.lock` by path (no version/hash pin) → no downstream lock invalidated. Prompt re-author against new canon + orchestrator/code-canon wiring remain T06+ scope.
+
+### Acceptance — MET (`node selftest.mjs` → PASS, 20 checks ok, 0 failed)
+- reference tight prompt → `clean`.
+- planted-defect copies → `blocked`, each naming the RIGHT check: C2 role-pad→`role-identity-length`, C3 brace-list→`format-clause-length`, C4 `etc.`→`banned-hedge`, C6 lane-in-Stop→`escapes-in-stop`, C7 8-line block→`duplicate-phrase`, C9 pleasantry→`register-compliance` (+ bonus C1/C5/C8).
+- Deterministic: two runs byte-identical.
+
+### Contract (`lint.json`)
+- `verdict=blocked` iff `violations` (BLOCK-grade) non-empty. `warnings`=signal-grade (C1/C7/C9 below block), non-gating.
+- `fix` ALWAYS `DELETE|REWRITE`, never `ADD` (AB9 keystone, in schema). T06 routes blocked→re-author, skip sim.
+- Parameterized by `{artifact-type, thresholds}` (`PROFILES`); C2/C3/C5/C6 gated behind prompt type, C1/C4/C7/C8/C9 universal. Non-prompt thresholds belong in stack profile, not hard-coded (file-06).
+
+### Corpus validation (real bloat caught, matches GIVEN audit)
+- DERIVE-TESTS: blocked, 332 lines, AB3×8 / AB5×3 / AB2×1 / AB1×3 (line-budget + footer).
+- BUILD-PLAN L126: `field-rules-section` (AB5) — exactly the cited schema-footer.
+- MODEL-DATA, VERIFY-OUTPUT, RECONCILE-CRITIQUE: all blocked on AB3/AB2/AB5/PR4.
+
+### Known limit (deferred to T05 AUDIT, consistent w/ spec thresholds)
+- C7 verbatim single-line dup at exactly 2× sits below spec ≥3 threshold (e.g. MODEL-DATA `WRONG` ×2). Multi-line verbatim blocks at 2× ARE caught (contiguous-run rule). Semantic dup (×12 reworded) = AUDIT.
+- C4 hedge "crisp-test-within-N-chars" relaxation not implemented — `judgment call:` escape is the deterministic allow; relaxation deferred (semantic, AUDIT).
+
+NOT committed (do-not-commit rule honored).

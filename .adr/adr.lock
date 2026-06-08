@@ -1,10 +1,11 @@
 {
   "artifact": ".adr/log/",
-  "version": "v3",
-  "content_sha256": "267b885b4442fe245dd35a40e4d8c1fa84f611195b540ace793cfb63b87cb779",
+  "version": "v4",
+  "content_sha256": "234304b61374c850ced89f2be0a8e89430971bd77dc1c3e47edce1148a2e27a6",
   "signer": "self-host:agentic-delivery-pipeline",
-  "signed_at": "2026-06-08T14:15:26Z",
+  "signed_at": "2026-06-08T20:07:07Z",
   "status": "frozen",
+  "amendment": "v4 adds ADR-0022 (D22) — deterministic helper tools, operator-approved 2026-06-08 (review gate = operator per spec §5.8 senior/human reviewer; not an agent CRITIQUE run). Additive: ADR-0001..0021 bodies unchanged; set remains coherent. content_sha256 = sha256 of .adr/log/*.md concatenated in sorted-name order (reproduces v3 over the prior 21).",
   "gate": {
     "reconcile_verdict": "coherent",
     "critique_verdict": "clean"
@@ -285,7 +286,20 @@
       "draft_ref": "drafts/0021-stack-adr-stack-agentic-delivery-pipeline-the-self-host-deliverable-ta.draft.md",
       "log_ref": "log/0021-stack-adr-stack-agentic-delivery-pipeline-the-self-host-deliverable-ta.md",
       "stack": "agentic-delivery-pipeline"
+    },
+    {
+      "id": "ADR-0022",
+      "dn": "D22",
+      "title": "Deterministic helper tools — sanctioned component class; spine may shell out",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "operator-approved",
+      "supersedes": null,
+      "superseded_by": null,
+      "draft_ref": "drafts/0022-deterministic-helper-tools.draft.md",
+      "log_ref": "log/0022-deterministic-helper-tools.md"
     }
   ],
-  "adr_count": 21
+  "adr_count": 22
 }

@@ -6,7 +6,7 @@
     "reconcile_verdict": "coherent",
     "critique_verdict": "clean"
   },
-  "note": "Canonical decision index (D1–D21 → ADR-0001..0021). D1–D4 are the foundational conventions; D21 is the stack ADR. The index lives HERE as JSON, never as a markdown header (canonical fixture layout).",
+  "note": "Canonical decision index (D1–D22 → ADR-0001..0022). D1–D4 are the foundational conventions; D21 is the stack ADR; D22 (operator-approved amendment) sanctions deterministic helper tools the spine may shell out to. The index lives HERE as JSON, never as a markdown header (canonical fixture layout).",
   "adrs": [
     {
       "id": "ADR-0001",
@@ -281,10 +281,23 @@
       "draft_ref": "drafts/0021-stack-adr-stack-agentic-delivery-pipeline-the-self-host-deliverable-ta.draft.md",
       "log_ref": "log/0021-stack-adr-stack-agentic-delivery-pipeline-the-self-host-deliverable-ta.md",
       "stack": "agentic-delivery-pipeline"
+    },
+    {
+      "id": "ADR-0022",
+      "dn": "D22",
+      "title": "Deterministic helper tools — sanctioned component class; spine may shell out",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "operator-approved",
+      "supersedes": null,
+      "superseded_by": null,
+      "draft_ref": "drafts/0022-deterministic-helper-tools.draft.md",
+      "log_ref": "log/0022-deterministic-helper-tools.md"
     }
   ],
   "adr_counts": {
-    "rendered": 21,
+    "rendered": 22,
     "degenerate_forced": 0,
     "undecided_skipped": 0
   }
