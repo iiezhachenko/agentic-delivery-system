@@ -24,10 +24,11 @@
 - [ ] An orchestrator prompt + launcher exist and boot (`/self-host` for Claude Code; `selfhost` agent for Kiro), scoped to `_self/` + the agentic-delivery-pipeline target.
 - [ ] **The cutover proof has cleared once** (§7): one prompt was authored by the pipeline, verified clean-room, and promoted to `prompts/` — with parity confirmed against a twin.
 - [ ] The hand loop is decommissioned: `_prompt-run.md`, `_tracker.md`, `_changelog.md` retired; state is derived.
-- [ ] **The repo is canonical** (§6 M7–M10, §12): the on-disk tree is *identical to the canonical Agentic Delivery Pipeline structure* — `.aprd/ .adr/ .hld/ .roadmap/` are committed source at the repo root (the analog of a fixture project's tree), **not** stray markdown rendered into a cache. No `_self/` cache, no freeze tool, no stray files (`_decisions.md`, `_rules.md`, `_initial_design/`, `agent.log`, scratch dirs, ad-hoc run docs), and **no mention of the migration** anywhere in the kept tree.
+- [ ] **The repo is canonical** (§6 M7–M11, §12): the on-disk tree is *identical to the canonical Agentic Delivery Pipeline structure* — `.aprd/ .adr/ .hld/ .roadmap/` are committed source at the repo root (the analog of a fixture project's tree), **not** stray markdown rendered into a cache. No `_self/` cache, no freeze tool, no stray files (`_decisions.md`, `_rules.md`, `_initial_design/`, `agent.log`, scratch dirs, ad-hoc run docs), and **no mention of the migration** anywhere in the kept tree.
 - [ ] **The migration scaffolding is gone** (§6 M10): `_self-host-migration/` no longer exists; the surviving narrative docs were relocated to a canonical docs home and rewritten free of migration framing.
+- [ ] **The whole tree is caveman** (§6 M11): every migration-survivor file (everything except the gitignored `_test_bench/`) has its prose AND its code comments rewritten in the caveman register (invariant #6); the rule-flip is canon (`.hld/skeleton/coding-canon.md`, the embedded caveman block, `CLAUDE.md`); frozen artifacts touched in the rewrite are re-locked; and the deleted-source rogue references (`_decisions.md`/`_rules.md`/`_initial_design`) are swept to their canonical homes in the same pass.
 
-**Fully validated** one step further (§6, M11): the tree passes a **structural-conformance check** against the canonical layout AND a *second* canon profile runs the unchanged spine — proving deliverable-agnosticism, not agentic-delivery-pipeline-specialness.
+**Fully validated** one step further (§6, M12): the tree passes a **structural-conformance check** against the canonical layout AND a *second* canon profile runs the unchanged spine — proving deliverable-agnosticism, not agentic-delivery-pipeline-specialness.
 
 ---
 
@@ -109,13 +110,13 @@ Non-negotiable; every phase below is checked against these.
 3. **The oracle is unchanged.** A prompt is judged by **running it clean-room against `_fixtures/`** — the existing harness (`_test_bench`, the Sonnet runner). The adapter registers this; it invents no new judge.
 4. **Disk is the source of truth (D20).** All state is derived from `_self/` + `prompts/` + locks. Atomic writes, immutable frozen artifacts, validate-frontier-on-resume, persisted gate replies. The migration must not introduce a new hand-maintained state file.
 5. **`_self/` is a cache, never a source.** It is rendered *from* the kept source files. Never hand-edit it; on any source change, re-freeze.
-6. **Caveman in chat, clean prose in artifacts.** Unchanged authoring register.
+6. **Caveman everywhere — chat AND artifacts AND code comments.** The authoring register is a **mandate across the whole tree**, not a chat-only convention: caveman governs all prose — narration, spec/ADR/prompt/doc bodies, and code comments (comments are prose; they get caveman too). It saves tokens at scale, the long-run reason. Only **structural data** (JSON/YAML keys+values, schemas), **identifiers** (`R*`/`AC*`/`C*`/`ADR-*`), and **code syntax itself** stay literal — caveman shortens prose, never corrupts data or breaks code. (This reverses the old "clean prose in artifacts" carve-out; the rule-flip + the tree-wide rewrite are M11.)
 
 ---
 
 ## 6. Migration phases
 
-Sequenced so each phase unblocks the next, and the risky cutover (M5) happens only after the scaffolding is proven to boot. M0–M4 are reversible setup; M5 is the one-way proof; M6 retires the old loop; **M7–M10 are the canonicalization & cleanup band** (collapse the bootstrap scaffolding into the canonical repo structure, removing every stray and every migration trace); M11 fully validates.
+Sequenced so each phase unblocks the next, and the risky cutover (M5) happens only after the scaffolding is proven to boot. M0–M4 are reversible setup; M5 is the one-way proof; M6 retires the old loop; **M7–M11 are the canonicalization & cleanup band** (collapse the bootstrap scaffolding into the canonical repo structure, remove every stray and every migration trace, then normalize the whole tree to the caveman register); M12 fully validates.
 
 ```mermaid
 flowchart LR
@@ -126,21 +127,22 @@ flowchart LR
     M4 --> M5[[M5 Cutover proof<br/>parity gate — one way]]
     M5 --> M6[M6 Decommission<br/>hand loop]
     M6 --> M7
-    subgraph CLEAN["M7–M10 · Canonicalization & cleanup"]
+    subgraph CLEAN["M7–M11 · Canonicalization & cleanup"]
       direction LR
       M7[M7 Canonicalize<br/>sources → root .aprd/.adr/.hld/.roadmap] --> M8[M8 Retire freeze<br/>+ _self/ cache; engine → root]
       M8 --> M9[M9 Purge strays<br/>+ migration vocabulary]
-      M9 --> M10[M10 Relocate docs<br/>drop _self-host-migration/]
+      M9 --> M10[M10 Relocate docs<br/>→ docs/]
+      M10 --> M11[M11 Caveman rewrite<br/>all survivors + rogue-ref sweep + re-lock<br/>+ drop _self-host-migration/]
     end
-    M10 --> M11[M11 Validate<br/>structure + 2nd canon profile]
+    M11 --> M12[M12 Validate<br/>structure + 2nd canon profile]
 
     classDef cut fill:#fde68a,stroke:#b45309,color:#000;
     classDef clean fill:#dbeafe,stroke:#1d4ed8,color:#000;
     class M5 cut;
-    class M7,M8,M9,M10 clean;
+    class M7,M8,M9,M10,M11 clean;
 ```
 
-> **Why M7–M10 exist.** M0–M6 got the loop self-hosting, but they did it on *bootstrap scaffolding*: a `_self/` cache rendered by `freeze.mjs` from stray markdown (`_decisions.md`, `_rules.md`, `_initial_design/`), launchers scoped to `_self/`, and a `_self-host-migration/` workdir littering the root. That scaffolding is a **non-canonical** way to plug source into the system — it works, but the repo does not look like the very structure the pipeline emits for any other project (§12). M7–M10 retire the scaffolding: the canonical artifact trees become committed source at the root, the cache and its renderer are deleted, the strays are removed, and every migration trace is purged — so when the dust settles the repo is *just a canonical Agentic Delivery Pipeline project that happens to deliver prompts*. These four are reversible setup-style steps (additive then deletive, gated, recoverable from the `pre-self-host` tag) — **not** one-way like M5.
+> **Why M7–M11 exist.** M0–M6 got the loop self-hosting, but they did it on *bootstrap scaffolding*: a `_self/` cache rendered by `freeze.mjs` from stray markdown (`_decisions.md`, `_rules.md`, `_initial_design/`), launchers scoped to `_self/`, and a `_self-host-migration/` workdir littering the root. That scaffolding is a **non-canonical** way to plug source into the system — it works, but the repo does not look like the very structure the pipeline emits for any other project (§12). M7–M10 retire the scaffolding: the canonical artifact trees become committed source at the root, the cache and its renderer are deleted, the strays are removed, and every migration trace is purged. **M11 then normalizes the register**: with the tree finally canonical, every survivor file is rewritten to caveman (prose + code comments, invariant #6), the rogue references to the deleted sources are swept, and the frozen artifacts touched are re-locked — so when the dust settles the repo is *just a canonical Agentic Delivery Pipeline project that happens to deliver prompts, authored end-to-end in one register*. These five are reversible setup-style steps (additive then deletive, gated, recoverable from the `pre-self-host` tag) — **not** one-way like M5.
 
 ### M0 — Baseline & rollback point
 
@@ -259,32 +261,49 @@ The one-way gate. Detailed separately because it is the migration's load-bearing
 1. **Delete the remaining strays:** `agent.log`, `_self-host-scratch/` (M5 scratch), `_pipeline-run-modeA.md` / `_pipeline-run-modeB.md` (ad-hoc chain-runner docs — fold any still-needed full-chain runner content into the canonical home, e.g. the orchestrator or the relocated docs in M10; otherwise drop as superseded by `prompts/_orchestrator.md`). Strip dead `.gitignore` entries (`agent.log`, `_self-host-scratch/`, `_self/`, `_m2-acceptance-mock/`).
 2. **Purge migration vocabulary from every kept file.** Rewrite headers/bodies so no "migration / migration-spec §N / D-4 / M5 / bootstrap / parity-gate / self-host-as-special-mode" framing survives — the orchestrator is *the orchestrator*, the repo is *a canonical project*. Targets (bounded — see §10): `prompts/_orchestrator.md` (drop the "Migration: D-4 …" line, the "NOT given — retired" block, "bootstrap"/"parity gate" framing → plain "no bookkeeping file" rule), `code-canon/agentic-delivery-pipeline.md` (drop migration-spec cites), `.kiro/steering/*`, `.claude/skills/*`, `.adr/` ADR bodies that cite migration phases.
    - **Keep legit pipeline vocabulary** — "frozen artifact", "freeze the requirements", "skeleton" — these are the engine's own terms and predate the migration. Purge only references to the *deleted freeze TOOL* and the *migration process*. Do not over-purge.
+   - **Deleted-source path references are M11's, not M9's.** The M7-deleted sources (`_decisions.md`, `_rules.md`, `_initial_design/`) are still cited by-path in many **frozen, locked** bodies (`.adr/log/*`, `.adr/drafts/*`, `.hld/skeleton/*`, `code-canon/`, `.claude/agents/step-runner.md`) — e.g. "Indexed in `_decisions.md` Decision index". These are **not** in the M9 migration token-set (they are dead *source-file paths*, not migration vocabulary), and re-pointing them touches locked artifacts that need a re-lock. M11 already re-locks every frozen body for the caveman rewrite, so it sweeps these in the same pass (repoint `_decisions.md`→`.adr/`, `_rules.md`→`.hld/`/`CLAUDE.md`, `_initial_design/`→`.aprd/specs/`). M9 leaves them.
 
-**Acceptance:** a `grep` over the kept tree for the migration token-set (`_self/`, `_self-host-migration`, `migration-spec`, `_tracker.md`, `_changelog.md`, `_prompt-run.md`, `freeze.mjs`, `parity gate`, `bootstrap`, `M0`–`M11`) returns **zero** hits; `ls` at the root shows only canonical members (§12); no stray remains.
+**Acceptance:** a `grep` over the kept tree for the migration token-set (`_self/`, `_self-host-migration`, `migration-spec`, `_tracker.md`, `_changelog.md`, `_prompt-run.md`, `freeze.mjs`, `parity gate`, `bootstrap`, `M0`–`M12`) returns **zero** hits; `ls` at the root shows only canonical members (§12); no stray remains. (Residual deleted-source path refs — `_decisions.md`/`_rules.md`/`_initial_design` — are knowingly carried to M11's re-lock sweep; they are not in this token-set.)
 
-### M10 — Relocate the surviving docs; drop `_self-host-migration/`
+### M10 — Relocate the surviving docs
 
-**Deliverable:** the migration workdir no longer exists; the operating-manual docs live in a canonical home.
+**Deliverable:** the operating-manual docs live in a canonical home, rewritten free of migration framing. (The `_self-host-migration/` directory itself is dropped at M11's tail — relocate first, normalize the relocated docs in M11, then delete the workdir last.)
 
 **Precondition:** M9 cleared (no kept file references the migration).
 
 **Steps:**
 1. **Relocate the surviving narrative docs** out of `_self-host-migration/` — `generic-workflow.md`, `generic-usage-guide.md`, `self-host-workflow.md`, `self-host-usage-guide.md` are the operating manual and survive. Move to a canonical docs home (e.g. `docs/`, the landing zone the documentation pipeline — spec 05 — targets) and **rewrite them free of migration framing**: no `_self/`, no freeze tool, no "bootstrap"/"seed-from-frozen", no migration-spec cross-refs. Collapse the "self-host" special-casing into "run the pipeline on this repo" — the repo is now just a canonical project, so the self-host guides largely fold into the generic ones (keep only the genuinely reflexive content: Level-A/Level-B, the prompt-as-deliverable target).
-2. **Delete the rest of `_self-host-migration/` entirely** — `migration-spec.md` (this file), `M0–M10-tasks.md`. (`freeze*.mjs` already died in M8.) The directory disappears.
 
-**Acceptance:** `_self-host-migration/` does not exist; the surviving docs live in a canonical location and read clean (no migration trace, verified by the M9 grep extended over the relocated docs); no file references the deleted directory.
+**Acceptance:** the four surviving docs live in a canonical location (`docs/`) and read clean (no migration trace, verified by the M9 grep extended over the relocated docs); no kept file references the old `_self-host-migration/` paths. (`_self-host-migration/` still exists at this point — it holds the spec + M-task files M11 deletes last.)
 
-### M11 — Full validation (structural conformance + agnosticism)
+### M11 — Caveman-normalize the whole tree; drop `_self-host-migration/`
+
+**Deliverable:** every migration-survivor file is in the caveman register (prose **and** code comments, invariant #6); the deleted-source rogue references are swept; the frozen artifacts touched are re-locked; and the `_self-host-migration/` workdir is gone — the migration's last trace removed.
+
+**Precondition:** M10 cleared (docs relocated to `docs/`; the tree is structurally canonical, only the register and the migration workdir remain non-canonical).
+
+**Why M11 exists.** The whole tree is canonical in *structure* after M10, but it was authored under the old "clean prose in artifacts" carve-out — so its prose and code comments are verbose. Invariant #6 now mandates caveman **everywhere** (the long-run token saving). M11 makes the register uniform across the surviving tree, in one pass, and — because rewriting a frozen body forces a re-lock anyway — folds in the residual deleted-source rogue-reference sweep M9 deferred here. It runs last in the cleanup band because it must also normalize the docs M10 just relocated, and its closing act is the self-referential deletion the spec was always destined for.
+
+**Steps:**
+1. **Flip the register canon.** Rewrite the caveman rule in its three homes so it mandates caveman for all prose + code comments (no artifact carve-out): `.hld/skeleton/coding-canon.md` (the caveman block + PR4), the caveman block embedded verbatim in every `prompts/**/*.md` (PR4), and `CLAUDE.md` (the always-on Register section). Keep the literal-data carve-out (JSON/YAML keys+values, schemas, ids, code syntax stay as-is — caveman is a prose register).
+2. **Rewrite every survivor file to caveman** — every file except the gitignored `_test_bench/`: all prose in `.aprd/ .adr/ .hld/ .roadmap/`, `prompts/`, `code-canon/`, `docs/`, `.claude/`, `.kiro/`, `CLAUDE.md`, and **all code comments** in any script/JSON-with-comments. Substance is invariant — only fluff dies (drop articles/filler/hedging; `[thing] [action] [reason]`). Structural data untouched.
+3. **Sweep the deleted-source rogue references** in the same pass (M9 deferred them here): repoint every `_decisions.md`→`.adr/` (the decision index is now `.adr/adr-index.json`), `_rules.md`→`.hld/skeleton/*` or `CLAUDE.md`, `_initial_design/`→`.aprd/specs/` across the frozen bodies (`.adr/log/*`, `.adr/drafts/*`, `.hld/skeleton/*`, `code-canon/*`, `.claude/agents/step-runner.md`).
+4. **Re-lock every frozen artifact touched** (immutability — a change is a new sealed version): recompute `content_sha256` with the recovered hash algorithm (`aprd = sha256(aprd.frozen.md)`; `adr = sha256(sorted(.adr/log/*) joined)`; `skeleton = sha256(sorted(.hld/skeleton/*) joined + skeleton.frozen.md)`), bump `version`, re-sign. Drafts/specs/roadmap are unlocked — edit free.
+5. **Delete `_self-host-migration/` entirely** (the closing act) — `migration-spec.md` (this file) + all `M0–M11-tasks.md`. The directory disappears; the migration leaves no trace. (Recoverable from the `pre-self-host` tag + git history — §10.)
+
+**Acceptance:** a caveman-register check over the surviving tree finds no fluff-prose or verbose comments (spot-checked); the register canon (coding-canon, every embedded caveman block, `CLAUDE.md`) states the no-carve-out mandate; `grep` for the deleted-source paths (`_decisions.md`/`_rules.md`/`_initial_design`) over the kept tree returns **zero** hits; every re-locked artifact's recomputed sha == its lock; RE-RANK still names the correct next-unshipped (prose/comment edits are behavior-preserving); `_self-host-migration/` does not exist.
+
+### M12 — Full validation (structural conformance + agnosticism)
 
 **Deliverable:** proof the repo is canonical AND the spine is deliverable-agnostic.
 
-**Precondition:** M10 cleared (cleanup complete).
+**Precondition:** M11 cleared (cleanup + caveman normalization complete; migration workdir gone).
 
 **Steps:**
-1. **Structural conformance.** Diff the repo tree against the canonical layout (generic-usage-guide §A1/§B1 + a clean fixture's tree, §12). Assert: only canonical members at the root; `.aprd/ .adr/ .hld/ .roadmap/` committed source; `prompts/` the deliverable; `_fixtures/` the oracle; `code-canon/`, `.claude/`, `.kiro/`, `CLAUDE.md` present; the only gitignored working dir is the clean-room sandbox (`_test_bench/`). Zero strays, zero migration mentions.
+1. **Structural conformance.** Diff the repo tree against the canonical layout (generic-usage-guide §A1/§B1 + a clean fixture's tree, §12). Assert: only canonical members at the root; `.aprd/ .adr/ .hld/ .roadmap/` committed source; `prompts/` the deliverable; `_fixtures/` the oracle; `code-canon/`, `.claude/`, `.kiro/`, `CLAUDE.md` present; the only gitignored working dir is the clean-room sandbox (`_test_bench/`). Zero strays, zero migration mentions, zero deleted-source path refs, and the whole tree in one register (caveman).
 2. **Agnosticism.** After the agentic-delivery-pipeline loop drains, author a *second* canon profile (`code-canon/terraform.md` or `code-canon/typescript.md`) + its stack ADR, and run a tiny greenfield through the **unchanged** spine. If it passes its own verify with zero engine edits, agnosticism is proven. Any forced spine edit = a leak; fix the spine once (P3).
 
-**Acceptance:** the tree matches the canonical structure (§12) with no stray and no migration trace, AND a second deliverable type ships through the unchanged engine.
+**Acceptance:** the tree matches the canonical structure (§12) with no stray, no migration trace, no deleted-source ref, and a uniform caveman register, AND a second deliverable type ships through the unchanged engine.
 
 ---
 
@@ -339,7 +358,7 @@ flowchart TD
 | `.claude/agents/step-runner.md` | — |
 | **New:** `code-canon/`, `_self/`, launcher, orchestrator prompt | — |
 
-**Through M7–M10 (canonicalization — the bootstrap scaffolding itself dies):** what "lived as source" above was still *non-canonical* (stray markdown rendered into a cache). The cleanup converts it.
+**Through M7–M11 (canonicalization — the bootstrap scaffolding itself dies, then the register is normalized):** what "lived as source" above was still *non-canonical* (stray markdown rendered into a cache). The cleanup converts it; M11 then rewrites every survivor to caveman.
 
 | Becomes canonical (committed root tree) | Dies (bootstrap scaffolding, now redundant) |
 |---|---|
@@ -359,7 +378,7 @@ After M7 the kept source files are *gone* — not "inputs to a cache" but **prom
 - **Reversible up to M5.** M0–M4 only *add* files (`code-canon/`, `_self/`, launcher, orchestrator). Nothing existing is deleted. If any of M1–M4 goes wrong, delete the added files and you are back at the M0 baseline.
 - **M5 is gated, not committed-blind.** The cutover only promotes a self-build *after* the operator accepts at the value/parity gate. A bad prompt cannot ship — the oracle is the safety net; it stays unshipped and IMPLEMENT re-runs.
 - **M6 is the point of no return** — only run it after M5 has cleared and the loop is observed to drain. The retired files are recoverable from the `pre-self-host` tag if needed, but the *intent* is they are gone for good.
-- **M7–M10 are recoverable, not one-way.** The cleanup is additive-then-deletive and gated per milestone: M7 promotes *before* it deletes (content diffed first); every deletion is recoverable from the `pre-self-host` tag and git history. If a cleanup milestone goes wrong, restore the deleted paths from the tag and re-run. The order matters — never delete a source (M7) before its content is committed canonically, never delete `_self/` (M8) before the engine reads the root, never drop `_self-host-migration/` (M10) before the surviving docs are relocated.
+- **M7–M11 are recoverable, not one-way.** The cleanup is additive-then-deletive and gated per milestone: M7 promotes *before* it deletes (content diffed first); every deletion is recoverable from the `pre-self-host` tag and git history. If a cleanup milestone goes wrong, restore the deleted paths from the tag and re-run. The order matters — never delete a source (M7) before its content is committed canonically, never delete `_self/` (M8) before the engine reads the root, never drop `_self-host-migration/` (M11) before the surviving docs are relocated (M10) and the survivor tree is caveman-normalized. M11's prose/comment edits + re-locks are reversible: a bad re-lock is restored from the tag and re-run.
 - **Idempotent throughout (D20).** Interrupt any phase; disk is the source of truth, writes are atomic, frozen artifacts immutable, resume re-derives the frontier. The freeze (M3) is itself idempotent — re-run it freely. (After M8 there is no freeze; the root tree is the source.)
 
 ---
@@ -379,7 +398,8 @@ After M7 the kept source files are *gone* — not "inputs to a cache" but **prom
 | **Over-purge of legit "freeze" vocabulary at M9** — the engine's own term ("frozen artifact", "freeze the requirements") collides with the deleted freeze *tool*. | A blind grep-and-delete corrupts engine prose. | M9 step 2: purge only the *tool* and the *migration process* references; keep engine vocabulary (explicit carve-out). |
 | **Engine repoint leaks into a spine edit at M8** — flipping the workspace root from `_self/` to `.` touches the orchestrator. | Could mask a spine change as "config". | M8 is path/scope config only (invariant #1); M8 acceptance re-runs RE-RANK to prove behavior is preserved. If a path can't be made a target/scope read, the abstraction leaked — fix the spine once (P3). |
 | **Docs orphaned at M10** — the surviving guides cross-ref the migration + `_self/` heavily. | Relocated docs would carry dead references. | M10 step 1 rewrites them clean; the M9 grep is re-run over the relocated docs as the M10 acceptance. |
-| **Self-referential deletion** — this spec + its M-tasks live in the dir M10 deletes. | The plan deletes its own home. | Intended (§ this file is the bridge, dropped when done); the `pre-self-host` tag + git history preserve it. Relocate any still-useful content to `docs/` before deleting. |
+| **Self-referential deletion** — this spec + its M-tasks live in the dir M11 deletes (as its closing act). | The plan deletes its own home. | Intended (§ this file is the bridge, dropped when done); the `pre-self-host` tag + git history preserve it. Relocate any still-useful content to `docs/` (M10) before M11 deletes. |
+| **Caveman rewrite corrupts a frozen artifact / lock** — M11 edits locked bodies (`.adr/log/*`, `*.frozen.md`) to re-register + sweep dead paths. | A bad edit desyncs the lock or breaks data/JSON. | M11 treats each as a new sealed version (recompute sha, bump version, re-sign); caveman touches **prose + comments only**, never structural data/ids/code (invariant #6); RE-RANK re-run confirms behavior preserved. Recoverable from the tag. |
 
 ---
 
@@ -403,8 +423,12 @@ M7 [ ] .aprd/ .adr/ .hld/ .roadmap/ materialized at root, committed source, sche
 M8 [ ] freeze.mjs / freeze-check.mjs / _self/ deleted; engine workspace root _self/ → repo root; RE-RANK still names next
 M9 [ ] strays gone (agent.log, _self-host-scratch/, _pipeline-run-mode{A,B}.md); .gitignore cleaned
    [ ] migration-vocabulary grep over kept tree = zero hits; root shows only canonical members
-M10 [ ] surviving docs relocated to canonical home + rewritten clean; _self-host-migration/ deleted
-M11 [ ] structural-conformance check passes (tree == canonical §12; zero strays, zero migration trace)
+M10 [ ] surviving docs relocated to canonical home (docs/) + rewritten clean
+M11 [ ] register canon flipped (coding-canon + every embedded caveman block + CLAUDE.md): caveman everywhere, no artifact carve-out
+    [ ] every survivor file (excl. _test_bench/) rewritten to caveman — prose AND code comments; structural data untouched
+    [ ] deleted-source rogue refs (_decisions.md/_rules.md/_initial_design) swept; frozen artifacts touched re-locked (recompute==lock); RE-RANK still names next
+    [ ] _self-host-migration/ deleted (closing act) — spec + all M-task files gone
+M12 [ ] structural-conformance check passes (tree == canonical §12; zero strays, zero migration trace, zero deleted-source refs, one caveman register)
     [ ] second canon profile runs the unchanged spine and passes its own verify
 ```
 
@@ -412,9 +436,9 @@ When this checklist is complete, the surviving operating-manual docs (relocated 
 
 ---
 
-## 12. Canonical target structure (the M11 conformance target)
+## 12. Canonical target structure (the M12 conformance target)
 
-The shape the repo must hold after M7–M10 — *identical to what the pipeline emits for any project* (cf. `_fixtures/greenfield-clean/`, generic-usage-guide §A1/§B1). The deliverable here is a prompt library, so `prompts/` plays the role `src/` plays in a code project; everything else is the same canonical skeleton.
+The shape the repo must hold after M7–M11 — *identical to what the pipeline emits for any project* (cf. `_fixtures/greenfield-clean/`, generic-usage-guide §A1/§B1). The deliverable here is a prompt library, so `prompts/` plays the role `src/` plays in a code project; everything else is the same canonical skeleton.
 
 ```
 agentic-systems/                  ← a canonical pipeline project (deliverable = prompts)
@@ -440,9 +464,9 @@ agentic-systems/                  ← a canonical pipeline project (deliverable 
 └── .gitignore                    ← only the clean-room sandbox `_test_bench/` (gitignored working dir)
 ```
 
-**Gone after the cleanup (must not appear at M11):** `_self/`, `freeze.mjs`, `freeze-check.mjs`, `_decisions.md`, `_rules.md`, `_initial_design/`, `agent.log`, `_self-host-scratch/`, `_pipeline-run-mode{A,B}.md`, `_self-host-migration/`, `_m2-acceptance-mock/` — and zero migration-vocabulary references anywhere in the kept tree.
+**Gone after the cleanup (must not appear at M12):** `_self/`, `freeze.mjs`, `freeze-check.mjs`, `_decisions.md`, `_rules.md`, `_initial_design/`, `agent.log`, `_self-host-scratch/`, `_pipeline-run-mode{A,B}.md`, `_self-host-migration/`, `_m2-acceptance-mock/` — and zero migration-vocabulary references **and zero deleted-source path references** (`_decisions.md`/`_rules.md`/`_initial_design`) anywhere in the kept tree.
 
-**The two reference points M11 diffs against:** (1) a clean fixture's artifact layout (`_fixtures/greenfield-clean/{.aprd,.adr,.hld,.roadmap,.build,src}`) for the *artifact trees*; (2) the generic-usage-guide §A1 (Claude) / §B1 (Kiro) deploy layouts for the *harness wiring*. Where the self-project differs from a code fixture it is only because the deliverable is prompts not code: `prompts/` instead of `src/`, `_fixtures/` as the oracle instead of an in-tree `.build/skeleton/oracle/`, and `code-canon/agentic-delivery-pipeline.md` as the active stack profile. Every such difference is a *canonical* deliverable-target difference, not a stray.
+**The two reference points M12 diffs against:** (1) a clean fixture's artifact layout (`_fixtures/greenfield-clean/{.aprd,.adr,.hld,.roadmap,.build,src}`) for the *artifact trees*; (2) the generic-usage-guide §A1 (Claude) / §B1 (Kiro) deploy layouts for the *harness wiring*. Where the self-project differs from a code fixture it is only because the deliverable is prompts not code: `prompts/` instead of `src/`, `_fixtures/` as the oracle instead of an in-tree `.build/skeleton/oracle/`, and `code-canon/agentic-delivery-pipeline.md` as the active stack profile. Every such difference is a *canonical* deliverable-target difference, not a stray.
 
 ---
 

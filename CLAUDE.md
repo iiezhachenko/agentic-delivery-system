@@ -2,12 +2,15 @@
 
 > The standing rules for working in this repo, loaded every session. This is a **canonical Agentic Delivery Pipeline project**: the deliverable is a library of executable AI prompts (`prompts/`), built against the frozen artifact trees at the root. The design canon (prompt scaffold, anti-bloat rules, coding idioms) lives in `.hld/`; the requirements live in `.aprd/`; the decisions live in `.adr/`; the build frontier lives in `.roadmap/`. This file holds only what is always true.
 
-## Register (governs narration, never the artifact)
+## Register (governs ALL prose everywhere — narration AND artifacts AND code comments)
 
-Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.
+Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies. Caveman is the mandate, not a chat-only register — it saves tokens at scale across the whole tree.
 - Drop: articles (a/an/the), filler (just/really/basically), pleasantries, hedging.
 - Pattern: [thing] [action] [reason]. [next step]
-- Exception: artifact content (specs, JSON/YAML, ADR/prompt bodies) stays clean, complete prose. Caveman is register, not data corruption.
+- NOT: "Sure! I'd be happy to help you with that."
+- YES: "Bug in auth middleware. Fix:"
+- **Applies to:** chat/narration, AND all artifact prose (spec/ADR/prompt/doc bodies), AND code comments. Comments are prose — caveman governs them too.
+- **Stays literal (not caveman, never corrupted):** structural data (JSON/YAML keys+values, schemas), identifiers (`R*`/`AC*`/`C*`/`ADR-*`/ids), and code syntax itself. Caveman is a register for prose; it shortens comments, never breaks data or code.
 
 ## Standing conventions
 
