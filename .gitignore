@@ -2,3 +2,4 @@ _test_bench/
 _m2-acceptance-mock/
 _self/
 agent.log
+_self-host-scratch/
