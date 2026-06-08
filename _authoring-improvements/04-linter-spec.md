@@ -60,6 +60,11 @@ Same shape as every gate artifact (D3 disk-truth, schema-valid). `fix` is always
 - **Threshold:** BLOCK >1 (the Register block already mandates it; per-schema reminders are duplication — 02-adr files repeat it per schema).
 - **Why:** AB1. Recurring corpus-wide footer.
 
+### C9 — register / caveman compliance (PR4, hard) — the absolute mandate, gated
+- **Heuristic (deterministic signals, outside code/JSON/ids):** article density (`\b(the|a|an)\b` per prose line); filler hits (`\b(just|really|basically|simply|actually|in order to|please|note that)\b`); pleasantry/hedge openers ("Sure", "I'd be happy", "Let's", "As you can see"). Compute per-artifact ratio.
+- **Threshold:** WARN over a per-artifact-type article+filler ratio; BLOCK on any pleasantry opener or filler-phrase hit. Literal data (JSON/YAML keys+values, schemas, ids, code) exempt — register stays literal there.
+- **Why:** caveman is ABSOLUTE on every artifact incl human-facing — no register exception (T01). PR4 was advisory; this makes it gated, same as economy. A full-prose-but-DRY artifact must still FAIL. Different human prose = external rewrite outside the system, never a pass here.
+
 ## What lint CANNOT do (→ Layer 2 AUDIT)
 
 - Semantic duplication: same fact, reworded (the ×12). C7 only catches verbatim copies.

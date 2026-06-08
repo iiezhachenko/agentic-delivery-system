@@ -29,23 +29,28 @@ Bloat compounds along the chain. A verbose ADR doesn't just cost its own tokens 
 1. **Economy applies to every artifact every stage produces** — not just the prompt deliverable. aPRD, ADR bodies, HLD specs, roadmap, data-model, contracts prose, test-spec prose, build records' prose fields — all of it.
 2. **Economy applies to every PROJECT the ADS builds** — not just self-host. The ADS is a generic engine (P3 — one spine, swappable playbooks). When it builds a terraform system or a typescript app, it still emits a PRD, ADRs, an HLD — same prose artifacts, same downstream-context role, same disease. The bar must travel with the engine, not live in the self-host config.
 
-## Register vs Economy — resolve the canon contradiction first
+## Caveman + Economy — both ABSOLUTE, no exception — kill the loophole first
 
-The existing canon contradicts itself on artifacts:
+Canon contradicts itself on artifacts. Resolve in favor of the absolute mandate:
 
-- **CLAUDE.md** says caveman register governs "all artifact prose (spec/ADR/prompt/doc bodies)".
-- **Every prompt's Register block** says the opposite: *"Exception: artifact content (specs, JSON/YAML, ADR bodies) stays clean and complete. Caveman governs narration, not the deliverable."*
+- **CLAUDE.md** (correct): caveman register governs "all artifact prose (spec/ADR/prompt/doc bodies)".
+- **Every prompt's Register block** (wrong, DELETE): *"Exception: artifact content (specs, JSON/YAML, ADR bodies) stays clean and complete. Caveman governs narration, not the deliverable."*
 
-This is unresolved. But it conflates two SEPARATE properties:
+The exception is killed. **Caveman is an absolute mandate on EVERY artifact, incl human-facing.** Rationale:
+- condensed text reads faster (human + agent);
+- a "human-facing" artifact is still ingested by agents downstream — it IS prompt context (P13);
+- need a different prose style for a human consumer → a SEPARATE agent OUTSIDE the pipeline rewrites that one artifact. Restyling is an external post-process, NEVER a reason to relax caveman inside the system.
+
+Register + economy are TWO separate properties — but BOTH are absolute + consumer-independent:
 
 | Property | What it controls | Consumer-dependent? |
 |---|---|---|
-| **Register** (caveman vs clean prose) | terse style — drop articles/filler | **Yes** — a human-facing deliverable doc may want full prose; agent-context may want terse |
-| **Economy** (P1/P2/P3 = AB1/AB7/AB8/AB9) | one home per fact · every statement has objective · single interpretation | **No** — applies to ALL prose regardless of register or consumer |
+| **Register** (caveman) | terse style — drop articles/filler | **No** — all prose, all artifacts, incl human-facing. External restyle only. |
+| **Economy** (P1/P2/P3 = AB1/AB7/AB8/AB9) | one home per fact · every statement has objective · single interpretation | **No** — all prose regardless of register or consumer |
 
-The fix: **the Register exception covers REGISTER only, never ECONOMY.** An ADR body can be clean full-sentence prose (register exempt) AND still be DRY, objective, single-interpretation (economy enforced). The two are orthogonal. The current canon accidentally lets the register exception excuse economy violations ("artifact stays complete" → agents read it as "say everything, repeat freely"). That loophole is the artifact-bloat enabler.
+Both bind every artifact, independently: a text can be caveman-terse yet still bloated (repeats a fact) — economy fails it; or economical yet full-sentence — register fails it. Both must hold. The old loophole ("artifact stays complete" → agents read it as "say everything, repeat freely, full prose") vanishes because there is no exception left to misread.
 
-**Restated rule:** economy (AB1, AB7, AB8, AB9) is universal and consumer-independent. Register (caveman) is a style choice that may vary by the artifact's reader. Bloat ≠ register. You can be verbose in clean prose; economy forbids it.
+**Rule:** caveman (register) AND economy (AB1, AB7, AB8, AB9) are both universal, consumer-independent, absolute. No artifact is exempt from either. Different human prose = external rewrite, outside the system.
 
 ## Where the discipline must LIVE (architectural relocation)
 

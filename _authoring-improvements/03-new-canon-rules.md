@@ -40,15 +40,15 @@ Enforces P1 as an ACTION rule (AB1 is a placement rule). Gate: the routing keyst
 
 ---
 
-## Caveman-block delta (optional, smaller)
+## Caveman-block delta (smaller)
 
-Current caveman block (coding-canon L7-14) governs register. Add one line tying register to the new rules:
+Caveman block (coding-canon L7–14) governs register — now ABSOLUTE on every artifact, no exception (the register-exception deletion is T01, separate task). Add one line tying register to the new economy rules:
 
 ```markdown
 Fix by cutting, never by adding (AB9). If a statement reads two ways, rewrite it (AB8). Every line earns its place (AB7).
 ```
 
-One line, in the verbatim block, so every prompt carries the anti-bloat reflex at point-of-authoring, not just in canon the author may skip.
+One line, in the verbatim block, so every prompt carries the anti-bloat reflex at point-of-authoring, not just in canon the author may skip. (T01 separately rewrites the block's closing line to "applies to ALL artifacts incl human-facing, no exception".)
 
 ---
 
