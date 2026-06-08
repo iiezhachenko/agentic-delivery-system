@@ -11,6 +11,6 @@
 - RE-RANK over `.roadmap/08-rerank.json` picks the next unshipped prompt. Status is derived
   from disk (scan `prompts/` + `_fixtures/` + locks; done iff `done_sentinel` present + valid);
   do NOT maintain a tracker/changelog file.
-- Orchestrator stays Opus through the parity gate (external judge), Sonnet after.
+- Orchestrator runs Sonnet — the loop is trusted; the earlier Opus external-judge pass is retired.
 - `00-exclusive.md` still applies (don't touch Kiro's built-in specs). The generic `step.json`
   executor is reused unchanged — for self-host it just happens to write a prompt `.md`.

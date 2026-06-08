@@ -17,7 +17,7 @@ Pass `$ARGUMENTS` to the orchestrator as its mode:
 Let RE-RANK pick the next unshipped prompt from `.roadmap/08-rerank.json` (state derived from
 disk — scan `prompts/` + `_fixtures/` + locks; never read a tracker). IMPLEMENT authors the `.md` into a
 scratch path, the clean-room runner (`.claude/agents/step-runner.md`, Sonnet/High, `_test_bench` root,
-both directions) verifies it against `_fixtures/`, then **pause at the parity/value gate** before
+both directions) verifies it against `_fixtures/`, then **pause at the operator gate (value/parity)** before
 promoting it to `prompts/`.
 
-Orchestrator runs **Sonnet** — M5 parity cleared and the loop is trusted, so the Opus-through-the-parity-gate bootstrap (external judge) is retired (migration-spec M6).
+Orchestrator runs **Sonnet** — the loop is trusted, so the earlier Opus external-judge pass is retired.

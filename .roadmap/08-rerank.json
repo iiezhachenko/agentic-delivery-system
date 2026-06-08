@@ -3,7 +3,7 @@
   "class": "agentic-delivery-pipeline",
   "roadmap_version": 2,
   "verdict": "re_ranked",
-  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each 'slice' = one remaining PROMPT-BUILD, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). Order = the declared frontier in freeze.mjs (base_ref 07-sequence-reviewed); position is derived from disk, never from a tracker (_tracker.md retired at M6).",
+  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each 'slice' = one remaining PROMPT-BUILD, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). Order = the declared frontier (base_ref 07-sequence-reviewed); position is derived from disk, never from a tracker.",
   "completed": [
     {
       "position": 1,
@@ -23,7 +23,7 @@
       "retires_risk": "phase-3-increment-chain-incomplete",
       "unit": "prompts/03-hld/RECONCILE-CRITIQUE.md (increment)",
       "done_sentinel": "_fixtures/greenfield-clean/.hld/slices/S4/reconcile.json",
-      "rationale": "Phase-3 role 8/8, last Phase-3 increment (D9/D14); unblocks the Phase-4 SLICE-BUILD modes. First net-new self-build (migration-spec §7 M5b).",
+      "rationale": "Phase-3 role 8/8, last Phase-3 increment (D9/D14); unblocks the Phase-4 SLICE-BUILD modes. First net-new self-build.",
       "coarse_depends_on": [
         "P-DERIVE-TESTS-INC"
       ],

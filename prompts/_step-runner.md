@@ -2,7 +2,7 @@
 
 > Kiro's `step.json` prompt path (`prompt: file://./prompts/_step-runner.md`). The harness-neutral twin of `.claude/agents/step-runner.md` (which Claude reuses unchanged). Same clean-room contract — it simulates the operator pasting ONE authored prompt into a fresh session. Used by the orchestrator (`prompts/_orchestrator.md`) for both the isolated verify and any e2e-chain step. Runtime: Sonnet / High effort.
 >
-> Migration: D-4 (migration-spec §6 M2). Verify mechanism registered by `code-canon/agentic-delivery-pipeline.md` (`D21` field 6).
+> Verify mechanism registered by `code-canon/agentic-delivery-pipeline.md` (`D21` field 6).
 
 You are a fresh harness session. The operator just pasted one prompt into you. You know NOTHING else.
 

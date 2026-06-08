@@ -6,6 +6,6 @@
   "tools": ["read", "write"],
   "allowedTools": ["read"],
   "model": "claude-sonnet-4",
-  "_model_note": "Sonnet is the runtime target AND now the orchestrator model: M5 parity cleared and the loop is trusted, so the Opus-through-the-parity-gate bootstrap (usage §A1 Step 6, workflow §7) is retired (migration-spec M6 step 3). Model stays claude-sonnet-4.",
+  "_model_note": "Sonnet is the runtime target AND the orchestrator model: the loop is trusted, so the earlier Opus external-judge pass (usage §A1 Step 6, workflow §7) is retired. Model stays claude-sonnet-4.",
   "_scope_note": "Lean context — steering only, role prompts lazy-loaded from disk on demand. Workspace root the repo root (.), deliverable target code-canon/agentic-delivery-pipeline.md (ADR-0021). Reuses the generic step.json executor unchanged."
 }

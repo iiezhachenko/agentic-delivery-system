@@ -1,5 +1,3 @@
-# Canonical artifact trees (.aprd .adr .hld .roadmap) are COMMITTED SOURCE, not ignored (M7).
+# Canonical artifact trees (.aprd .adr .hld .roadmap) are committed source, not ignored.
+# Only the clean-room sandbox is ignored.
 _test_bench/
-_m2-acceptance-mock/
-agent.log
-_self-host-scratch/

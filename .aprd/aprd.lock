@@ -1,8 +1,8 @@
 {
   "artifact": "aprd.frozen.md",
-  "version": "v1",
-  "content_sha256": "1eaff631b832505f9f16c1d20fcd5eea37aa9ac37bfc5a23834d16ca0da84178",
+  "version": "v2",
+  "content_sha256": "87ee8454b5f1ccdab3982d242a78dc7fb558c471c11886434c6ec23eedd7e8a7",
   "signer": "self-host:agentic-delivery-pipeline",
-  "signed_at": "2026-06-08T00:00:00Z",
+  "signed_at": "2026-06-08T12:00:00Z",
   "status": "frozen"
 }

@@ -1,6 +1,6 @@
-# HLD Skeleton — Agentic Delivery Pipeline (self-host) (FROZEN v1)
+# HLD Skeleton — Agentic Delivery Pipeline (self-host) (FROZEN v2)
 
-> Frozen, signed skeleton. Immutable. The self-host Build phase reads this + the .hld/skeleton/*.json artifacts it manifests. Gate: RECONCILE/CRITIQUE verdict **clean**. Rendered mechanically by freeze.mjs — do not hand-edit (invariant #5).
+> Frozen, signed skeleton. Immutable. The self-host Build phase reads this + the .hld/skeleton/*.json artifacts it manifests. Gate: RECONCILE/CRITIQUE verdict **clean**. Committed source at the repo root.
 
 ## CLASS
 self-host
