@@ -4,12 +4,12 @@ phase: 02-adr
 class: greenfield            # first pass; the conflict/coverage logic is class-agnostic, but only greenfield is authored (no brownfield existing-ADR inheritance / conformance reconciliation yet)
 interactive: false          # internal coherence + coverage check — reads disk, writes disk, stops. No client touch (PR1, §9)
 inputs:
-  - { path: ".adr/03-options/decisions-index.json", format: "json — EVALUATE-DECIDE manifest; the work list (decisions[{id,category,decision_made,decision_ref,traces}] + undecided[]). Tells which decisions were made + where each file lives" }
+  - { path: ".adr/03-options/decisions-index.json", format: "json — EVALUATE-DECIDE manifest; the work list (decisions[] + undecided[]). Tells which decisions were made + where each file lives" }
   - { path: ".adr/03-options/<DP-id>.decision.json", format: "json — per-DP decision; read decision_made, traces[], cut_ref, consequences.follow_on[] (the NOTED cross-decision deps — primary conflict-detection grounding)" }
   - { path: ".aprd/aprd.frozen.md", format: "markdown — frozen aPRD; in-scope CONSTRAINTS C* = the coverage target (D5), full id-space (R*/AC*/A*/E*) = trace-validity oracle (D4). Read-only, never re-opened (D9)" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — FOUNDATION-CUT; cross_slice_invariants INV* (hard floor for violation check, NOT a coverage target), foundational_decisions FD*, deferred[] (explicit-deferral evidence)" }
 outputs:
-  - { path: ".adr/04-conflicts.json", format: "json (§10 reserved slot, schema below) — cross-decision conflicts + constraint violations + bidirectional coverage + verdict coherent|blocked. SYNTHESIZE-ADR (role 6) gates on it; a blocked verdict loops back to re-decide before any ADR is rendered" }
+  - { path: ".adr/04-conflicts.json", format: "json (§10 reserved slot, schema below) — conflicts + violations + coverage + verdict; SYNTHESIZE-ADR gates on it, blocked loops back to re-decide" }
 escapes:
   - { when: ".adr/03-options/decisions-index.json missing or unparseable — no manifest to enumerate", target: "self / HALT" }
   - { when: ".aprd/aprd.frozen.md missing or unparseable — no CONSTRAINTS to coverage-check, no id-space to validate traces (D4/D5)", target: "self / HALT" }
@@ -126,6 +126,5 @@ Coherence + coverage gate, role 5 of ADR (Phase 2) pipeline. EVALUATE-DECIDE dec
 All prose (`finding`/`evidence`/`why`/`issue`) caveman governs this too (PR4).
 
 ## Stop condition
-- Guard tripped (frontmatter `escapes:` — no manifest/aPRD/cut, non-greenfield) → write nothing; print which fired + offending detail; "HALT".
-- Empty `decisions[]` (guard) → write `04-conflicts.json` empty + `verdict: coherent` + note; "nothing to reconcile".
-- Reconciled → write `.adr/04-conflicts.json` (only output; `.adr/` exists upstream); state verdict (`coherent` → "SYNTHESIZE-ADR next" / `blocked` → "N blocking issues routed back, re-decide") + `blocking_count`. No decision re-decided, no option re-sourced, no ADR rendered, no id assigned, no input re-opened, no client touch.
+- Guard tripped (frontmatter `escapes:`) → follow its target; print which fired + offending detail.
+- Reconciled → write `.adr/04-conflicts.json` (only output); state verdict (`coherent` → "SYNTHESIZE-ADR next" / `blocked` → "N blocking issues routed back, re-decide") + `blocking_count`. Stay in lane (no re-decide, re-source, render, id-assign, input re-open, client touch).

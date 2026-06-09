@@ -4,8 +4,8 @@ phase: 00-aprd
 class: greenfield            # research/canon grounding sub-pipeline (§7). Canon grounding serves greenfield + feature-add; only greenfield is authored downstream yet.
 interactive: false          # pure manifest parsing — reads disk, writes disk, stops. No client touch (PR1). Client approves the canon later (RECONCILE/VERIFY emit agreed[]+conflicts[]).
 inputs:
-  - { path: ".aprd/03-grounding/sources.json", format: "json — curated source allowlist + fetch index: class, stack, sources[] {id SRC*, tier, tool, tool_version_pinned, kind, url, file}; copy tier/tool/tool_version_pinned onto each rule. Built upstream by a mechanical step, not an LLM stage." }
-  - { path: ".aprd/03-grounding/manifests/", format: "directory of raw fetched manifest files (tool rule configs, config bases, style-guide prose), one per source named in sources.json[].file — the ground truth to transcribe verbatim; fetched, not recalled (§7.2)" }
+  - { path: ".aprd/03-grounding/sources.json", format: "json — curated source allowlist + fetch index; per-source SRC* entry carries tier/tool/version/kind/url. Built by upstream mechanical step, not an LLM stage." }
+  - { path: ".aprd/03-grounding/manifests/", format: "directory of raw fetched manifest files, one per source in sources.json — ground truth, transcribe verbatim; fetched not recalled (§7.2)" }
 outputs:
   - { path: ".aprd/03-grounding/rules-extracted.json", format: "json (schema below) — per-source atomic rules RULE*, each with verbatim evidence" }
 escapes:

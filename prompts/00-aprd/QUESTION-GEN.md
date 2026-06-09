@@ -28,7 +28,7 @@ Turn ranked gaps into client-facing clarifying-questions document — single bat
 3. **One gap = one question.** Each selected gap maps to exactly one question threading `gap_ref: G*`. **Do not merge** two gaps into one question (compound questions destroy recognition, re-introduce ambiguity GAP-DETECT split apart). Do not split one gap across two questions.
 4. **Options are gap's interpretations — faithful, never reordered (P11).** Render every interpretation as one lettered option **in `interpretations[]` array order**: index 0 → A, 1 → B, 2 → C, … Index→letter mapping is load-bearing contract — downstream maps client's answer letter back to interpretation at that index, so order is data, not presentation. MAY rephrase each interpretation into plain client-facing language (translate engineer-speak so non-technical client recognizes choice); may **not** invent new option, drop, merge, **reorder**, or import model gap never raised. Same interpretations, same order, client-readable surface.
 5. **Mark exactly one recommended default per question — in place, never moved (P7).** Mark option whose interpretation equals gap's `recommended_default` (verbatim match in `04-gaps.json`) as `**(recommended)**`; exactly one option carries it. **Recommended option frequently NOT option A** — for many gaps default is second or third interpretation, so marker lands on B or C; correct and expected. Do not hoist/promote/re-sort recommended interpretation to front — options stay in `interpretations[]` order (Rule 4), marker moves to wherever that interpretation sits. Letter A is **not** synonym for "recommended." This is choice pipeline adopts if client skips question — say so once in document intro.
-6. **Always offer escape option.** Each question ends with final lettered option `Something else — please describe.` that is **not** one of gap's interpretations. Recognition is default, but never box client into false dichotomy. Escape option never carries recommended marker.
+6. **Always offer escape option.** Each question ends with final lettered option `Something else — describe it.` that is **not** one of gap's interpretations. Recognition is default, but never box client into false dichotomy. Escape option never carries recommended marker.
 7. **Recognition over recall, plain language (P7).** Phrase each stem as concrete decision client can recognize and answer in seconds — not open-ended "what do you want?". Translate data-model / stack / dependency terms into outcome language (not "currency granularity at entry vs project level" but "Can different time entries on one project use different currencies, or does each project use single currency?"). Keep technical precision in option text where it earns its place; keep stem human.
 8. **Thread IDs (P9).** Every question carries source `gap_ref` (`G*`); every deferred assumption carries `gap_ref`. No question and no assumption may exist without `gap_ref`. Question numbering `Q1, Q2, …` sequential and independent of `G*` numbers.
 9. **No client interaction now (PR1).** Write document to disk; do not present it, wait, or collect answers. Clarify-loop gate does that later.
@@ -41,7 +41,7 @@ Set of question `gap_ref`s plus set of assumption `gap_ref`s must equal full set
 1. Read `.aprd/04-gaps.json`. Check guards (frontmatter `escapes:`) — any tripped → HALT, report which + offending detail (e.g. class), write nothing. Else continue.
 2. Filter to `ask` gaps, preserving file order; set aside, ignore all cosmetic gaps (SYNTHESIZE owns those).
 3. Select first `min(6, count)` `ask` gaps as **questions**; remainder are **deferred assumptions** (Rule 2).
-4. Per question gap, in order, build: recognition-framed plain-language stem; one lettered option per interpretation (faithful, client-readable, order preserved); `**(recommended)**` marker on option matching `recommended_default`; final `Something else — please describe.` escape option; tag with `gap_ref`.
+4. Per question gap, in order, build: recognition-framed plain-language stem; one lettered option per interpretation (faithful, client-readable, order preserved); `**(recommended)**` marker on option matching `recommended_default`; final `Something else — describe it.` escape option; tag with `gap_ref`.
 5. Per deferred-assumption gap, write one-line plain-language statement of `recommended_default`, tagged with `gap_ref`.
 6. Assemble per template, write `.aprd/05-questions.md`. Stop.
 
@@ -55,17 +55,19 @@ A few choices to confirm before we build. For each question, reply with the lett
 
 ## Questions
 
+<!-- Zero ask gaps (all cosmetic / none): replace the Q* blocks with one line — "No clarifying questions — every open choice is safe to assume; assumptions will be announced in the draft for your review." — and omit the Assumptions section. -->
+
 ### Q1 · <recognition-framed, plain-language stem>
 <!-- gap_ref: G1 -->
 - **A.** <interpretation 1 as plain-language option> **(recommended)**
 - **B.** <interpretation 2 as plain-language option>
-- **C.** Something else — please describe.
+- **C.** Something else — describe it.
 
 ### Q2 · <stem>
 <!-- gap_ref: G2 -->
 - **A.** <option> **(recommended)**
 - **B.** <option>
-- **C.** Something else — please describe.
+- **C.** Something else — describe it.
 
 <!-- …up to a maximum of Q6. Options lettered A,B,C,… one per interpretation in interpretations[] order (index 0→A); recommended marker on whichever letter matches recommended_default — may be A/B/C/any, never reordered to front; last option always the escape, never marked. A gap with 3+ interpretations renders all of them as options plus the escape; the ≤6 cap counts questions, not options. -->
 
@@ -75,11 +77,6 @@ A few choices to confirm before we build. For each question, reply with the lett
 - **(G7)** <plain-language statement of that gap's recommended_default>
 - **(G8)** <…>
 ```
-
-### Edge cases
-- **Zero `ask` gaps** (all cosmetic, or no gaps): do not fabricate questions. Write document with `## Questions` heading followed by single line — `No clarifying questions — every open choice is safe to assume; assumptions will be announced in the draft for your review.` — omit assumptions section. Pipeline proceeds straight to drafting.
-- **Fewer than 6 `ask` gaps**: ask all; no assumptions section (nothing deferred).
-- **Gap with 3+ interpretations**: render all as options (plus escape option). ≤6 cap counts questions, not options.
 
 Schema match exact; clarify-loop gate presents this to client and collects `06-answers.md`; SYNTHESIZE later reads answers + gaps + deferred assumptions — keep headings and `gap_ref` tags as specified (PR2).
 

@@ -3,6 +3,8 @@
 > **Status:** design sketch. Built after greenfield delivery pipeline (Phases 0–4) and, by current build order, after Spine D (documentation). Authored prompt-by-prompt, same tracker-driven way.
 >
 > **Register note:** spec contract overrides — caveman prose inside this spec. Authored prompts carry canonical caveman block.
+>
+> **Change log:** 2026-06-09 — T10 economy cut (caveman register + AB8): killed banned hedge/filler words. Substance invariant. New version = the change request (P8).
 
 ---
 
@@ -17,7 +19,7 @@ This = **investigation** class extended with decision step. Greenfield CLASSIFIE
 Review-**backward** over existing system, inverse of greenfield pipeline's build-**forward**. Reuses greenfield reasoning roles two distinctive ways: **Phase-3 HLD modeling roles run in reverse** to reconstruct as-built architecture, and **Phase-2 ADR engine runs verbatim** to turn diagnoses into decided recommendations.
 
 ### 1.1 Goals
-- **Diagnose, don't just describe.** Map each complaint to *root cause* in reconstructed architecture/process, distinguish symptom from cause. Complaint may have several causes, share cause with another complaint, or be non-issue.
+- **Diagnose, don't merely describe.** Map each complaint to *root cause* in reconstructed architecture/process, distinguish symptom from cause. Complaint may have several causes, share cause with another complaint, or be non-issue.
 - **Recommend with rigor.** Each remediation = ADR-grade decision: ≥2 live alternatives, evaluated against real constraints/impact/cost, one picked, consequences recorded. No hand-wave "use microservices."
 - **Grounded in as-built system.** Current-state model cites real files/modules/configs (transcribe-never-recall). No assumed architecture, no diagnosis of structure that isn't there.
 - **Traceable + adversarially gated.** Every recommendation traces to complaint; every complaint addressed, deferred, or explicitly declined with reason; hostile reviewer gates lot.
@@ -55,7 +57,7 @@ Exit: accepted review artifact. Distinctively, recommendation set shaped as **Pr
 
 ## 3. Core principles
 
-- **P5 / P11 — code is truth; transcribe, never recall.** Reconstruct architecture from actual repo, not from what agentic system "usually" looks like. Every current-state claim cites real file/module. LLM reconciles evidence; never source.
+- **P5 / P11 — code is truth; transcribe, never recall.** Reconstruct architecture from actual repo, not from recalled agentic-system shape. Every current-state claim cites real file/module. LLM reconciles evidence; never source.
 - **Symptom ≠ cause (unifying insight, §4.1).** Complaint = observed symptom; review's job = causal trace from symptom to structural/process root that produces it. "Done" = every complaint has grounded root-cause trace.
 - **Live alternatives are rule (inherited D1/D3 from Phase 2).** Recommendation only as good as alternatives it beat. Every recommended change records options it was chosen over + why — ADR engine's core discipline, reused verbatim.
 - **FLAG / DIAGNOSE / RECOMMEND = separated lanes.** Reconstruction states *what is*; diagnosis states *why it hurts*; recommendation states *what to change*. Mixing them (e.g. reconstruction role that editorializes, or diagnosis that smuggles fix) = failure-isolation boundary, same as greenfield role separation.
@@ -96,7 +98,7 @@ Gives review *oracle*: recommendation that doesn't tie back to complaint's cause
 Two loops: **reconstruction** (once) then **per-complaint diagnose-and-recommend** (×N).
 
 ### 5.1 Classify & scope `[reuse: CLASSIFIER]`
-`investigation` → architecture-review. Decompose complaint set into **atomic complaints** (one symptom, one locus); preserve client wording; detect scope (which subsystems in play); escape if request actually build/bugfix in disguise, or if repo inaccessible.
+`investigation` → architecture-review. Decompose complaint set into **atomic complaints** (one symptom, one locus); preserve client wording; detect scope (which subsystems in play); escape if request is build/bugfix in disguise, or if repo inaccessible.
 
 ### 5.2 Extract complaints `[reuse: EXTRACT]`
 Transcribe each complaint into structured atom: `{CMP*, symptom, locus, evidence_kind, quoted_evidence, impact, source_ref}`. Transcriber-not-author: cite client's words, mark inferred impact as inferred, list unknowns as `U*`. Verbatim carry, no paraphrasing away scope.
@@ -161,7 +163,7 @@ roadmap:         [ ordered REC* with prerequisite cuts ]
 coverage:        { every CMP* → covered | deferred | declined(reason) }
 ```
 
-IDs thread: `CMP → root_cause(element_ref) → REC → ADR`, so coverage + traceability mechanically auditable — same property that lets Phase-2 CRITIQUE verify ADR coverage.
+IDs thread: `CMP → root_cause(element_ref) → REC → ADR`, so coverage + traceability mechanically auditable — same property that enables Phase-2 CRITIQUE to verify ADR coverage.
 
 ### 6.2 Why this form
 Review = **executable-on-paper**: recommendation with no `addresses[CMP*]` = gold-plating by schema; complaint not in `coverage` = incomplete review by schema; diagnosis with no `element_ref` = ungrounded by schema. Defects structural, not matters of taste — and recommendation set already in ADR shape, so drops straight into delivery pipeline.

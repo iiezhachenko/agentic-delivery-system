@@ -5,8 +5,8 @@ class: greenfield            # first pass; reviewer is class-agnostic by design,
 interactive: false          # adversarial review — reads disk, writes the issues list to disk, stops. Does NOT re-run SYNTHESIZE and does NOT touch the client; the loop-back and sign-off gate are separate orchestration steps (§5.6/§5.4, PR1).
 inputs:
   - { path: ".aprd/drafts/aprd.v1.md", format: "markdown — the aPRD draft under review: PROJECT, CLASS, ENTITIES E*, REQUIREMENTS R*, CONSTRAINTS C*, ASSUMPTIONS A* (gap_ref), OUT_OF_SCOPE, ACCEPTANCE AC* (req_ref)" }
-  - { path: ".aprd/07-assumptions.json", format: "json — machine log: assumptions[] {id A*, gap_ref G*, text, source, chosen_interpretation, rejected_interpretations}, flagged_requirements[], assumption_count; cross-checked against the draft's ASSUMPTIONS" }
-  - { path: ".aprd/04-gaps.json", format: "json — ranked gaps[] G* with interpretations[], recommended_default, disposition; the traceability ground truth (every assumption must trace to a real gap, every gap must be resolved)" }
+  - { path: ".aprd/07-assumptions.json", format: "json — machine assumptions log (assumptions[] A* each gap_ref→G*, plus flagged_requirements[] + assumption_count); cross-check against draft ASSUMPTIONS" }
+  - { path: ".aprd/04-gaps.json", format: "json — ranked gaps[] G* with interpretations + recommended_default + disposition; the traceability ground truth (assumptions trace back to these)" }
 outputs:
   - { path: ".aprd/08-critique.json", format: "json (schema below) — verdict + blocking issues[]; blocking-grade only" }
 escapes:
@@ -35,7 +35,7 @@ Issue is blocking iff it satisfies one of five categories below **after reading 
    - **No observable named** — AC points at nothing tester can run (no rendered element, stored field, reachable response, computed equality, or returned file).
    - **Non-flagged requirement has no AC** — every `R*` not marked `[FLAGGED: …]` must carry ≥1 `AC*`. (Correctly flagged requirement — marked `[FLAGGED: no testable AC — …]` in REQUIREMENTS **and** listed in `07`'s `flagged_requirements` — is sanctioned escape, NOT defect. Block flag only if binary AC plainly *could* be written, i.e. flag is dodge.)
    - **Not blocking: single observable leaving *cosmetic* sub-detail unpinned.** AC is binary when core observable has defined present/absent or equality check — even if it leaves latitude on cosmetic rendering detail no requirement and no gap in `04` pins (exact glyph or form of token, e.g. currency `USD` vs `$`; label wording; default sort order; date format). "Amount displays currency identifier alongside it" is binary — tester checks currency token present next to number; which form it takes is cosmetic (P6: safe to assume, never ask, never block). Do **not** raise `non-binary-ac` because AC fails to mandate one cosmetic form.
-3. **`unbounded-scope`** — capability contract leaves open with **no boundary anywhere**. Block iff: **declined interpretation** of gap in `04` missing from `OUT_OF_SCOPE` (negative space client's choice created not recorded), or requirement plainly implies optional extras with no in/out boundary set by any assumption, AC, or exclusion. Bound to what gaps and requirements actually raised — do **NOT** demand `OUT_OF_SCOPE` entries for capabilities no gap and no requirement ever mentioned (inventing scope contract never owed = over-reach, P11).
+3. **`unbounded-scope`** — capability contract leaves open with **no boundary anywhere**. Block iff: **declined interpretation** of gap in `04` missing from `OUT_OF_SCOPE` (negative space client's choice created not recorded), or requirement plainly implies optional extras with no in/out boundary set by any assumption, AC, or exclusion. Bound to what gaps and requirements raised — do **NOT** demand `OUT_OF_SCOPE` entries for capabilities no gap and no requirement ever mentioned (inventing scope contract never owed = over-reach, P11).
 4. **`untraceable-assumption`** — break in assumption↔gap thread (P9). Block iff: assumption `A*` whose `gap_ref` names **no gap** in `04`; gap in `04` with **no assumption** resolving it (coverage hole); assumption whose decision **contradicts** its gap's interpretations or recorded client answer (claims project-level when client chose per-entry); or duplicate (two assumptions for one gap). Disagreeing with *correctly-traced* decision is NOT defect — assumption is sanctioned resolution of gap (§5.5); check it traces and is faithful, not whether you'd have chosen differently.
 5. **`broken-id-thread`** — id reference doesn't resolve, or two artifacts disagree. Block iff: `AC*`'s `req_ref` names `R*` not in REQUIREMENTS; `A*`'s `gap_ref` names `G*` not in `04`; `A*`/`AC*` id-spaces non-contiguous or duplicated; draft's ASSUMPTIONS section and `07`'s `assumptions[]` disagree (different ids, gap_refs, or count); `07`'s `assumption_count` ≠ number of gaps in `04` ≠ length of `assumptions[]`; or `flagged_requirements` entry has no matching `[FLAGGED]` marker in draft (or vice-versa).
 
@@ -54,7 +54,7 @@ Genuinely on the line *after* applying resolution test — fork might survive, A
 
 ## Rules
 1. **Read whole contract before raising any issue.** Resolution test runs across REQUIREMENTS + ASSUMPTIONS + OUT_OF_SCOPE + ACCEPTANCE together — never block fork in isolation.
-2. **Blocking-grade only (§5.6, §8).** Every issue, left unfixed, lets build commit silently to wrong interpretation or leaves "done" undefined. No style, no taste, no "could be nicer".
+2. **Blocking-grade only (§5.6, §8).** Every issue, left unfixed, allows build to commit silently to wrong interpretation or leaves "done" undefined. No style, no taste, no "could be nicer".
 3. **Cheapest source first; reconcile and verify, don't author truth (P5, P11).** Evidence = three files: draft (`aprd.v1.md`), machine log (`07`), gaps (`04`). Every issue cites concrete id in those artifacts and concrete reason competent reviewer would block on. Don't import requirement, scope boundary, or "done" upstream artifacts never raised to manufacture issue — that is inventing defect, mirror of inventing requirement. Real gap framed badly upstream = GAP-DETECT's defect, not CRITIQUE blocker against draft that faithfully resolved it. Find defects in *contract as written*; never rewrite it.
 
 ## Task steps
@@ -91,12 +91,6 @@ Genuinely on the line *after* applying resolution test — fork might survive, A
 }
 ```
 Caveman governs this too.
-
-### Edge cases
-- **Zero issues** → `verdict: clean`, `issues: []`, `issue_count: 0`. Write file; don't skip output on clean pass.
-- **Same root defect hits several ids** (one missing OUT_OF_SCOPE pattern across three gaps) → one issue per distinct id, or one issue naming primary id and listing rest in `problem` — don't inflate count by splitting one fix into many cosmetic rows, nor bury distinct fixes in one row.
-- **Draft and `07` disagree** (different assumption set, count, or flags) → itself `broken-id-thread` blocker; report it rather than silently trusting one over other.
-- **Gap with `disposition: assume` (cosmetic)** → still must be resolved by assumption (`source: cosmetic-announced`); missing one = `untraceable-assumption` coverage hole, same as any other gap.
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which guard fired + offending detail; "HALT".

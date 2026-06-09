@@ -3,13 +3,14 @@
 | | |
 |---|---|
 | **Status** | Draft |
-| **Version** | 0.2 |
+| **Version** | 0.3 |
 | **Date** | 2026-06-08 |
 | **Audience** | Engineers building system; agents executing it |
 | **Scope** | Stage slices frozen aPRD set into vertical demoable increments, sequences them, controls foundation + slice delivery loops |
 | **Predecessor** | Phase 0 — `00-automated-aprd-pipeline-spec.md` (produces frozen aPRD set this phase slices) |
 
 **Change log**
+- **v0.3** (2026-06-09) — T10 economy cut (caveman register + AB8): killed banned hedge/filler words. Substance invariant. New version = the change request (P8); re-lock at next freeze.
 - **v0.2** (2026-06-08) — §5.7 + §6.1: `cross_slice_invariants` gains TWO sources — aPRD-read (unchanged) + **engine-standing** `INV-ECON` (spec-00 §2.1, grounded P13/`A-ECON`) cut by DEFAULT into EVERY project, cross-cutting like security, stack-independent. Makes economy inherited per-project automatically (consumes T02 P13/INV). New version = the change request (P8). Downstream: `FOUNDATION-CUT` emits `INV-ECON[0]` by default.
 
 ---
@@ -36,7 +37,7 @@ Four facts drive design:
 ### 1.2 Non-goals
 
 - **Designing or building.** Phase 1 decides *which slice, what order*. Phases 2–4 decide HOW + build. Controller, not designer.
-- **Detailing whole HOW up front.** Only foundation cut resolved before slicing; per-slice design/build just-in-time.
+- **Detailing whole HOW up front.** Only foundation cut resolved before slicing; per-slice design/build on demand.
 - **Freezing sequence forever.** Roadmap versioned + *living* — re-ranks on learning. (Completed-slice records immutable; *sequence* not.)
 - **Single mega-prompt.** Roles separated for failure isolation + quality, as Phase 0.
 
@@ -74,9 +75,9 @@ Inherits Phase 0 P-series. Roadmap-specific additions; each load-bearing.
 | RM5 | Sequence by **value × risk, dependency-constrained** — riskiest-valuable first (after skeleton) | Low-value or blocked work built first; risk deferred | P6 |
 | RM6 | Roadmap **living** — re-rank remaining slices as each completes + reveals information | Stale plan drives build off cliff | — |
 | RM7 | Slice **is a flow** — vertical path traverses component graph along one flow F*, not across a layer | Slices drift back to horizontal (layer) cuts | — |
-| RM8 | **WHAT broad, HOW thin** — detail each slice's design/build just-in-time | Premature full design = waterfall | P12 |
+| RM8 | **WHAT broad, HOW thin** — detail each slice's design/build on demand | Premature full design = waterfall | P12 |
 | RM9 | **Foundation minimal** — decide only what first slices + cross-slice invariants need; defer rest to slice that needs it | Over-decided up front (waterfall), or under-decided (slice blocked) | P6 |
-| RM10 | **Slice size by INVEST** — smallest increment demoable AND delivers value or retires named risk | Too big → mini-waterfall; too small → integration thrash | — |
+| RM10 | **Slice size by INVEST** — smallest increment demoable AND delivers value or retires named risk | Oversized → mini-waterfall; undersized → integration thrash | — |
 | RM11 | Roadmap is **controller**, not builder — drives loops + dispatches slices; never designs or implements | Phase boundaries blur; slicer starts deciding HOW | P3 |
 
 ---
@@ -174,7 +175,7 @@ From slice-1 (skeleton) + cross-slice invariants, name **minimum** to decide and
 - `skeleton_seams` → contracts Phase 3 must establish in **skeleton pass**.
 - `cross_slice_invariants` → properties decided once, every slice inherits. TWO sources:
   - **aPRD-read** — auth/tenancy/scale/compliance properties, read verbatim from frozen CONSTRAINTS/ASSUMPTIONS, never invented (P11).
-  - **engine-standing** — `INV-ECON` (spec-00 §2.1, grounded P13/`A-ECON`) cut by DEFAULT into EVERY project, cross-cutting like security — NOT aPRD-derived, NOT opt-in. So VERIFY-OUTPUT's NFR check measures every stage's output against economy in ANY stack (terraform/typescript), not just self-host. Stack-independent (P3): swapping the stack profile never drops it.
+  - **engine-standing** — `INV-ECON` (spec-00 §2.1, grounded P13/`A-ECON`) cut by DEFAULT into EVERY project, cross-cutting like security — NOT aPRD-derived, NOT opt-in. So VERIFY-OUTPUT's NFR check measures every stage's output against economy in ANY stack (terraform/typescript), not only self-host. Stack-independent (P3): swapping the stack profile never drops it.
 Everything not in cut deferred to slice that first needs it (RM9). Cut deliberately thin — widening later cheaper than building wrong foundation.
 
 ### 5.8 Client review of the sequence
@@ -265,7 +266,7 @@ flowchart LR
 - **Acceptance is verticality proof.** Slice without black-box AC is not a slice (RM2). Reusing aPRD `AC*` keeps demo gate honest + traceable.
 - **Sequence living.** Re-ranking on learning is feature, not drift (RM6). Versioning plan (not freezing) is deliberate contrast with every other phase artifact.
 - **Coverage prevents orphans.** Every `R*` must land in ≥1 slice, or never built. Coverage = slice-layer analog of Phase 0 requirement-completeness check.
-- **Foundation cut = anti-waterfall lever.** Naming *minimum* to decide once lets rest stay thin + incremental (RM8, RM9).
+- **Foundation cut = anti-waterfall lever.** Naming *minimum* to decide once keeps rest thin + incremental (RM8, RM9).
 
 ---
 
@@ -431,8 +432,8 @@ If new class forces engine edit, abstraction wrong — fix spine, not playbook. 
 | Big-bang waterfall | Two-loop split (RM3); foundation thin (RM9), then slice-by-slice with demo gate |
 | Foundation too thin (mid-slice surprises) | Re-rank + foundation gap escape (§5.13); local-ADR flood signal from Phase 3 |
 | Foundation too thick (over-decided up front) | Cut covers only first slices + invariants (RM9); bias thin |
-| Slice too big (mini-waterfall) | INVEST sizing (RM10); split until demoable-and-small |
-| Slice too small (integration thrash) | INVEST sizing (RM10); merge into vertical neighbor |
+| Slice oversized (mini-waterfall) | INVEST sizing (RM10); split until demoable-and-small |
+| Slice undersized (integration thrash) | INVEST sizing (RM10); merge into vertical neighbor |
 | Sequence ignores dependencies (slice blocked) | Dependency-constrained ordering (RM5); cycle flagged as defect |
 | Integration risk discovered late | Walking skeleton first (RM4) retires it up front |
 | Requirement never built (orphan) | Coverage check — every R* in ≥1 slice |

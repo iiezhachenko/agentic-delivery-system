@@ -9,7 +9,7 @@
 
 You describe what you want. System designs it, builds it, tests it, shows working software running on staging — delivered in small reviewable increments, not one big drop at end.
 
-Team of AI agents as pipeline. Each stage has job, hands result to next, checks work along way. **Nothing "done" until verified to actually work** — every increment ships with tests proving it does what asked.
+Team of AI agents as pipeline. Each stage has job, hands result to next, checks work along way. **Nothing "done" until verified to work** — every increment ships with tests proving it does what asked.
 
 **What you get:** verified demoable app on staging, plus clean paper trail — what agreed (requirements), why each major technical choice made (decision records), how structured (design), proof it works (passing tests).
 
@@ -177,9 +177,9 @@ Technology = **decision made for your project** (at "Decide" phase), based on re
 
 ## 11. Common situations
 
-- **"My request is actually several things"** (e.g. "fix upload bug, make it faster, add PDF support"). System detects this, splits into atomic pieces, classifies each (bug fix / performance / feature), confirms breakdown with you before proceeding.
+- **"My request is several things at once"** (e.g. "fix upload bug, make it faster, add PDF support"). System detects this, splits into atomic pieces, classifies each (bug fix / performance / feature), confirms breakdown with you before proceeding.
 - **"Changed my mind about a requirement."** Raise at next checkpoint. Change updates agreed requirements + re-plans affected slices — paper trail keeps everything consistent.
-- **"How do I know it really works, isn't faked?"** Every slice ships with tests authored by role separate from builder, run against live build, plus anti-cheat review flagging hollow/hard-coded implementations. "Done" requires passing, not claiming.
+- **"How do I know it works, isn't faked?"** Every slice ships with tests authored by role separate from builder, run against live build, plus anti-cheat review flagging hollow/hard-coded implementations. "Done" requires passing, not claiming.
 - **"This is change to existing system, not new build."** Supported. System reads codebase first, conforms to conventions, adds regression guards so existing behavior stays green.
 - **"Don't know answer to clarifying question."** Say so. Becomes explicit recorded assumption you can change later — never silent guess.
 

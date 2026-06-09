@@ -9,8 +9,8 @@ interaction:
 inputs:
   - { path: ".roadmap/05-sequence.json", format: "json — SEQUENCE proposed order. verdict MUST be 'sequenced'; sequence[] per-position id/name/skeleton/value/retires_risk/depends_on/cost_proxy/rationale. Order to present; carried verbatim, never re-scored" }
 outputs:
-  - { path: ".roadmap/roadmap.md", format: "markdown (schema below, Phase A) — client-facing presentation + demo plan, written autonomously BEFORE client replies: recognition-over-recall order, first-demo, plain-language per-position rationale, dependency-legal reorder as multiple-choice. Always produced" }
-  - { path: ".roadmap/07-sequence-reviewed.json", format: "json (schema below, Phase B) — CLIENT-CONFIRMED living baseline order + captured overrides. Written ONLY after client responds. Downstream (RE-RANK / foundation-loop dispatch) reads this, not 05" }
+  - { path: ".roadmap/roadmap.md", format: "markdown (schema below, Phase A) — client-facing presentation + demo plan, written autonomously BEFORE client replies. Always produced" }
+  - { path: ".roadmap/07-sequence-reviewed.json", format: "json (schema below, Phase B) — CLIENT-CONFIRMED living baseline order + captured overrides. Written ONLY after client responds; downstream reads this, not 05" }
 escapes:
   - { when: ".roadmap/05-sequence.json missing or unparseable", target: "self / HALT — no order to review; cannot run" }
   - { when: "05 class != greenfield", target: "non-greenfield playbook — review depth not authored; HALT, report class" }
@@ -64,7 +64,7 @@ Keeps multiple-choice honest: never offer reorder that breaks dependency; never 
 ### Phase B — Capture (only after client replies)
 6. Read client's selection:
    - **Confirm** → confirmed order = proposed order, verbatim. `verdict: confirmed`, `client_response: confirmed`.
-   - **"Build X earlier"** (slack option) → move X to earliest legal position (`max(position of X's depends_on) + 1`); shift slices it jumps down by one, preserving relative order; renumber positions. Re-validate whole order still legal topological sort. Record move in `review.overrides[]`. `verdict: reordered`, `client_response: reordered`.
+   - **"Build X earlier"** (slack option) → move X to its earliest legal position (slack rule above); shift slices it jumps down by one, preserving relative order; renumber positions. Re-validate whole order still legal topological sort. Record move in `review.overrides[]`. `verdict: reordered`, `client_response: reordered`.
    - **Escape / free-text priority** → interpret stated priority as reorder. If dependency-legal, apply it (as above) and record in `review.overrides[]` (`client_response: reordered`, `verdict: reordered`). If it violates `depends_on` edge or asks to move skeleton, **block it**: record in `review.blocked_overrides[]` with conflicting edge named in plain language, keep legal order, set `review.needs_followup: true`, `verdict: confirmed`, `client_response: blocked` (client asked for reorder, none legal — neither clean confirm nor applied reorder). If single reply mixes legal reorder and illegal one, apply legal part (`verdict: reordered`) and still record illegal part in `blocked_overrides[]` with `needs_followup: true`. (`client_response: deferred` = client explicitly declines to decide → keep proposed order, `verdict: confirmed`.)
 7. Run coverage check: confirmed `sequence` holds exactly `05` slice id set, each once.
 8. Write `.roadmap/07-sequence-reviewed.json` (create `.roadmap/` if absent). Stop. RE-RANK / foundation-loop dispatch reads this confirmed living order.
@@ -149,7 +149,7 @@ This order is set by what each capability needs built first — there's no alter
 Two registers: `07-sequence-reviewed.json` prose (`signoff`, blocked-override reasons) is caveman (governs artifact bodies too — PR4); client-facing `roadmap.md` stays plain readable language (client non-technical, comprehension load-bearing).
 
 ## Stop condition
-- Guard tripped (escapes: 05 missing/unparseable, non-greenfield class, or verdict == dependency_defect) → write nothing; print which guard fired + offending detail; "HALT".
+- Guard tripped (escapes) → write nothing; print which guard fired + offending detail; "HALT".
 - Phase A complete, no client response this session → `.roadmap/roadmap.md` written + presented; state "order presented, awaiting client selection", stop. Do **not** write `07`; do **not** fabricate client answer.
 - Phase B complete (client replied) → write `.roadmap/07-sequence-reviewed.json` (RE-RANK / foundation-loop dispatch reads this confirmed living order); state outcome ("order confirmed" / "order reordered: <move>" / "override blocked: <reason>, order held"), stop.
 ```

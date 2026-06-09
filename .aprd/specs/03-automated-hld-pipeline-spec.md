@@ -3,11 +3,14 @@
 | | |
 |---|---|
 | **Status** | Draft |
-| **Version** | 0.2 |
+| **Version** | 0.3 |
 | **Date** | 2026-06-06 |
 | **Audience** | Engineers building system; agents executing it |
 | **Scope** | Stage turns frozen aPRD set + ADR frame + roadmap into High-Level Design — skeleton drawn once, then extended one vertical slice at a time |
 | **Predecessors** | Phase 0 — `00-automated-aprd-pipeline-spec.md` (WHAT) · Phase 1 — `01-automated-roadmap-pipeline-spec.md` (slices) · Phase 2 — `02-automated-adr-pipeline-spec.md` (WHY-this-HOW) |
+
+**Change log**
+- **v0.3** (2026-06-09) — T10 economy cut (caveman register + AB8 + dedup): killed banned hedge/filler words, H14 skeleton-ripple rationale stated once (§5.10 home; §5.6 freeze cites it). Substance invariant. New version = the change request (P8); re-lock at next freeze.
 
 ---
 
@@ -37,7 +40,7 @@ Three facts drive design:
 ### 1.2 Non-goals
 
 - **Low-level / detailed design.** Class hierarchies, function signatures, algorithms *inside* a component decided at implementation time against component's frozen contract. Phase 3 stops at component boundary.
-- **Drawing whole HLD up front.** Only skeleton drawn once; component depth filled per slice, just-in-time. Big-bang design = waterfall roadmap exists to prevent.
+- **Drawing whole HLD up front.** Only skeleton drawn once; component depth filled per slice, on demand. Big-bang design = waterfall roadmap exists to prevent.
 - **Re-deciding foundational architecture.** Style, stack, persistence = frozen ADRs. If structure can't honor one, that = ADR change request to Phase 2 — never silent re-decision.
 - **Writing code.** Phase 3 produces structure + test specs, not implementation. That = Phase 4.
 - **Single mega-prompt.** Roles stay separated, as in Phases 0–2.
@@ -149,10 +152,10 @@ Read aPRD set, ADR frame (verify `adr.lock`), roadmap (foundation cut for skelet
 **Increment:** locate which existing skeleton components slice's flow touches; add only components a new capability genuinely needs (register their edges in DAG).
 
 ### 5.3 Define contracts (the load-bearing stage)
-For every seam, specify contract: **kind** (sync request/response, async event, shared data), **shape** (schema reference), **failure modes** (timeout, partial failure, retry/idempotency). Contracts designed **before** component internals — lets Phase 4 build components in parallel against stable seams (H1, H7). **Skeleton:** foundational contracts. **Increment:** contracts slice's flow needs that skeleton didn't already establish.
+For every seam, specify contract: **kind** (sync request/response, async event, shared data), **shape** (schema reference), **failure modes** (timeout, partial failure, retry/idempotency). Contracts designed **before** component internals — so Phase 4 builds components in parallel against stable seams (H1, H7). **Skeleton:** foundational contracts. **Increment:** contracts slice's flow needs that skeleton didn't already establish.
 
 ### 5.4 Resolve deferred decisions → local ADRs
-Drain relevant part of deferred-decision queue from Phase 2. Each local fork drawing forces (e.g., "split read/write model in component C3?") resolved here + **recorded as local ADR appended to shared log** — feedback loop Phase 2 promised (H3). In increment mode, drain only forks **this slice** touches; mark each queue item resolved with its new ADR id. *Foundational* decision surfacing here (not just local) = "thin cut" signal — escalate to Phase 2 (§5.11).
+Drain relevant part of deferred-decision queue from Phase 2. Each local fork drawing forces (e.g., "split read/write model in component C3?") resolved here + **recorded as local ADR appended to shared log** — feedback loop Phase 2 promised (H3). In increment mode, drain only forks **this slice** touches; mark each queue item resolved with its new ADR id. *Foundational* decision surfacing here (not only local) = "thin cut" signal — escalate to Phase 2 (§5.11).
 
 ### 5.5 Design the data model
 From `ENTITIES` (aPRD) + persistence ADR. Logical model with **single-owner** assignment: each entity owned by exactly one component; others access via that component's contract. No shared-write. **Skeleton:** foundational entities. **Increment:** entities a slice introduces. Ownership ambiguity = boundary defect — fix §5.2/§5.3.
@@ -192,7 +195,7 @@ Internal gate (senior/human reviewer for high-blast structure). Two escapes:
 Never patch either upstream artifact in place (H10).
 
 ### 5.12 Freeze
-On approval, render immutable artifacts (content hash + signer + timestamp + version). **Skeleton pass:** freeze `hld.skeleton.frozen.md` + build DAG — baseline every slice extends. **Increment pass:** freeze slice's `hld.S<n>.frozen.md` + its test specs. Hand contracts, build DAG, test specs to Phase 4. After freeze, change = new version + re-trigger of affected build units; *skeleton* change ripples to all slices (so skeleton stays thin — H14).
+On approval, render immutable artifacts (content hash + signer + timestamp + version). **Skeleton pass:** freeze `hld.skeleton.frozen.md` + build DAG — baseline every slice extends. **Increment pass:** freeze slice's `hld.S<n>.frozen.md` + its test specs. Hand contracts, build DAG, test specs to Phase 4. After freeze, change = new version + re-trigger of affected build units (H14 governs skeleton-change blast radius).
 
 ### 5.13 Pipeline state machine
 
@@ -468,8 +471,8 @@ Decomposition depth scales with class blast radius (H11), set by same playbook d
 | **Greenfield / Migration** | Full skeleton + per-slice increments — components, contracts, data model, flows, NFR mechanisms |
 | **Integration** | Contract-centric — external contract + our seams dominate; few new components; each slice = one integration flow |
 | **Large feature-add** | Delta skeleton (existing system *is* skeleton) + per-slice increments + integration seams |
-| **Refactor** | Structure delta only — target structure + invariants; data model usually unchanged |
-| **Bugfix / Perf** | Usually none; flow or mechanism sketch only if fix changes a seam |
+| **Refactor** | Structure delta only — target structure + invariants; data model typically unchanged |
+| **Bugfix / Perf** | Typically none; flow or mechanism sketch only if fix changes a seam |
 | **Investigation** | None — no structure to design |
 
 ```mermaid

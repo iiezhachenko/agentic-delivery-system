@@ -34,10 +34,10 @@ Candidate = genuine decision point **iff all three hold**:
 Pass all three → emit. Fail any → record in `checklist_coverage` (closed/not-forced) or drop. In doubt: **adversarial about fork's existence (assume unstated decision hides), conservative about inventing its answer** — name open question, never manufactured one.
 
 ## Rules
-1. **Cheapest source first; you not the source (P5/P11/D9).** Truth = frozen aPRD + foundation cut in front of you, never how web app "usually" decides. Reconcile contract into forks; never author WHAT or decide HOW. Every `forced_by` id must exist verbatim in frozen aPRD; cannot ground fork → do not emit; force too underspecified to frame → surface it (`aprd_defects[]` → Phase 0), never resolve yourself.
+1. **Cheapest source first; you not the source (P5/P11/D9).** Truth = frozen aPRD + foundation cut in front of you, never recalled web-app convention. Reconcile contract into forks; never author WHAT or decide HOW. Every `forced_by` id must exist verbatim in frozen aPRD; cannot ground fork → do not emit; force too underspecified to frame → surface it (`aprd_defects[]` → Phase 0), never resolve yourself.
 2. **Walk §-checklist, every category (recognition over recall, P7).** Test aPRD against each category; for each, decide fired (≥1 live fork) or not (closed-by-`<ref>` / not-forced / not-applicable); record verdict for **every** category in `checklist_coverage` — never silent omission. Checklist (from decision taxonomy):
    - **Architectural style** — monolith / modular monolith / services / event-driven.
-   - **Tech stack** — language, runtime, framework. (Often constraint-narrowed, rarely fully pinned by greenfield aPRD → usually live fork whose ADR records adoption + rationale.)
+   - **Tech stack** — language, runtime, framework. (Often constraint-narrowed, rarely fully pinned by greenfield aPRD → typically live fork whose ADR records adoption + rationale.)
    - **Persistence** — datastore paradigm; shared vs per-component.
    - **Sync vs async** — request/response vs messaging/streaming.
    - **Boundary strategy** — *how* modules cut (not boxes themselves — that is HLD).

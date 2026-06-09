@@ -4,7 +4,7 @@ phase: 01-roadmap
 class: greenfield            # first pass; skeleton rule class-agnostic, but only greenfield has upstream (SLICE-EXTRACT, VERTICALITY-CHECK) authored yet + skeleton rule defined (§5.5)
 interactive: false          # internal designation — reads disk, writes skeleton + seams, stops. Does NOT sequence other slices (SEQUENCE), define foundation cut (FOUNDATION-CUT), or touch client (order gate = SEQUENCE-REVIEW, later). PR1.
 inputs:
-  - { path: ".roadmap/03-verticality.json", format: "json — verdict (must be all_vertical) + valid[] {id, name, qualifying_acceptance} = ELIGIBILITY set; only validated-vertical slice can be skeleton" }
+  - { path: ".roadmap/03-verticality.json", format: "json — verdict (must be all_vertical) + valid[] = ELIGIBILITY set; only validated-vertical slice can be skeleton" }
   - { path: ".roadmap/02-slices.json", format: "json — full slice BODIES (requirements[R*], acceptance[AC*], retires_risk, depends_on) joined by id for seam/thinness/dependency reasoning; carried verbatim onto skeleton" }
   - { path: ".aprd/aprd.frozen.md", format: "markdown — oracle for naming foundational seams (PROJECT, ENTITIES E*, CONSTRAINTS C*, ASSUMPTIONS A*, REQUIREMENTS R*, ACCEPTANCE AC*) + confirming which seam each slice crosses" }
 outputs:
@@ -41,7 +41,7 @@ Among **eligible** slices (validated-vertical `valid[]` set only), walking skele
 1. **Crosses every present foundational seam at least once.** Genuinely end-to-end — ingress through domain through persistence, and primary external integration if project has one. Slice that misses seam not skeleton (doesn't prove whole frame composes).
 2. **First to exercise primary external integration / riskiest unproven foundational seam (RM4).** Skeleton exists to retire integration risk up front. Slice that first crosses external-integration seam (or, absent one, riskiest unproven foundational decision) = strongest candidate — frequently one whose `retires_risk` already names that integration.
 3. **Sits at root of coarse dependency graph.** Skeleton cannot depend on unbuilt slice — built first. Prefer **minimal `depends_on`** (ideally `[]`). Seam-crossing slice that depends on others signals cut or graph off — note it, but skeleton = root-most seam-crossing slice.
-4. **Carries thinnest behaviour (RM4/RM10).** Among slices meeting 1–3, pick **least feature depth** — fewest requirements, narrowest capability. Skeleton proves composition, not function; everything else hardcoded or deferred to later slice. Don't inflate with feature work just because fatter slice also crosses seams.
+4. **Carries thinnest behaviour (RM4/RM10).** Among slices meeting 1–3, pick **least feature depth** — fewest requirements, narrowest capability. Skeleton proves composition, not function; everything else hardcoded or deferred to later slice. Don't inflate with feature work merely because fatter slice also crosses seams.
 
 Slice satisfying these in order = walking skeleton; assign `kind: walking_skeleton`. If **no single eligible slice crosses every present seam once**, do not force pick — that = re-cut escape (`skeleton:null`; see Rule 7 / escapes).
 
@@ -124,6 +124,6 @@ Slice satisfying these in order = walking skeleton; assign `kind: walking_skelet
 All prose (`instance`, `establishes`, `must_establish`, rationale, reason) is caveman (governs artifact bodies too — PR4).
 
 ## Stop condition
-- Guard tripped (frontmatter `escapes:` — input missing/unparseable, non-greenfield class, verdict != all_vertical, or empty `valid[]`) → write nothing; print which guard fired + offending detail; "HALT".
+- Guard tripped (frontmatter `escapes:`) → write nothing; print which guard fired + offending detail; "HALT".
 - Skeleton found → write `.roadmap/04-skeleton.json` (create `.roadmap/` if absent; only output, SEQUENCE reads skeleton to lead running order, FOUNDATION-CUT reads `skeleton_seams`), state "walking skeleton = S?, SEQUENCE next", stop. No sequencing, no foundation cut, no client touch.
 - No eligible slice crosses every present seam → write JSON with `skeleton: null` + `uncovered_seams` + reason (re-cut escape), state "no single slice crosses all foundational seams, re-cut at SLICE-EXTRACT", stop.

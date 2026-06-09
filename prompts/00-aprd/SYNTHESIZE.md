@@ -45,7 +45,7 @@ For each gap `G*` in `04-gaps.json`, determine chosen interpretation by exactly 
 4. **OUT_OF_SCOPE is load-bearing — derive from declined interpretations (§6.2).** For every architecture/scope gap, interpretation(s) decision did **not** choose become explicit OUT_OF_SCOPE exclusions as concrete capabilities build won't include (chose project-level currency → "Per-time-entry currency and mixed-currency invoices are out of scope"; chose no conversion → "Live exchange-rate conversion is out of scope"). Bounds agent, stops gold-plating. For `client-described` escape decision, exclude only canned interpretation(s) free text clearly contradicts; if ambiguous, omit rather than invent. Add no OUT_OF_SCOPE entry no gap raised.
 5. **CONSTRAINTS = exactly `02`'s stated constraints. Never synthesize constraint from gap answer (§6.1).** Carry `02`'s `stated_constraints` forward as `C*` unchanged, and **stop there** — CONSTRAINTS hold only what client stated up front. Gap resolution is gap-fill → it is ASSUMPTION (Rule 2), never CONSTRAINT, even when answer reads like hard mandate ("AWS only", "GDPR required"): log as assumption with `gap_ref`; build-binding force comes from assumption + OUT_OF_SCOPE exclusion (Rule 4), not new `C*`. Never record one gap's decision in two places. Do not add `C4`, `C5`, … from `06`; C-id space ends where `02` ends.
 6. **Greenfield adds no class-extension block (§6.1).** §6.1 class extensions exist only for feature-add, bugfix, refactor, migration, perf, integration, investigation. **Greenfield not in that list** — contract is shared skeleton alone (PROJECT, CLASS, ENTITIES, REQUIREMENTS, CONSTRAINTS, ASSUMPTIONS, OUT_OF_SCOPE, ACCEPTANCE). Invent no greenfield extension block.
-7. **Dual audience, structured but signable (§6).** Read by machine (typed, id'd sections) and signed by client (readable prose). Keep section headings + id tags exactly as schema specifies so parser and CRITIQUE can read them; keep prose inside plain. (Caveman governs this too.)
+7. **Dual audience, structured but signable (§6).** Read by machine (typed, id'd sections) and signed by client (readable prose). Keep section headings + id tags exactly as schema specifies so parser and CRITIQUE can read them; keep prose inside plain.
 8. **Cheapest source first; reconcile, do not author truth (P5, P11).** Evidence = four files: requirements/entities/constraints from `02`, gaps + interpretations + defaults from `04`, Q→gap + lettering map from `05`, client's choices from `06`. Every requirement, entity, constraint, assumption, and OUT_OF_SCOPE line traces to one of those. Import no product model, requirement, or scope boundary upstream artifacts never raised; upstream error is upstream stage's defect to fix. Acceptance criteria are one thing genuinely authored (intent → test) and must bind to existing `R*`.
 
 ## Task steps
@@ -126,7 +126,7 @@ greenfield
 }
 ```
 
-aPRD body uses signable client language; no internal jargon beyond labelled id tags. Caveman governs this too.
+aPRD body uses signable client language; no internal jargon beyond labelled id tags.
 
 ### Edge cases
 - **Answer letter out of range / unparseable** (references nonexistent option): fall back to gap's `recommended_default` (treat as skipped); do not HALT — stay autonomous (PR1).

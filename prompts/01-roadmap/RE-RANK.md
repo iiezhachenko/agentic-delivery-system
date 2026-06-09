@@ -4,13 +4,13 @@ phase: 01-roadmap
 class: greenfield            # first pass; re-rank rule class-agnostic, but only greenfield has upstream chain (SEQUENCE-REVIEW + HLD skeleton + skeleton-build demo) authored
 interactive: false          # internal re-rank — reads disk, writes re-ranked living roadmap, stops. Client saw order at SEQUENCE-REVIEW; re-ranks surface as updates + per-slice demo, not re-negotiation (§9). PR1
 inputs:
-  - { path: ".roadmap/07-sequence-reviewed.json", format: "json — client-confirmed base sequence; sequence[] {id,name,value,retires_risk,depends_on(COARSE, aPRD-derived)} carried verbatim = order to re-rank + value/risk to carry (never re-scored)" }
+  - { path: ".roadmap/07-sequence-reviewed.json", format: "json — client-confirmed base sequence; sequence[] carried verbatim (coarse aPRD-derived depends_on) = order to re-rank + value/risk to carry, never re-scored" }
   - { path: ".hld/skeleton/build-dag.json", format: "json — REAL component dependency DAG (nodes[].depends_on); replaces coarse aPRD graph (§5.11). Authoritative component-level prerequisites" }
   - { path: ".hld/skeleton/components.json", format: "json — per component traces[R*] + realizes_seam[]; projection key (seam-realizer = skeleton-built; trace = which slice introduces non-seam component)" }
   - { path: ".roadmap/02-slices.json", format: "json — slices[].requirements[R*]; slice→component projection input (slice's component set = components whose traces hit its requirements)" }
   - { path: ".build/skeleton/demo/demo.json", format: "json (+ .build/slices/S*/demo/demo.json if present) — completed-slice acceptance records: slice + client_response + learnings[]; accepted slices COMPLETED (pinned, not re-ranked), learnings = only value/risk-change source" }
 outputs:
-  - { path: ".roadmap/08-rerank.json", format: "json (schema below) — re-ranked LIVING roadmap (roadmap_version bumped): completed slices pinned + remaining slices re-ordered dependency-legal against real DAG, with coarse→real depends_on delta + any value/risk change per slice" }
+  - { path: ".roadmap/08-rerank.json", format: "json (schema below) — re-ranked LIVING roadmap (roadmap_version bumped): completed slices pinned + remaining slices re-ordered dependency-legal against real DAG" }
 escapes:
   - { when: "any input missing/unparseable, OR no demo record with client_response:accepted exists (foundation loop not complete — nothing built to re-rank against)", target: "self / HALT — report which guard, write nothing (§5.11 runs AFTER foundation loop)" }
   - { when: "07 / build-dag / components / 02 class != greenfield", target: "non-greenfield playbook — re-rank depth not authored; HALT, report class" }
@@ -37,7 +37,7 @@ Re-ranker of LIVING roadmap, Phase 1. Runs AFTER foundation loop (walking skelet
 3. **Project real DAG onto remaining slices.** For each remaining slice S (introducing components Cs): its **real depends_on** = { introducing-slice(C') : C' is `build-dag` dependency of some C ∈ Cs, C' ≠ component S itself introduces } — list EVERY such introducing slice, completed or remaining. Dependency on COMPLETED slice (incl. skeleton) already SATISFIED — stays listed (so legality + coarse→real delta read cleanly) but does NOT gate remaining-slice frontier (discriminator 5). Only depends_on DAG genuinely changes vs coarse graph shows up in delta (discriminator 4) — completed prerequisite matching coarse dep is `confirmed`, never `removed`.
 4. **Compare real vs coarse depends_on** (base carries coarse, aPRD-derived `depends_on`): coarse dep real DAG also yields = **confirmed**; coarse dep real DAG does NOT yield = **removed** (slice freer than thought — material new info); real dep absent from coarse graph = **added** (slice more constrained — material, legality must still hold).
 5. **Re-rank remaining by dependency-legal topo + value × risk (same soft order as SEQUENCE, RM5).** Frontier = remaining slices whose entire real depends_on already placed (or completed). From frontier pick by priority: (a) higher `value` (`high`>`med`>`low`, carried verbatim from base, NEVER re-scored); (b) then slice that retires named risk (`retires_risk != null` ahead of `== null`); (c) then lower cost proxy = `len(requirements)+len(acceptance)` (declared, never fabricated); (d) lowest `S*` index. Place winner, recompute frontier, repeat.
-6. **Anti-thrash gate (RM6, load-bearing).** Remaining slice's order changes ONLY if material change licenses it: removed/added real dependency, or learning-driven value/risk change, freed/constrained it relative to neighbor. With no material change for any slice, re-rank reproduces base remaining order (verdict `unchanged`). Removed dependency that lets RM5 (risk-first) reorder two slices IS material — re-ordering then correct, not thrash; never invent re-order real DAG/learnings don't license.
+6. **Anti-thrash gate (RM6, load-bearing).** Remaining slice's order changes ONLY if material change licenses it: removed/added real dependency, or learning-driven value/risk change, freed/constrained it relative to neighbor. With no material change for any slice, re-rank reproduces base remaining order (verdict `unchanged`). Removed dependency enabling RM5 (risk-first) reorder of two slices IS material — re-ordering then correct, not thrash; never invent re-order real DAG/learnings don't license.
 
 ## Rules
 1. **Re-order remaining only; completed slices pinned (§5.9, load-bearing).** Per discriminator: partition by accepted-demo, pin completed at built positions, re-rank only remaining set. Completed slice's position/body never touched.
@@ -127,7 +127,6 @@ Re-ranker of LIVING roadmap, Phase 1. Runs AFTER foundation loop (walking skelet
 All prose content (`rationale`, `*.basis`, `thrash_avoided`) is caveman (governs artifact bodies too — PR4).
 
 ## Stop condition
-- HALT-guard tripped (escapes: missing input / no accepted demo / non-greenfield) → write nothing; print which guard + offending detail; "HALT".
-- Dependency defect (real-DAG cycle/dangling, recorded-not-HALT escape) → write `08-rerank.json` with `verdict:dependency_defect` + offending refs + `remaining_sequence:[]`, state "dependency defect, re-cut at SLICE-EXTRACT", stop.
-- aPRD-defect / foundation-gap recorded → re-rank unblocked remainder, populate `aprd_defects[]`/`foundation_gaps[]`, state route, stop (never patch).
-- Clean re-rank → write `08-rerank.json` with `verdict:re_ranked` (or `unchanged`), state "re-ranked remaining = [S?, S?, …], dispatch next slice" (slice loop dispatches in this order), stop. No re-slice, no foundation cut, no client touch.
+- HALT-guard tripped (escapes) → write nothing; print which guard + offending detail; "HALT".
+- Defect-route escape fired (see escapes) → write `08-rerank.json` recording it in the matching field (`structural_defects`/`aprd_defects`/`foundation_gaps`); re-rank only what stays unblocked (empty when the whole order is blocked); state the route; stop. Never patch.
+- Clean re-rank → write `08-rerank.json` (`verdict:re_ranked` or `unchanged`); state "dispatch next slice", stop. No re-slice, no foundation cut, no client touch.

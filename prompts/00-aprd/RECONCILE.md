@@ -4,7 +4,7 @@ phase: 00-aprd
 class: greenfield            # research/canon grounding sub-pipeline (§7). Canon grounding serves greenfield + feature-add; only greenfield is authored downstream yet.
 interactive: false          # pure reconciliation — reads disk, writes disk, stops. No client touch (PR1). Client approves agreed[] and decides conflicts[] later, after VERIFY.
 inputs:
-  - { path: ".aprd/03-grounding/rules-extracted.json", format: "json (EXTRACT-RULES output) — flat per-source atomic rules[] RULE* {source_ref→SRC*, tier, tool, tool_version_pinned, kind, topic, rule, setting, evidence}; group by topic, carry per-source detail verbatim; plus unfetched_sources[] (carry through) and extraction_meta" }
+  - { path: ".aprd/03-grounding/rules-extracted.json", format: "json (EXTRACT-RULES output) — flat per-source atomic rules[] RULE*, each pinned to its SRC* with verbatim evidence; plus unfetched_sources[] + extraction_meta" }
 outputs:
   - { path: ".aprd/03-grounding/rules-reconciled.json", format: "json (schema below) — agreed[] AGR* + conflicts[] CONF*, every input RULE* accounted exactly once, per-source detail preserved for VERIFY" }
 escapes:
@@ -125,4 +125,4 @@ Do NOT include any verified/current/deprecated fields — that is VERIFY's outpu
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → do **not** write `rules-reconciled.json`; print which guard fired + offending detail; "HALT".
-- Clean run → write JSON to `.aprd/03-grounding/rules-reconciled.json` (create `.aprd/03-grounding/` if absent; only output, schema-exact, every per-source `evidence`/`setting`/`tool_version_pinned` kept intact for VERIFY, PR2); state "rules reconciled, VERIFY next"; stop. No currency check, no rule invention, no conflict resolution, no client touch.
+- Clean run → write JSON to `.aprd/03-grounding/rules-reconciled.json` (create dir if absent; schema-exact per PR2); state "rules reconciled, VERIFY next"; stop.

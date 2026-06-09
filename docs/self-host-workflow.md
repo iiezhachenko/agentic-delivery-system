@@ -16,8 +16,6 @@ Engine unchanged. Same five-phase spine — Understand → Plan → Decide → D
 - **Deliverable** Build phase emits = **prompt `.md` files** (system's own parts), not application code. `prompts/` plays `src/` role.
 - **Product owner** at checkpoints = you, operator.
 
-Dogfooding at deepest level: pipeline that delivers client software turned on project that *is* pipeline. When works, delivery system authors delivery system, through same engine that delivers anything else.
-
 This repo *is* canonical Agentic Delivery Pipeline project — engine reads its frozen artifact trees directly at repo root. Self-host not special mode; = ordinary pipeline run on this repo.
 
 ---
@@ -44,9 +42,7 @@ flowchart TD
     class VERDICT good;
 ```
 
-**Level B validated through Level A.** Never invent separate "is this prompt good?" judge. Self-authored prompt earns *correct* iff running it against fixture products yields correct value. **Fixture-product run = oracle** — same test model system always used, applied one level up.
-
-So workflow dodges infinite regress: recursion bottoms out at real runnable product value.
+**Level B validated through Level A.** Never invent separate "is this prompt good?" judge. Self-authored prompt earns *correct* iff running it against fixture products yields correct value. **Fixture-product run = oracle** — same test model system always used, applied one level up. Recursion bottoms out at real runnable product value (§8).
 
 ---
 
@@ -154,7 +150,7 @@ Heart of workflow + answer to "how do you grade a prompt?"
 
 Both directions tested: known-good prompt must PASS, *planted-defect* copy must FAIL. Verifier can't tell them apart → verifier broken.
 
-Deliverable = "just text," so no compiler — correctness **behavioral**, observed by running it, exactly way system tests any other deliverable. Also why workflow deliverable-agnostic in same breath: Python app, Terraform module, prompt library all judged identically — *deliver fixture product in that technology, check value.*
+Deliverable = text alone, so no compiler — correctness **behavioral**, observed by running it, exactly way system tests any other deliverable. Also why workflow deliverable-agnostic in same breath: Python app, Terraform module, prompt library all judged identically — *deliver fixture product in that technology, check value.*
 
 ---
 

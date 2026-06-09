@@ -2,7 +2,9 @@
 
 > **Status:** design sketch. Built AFTER greenfield delivery pipeline (Phases 0–4) done, per roadmap build order (`.roadmap/`; status derived from disk, not tracker). Authored prompt-by-prompt same way (one role = one prompt, fresh-session sim, artifacts chain on disk, golden fixtures).
 >
-> **Register note:** clean prose inside this spec (it deliverable). Authored prompts carry canonical caveman block.
+> **Register note (judgment call:):** spec body + pipeline artifacts = caveman, absolute (T01). The produced doc-SET is the external-human-consumer deliverable T01 carves out — its reader prose owned by a restyle pass; ECONOMY still forbids repeating any fact.
+>
+> **Change log:** 2026-06-09 — T10 economy cut: register note aligned to T01 (caveman absolute; clean-prose exemption removed, doc-set deliverable marked judgment call), caveman reminder stated once, banned filler killed. New version = the change request (P8).
 
 ---
 
@@ -129,10 +131,10 @@ Ask SME/client only `disposition: ask` gaps, ≤6, recognition-framed, recommend
 Cut doc set into **sections**, where section = **reader-completable unit** (task audience can finish end-to-end), not layer dump. Phase-1 verticality test transfers directly: section "vertical" iff has audience-observable acceptance ("reader can deploy", not "reader has read about deploys"). Identify **walking-skeleton doc** = minimal must-read orientation path (map + glossary + conventions + topology); sequence rest by prerequisite dependency (read account-setup before deploy). This = skeleton-loop output.
 
 ### 5.7 Synthesize sections `[reuse: SYNTHESIZE]`
-Render each section in clean prose from grounded fact base. **Every claim carries source trace** (`fact_ref`); sentence with no traceable fact flagged, not written. Skeleton section first (frozen), then per-section increments extending it. Clean deliverable register (caveman governs narration only).
+Render each section in clean prose from grounded fact base. **Every claim carries source trace** (`fact_ref`); sentence with no traceable fact flagged, not written. Skeleton section first (frozen), then per-section increments extending it. Deliverable prose per §-register note above.
 
 ### 5.8 Critique (adversarial) `[reuse: CRITIQUE]`
-Hostile review on rendered docs. Blocking categories (mirroring Phase-0 CRITIQUE's): **ungrounded-claim** (no `fact_ref` → suspected hallucination), **uncovered-audience-task** (target task doc set never lets reader complete), **broken-cross-ref**, **stale-or-contradicted-fact** (claim contradicts VERIFY drift/deprecation flag), **untestable-instruction** (procedure no oracle can replay). Blocking → loop to SYNTHESIZE or back to GROUND.
+Hostile review on rendered docs. Blocking categories (mirroring Phase-0 CRITIQUE's): **ungrounded-claim** (no `fact_ref` → suspected hallucination), **uncovered-audience-task** (target task doc set leaves reader unable to complete), **broken-cross-ref**, **stale-or-contradicted-fact** (claim contradicts VERIFY drift/deprecation flag), **untestable-instruction** (procedure no oracle can replay). Blocking → loop to SYNTHESIZE or back to GROUND.
 
 ### 5.9 Verify — the doc oracle (terminal test) `[reuse: VERIFY-OUTPUT pattern from Phase 4]`
 Analog of "execute tests against built software." Where doc tells reader to act, **execute the doc** against safe target:

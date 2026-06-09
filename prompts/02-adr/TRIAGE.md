@@ -4,8 +4,8 @@ phase: 02-adr
 class: greenfield            # first pass; the triage logic is class-agnostic, but only greenfield has upstream (DECISION-EXTRACT) + downstream (OPTION-GEN) prompts authored yet
 interactive: false          # internal classifier/router — reads disk, writes disk, stops. Decisions are the delivery team's domain; no client touch (PR1, §9)
 inputs:
-  - { path: ".adr/01-decision-points.json", format: "json — DECISION-EXTRACT output; the raw fork list to triage (decision_points DP*{decision, category, forced_by[], candidate_blast_radius, blast_rationale, fork_evidence, cut_ref}, checklist_coverage, aprd_defects[])" }
-  - { path: ".roadmap/06-foundation-cut.json", format: "json — Phase 1 cut; the authoritative in-cut set + which slice needs each foundational decision (foundational_decisions FD*{category, needed_by[]}, skeleton_seams[], cross_slice_invariants INV*, deferred[], coverage)" }
+  - { path: ".adr/01-decision-points.json", format: "json — DECISION-EXTRACT output; raw fork list to triage (decision_points DP* + checklist_coverage + aprd_defects[])" }
+  - { path: ".roadmap/06-foundation-cut.json", format: "json — Phase 1 cut; authoritative in-cut set + which slice needs each foundational decision (foundational_decisions FD*, skeleton_seams[], cross_slice_invariants INV*, deferred[])" }
 outputs:
   - { path: ".adr/02-triage.json", format: "json (schema below) — per-point binding blast-radius call + cut split + route, the four route queues, cut-gap signal, accounting" }
 escapes:
@@ -42,7 +42,7 @@ Cut's `foundational_decisions[]` (FD*) **are authoritative in-cut set** — Phas
 `cut_status` is `null` for any non-foundational point (local/trivial take no cut axis).
 
 ## Rules
-1. **Cheapest source first; add only one judgment (P5, RM11, D9).** Source of truth = decision points in 01 + foundation cut in 06, not your sense of what web app "usually" decides foundational. Cut's `foundational_decisions[]` is authoritative for what Phase 1 scoped in; **skeleton-need test** (does skeleton / invariant break without this?) is only judgment you add, grounded in cut's `skeleton_seams[]` + `cross_slice_invariants[]`, never invented. Re-judge blast radius against discriminator, not guess. Never decide fork's answer, name convention's value, re-open contract.
+1. **Cheapest source first; add only one judgment (P5, RM11, D9).** Source of truth = decision points in 01 + foundation cut in 06, not recalled web-app convention for what is foundational. Cut's `foundational_decisions[]` is authoritative for what Phase 1 scoped in; **skeleton-need test** (does skeleton / invariant break without this?) is only judgment you add, grounded in cut's `skeleton_seams[]` + `cross_slice_invariants[]`, never invented. Re-judge blast radius against discriminator, not guess. Never decide fork's answer, name convention's value, re-open contract.
 2. **Carry every DP field verbatim — classify, do not rewrite.** `id`, `decision`, `category`, `cut_ref` carried verbatim from 01; never re-author `decision` text, re-mint ids, change `category`. Add only triage verdict fields. Fork question stays exactly as DECISION-EXTRACT framed it (RM11 — neither of you decides answer).
 3. **Convention = announce left to convention, never decide it (RM11 / stay in lane).** For `trivial` point, `route_rationale` records it carries no architectural fork, left to standard team/framework convention. Do **not** pick specific convention value (no vendor, library, setting) — naming chosen default is deciding, not your job. Announce no ADR owed; do not author convention.
 4. **Route each point to exactly one queue (pure function of two axes — never route against classification).**

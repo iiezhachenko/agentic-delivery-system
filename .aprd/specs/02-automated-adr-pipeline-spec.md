@@ -3,11 +3,14 @@
 | | |
 |---|---|
 | **Status** | Draft |
-| **Version** | 0.2 |
+| **Version** | 0.3 |
 | **Date** | 2026-06-06 |
 | **Audience** | Engineers building system; agents executing it |
 | **Scope** | Stage turns frozen aPRD set + roadmap foundation cut into coherent, traceable set of Architecture Decision Records |
 | **Predecessors** | Phase 0 — `00-automated-aprd-pipeline-spec.md` (WHAT) · Phase 1 — `01-automated-roadmap-pipeline-spec.md` (slices + foundation cut) |
+
+**Change log**
+- **v0.3** (2026-06-09) — T10 economy cut (caveman register + AB8): killed banned hedge/filler words. Substance invariant. New version = the change request (P8); re-lock at next freeze.
 
 ---
 
@@ -70,7 +73,7 @@ Inherits Phase 0 P-series + Phase 1 RM-series. These = decision-specific additio
 |---|---|---|---|
 | D1 | Decisions precede structure — ADRs = **input** to HLD, not output | Reverse-engineered rationale; dead alternatives; ADR theater | — |
 | D2 | Resolve **foundational** decisions only — and only those in roadmap **foundation cut**; local decisions defer to Phase 3 | Premature over-decision, or HLD blocked on missing frame | P6, RM9 |
-| D3 | Every ADR carries **live alternatives** (≥2 real options + why-rejected) | No decision actually made; cannot revisit cheaply | P10 |
+| D3 | Every ADR carries **live alternatives** (≥2 real options + why-rejected) | No real decision made; cannot revisit cheaply | P10 |
 | D4 | Every ADR traces to ≥1 aPRD element (R / AC / CONSTRAINT) | Untraceable ADR = unrequested architecture (gold-plating) | P9 |
 | D5 | Every in-scope aPRD CONSTRAINT addressed by ADR or explicitly deferred | Silent architectural risk; constraint found violated in build | P9 |
 | D6 | ADR log append-only; **supersede, never edit**; status = lifecycle | Decision history lost; can't tell current from historical | P8 |
@@ -176,7 +179,7 @@ Decisions interact (event-driven constrains persistence; per-region constrains d
 Render each decision in canonical form (§6): machine-readable frontmatter + human Nygard body. Assign monotonic id. Append to log.
 
 ### 5.8 Critique (adversarial)
-Hostile reviewer pass. Flags: strawman alternatives, ADRs tracing to no requirement, in-scope constraints with no ADR, ADRs contradicting one another, decisions actually *local* (over-decided), actually *unforced*, or actually *not-yet* (belong to later slice, not cut). Blocking issues loop back to synthesize.
+Hostile reviewer pass. Flags: strawman alternatives, ADRs tracing to no requirement, in-scope constraints with no ADR, ADRs contradicting one another, decisions that are *local* (over-decided), *unforced*, or *not-yet* (belong to later slice, not cut). Blocking issues loop back to synthesize.
 
 ### 5.9 Gate
 Mostly **internal** — senior-agent or human reviewer for high-risk decisions. Client signed WHAT + ordered slices; HOW = delivery team domain. **Exception:** decision with **client-visible blast radius** (cost, vendor lock-in, timeline, data residency) bubbles up. If changes contract, routes back to Phase 0 as change request (§5.10). Keeps Phase 0 "cheap client interaction" promise.
@@ -424,7 +427,7 @@ Decision depth scales with class blast radius (D10), set by same playbook drivin
 |---|---|
 | **Greenfield / Migration / Integration** | Foundational ADRs for cut — style, stack, persistence, boundaries, topology that slice-1 + invariants need |
 | **Large feature-add** | Foundational ADRs for *new* surface in cut; inherit rest from existing ADRs |
-| **Bugfix / Perf / Small refactor** | Usually 0 ADRs; **one** only if fix moves boundary or reverses existing decision |
+| **Bugfix / Perf / Small refactor** | Typically 0 ADRs; **one** only if fix moves boundary or reverses existing decision |
 | **Investigation** | None — no structure to frame; investigation plan = artifact |
 
 ```mermaid

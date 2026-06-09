@@ -108,7 +108,7 @@ RE-RANK reads `.roadmap/`, picks first unshipped prompt (today: **RECONCILE/CRIT
 
 **Step 5 — Find outputs.** Authored prompts land in `prompts/<phase>/<ROLE>.md`; per-build records + verify verdicts land under build tree. Status **derived** — ask orchestrator to render from disk; no tracker file to read.
 
-**Resuming:** run `claude`, then `/resume` — or just `/self-host` again. State on disk (canonical trees + `prompts/`), so continues from first unshipped/invalid prompt. See §3.
+**Resuming:** run `claude`, then `/resume` — or `/self-host` again. State on disk (canonical trees + `prompts/`), so continues from first unshipped/invalid prompt. See §3.
 
 ---
 
@@ -149,7 +149,7 @@ As in generic guide, **Kiro's built-in spec flow not used.** CLI custom agent ru
 - RE-RANK over .roadmap/08-rerank.json picks the next unshipped prompt. Status is derived
   from disk (scan prompts/ + _fixtures/ + locks); do NOT maintain a tracker file.
 ```
-Existing `00-exclusive.md` still applies (don't touch Kiro's built-in specs). Generic step agent `step.json` reused unchanged — runs any role prompt; for self-host just happens to write a prompt `.md`.
+Existing `00-exclusive.md` still applies (don't touch Kiro's built-in specs). Generic step agent `step.json` reused unchanged — runs any role prompt; for self-host it writes a prompt `.md`.
 
 **Step 6 — Verification (mandatory).** Same gate as generic guide's verification step — separate oracle author, build, full ladder, anti-cheat — but **mechanism swapped by target**: ladder runs clean-room runner sim against `_fixtures/` instead of pytest. Spine roles identical; only verify mechanism comes from agentic-delivery-pipeline profile. Wiring this forces spine edit → deliverable-agnostic abstraction leaked — fix spine once, not target (P3).
 
@@ -222,7 +222,7 @@ Self-build runs on same crash-safe guarantees as any delivery (decision **D20**)
 **Your gate answer safe too.** Value acceptance saved moment you give it; resume won't re-ask. Interrupted *before* you judged → re-presents prompt for judging, never silently promotes it.
 
 **How to resume (restart + re-run — no cleanup):**
-- **Claude Code:** `claude` → `/resume`, or just `/self-host` again.
+- **Claude Code:** `claude` → `/resume`, or `/self-host` again.
 - **Kiro:** `kiro-cli chat --agent selfhost "continue"`.
 
 ---

@@ -70,7 +70,7 @@ Artifact folders (`.aprd/`, `.roadmap/`, `.adr/`, `.hld/`, `.build/`) created au
   }
 }
 ```
-`Read/Write/Edit` let agents manage artifacts without prompting; `Agent` lets orchestrator spawn role agents; `acceptEdits` auto-approves file writes (still asked before shell commands).
+`Read/Write/Edit` let agents manage artifacts without prompting; `Agent` enables orchestrator to spawn role agents; `acceptEdits` auto-approves file writes (still asked before shell commands).
 
 **Step 5 — `/deliver` entry point.** `.claude/skills/deliver/SKILL.md` = thin launcher:
 ```markdown
@@ -118,7 +118,7 @@ Kiro ships own built-in spec workflow (`requirements.md` / `design.md` / `tasks.
 
 **Step 1 — Install Kiro CLI** (`kiro-cli`), open terminal in your project. (Kiro IDE optional — useful for *viewing/editing* agent + artifact files; **driver = custom agent**, run from CLI, not IDE's Spec button.)
 
-**Step 2 — Lay system into your project.** Delivery system drives everything; Kiro just runs it:
+**Step 2 — Lay system into your project.** Delivery system drives everything; Kiro only runs it:
 ```
 your-project/
 ├── prompts/<phase>/<ROLE>.md        # the role library (aprd, roadmap, adr, hld, build)
@@ -147,7 +147,7 @@ System's artifact folders (`.aprd/ .roadmap/ .adr/ .hld/ .build/`) written by ag
   "model": "claude-sonnet-4"
 }
 ```
-Orchestrator sequences phases and, each step, **delegates to fresh `step` subagent** (Step 5) — handing just that step's role-prompt path. Role prompt then lives only in subagent's fresh context, discarded when step ends, so no turn carries more than active step. Orchestrator stays small for whole run.
+Orchestrator sequences phases and, each step, **delegates to fresh `step` subagent** (Step 5) — handing only that step's role-prompt path. Role prompt then lives only in subagent's fresh context, discarded when step ends, so no turn carries more than active step. Orchestrator stays small for whole run.
 
 **Step 4 — Make discipline (+ exclusivity) steering.** Steering files in `.kiro/steering/*.md` loaded as always-on context (+ committed to Git). Critical one, `00-exclusive.md`, keeps Kiro on rails:
 ```markdown
@@ -191,12 +191,9 @@ kiro-cli chat --agent delivery "A web marketplace where clients post jobs and fr
 ```
 Launches **system's own pipeline** — not Kiro's spec flow. Orchestrator reads role prompts, begins at aPRD phase.
 
-**Step 2 — Answer gates, same chat.** Orchestrator pauses, asks you directly; gates = system's, identical to workflow:
-- **Clarifying questions** → you answer (Part C, §C2).
-- **Roadmap** → you confirm or reorder (§C3).
-- **Each demo** → you accept or give feedback (§C4).
+**Step 2 — Answer gates, same chat.** Orchestrator pauses, asks you directly; same three gates as the Claude Code flow above (§C2/C3/C4).
 
-**Step 3 — Find outputs.** Requirements, roadmap, decision records, design land in `.aprd/ .roadmap/ .adr/ .hld/`; built increments land under `.build/` + on staging target orchestrator reports. (Open these in Kiro IDE for visual view — plain Markdown/JSON, Git-tracked.)
+**Step 3 — Find outputs.** Same output tree as above. (Open in Kiro IDE for visual view — plain Markdown/JSON, Git-tracked.)
 
 **Manual stepping (optional).** Prefer phase-by-phase? Run generic step agent directly, handing it one role prompt:
 ```bash
@@ -210,7 +207,7 @@ Reads prior phase's on-disk artifacts, writes next, so manual stepping + orchest
 
 # PART C — What you do at each checkpoint (both harnesses)
 
-Setup differs; **your job at three gates same.** Part you actually do.
+Setup differs; **your job at three gates same.** Part you do.
 
 ## C1. Write a good request
 
@@ -277,7 +274,7 @@ Stop at **any** time — clean pause after slice, or abrupt interruption: lost i
 2. Validates that frontier against schema; partial or missing output counts as "not done."
 3. Continues from **first step whose output absent or invalid** — completed steps skipped; interrupted step re-runs cleanly.
 
-**Your gate answers safe too.** Replies (clarifying answers, roadmap confirmation, demo acceptance) saved as files moment you give them. Reply saved → resume uses it, won't re-ask. Interrupted *before* answering → simply asks again — never silent guess.
+**Your gate answers safe too.** Replies (clarifying answers, roadmap confirmation, demo acceptance) saved as files moment you give them. Reply saved → resume uses it, won't re-ask. Interrupted *before* answering → asks again — never silent guess.
 
 **How to resume (restart + re-run — no cleanup):**
 - **Claude Code:** run `claude`, then `/resume` to reopen session — or run `/deliver` again / tell orchestrator to continue. Reads artifact tree, picks up next step.
@@ -301,7 +298,7 @@ Stop at **any** time — clean pause after slice, or abrupt interruption: lost i
 
 ## 6. Do's and don'ts
 
-**Do** — describe outcomes, not implementation · state real constraints up front · answer questions directly ("assume X" when unsure) · actually use each demo before responding · give concrete feedback.
+**Do** — describe outcomes, not implementation · state real constraints up front · answer questions directly ("assume X" when unsure) · use each demo before responding · give concrete feedback.
 **Don't** — over-specify *how* while leaving *what* vague · sit on clarifying questions (they block progress) · change direction mid-slice · accept demo you haven't tried · file new idea as "fix" (flag as change).
 
 ## 7. Frequently asked

@@ -3,12 +3,15 @@
 | | |
 |---|---|
 | **Status** | Draft |
-| **Version** | 0.1 |
+| **Version** | 0.2 |
 | **Date** | 2026-06-06 |
 | **Audience** | Engineers building system; agents executing it |
 | **Scope** | Stage turning frozen HLD (skeleton + slice increments) + pre-authored test oracle into verified, demoable running software — one vertical slice at a time |
 | **Predecessors** | Phase 0 — `00-automated-aprd-pipeline-spec.md` (WHAT) · Phase 1 — `01-automated-roadmap-pipeline-spec.md` (slices) · Phase 2 — `02-automated-adr-pipeline-spec.md` (WHY-this-HOW) · Phase 3 — `03-automated-hld-pipeline-spec.md` (structure + contracts + test specs) |
 | **Terminal** | Phase 4 **terminal phase** — system delivers verified software to STAGING (demo-accepted). Production release / rollback / handoff **out of scope** (§1.2) |
+
+**Change log**
+- **v0.2** (2026-06-09) — T10 economy cut (caveman register + AB8): killed banned hedge/filler words. Substance invariant. New version = the change request (P8); re-lock at next freeze.
 
 ---
 
@@ -24,7 +27,7 @@ Three facts drive design:
 
 So Phase 4 runs **two modes**, mirroring roadmap's two loops:
 
-- **Skeleton build** — once: scaffold repo, CI, test harness, demo/staging target; build walking skeleton end-to-end with stub behavior. Proves architecture *runs*, not just composes on paper. Every slice reuses this harness.
+- **Skeleton build** — once: scaffold repo, CI, test harness, demo/staging target; build walking skeleton end-to-end with stub behavior. Proves architecture *runs*, not only composes on paper. Every slice reuses this harness.
 - **Slice build** — per slice: implement slice's path through build DAG against frozen contracts, materialize-then-pass its oracle, integrate, demo.
 
 ### 1.1 Goals
@@ -42,7 +45,7 @@ So Phase 4 runs **two modes**, mirroring roadmap's two loops:
 - **Authoring acceptance.** Phase 4 executes oracle; does not define "done." Editing frozen test forbidden — it = escape.
 - **Production release / handoff.** Phase 4 **terminal phase**: ends at *accepted demo on STAGING*; that verified staging build = system's final deliverable. Production release, rollback, handoff to client's environment **out of scope** — deliberate boundary, not deferred phase. (If system later extended past staging, that = new phase; nothing here hands off to one.)
 - **Re-deciding structure or decisions.** Contracts + ADRs = frozen input. Contract that cannot be built = change request to Phase 3, never silent redesign.
-- **Building whole product at once.** Only skeleton built eagerly; everything else per-slice, just-in-time. Big-bang integration = waterfall roadmap exists to prevent.
+- **Building whole product at once.** Only skeleton built eagerly; everything else per-slice, on demand. Big-bang integration = waterfall roadmap exists to prevent.
 - **Single mega-prompt.** Roles stay separated for failure isolation + quality, exactly as Phases 0–3.
 
 ---
@@ -190,7 +193,7 @@ For each component in plan — parallel where DAG allows — builder does **only
 As deps land, swap their mocks for real implementations and run slice's **flow test, incl. failure variant**. Flow that composed on paper (Phase 3) but won't compose in code reveals contract-reality mismatch → return to §5.5, or escape to Phase 3 if contract itself wrong (§5.8).
 
 ### 5.7 Verify (ladder + anti-cheat)
-Run full verification ladder (§4.2): contract + flow + acceptance (visible **and** held-out) + class extension + NFR-mechanism checks (each `M*` from HLD must be actually wired, not just present in design). Then adversarial anti-cheat pass: **semantic diff critique** (flag literals matching fixtures, empty catch-alls, stub branches, complexity below what requirement implies) and **property tests** for logic-bearing components. Oracle already mutation-certified at freeze (§5.3). All-green across applicable layers = bar.
+Run full verification ladder (§4.2): contract + flow + acceptance (visible **and** held-out) + class extension + NFR-mechanism checks (each `M*` from HLD must be wired, not only present in design). Then adversarial anti-cheat pass: **semantic diff critique** (flag literals matching fixtures, empty catch-alls, stub branches, complexity below what requirement implies) and **property tests** for logic-bearing components. Oracle already mutation-certified at freeze (§5.3). All-green across applicable layers = bar.
 
 ### 5.8 Self-heal vs escape
 Red→green discipline. On any red, **diagnose before retrying** — classify failure as `my-code | contract | decision | WHAT | missing-foundation`.
@@ -480,7 +483,7 @@ Build/verify depth scales with class blast radius (B13), set by same playbook dr
 |---|---|
 | **Greenfield** | Full — skeleton build (scaffold + harness + walking skeleton) + per-slice build against new contracts |
 | **Large feature-add** | No scaffold (harness exists); per-slice build into existing code; regression guard mandatory; conform to conventions |
-| **Bugfix** | Single unit — make reproduction test green; regression guard; usually no new component |
+| **Bugfix** | Single unit — make reproduction test green; regression guard; typically no new component |
 | **Refactor** | Behavior-frozen — characterization/golden tests = oracle; implementation changes while oracle stays green throughout |
 | **Migration** | Parity-gated — parity tests = oracle; per-module slice build; old == new |
 | **Perf** | Benchmark-gated — optimize until benchmark ≥ target, behavior tests stay green |

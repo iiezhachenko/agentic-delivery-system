@@ -3,12 +3,13 @@
 | | |
 |---|---|
 | **Status** | Draft |
-| **Version** | 0.4 |
+| **Version** | 0.5 |
 | **Date** | 2026-06-08 |
 | **Audience** | Engineers building system; agents executing it |
 | **Scope** | Intake-to-delivery pipeline. Turns any client request into verified software |
 
 **Change log**
+- **v0.5** (2026-06-09) — T10 economy cut (caveman register + AB7/AB8): killed banned hedge/filler words, trimmed decorative narration (§1 vague-input pep-talk). Substance invariant; only fluff died. New version = the change request (P8); re-lock at next freeze.
 - **v0.4** (2026-06-08) — P13 (artifact = downstream context, author to economy) + §2.1 economy invariant `A-ECON`/`INV-ECON` added. New version = the change request (P8); re-lock `aprd.lock` v3→v4 at next freeze; downstream re-trigger: coding-canon CITES P13, foundation-cut injects `INV-ECON`, MAP-NFR buckets economy NFR, VERIFY-OUTPUT NFR check measures it.
 
 ---
@@ -19,8 +20,8 @@ Build pipeline. Converts **any** client request — vague, any class (new build,
 
 Three facts drive whole design:
 
-1. **Vague input = normal case.** Clients don't know what they want until they see it. Request = hypothesis, not contract.
-2. **"Done" usually undefined.** Most delivery failures = failures to define "done" in testable terms before building.
+1. **Vague input = normal case.** Request = hypothesis, not contract.
+2. **"Done" typically undefined.** Most delivery failures = failures to define "done" in testable terms before building.
 3. **WHAT mapped broad; HOW built thin.** Knowing whole WHAT up front = cheap, prevents architectural dead-ends. *Building* it whole = waterfall — client sees nothing until end. So Phase 0 captures entire WHAT, then **Phase 1 (Roadmap)** slices into vertical demoable increments. Downstream design/build loop delivers one at a time.
 
 Pipeline job: compile vagueness → **frozen testable contract** (aPRD), hand to roadmap for slicing, then execute **one vertical slice at a time**. Build phase never sees vagueness — compiled away.
@@ -315,7 +316,7 @@ ACCEPTANCE:                             # binary, testable
 - **Assumptions logged, not buried** — audit trail; client challenges cheaply; wrong assumptions traceable to decision, not hidden in code.
 - **Out-of-scope load-bearing** — bounds agent, stops gold-plating + creep.
 - **Stable atomic IDs** — architecture cites R3, test cites AC2, commit cites both. Drift = any code not traceable to requirement.
-- **Atomic requirements = sliceable units** — Phase 1 (Roadmap) groups R*/AC* into vertical increments. Atomicity lets slice cut cleanly through stack; monolithic requirement cannot be sliced vertically.
+- **Atomic requirements = sliceable units** — Phase 1 (Roadmap) groups R*/AC* into vertical increments. Atomicity → slice cuts cleanly through stack; monolithic requirement cannot be sliced vertically.
 
 ---
 
@@ -351,7 +352,7 @@ flowchart TD
 | **Cache canon, version it** | Research once, reuse every project (biggest lever) |
 | Parallel fetch | Wall-clock |
 | LLM reconciles/verifies, never recalls | No stale or hallucinated rules |
-| Verify against pinned tool versions | Output actually runs |
+| Verify against pinned tool versions | Output runs |
 
 **Cache = real efficiency answer.** First project pays full research cost; later projects load `canon.vN.json` + fetch only deltas. Per-project research collapses to retrieval. **Verify stage mandatory** — catches hallucinated rule names + deprecated/superseded flags training recall introduces.
 
