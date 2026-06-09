@@ -72,6 +72,7 @@ def test_f4_happy_path_project_create_and_list(
     assert create_response["status"] in (200, 201, 302)
 
     # List request to assert project appears
+    mock_project_management.handle_request.side_effect = None  # reset: side_effect overrides return_value otherwise — create handler would re-fire
     mock_project_management.handle_request.return_value = {
         "status": 200,
         "body": "<html>Beta Client Portal</html>",

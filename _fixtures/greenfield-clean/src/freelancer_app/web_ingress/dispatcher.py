@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from freelancer_app.project_management.exceptions import NotFoundError
+from freelancer_app.project_management.exceptions import NotFoundError, UnauthorizedError
 
 
 def dispatch_project_request(
@@ -38,10 +38,17 @@ def dispatch_project_request(
     CT9 failure modes (handled here, not re-raised):
     - callee-error (RuntimeError from C3) → 500 response, error detail NOT in body
     - not-found (NotFoundError from C3)   → 404 response
+
+    CT3 failure mode surfaced at C6 boundary:
+    - no-valid-session (UnauthorizedError from C3) → 302 redirect to /auth/login (sign-in)
     """
     try:
         response = project_management.handle_request(request)
         return response
+    except UnauthorizedError:
+        # CT3:no-valid-session — C3 rejected request (no authenticated session).
+        # Web Ingress redirects to sign-in entry point (failure_path.arrives_at).
+        return {"status": 302, "body": "", "content_type": "text/html", "location": "/auth/login"}
     except NotFoundError:
         # CT9 not-found: C3 could not locate the requested resource.
         return {"status": 404, "body": "<html>Not Found</html>", "content_type": "text/html"}

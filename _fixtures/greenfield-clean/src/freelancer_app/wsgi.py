@@ -1,5 +1,6 @@
-# Composition root (INTEGRATE) — wires C6->C2->C1 along flow F1 against the
-# FROZEN contracts. Traces: R1, R5, AC1, AC5.
+# Composition root (INTEGRATE) — wires C6->C2->C1 along flow F1 (S1) and
+# C6->C3->C2->C1 along flow F4 (S4) against the FROZEN contracts.
+# Traces: R1, R5, R4, R6, R9, R10, AC1, AC5, AC6.
 # Composition LLD owned here (B8); component internals are IMPLEMENT's (§5.5);
 # seams fixed (B3).
 #
@@ -61,6 +62,12 @@ from django.core.wsgi import get_wsgi_application
 from freelancer_app.identity_auth import oauth_callback
 from freelancer_app import identity_auth  # for oauth_provider seam access
 from freelancer_app.web_ingress import session_gate
+
+# S4 slice: C3 real components and CT9 dispatcher.
+from freelancer_app.web_ingress.dispatcher import dispatch_project_request
+from freelancer_app.project_management import project_store as _project_store_mod
+from freelancer_app.project_management import session_resolver as _session_resolver_mod
+from freelancer_app.data_store import identity_record_store as _identity_record_store
 
 
 # ---------------------------------------------------------------------------
@@ -177,12 +184,110 @@ def _view_auth_callback_safe(request):
         )
 
 
-# URL configuration — the walking-skeleton F1 HTTP entry points only (R1, R5).
-# No gold-plating: only routes the flow exercises (Rule 7).
+# ---------------------------------------------------------------------------
+# S4 slice composition — F4 flow: C6->C3->C2->C1 (CT9/CT3/CT2).
+# Additive routes only — skeleton F1 routes above are frozen (B4/H14).
+# Traces: R4, R6, R9, R10, AC6.
+# ---------------------------------------------------------------------------
+
+class _IdentityAuthAdapter:
+    """Adapter: exposes resolve_session() (CT3 shape) over real C2 session_checker (CT8 shape).
+    CT3 contract: resolve_session(request_context) -> identity dict or None.
+    Bridges CT8 check_session(cookie_value) to the CT3 interface C3's SessionResolver expects.
+    Composition wiring — not a component rewrite (B8).
+    """
+
+    def resolve_session(self, request_context: dict) -> dict | None:
+        cookie_value = request_context.get("session_token")
+        return session_gate.check({"session": cookie_value} if cookie_value else {})
+
+
+class _ProjectManagementAdapter:
+    """Adapter: exposes handle_request(request) (CT9 shape) by composing real C3 internals.
+    Wires SessionResolver (CT3) + ProjectStore (CT2) for HTTP project CRUD requests.
+    Composition wiring — not a component rewrite (B8).
+    """
+
+    def __init__(self, identity_auth_adapter: _IdentityAuthAdapter) -> None:
+        self._session_resolver = _session_resolver_mod.SessionResolver(identity_auth_adapter)
+        # Data Store bound via module reference — real C1 at runtime.
+        self._project_store = None  # bound lazily: import avoids circular at module load
+
+    def handle_request(self, request: dict) -> dict:
+        # Resolve session (CT3); UnauthorizedError propagates to dispatcher.
+        from freelancer_app.project_management.project_store import ProjectStore
+        from freelancer_app.data_store import identity_record_store as _ids
+        _store = ProjectStore(_ids)
+
+        session_ctx = {"session_token": request.get("session_token")}
+        identity = self._session_resolver.resolve(session_ctx)
+
+        method = request.get("method", "GET").upper()
+        owner_id = identity["freelancer_id"]
+
+        if method == "POST" and request.get("path", "").rstrip("/") in ("/projects", "/projects/"):
+            body = request.get("body", {})
+            record = _store.create({"name": body.get("name"), "owner_id": owner_id,
+                                    "client": body.get("client_name"),
+                                    "currency": body.get("currency"),
+                                    "billable_rate": body.get("billable_rate")})
+            return {"status": 201, "project": record, "body": "", "content_type": "text/html"}
+        elif method == "GET" and request.get("path", "").rstrip("/") in ("/projects", "/projects/"):
+            projects = _store.list(owner_id)
+            body_html = "<html><body>" + "".join(
+                f"<li>{p.get('name','')}</li>" for p in projects
+            ) + "</body></html>"
+            return {"status": 200, "body": body_html, "content_type": "text/html", "projects": projects}
+        else:
+            return {"status": 200, "body": "<html><body></body></html>", "content_type": "text/html"}
+
+
+_identity_auth_adapter = _IdentityAuthAdapter()
+_project_mgmt_adapter = _ProjectManagementAdapter(_identity_auth_adapter)
+
+
+def _view_project_management(request):
+    """
+    /projects/* — F4 CT9 dispatch: authenticated project CRUD.
+    Calls dispatch_project_request with real C3 adapter; honors CT3/CT2 failure modes.
+    Additive route; does not touch F1 skeleton routes (H14).
+    """
+    from freelancer_app.project_management.exceptions import UnauthorizedError, NotFoundError
+    req_dict = {
+        "method": request.method,
+        "path": request.path,
+        "session_token": request.COOKIES.get("session"),
+        "body": {},
+    }
+    if request.method == "POST":
+        import json as _json
+        try:
+            req_dict["body"] = _json.loads(request.body or b"{}")
+        except Exception:
+            req_dict["body"] = {}
+
+    result = dispatch_project_request(
+        request=req_dict,
+        project_management=_project_mgmt_adapter,
+        identity_auth=_identity_auth_adapter,
+    )
+    status = result.get("status", 200)
+    location = result.get("location")
+    if location:
+        return HttpResponseRedirect(location)
+    return HttpResponse(result.get("body", ""), content_type=result.get("content_type", "text/html"),
+                        status=status)
+
+
+# URL configuration — F1 skeleton (frozen) + F4 slice S4 additive routes.
+# Skeleton routes not edited; S4 routes appended only (H14, delta Rule 3). Traces: R1, R5, R4, R6, R9, R10.
 urlpatterns = [
     path("", _view_entry_page, name="entry"),
     path("auth/login", _view_auth_login, name="auth_login"),
     path("auth/callback", _view_auth_callback_safe, name="auth_callback"),
+    # S4 additive routes — F4 CT9 dispatch (R4, R6, R9, R10, AC6).
+    path("projects", _view_project_management, name="projects_list"),
+    path("projects/", _view_project_management, name="projects_list_slash"),
 ]
 
 # Register URL patterns on the ROOT_URLCONF module (this module).
