@@ -30,9 +30,9 @@ Exit 0 = clean, 1 = blocked, 2 = usage. Type inferred from path (`/prompts/`→p
   "verdict": "clean | blocked",
   "violations": [ { "check": "role-identity-length", "rule": "AB6", "practice": "P2",
                     "line": 39, "evidence": "role block = 7 lines (cap 3)", "fix": "DELETE|REWRITE" } ],
-  "warnings":   [ { "check": "line-budget", "rule": "AB1", "practice": "P1",
-                    "line": 1, "evidence": "content lines = 180 (warn >150)", "fix": "REWRITE" } ],
-  "counts": { "lines_total": 331, "by_rule": { "AB6": 1, "AB1": 4 }, "warnings": 1 }
+  "warnings":   [ { "check": "token-budget", "rule": "AB1", "practice": "P1",
+                    "line": 1, "evidence": "est_tokens = 5762 (warn >5000; chars=23048)", "fix": "REWRITE" } ],
+  "counts": { "lines_total": 331, "est_tokens": 5762, "by_rule": { "AB6": 1, "AB1": 4 }, "warnings": 1 }
 }
 ```
 
@@ -44,7 +44,7 @@ Exit 0 = clean, 1 = blocked, 2 = usage. Type inferred from path (`/prompts/`→p
 
 | # | check | rule | gate | heuristic |
 |---|---|---|---|---|
-| C1 | `line-budget` | AB1/P1 | warn>150, block>220 | non-blank non-frontmatter content lines |
+| C1 | `token-budget` | AB1/P1 | warn>5000, block>7500 tok | est_tokens = content_chars/4 (lines gameable by packing — file-07) |
 | C2 | `role-identity-length` | AB6/P2 | block>3 | non-blank lines `# Role:`→next `##` |
 | C3 | `format-clause-length` | AB3/P2 | block | `format:"…"` >25 words OR `{…}` field-list (re-spec tell) |
 | C4 | `banned-hedge` | AB8/P3 | block | hedge wordlist + ` etc.`/`and so on`/`…`; escape = `judgment call:` |

@@ -53,11 +53,11 @@ Economy is engine-universal (spec-00 `P13` + `A-ECON`/`INV-ECON`, §2.1), NOT ow
 Profile omitting any of (a)/(b)/(c) = incomplete. Swap the profile → economy inherited FREE, no spine edit (invariant #1). Swap needing a spine change to keep economy = abstraction leaked → fix spine once (P3), not profile.
 
 - **This stack's "one home" (field b) = a prompt SECTION.** One fact lives in exactly one section of one prompt `.md` (AB1) — the prompt-stack analog of one `.tf` resource / one TS module. Realized by AB1–AB9 (`.hld/skeleton/coding-canon.md`), which CITE `P13`/`A-ECON`, never re-own.
-- **Per-artifact-type lint thresholds (field c — non-prompt live HERE).** Prompt thresholds ship in `tools/economy-lint/lint.mjs` `PROFILES.prompt` (150/220 line, role ≤3, format ≤25w, dup 3/4, + frontmatter checks C2/C3/C5/C6) — cited, not restated (AB1). Non-prompt:
+- **Per-artifact-type lint thresholds (field c — non-prompt live HERE).** Prompt thresholds ship in `tools/economy-lint/lint.mjs` `PROFILES.prompt` (C1 token budget 5000/7500, role ≤3, format ≤25w, dup 3/4, + frontmatter checks C2/C3/C5/C6) — cited, not restated (AB1). C1 budgets TOKENS not lines (lines gameable by packing facts into long lines — `07-bloat-metric-tokens.md`). Non-prompt:
 
-  | artifact-type | line warn/block | dup-phrase warn/block | checks |
+  | artifact-type | token warn/block | dup-phrase warn/block | checks |
   |---|---|---|---|
-  | adr · aprd · hld · roadmap | 200 / 400 | 3 / 4 | C1·C4·C7·C8·C9 (frontmatter checks C2/C3/C5/C6 skipped) |
+  | adr · aprd · hld · roadmap | 6500 / 13000 | 3 / 4 | C1·C4·C7·C8·C9 (frontmatter checks C2/C3/C5/C6 skipped) |
 
   RULE (economy) fixed + universal; only this stack-local MEASURE flexes. Tune per type w/ justification.
 - **New stack REUSES the shared auditor — never re-authors it.** Sibling profile does NOT write its own auditor/lint; it PARAMETERIZES the shared `prompts/_economy-audit.md` + `tools/economy-lint/` with `{artifact-type, stack thresholds}`. ONE auditor, every project (cross-project extension of the five-callers note above). And `INV-ECON` is cut into EVERY project's foundation-cut by default (spec-01 §5.7 / `FOUNDATION-CUT`), so VERIFY-OUTPUT's NFR check measures economy in any stack — not wired per project.

@@ -42,11 +42,16 @@ const defects = {
   // bonus — C8 caveman/PR4 reminder duplicated outside Register block
   C8: (s) => s.replace(/(## Rules\n)/,
     "$14. Remember PR4 — caveman governs.\n5. Keep clean prose everywhere (PR4).\n"),
-  // bonus — C1 line budget (inflate past block threshold)
-  C1: (s) => s + "\n" + Array.from({ length: 230 }, (_, i) => `Filler content line number ${i} adds bulk here.`).join("\n") + "\n",
+  // bonus — C1 token budget (inflate tokens past block threshold: ~320 lines × ~98 char → >7500 tok)
+  C1: (s) => s + "\n" + Array.from({ length: 320 },
+    (_, i) => `Filler content line number ${i} adds genuine bulk and many tokens to push the budget well past block.`).join("\n") + "\n",
+  // GAMING defect — few mega-lines: LOW line count (14), HIGH tokens. Old line-gate (220) would PASS this;
+  // token-gate MUST block it. Proves the metric flip closes the hole (file-07).
+  C1g: (s) => s + "\n" + Array.from({ length: 14 },
+    (_, i) => `megaline ${i}: ` + Array.from({ length: 240 }, (_, j) => `distinctword${i}x${j}`).join(" ")).join("\n") + "\n",
 };
 // each defect → the check it MUST trip
-const expect = { C1:"line-budget", C2:"role-identity-length", C3:"format-clause-length", C4:"banned-hedge",
+const expect = { C1:"token-budget", C1g:"token-budget", C2:"role-identity-length", C3:"format-clause-length", C4:"banned-hedge",
   C5:"field-rules-section", C6:"escapes-in-stop", C7:"duplicate-phrase", C8:"caveman-footer-dup", C9:"register-compliance" };
 
 let pass = 0, fail = 0;

@@ -36,13 +36,13 @@ Does NOT do semantic checks (T05). Does NOT wire into orchestrator (T06) — but
     { "check": "role-identity-length", "rule": "AB6", "practice": "P2",
       "line": 39, "evidence": "role block = 7 lines (cap 3)", "fix": "DELETE|REWRITE" }
   ],
-  "counts": { "lines_total": 331, "by_rule": { "AB6": 1, "AB1": 4 } }
+  "counts": { "lines_total": 331, "est_tokens": 8796, "by_rule": { "AB6": 1, "AB1": 4 } }
 }
 ```
 Same shape as every gate artifact (disk-truth, schema-valid). `fix` is ALWAYS `DELETE` or `REWRITE` — never `ADD` (AB9 keystone, enforced even in the lint output schema).
 
 ### The checks
-- **C1 — line budget (P1/AB1, signal).** Non-blank, non-frontmatter prose lines. WARN >150, BLOCK >220. Tunable per phase w/ justification. Rationale: a number that fails; bloat was invisible because nothing counted.
+- **C1 — TOKEN budget (P1/AB1, signal).** `est_tokens = content_chars/4` (non-blank, non-frontmatter lines). WARN >5000, BLOCK >7500. Tunable per phase w/ justification. TOKENS not lines: lines gameable by packing facts into long lines (char/line varies 78→190, 83% spread; line-gate ranks files backwards). Tokens = real context cost, un-gameable. Rationale + evidence: `07-bloat-metric-tokens.md`.
 - **C2 — role-identity length (P2/AB6, hard).** Lines between `# Role:` and next `##`. BLOCK >3.
 - **C3 — `format:` clause length (P2/AB3, hard).** Each `format: "..."` value in `inputs:`/`outputs:`. BLOCK >25 words OR contains a `{...}` field-list (the re-spec tell).
 - **C4 — banned hedge wordlist (P3/AB8, hard).** Regex outside code/JSON for `\b(usually|roughly|loosely|basically|really|just|simply|genuinely unsure|when in doubt|too big|too small)\b`, ` etc\.`, ` and so on`, prose `\.\.\.`. BLOCK on match UNLESS same line has `judgment call:` (the AB8 escape) or a crisp test within N chars.
@@ -116,3 +116,6 @@ Linter = FIRST deterministic-code component in an otherwise 100%-prompt-driven p
 - C4 hedge "crisp-test-within-N-chars" relaxation not implemented — `judgment call:` escape is the deterministic allow; relaxation deferred (semantic, AUDIT).
 
 NOT committed (do-not-commit rule honored).
+
+### AMENDMENT (2026-06-09) — C1 line→TOKEN budget (file-07)
+C1 was gameable: line count drops when facts packed into long lines (char/line 78→190 across corpus, 83% spread; line-gate ranked RECONCILE-CRITIQUE as passing yet heaviest ~8.8K tok). Flipped C1 to `est_tokens = content_chars/4` (deterministic, zero-dep). Thresholds WARN>5000 / BLOCK>7500 (mapped from 150/220 lines at median 134 char/line). `counts.est_tokens` now reported; `lines_total` kept informational. selftest gains a GAMING defect (14 mega-lines, low line count, high tokens) → blocks only on token-budget, proving the fix. `node selftest.mjs` → PASS, 22 checks. Rationale: `07-bloat-metric-tokens.md`. Still NOT committed.

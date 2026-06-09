@@ -15,7 +15,10 @@ import path from "node:path";
 const PROFILES = {
   prompt: {
     checks: ["C1","C2","C3","C4","C5","C6","C7","C8","C9"],
-    lineBudget: { warn: 150, block: 220 },   // ADR-0010 retrofit avg ~120; current top 331
+    // C1 budgets TOKENS, not lines — lines gameable by packing facts into long lines (file-07).
+    // Mapped from old line thresholds (150/220) at corpus median density 134 char/line ÷4:
+    // warn 150 ln → ~5000 tok, block 220 ln → ~7500 tok. Same ceiling, un-gameable axis.
+    tokenBudget: { warn: 5000, block: 7500 },
     roleMax: 3,                               // AB6 hard cap
     formatMaxWords: 25,                       // AB3 one-clause
     articleRatioWarn: 0.10,                   // C9 signal (caveman ~0.05)
@@ -26,7 +29,7 @@ const PROFILES = {
   // real values come from the stack profile per file-06, not from this file.
   artifact: {
     checks: ["C1","C4","C7","C8","C9"],
-    lineBudget: { warn: 200, block: 400 },
+    tokenBudget: { warn: 6500, block: 13000 },   // token-based (file-07); real values per stack profile
     articleRatioWarn: 0.12,
     dupPhrase: { warn: 3, block: 4 },
     dupBlockRun: 3,
@@ -35,7 +38,7 @@ const PROFILES = {
 const TYPE_TO_PROFILE = { prompt:"prompt", adr:"artifact", aprd:"artifact", hld:"artifact", roadmap:"artifact" };
 
 const META = {
-  C1: { check:"line-budget",            rule:"AB1", practice:"P1", fix:"REWRITE" },
+  C1: { check:"token-budget",           rule:"AB1", practice:"P1", fix:"REWRITE" },
   C2: { check:"role-identity-length",   rule:"AB6", practice:"P2", fix:"REWRITE" },
   C3: { check:"format-clause-length",   rule:"AB3", practice:"P2", fix:"REWRITE" },
   C4: { check:"banned-hedge",           rule:"AB8", practice:"P3", fix:"REWRITE" },
@@ -92,12 +95,15 @@ function run(p, prof, V, W) {
   const scan = [];
   for (let i = 0; i < N; i++) if (cls[i] === "prose" && !inReg(i)) scan.push(i);
 
-  // C1 — line budget (signal)
+  // C1 — TOKEN budget (signal). Tokens = real context cost; un-gameable by line packing (file-07).
+  // est_tokens = content_chars/4 (deterministic, zero-dep, conservative under-count for caveman).
   if (on("C1")) {
-    let content = 0;
-    for (let i = 0; i < N; i++) if (cls[i] !== "frontmatter" && cls[i] !== "blank") content++;
-    if (content > prof.lineBudget.block) push(V, "C1", 1, `content lines = ${content} (block >${prof.lineBudget.block})`);
-    else if (content > prof.lineBudget.warn) push(W, "C1", 1, `content lines = ${content} (warn >${prof.lineBudget.warn})`);
+    let chars = 0;
+    for (let i = 0; i < N; i++) if (cls[i] !== "frontmatter" && cls[i] !== "blank") chars += lines[i].length;
+    p.est_tokens = Math.ceil(chars / 4);
+    const tok = p.est_tokens;
+    if (tok > prof.tokenBudget.block) push(V, "C1", 1, `est_tokens = ${tok} (block >${prof.tokenBudget.block}; chars=${chars})`);
+    else if (tok > prof.tokenBudget.warn) push(W, "C1", 1, `est_tokens = ${tok} (warn >${prof.tokenBudget.warn}; chars=${chars})`);
   }
 
   // C2 — role identity ≤3 lines
@@ -236,7 +242,7 @@ export function lint(target, typeOverride) {
     verdict: V.length ? "blocked" : "clean",   // blocked iff a BLOCK-grade violation exists
     violations: V,                              // every fix is DELETE|REWRITE — never ADD (AB9 keystone)
     warnings: W,                                // signal-grade (C1/C7/C9 below block); do not gate
-    counts: { lines_total: p.N, by_rule, warnings: W.length },
+    counts: { lines_total: p.N, est_tokens: p.est_tokens ?? null, by_rule, warnings: W.length },
   };
 }
 function inferType(t) {

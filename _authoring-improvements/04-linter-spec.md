@@ -12,7 +12,7 @@
     { "check": "role-identity-length", "rule": "AB6", "practice": "P2",
       "line": 39, "evidence": "role block = 7 lines (cap 3)", "fix": "DELETE|REWRITE" }
   ],
-  "counts": { "lines_total": 331, "by_rule": { "AB6": 1, "AB1": 4 } }
+  "counts": { "lines_total": 331, "est_tokens": 8796, "by_rule": { "AB6": 1, "AB1": 4 } }
 }
 ```
 
@@ -20,10 +20,10 @@ Same shape as every gate artifact (D3 disk-truth, schema-valid). `fix` is always
 
 ## The checks
 
-### C1 — line budget per prompt (P1/AB1, signal)
-- **Heuristic:** total non-blank, non-frontmatter prose lines.
-- **Threshold:** WARN >150, BLOCK >220. (ADR-0010 retrofit avg ~120; current top 331.) Tunable per phase if justified.
-- **Why:** a number that fails. Bloat is currently invisible because nothing counts. This is the cheapest possible signal — a budget the authoring agent feels every run. Not a hard quality measure (a legit prompt can be long), so WARN-then-BLOCK with override-on-justification, not a silent cap.
+### C1 — TOKEN budget per prompt (P1/AB1, signal) — see file-07
+- **Heuristic:** `est_tokens = content_chars / 4` (content = non-blank, non-frontmatter lines). Deterministic, zero-dep, conservative under-count.
+- **Threshold:** WARN >5000, BLOCK >7500 tokens. (Mapped from old 150/220-line thresholds at corpus median 134 char/line.) Tunable per phase if justified.
+- **Why TOKENS not lines:** lines are gameable — system packs facts into long lines, line count drops, gate passes, real cost unchanged. char/line varies 78→190 across corpus (83% spread) → line budget has no fixed meaning + ranks files backwards (RECONCILE-CRITIQUE passed line-gate yet was heaviest at ~10.8K tok). Tokens = the actual context-window cost; un-gameable by packing. Full rationale + evidence: `07-bloat-metric-tokens.md`. Still signal-grade (WARN→BLOCK, override-on-justification) — a legit prompt can be long.
 
 ### C2 — role-identity length (P2/AB6, hard)
 - **Heuristic:** lines between `# Role:` and the next `##` heading.
