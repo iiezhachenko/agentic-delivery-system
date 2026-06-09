@@ -54,6 +54,31 @@ For EACH affected prompt:
 - **Value invariant:** each re-authored prompt PASSes clean-room value-verify against its golden — same downstream artifact, ID-threaded, schema-valid. (If value changes, the cut removed substance — STOP, that's a starvation defect, not a clean cut.)
 - **Token reduction from S1 is real but MODEST** — only genuinely-shared rules collapse (~3–5 per dual-mode prompt); per-pass schemas + discriminators are legit pass-specific substance, NOT duplication (cutting them = starvation defect). No fixed % target; value-invariance is the bar, the C1 **token** budget (warn 5000 / block 7500) the gate. Deeper per-file cuts → T09.
 
+## STATUS — DONE (2026-06-09)
+
+S1–S5 landed corpus-wide; skeleton v4 frozen (`.hld/skeleton.lock` status==frozen, amendment names the T08 re-trigger). Gate = `tools/economy-lint` (C1/C2/C5/C6 = T08-scope checks).
+
+**Acceptance vs final lint (16 prompts: 8 03-hld + 8 04-build):**
+
+| Acceptance | Check | Result |
+|---|---|---|
+| 03-hld single shared Rules + per-mode delta (S1) | structure | ✓ all 8 — `## Rules (shared — both passes)` + per-pass delta block; lane homed once |
+| 04-build role identity ≤3 lines, no Rule-1 paragraph (S2) | lint C2 | ✓ clean all 16 |
+| schema-footer prose gone (S3) | lint C5 | ✓ clean all 16 |
+| lane once (its Rule), absent role-id + Stop (S4) | manual + grep | ✓ role-id carries `Lane: Rule N` POINTER only; lane list lives once in that Rule; no Stop re-list |
+| Stop names no specific guards (S5) | lint C6 | ✓ clean all 16 |
+| value invariant | goldens | ✓ critique.json + S4/reconcile.json goldens both `clean/0 issues` — unchanged by cuts |
+| C1 token budget (block 7500) | lint C1 | 15/16 under block; **RECONCILE-CRITIQUE 8609 over-block → T09** (see below) |
+
+**This-session S1 cut — RECONCILE-CRITIQUE** (the GIVEN-table S1 exemplar: "exonerations all carry over" then re-listed):
+- Hoisted the RE-DERIVE-from-primary discipline (was restated near-verbatim in BOTH passes' "Your lane") → ONE shared Rule 7; each pass keeps only its per-pass field-binding map.
+- Cut 3 exoneration re-lists (Part A discriminator, Part B discriminator, Part B delta Rule 1) → pointers to shared Rule 2 (the home; holds full `NEVER block` list).
+- Diff: 5 ins / 8 del, pure prose. 8796 → 8609 tok. Every category (7 Part A + 8 Part B), check, exoneration, schema field intact → value-invariant (goldens unchanged).
+
+**RECONCILE-CRITIQUE residual C1 over-block → routed to T09.** S1 reduction is MODEST by design (acceptance: "only genuinely-shared rules collapse"). Residual 8609 driven by the pass-specific category discriminators (7 skeleton + 8 slice, distinct field bindings + distinct false-positive exonerations) — legit pass-specific substance, NOT duplication; cutting it = starvation defect. Deeper per-file cut is T09's job (acceptance: "Deeper per-file cuts → T09").
+
+**Out-of-T08-scope residue (still flips lint `verdict:blocked` on some prompts):** C3 (format-clause `{...}` field-list re-spec, AB3), C4 (hedge, AB8), C9 (register, AB9) — per-file offenders → T09/T10. NOT among the five P0 structural fixes.
+
 ## DEPENDS ON / BLOCKS
 
 - Depends on: T03 (v4 dual-mode rule + AB7–9), T04+T05+T06 (gate must exist + self-tested first).
