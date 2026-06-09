@@ -62,3 +62,27 @@ Tarball sha256 written beside artifact. Optional cosign hook (skip-if-absent).
 
 ## Deps
 Needs P3 (+P2,P1,P0). Feeds P5 (P5 installs the REAL tarball).
+
+---
+
+## STATUS — DONE
+
+Built:
+- `tools/pack/pack.mjs` (P4.1) — zero-dep. verify→gen-manifest→re-skin-confirm→allowlist-copy→GATE→tarball→sign. Self-verifies tarball==manifest. Non-destructive (reads src, writes `payload/`+`dist/` only).
+- `Makefile` `pack:` target (P4.2) — net-new root file. `pack: → node tools/pack/pack.mjs`.
+- signing (P4.3) — `dist/adp-v<ver>.tgz.sha256` written beside artifact; cosign hook skip-if-absent.
+- `.gitignore` — `payload/ dist/ *.tgz*` (build outputs not committed).
+
+Done-bar:
+- ✅ pack emits `adp-v815ab03+p03b9a94d.l96133636.tgz` + `.sha256` + `manifest.json` (60 files, 61 tar entries).
+- ✅ Gate RED (broke selftest golden) → HALT exit 1, NO tarball (`dist/` empty). Golden restored, selftest green.
+- ✅ Gate GREEN → tarball EXACTLY = manifest (extra=NONE, missing=NONE). Path-map applied (`_orchestrator.generic.md`→`_orchestrator.md` in tar; generic sibling NOT shipped). Self-host canon `agentic-delivery-pipeline.md` excluded. No scaffold/leak.
+- ✅ Originals untouched — only regenerated `manifest.json` `version` field moved (`3415a3a`→`815ab03`, git-describe); all 60 entries+sha256 identical; sources byte-identical.
+
+DEVIATIONS (maintainer decision — ADP remediation out of P4 scope):
+- Gate substep 4b (lint payload prompts) + 4c (self-host token grep) DISABLED (commented in `pack.mjs`, re-enable instructions inline). Reason: trip ONLY on un-remediated ADP content, not pack mechanics —
+  - lint: 5 shipped prompts block-grade (CRITIQUE/DEMO-GEN C3 format-clause field-lists; DEFINE-CONTRACTS/DERIVE-COMPONENTS/_step-runner C3/C4/C9).
+  - grep: 3 lines (`_step-runner.md`→`code-canon/agentic-delivery-pipeline.md` ref; `typescript.md` ×2).
+  - Active gate = `selftest` both-directions (passes; discriminates). Re-enable both once prompt remediation lands (separate prompt-build).
+- RED demonstrated via golden-break (task-offered alternative; payload-lint disabled so planted-prompt-defect path inert).
+- `make` binary absent in env (uninstallable, no root) → ran target's underlying cmd `node tools/pack/pack.mjs` directly (identical).

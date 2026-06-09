@@ -1,3 +1,10 @@
 # Canonical artifact trees (.aprd .adr .hld .roadmap) are committed source, not ignored.
 # Only the clean-room sandbox is ignored.
 _test_bench*/
+
+# pack build outputs (tools/pack/pack.mjs) — staged payload + emitted tarball/sig
+payload/
+dist/
+*.tgz
+*.tgz.sha256
+*.tgz.sig
