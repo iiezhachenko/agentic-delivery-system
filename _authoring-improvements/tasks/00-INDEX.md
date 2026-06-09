@@ -44,7 +44,7 @@ flowchart TD
 | `T05` | Adversarial ECONOMY-AUDIT role (Layer 2) + PROMPT-AUDIT instantiation, both-directions + substance-floor self-test | new prompt role |
 | `T06` | Gate wired pre-promote; routing keystone (fix=DELETE/REWRITE, never ADD) | `_orchestrator.md`, `code-canon/agentic-delivery-pipeline.md` |
 | `T07` | Economy inherited by every project the ADS builds | foundation-cut default INV + stack profiles |
-| `T08` | Re-author P0 structural fixes through the gate (biggest line driver) | all 8 03-hld, all 8 04-build + 2 |
+| `T08` | Re-author P0 structural fixes through the gate (biggest structural driver) | all 8 03-hld, all 8 04-build + 2 |
 | `T09` | Re-author P1 worst single-fact offenders | DERIVE-TESTS, RESOLVE-LOCAL, MODEL-DATA, MODEL-FLOWS, MAP-NFR, RECONCILE-CRITIQUE, INTEGRATE, aprd VERIFY |
 | `T10` | Re-author P2/P3 recurring + non-prompt artifacts | 00-aprd, 01-roadmap, 02-adr, specs, docs, ADRs |
 
