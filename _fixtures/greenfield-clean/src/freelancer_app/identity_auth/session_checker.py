@@ -46,3 +46,22 @@ def check_session(cookie_value: str | None) -> dict[str, Any] | None:
     # The frozen conftest patches this module for C6's tests, so this body is
     # exercised only if the module is called without mocking.
     return None
+
+
+def resolve_session(token: str | None) -> dict[str, Any] | None:
+    """
+    CT3 provider surface (C2) — resolve a session token to freelancer identity.
+
+    C3 (Project Management) calls this via the CT3 sync_api seam to obtain the
+    owning freelancer identity for ownership scoping. Returns a dict carrying at
+    least ``freelancer_id`` when the token names a valid session, else None
+    (no-valid-session). Real DB-backed lookup (ADR-0003) wired at INTEGRATE; the
+    AC6 acceptance oracle patches this module symbol, so this body runs unmocked
+    only — bridges CT8 check_session for the contract-layer stub. INV6 sync.
+    """
+    if not token:
+        return None
+    session = check_session(token)
+    if not session or not session.get("authenticated"):
+        return None
+    return {"freelancer_id": session.get("identity_ref")}

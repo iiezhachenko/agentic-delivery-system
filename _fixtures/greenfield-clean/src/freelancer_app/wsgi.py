@@ -190,93 +190,133 @@ def _view_auth_callback_safe(request):
 # Traces: R4, R6, R9, R10, AC6.
 # ---------------------------------------------------------------------------
 
+from freelancer_app.identity_auth import session_checker as _session_checker
+from freelancer_app.project_management.exceptions import NotFoundError as _NotFoundError
+
+
+def _project_slug(name: str) -> str:
+    # Project id = slug(name): lowercase, spaces->hyphens. Stable handle for edit/delete routes.
+    return (name or "").strip().lower().replace(" ", "-")
+
+
+class _InProcessProjectDataStore:
+    """Real C1 project persistence (in-process; no DB configured yet, ADR-0003 wires PostgreSQL later).
+    Owner-scoped CRUD over project records (E2/E5/E6/E7) = the CT2 data-store surface ProjectStore
+    delegates to. Composition runtime store (B8); component internals untouched. INV6 synchronous.
+    """
+
+    def __init__(self) -> None:
+        self._by_owner: dict = {}  # owner_id -> { project_id -> record }
+
+    def create_project(self, payload: dict) -> dict:
+        record = dict(payload)
+        self._by_owner.setdefault(record.get("owner_id"), {})[record.get("id")] = record
+        return record
+
+    def list_projects(self, owner_id: str) -> list:
+        return list(self._by_owner.get(owner_id, {}).values())
+
+    def get_project(self, project_id: str, owner_id: str) -> dict:
+        owned = self._by_owner.get(owner_id, {})
+        if project_id not in owned:
+            raise _NotFoundError(f"project {project_id} not found for owner")
+        return owned[project_id]
+
+    def update_project(self, project_id: str, owner_id: str, payload: dict) -> dict:
+        owned = self._by_owner.get(owner_id, {})
+        if project_id not in owned:
+            raise _NotFoundError(f"project {project_id} not found for owner")
+        owned[project_id].update({k: v for k, v in payload.items() if v is not None})
+        return owned[project_id]
+
+    def delete_project(self, project_id: str, owner_id: str) -> None:
+        self._by_owner.get(owner_id, {}).pop(project_id, None)
+
+
 class _IdentityAuthAdapter:
-    """Adapter: exposes resolve_session() (CT3 shape) over real C2 session_checker (CT8 shape).
+    """Adapter: exposes resolve_session() (CT3 shape) over real C2 session_checker (CT3 provider surface).
     CT3 contract: resolve_session(request_context) -> identity dict or None.
-    Bridges CT8 check_session(cookie_value) to the CT3 interface C3's SessionResolver expects.
-    Composition wiring — not a component rewrite (B8).
+    Composition wiring — not a component rewrite (B8); calls the C2 module symbol so the auth seam stays patchable.
     """
 
     def resolve_session(self, request_context: dict) -> dict | None:
-        cookie_value = request_context.get("session_token")
-        return session_gate.check({"session": cookie_value} if cookie_value else {})
+        token = request_context.get("session_token")
+        return _session_checker.resolve_session(token)
 
 
 class _ProjectManagementAdapter:
     """Adapter: exposes handle_request(request) (CT9 shape) by composing real C3 internals.
-    Wires SessionResolver (CT3) + ProjectStore (CT2) for HTTP project CRUD requests.
+    Wires SessionResolver (CT3) + ProjectStore (CT2, over the in-process data store) for HTTP project CRUD.
     Composition wiring — not a component rewrite (B8).
     """
 
     def __init__(self, identity_auth_adapter: _IdentityAuthAdapter) -> None:
+        from freelancer_app.project_management.project_store import ProjectStore
         self._session_resolver = _session_resolver_mod.SessionResolver(identity_auth_adapter)
-        # Data Store bound via module reference — real C1 at runtime.
-        self._project_store = None  # bound lazily: import avoids circular at module load
+        self._project_store = ProjectStore(_PROJECT_DATA_STORE)  # real C1 project persistence
+
+    def _render(self, projects: list) -> str:
+        items = "".join(
+            f"<li>{p.get('name','')} — {p.get('currency','')} {p.get('billable_rate','')}</li>"
+            for p in projects
+        )
+        return f"<html><body><ul>{items}</ul></body></html>"
 
     def handle_request(self, request: dict) -> dict:
-        # Resolve session (CT3); UnauthorizedError propagates to dispatcher.
-        from freelancer_app.project_management.project_store import ProjectStore
-        from freelancer_app.data_store import identity_record_store as _ids
-        _store = ProjectStore(_ids)
-
-        session_ctx = {"session_token": request.get("session_token")}
-        identity = self._session_resolver.resolve(session_ctx)
-
-        method = request.get("method", "GET").upper()
+        # Resolve session (CT3); UnauthorizedError propagates to dispatcher (→302 sign-in).
+        identity = self._session_resolver.resolve({"session_token": request.get("session_token")})
         owner_id = identity["freelancer_id"]
 
-        if method == "POST" and request.get("path", "").rstrip("/") in ("/projects", "/projects/"):
-            body = request.get("body", {})
-            record = _store.create({"name": body.get("name"), "owner_id": owner_id,
-                                    "client": body.get("client_name"),
-                                    "currency": body.get("currency"),
-                                    "billable_rate": body.get("billable_rate")})
-            return {"status": 201, "project": record, "body": "", "content_type": "text/html"}
-        elif method == "GET" and request.get("path", "").rstrip("/") in ("/projects", "/projects/"):
-            projects = _store.list(owner_id)
-            body_html = "<html><body>" + "".join(
-                f"<li>{p.get('name','')}</li>" for p in projects
-            ) + "</body></html>"
-            return {"status": 200, "body": body_html, "content_type": "text/html", "projects": projects}
-        else:
-            return {"status": 200, "body": "<html><body></body></html>", "content_type": "text/html"}
+        method = request.get("method", "GET").upper()
+        parts = [p for p in request.get("path", "").split("/") if p]  # e.g. ["projects","gamma-design","edit"]
+        body = request.get("body", {})
+        store = self._project_store
+
+        if parts == ["projects"]:
+            if method == "POST":
+                name = body.get("name", "")
+                record = store.create({"id": _project_slug(name), "owner_id": owner_id, "name": name,
+                                       "client": body.get("client_name"), "currency": body.get("currency"),
+                                       "billable_rate": body.get("billable_rate")})
+                return {"status": 201, "project": record, "body": self._render([record]), "content_type": "text/html"}
+            projects = store.list(owner_id)
+            return {"status": 200, "body": self._render(projects), "content_type": "text/html", "projects": projects}
+        if len(parts) == 3 and parts[0] == "projects" and method == "POST" and parts[2] in ("edit", "delete"):
+            if parts[2] == "edit":
+                store.update(parts[1], owner_id, {"name": body.get("name"), "billable_rate": body.get("billable_rate")})
+            else:
+                store.delete(parts[1], owner_id)
+            return {"status": 302, "body": "", "content_type": "text/html", "location": "/projects"}
+        return {"status": 200, "body": "<html><body></body></html>", "content_type": "text/html"}
 
 
+_PROJECT_DATA_STORE = _InProcessProjectDataStore()  # module singleton — persists across requests (INV6 single-server)
 _identity_auth_adapter = _IdentityAuthAdapter()
 _project_mgmt_adapter = _ProjectManagementAdapter(_identity_auth_adapter)
 
 
-def _view_project_management(request):
+def _view_project_management(request, **kwargs):
     """
-    /projects/* — F4 CT9 dispatch: authenticated project CRUD.
-    Calls dispatch_project_request with real C3 adapter; honors CT3/CT2 failure modes.
+    /projects, /projects/<slug>/edit, /projects/<slug>/delete — F4 CT9 dispatch: authenticated project CRUD.
+    Parses the form-encoded body, calls dispatch_project_request with the real C3 adapter; honors CT3/CT2 failure modes.
     Additive route; does not touch F1 skeleton routes (H14).
     """
-    from freelancer_app.project_management.exceptions import UnauthorizedError, NotFoundError
     req_dict = {
         "method": request.method,
         "path": request.path,
         "session_token": request.COOKIES.get("session"),
-        "body": {},
+        "body": dict(request.POST.items()) if request.method == "POST" else {},
     }
-    if request.method == "POST":
-        import json as _json
-        try:
-            req_dict["body"] = _json.loads(request.body or b"{}")
-        except Exception:
-            req_dict["body"] = {}
-
     result = dispatch_project_request(
         request=req_dict,
         project_management=_project_mgmt_adapter,
         identity_auth=_identity_auth_adapter,
     )
-    status = result.get("status", 200)
     location = result.get("location")
     if location:
         return HttpResponseRedirect(location)
     return HttpResponse(result.get("body", ""), content_type=result.get("content_type", "text/html"),
-                        status=status)
+                        status=result.get("status", 200))
 
 
 # URL configuration — F1 skeleton (frozen) + F4 slice S4 additive routes.
@@ -288,6 +328,8 @@ urlpatterns = [
     # S4 additive routes — F4 CT9 dispatch (R4, R6, R9, R10, AC6).
     path("projects", _view_project_management, name="projects_list"),
     path("projects/", _view_project_management, name="projects_list_slash"),
+    path("projects/<slug:slug>/edit", _view_project_management, name="projects_edit"),
+    path("projects/<slug:slug>/delete", _view_project_management, name="projects_delete"),
 ]
 
 # Register URL patterns on the ROOT_URLCONF module (this module).
