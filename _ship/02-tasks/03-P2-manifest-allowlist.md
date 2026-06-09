@@ -60,3 +60,27 @@ semver = `git describe` + content-hash(`prompts/`) + lock-hash. Lock-hash = hash
 
 ## Deps
 Needs P0 (lists re-skinned files) + ideally P1 (lists adapter files). Parallel with P1. Feeds P3 (installer reads manifest) + P4 (pack walks manifest).
+
+---
+
+## DONE — 2026-06-09
+
+**Built:**
+- `tools/pack/manifest.schema.md` — schema doc + sample + field law + version-derive spec.
+- `tools/pack/gen-manifest.mjs` — zero-dep (node:fs/path/crypto/child_process) ALLOWLIST-driven generator. RULES array mirrors SHIP table; enumerates includes, never walk-all-then-blacklist. Throws on missing src + dup dest.
+- `manifest.json` (repo root) — generated. 60 files.
+
+**Schema (P2.1):** `{ version, files:[{src,path,sha256,harness}], harness-matrix:{claude[],kiro[]} }`. `src≠path` enables path-map. `harness-matrix[h]` = paths where `harness ∈ {all,h}`.
+
+**Version derive (P2.3):** `<git-describe>+p<prompts8>.l<locks8>` = `3415a3a+p03b9a94d.l96133636`. git `describe --tags --always` (no `--dirty` → untracked manifest.json no perturb). prompts8 = sha256 over shipped `prompts/*` (path,sha) = deliverable identity. locks8 = sha256 over root frozen locks (`.aprd .adr .hld .roadmap` `*.lock`) = audit trail.
+
+**File tally:** 39 roles + `_step-runner` + `_economy-audit` + `_orchestrator.generic→_orchestrator.md` + `code-canon/typescript.md` + 3 economy-lint + fixtures reference + economy-audit README + 2 docs + `canon/CLAUDE.generic.md` + 5 adapters/claude (claude) + 4 adapters/kiro (kiro) = 60. harness: all=51, claude=5, kiro=4. matrix: claude=56, kiro=55.
+
+**Done-bar — all PASS:**
+- Generator emits manifest listing ONLY allowlist SHIP files. ✓
+- grep EXCLUDE terms (`\.aprd|\.adr/|\.hld|\.roadmap|_fixtures|_test_bench|agentic-delivery-pipeline\.md|self-host|selfhost|/CLAUDE\.md"`) = EMPTY. ✓
+- sha256 reproducible: two clean-tree runs byte-identical (`960d2848…`). ✓
+- Path-map present: `_orchestrator.generic.md`→`prompts/_orchestrator.md`; `CLAUDE.generic.md`→`canon/CLAUDE.generic.md`. ✓
+- All 60 src exist; 0 sha mismatch; files sorted by path (deterministic). ✓
+
+**Regen:** `node tools/pack/gen-manifest.mjs` (optional arg = repo root, default `.`).
