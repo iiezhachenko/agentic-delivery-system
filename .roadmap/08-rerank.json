@@ -38,7 +38,7 @@
       "value": "high",
       "retires_risk": null,
       "unit": "prompts/04-build/BUILD-PLAN.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/build-plan.json",
+      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/build-plan.json",
       "rationale": "Phase-4 slice-build (D11); blocked on the Phase-3 increment chain finishing.",
       "coarse_depends_on": [
         "P-RECONCILE-CRITIQUE-INC"
