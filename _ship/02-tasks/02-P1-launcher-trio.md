@@ -64,3 +64,54 @@ ADDITIVE ONLY. New `adapters/` tree. NEVER edit/delete existing self-host wiring
 
 ## Deps
 Needs P0 (refs generic canon + generic orchestrator). Parallel with P2. Feeds P3 (installer lays these) + P5 (dry-run boots them).
+
+---
+
+## STATUS — DONE
+
+Launcher trio authored, additive only. Self-host wiring UNMODIFIED (`git status` = only new `adapters/`).
+
+### Files (NEW `adapters/`)
+```
+adapters/
+├── claude/
+│   ├── agents/adp-orchestrator.md   # wraps .claude/adp/prompts/_orchestrator.md; spawns adp-step-runner; $CLAUDE_PROJECT_DIR/.claude/adp/... refs
+│   ├── agents/adp-step-runner.md    # clean-room executor, fresh context/step, Sonnet/High
+│   ├── skills/deliver/SKILL.md      # /deliver entry; name: deliver; invokes adp-orchestrator
+│   ├── rules/00-adp-canon.md        # POINTER → canon/CLAUDE.generic.md (installer inlines; auto-loaded as memory)
+│   └── settings.json                # allow Read/Write/Edit/Agent; acceptEdits; Bash NOT listed → shell still asks
+└── kiro/
+    ├── agents/delivery.json         # generic orchestrator; prompt file://.kiro/adp/prompts/_orchestrator.md; steering-only resources
+    ├── agents/step.json             # generic step runner; prompt file://.kiro/adp/prompts/_step-runner.md
+    ├── steering/00-exclusive.md     # run pipeline exclusively, Kiro spec flow NOT used
+    └── steering/10-canon.md         # POINTER → canon/CLAUDE.generic.md (installer inlines; Kiro auto-loads steering)
+```
+
+### Boot flow
+```mermaid
+flowchart TD
+  subgraph Claude
+    A["/deliver «request»"] --> B["skill deliver/SKILL.md"]
+    B --> C["agent adp-orchestrator"]
+    C -->|reads verbatim| D[".claude/adp/prompts/_orchestrator.md"]
+    C -->|spawns per step| E["agent adp-step-runner"]
+  end
+  subgraph Kiro
+    F["kiro-cli --agent delivery"] --> G["agents/delivery.json"]
+    G -->|prompt| H[".kiro/adp/prompts/_orchestrator.md"]
+    G -->|delegates step| I["agents/step.json → _step-runner.md"]
+  end
+  D & H -->|same engine, all 5 phases LIVE| J["understand→plan→decide→design→build · gates A/B/C"]
+```
+
+### Acceptance
+- [x] All `adapters/{claude,kiro}` files authored.
+- [x] JSON valid (`delivery.json`, `step.json` parse).
+- [x] Prose lint clean (6/6 files `verdict: clean`).
+- [x] Docs refs resolve: `deliver/SKILL.md` + `delivery.json` exact; orchestrator agent = `adp-orchestrator.md` (`adp-` prefix per installed-shape rule, supersedes doc's pre-prefix `orchestrator.md`).
+- [x] Self-host UNTOUCHED — `git status` only new `adapters/`; `.claude/skills/self-host/`, `.claude/agents/step-runner.md`, `.kiro/agents/{selfhost,step}.json`, `.kiro/steering/*.md` unchanged.
+- [~] Scratch-repo `/deliver` + `kiro-cli --agent delivery` boot = structural-ready (paths target installed `.claude/adp` / `.kiro/adp` locations); live boot = P3 installer + P5 dry-run.
+
+### Notes
+- DRY: canon NOT copied. `rules/00-adp-canon.md` + `steering/10-canon.md` = pointers to single home `canon/CLAUDE.generic.md`; installer (P3/P4) inlines content at install time (task permits "reference P0.1 as source").
+- Engine unchanged: adapters wire harness params + paths only; never edit loop body.

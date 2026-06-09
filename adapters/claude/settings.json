@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": ["Read", "Write", "Edit", "Agent"],
+    "defaultMode": "acceptEdits"
+  },
+  "_note": "Read/Write/Edit = artifact management without prompt; Agent = orchestrator spawns role agents (adp-step-runner). defaultMode acceptEdits auto-approves file writes; shell (Bash) NOT allow-listed, so operator still asked before any shell command."
+}

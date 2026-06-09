@@ -1,0 +1,10 @@
+{
+  "name": "delivery",
+  "description": "Runs the delivery pipeline exclusively: aPRD → roadmap → ADR → HLD → build",
+  "prompt": "file://.kiro/adp/prompts/_orchestrator.md",
+  "resources": ["file://.kiro/steering/**/*.md"],
+  "tools": ["read", "write"],
+  "allowedTools": ["read"],
+  "model": "claude-sonnet-4",
+  "_scope_note": "Generic orchestrator (installed copy of _orchestrator.generic.md). Lean context: resources load steering only; role prompts lazy-loaded from .kiro/adp/prompts/<NN-phase>/<ROLE>.md per step. Each step delegates to fresh `step` subagent. WORKSPACE_ROOT + DELIVERABLE_TARGET = launcher params (operator repo root + chosen canon profile under .kiro/adp/code-canon/), never pinned. All 5 phases run LIVE."
+}
