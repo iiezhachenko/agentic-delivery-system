@@ -1,11 +1,11 @@
 {
   "artifact": ".adr/log/",
-  "version": "v4",
-  "content_sha256": "234304b61374c850ced89f2be0a8e89430971bd77dc1c3e47edce1148a2e27a6",
+  "version": "v5",
+  "content_sha256": "509c2bb4cfa59a72a931047ca049d9e185a5f07ca8b980f6c76aa13e4d466bbb",
   "signer": "self-host:agentic-delivery-pipeline",
-  "signed_at": "2026-06-08T20:07:07Z",
+  "signed_at": "2026-06-09T05:35:41Z",
   "status": "frozen",
-  "amendment": "v4 adds ADR-0022 (D22) — deterministic helper tools, operator-approved 2026-06-08 (review gate = operator per spec §5.8 senior/human reviewer; not an agent CRITIQUE run). Additive: ADR-0001..0021 bodies unchanged; set remains coherent. content_sha256 = sha256 of .adr/log/*.md concatenated in sorted-name order (reproduces v3 over the prior 21).",
+  "amendment": "v5 (editorial, operator-approved 2026-06-09) — scrubbed build-initiative provenance labels from ADR-0022 body (two inline references to the now-finished authoring scaffolding); no decision content changed, set remains coherent, all 22 bodies otherwise unchanged. Re-signed content_sha256 over the edited log set. v4 added ADR-0022 (D22) — deterministic helper tools, operator-approved 2026-06-08 (review gate = operator per spec §5.8 senior/human reviewer). content_sha256 = sha256 of .adr/log/*.md concatenated in sorted-name order.",
   "gate": {
     "reconcile_verdict": "coherent",
     "critique_verdict": "clean"

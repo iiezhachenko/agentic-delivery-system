@@ -4,7 +4,7 @@
 >
 > **Register note:** spec contract overrides — caveman prose inside this spec. Authored prompts carry canonical caveman block.
 >
-> **Change log:** 2026-06-09 — T10 economy cut (caveman register + AB8): killed banned hedge/filler words. Substance invariant. New version = the change request (P8).
+> **Change log:** 2026-06-09 — economy cut (caveman register + AB8): killed banned hedge/filler words. Substance invariant. New version = the change request (P8).
 
 ---
 

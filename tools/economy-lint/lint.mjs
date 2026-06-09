@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Layer-1 economy LINT (deterministic, NO LLM). Oracle = AB1-AB9 (.hld/skeleton/coding-canon.md).
 // Reads a prose artifact, emits lint.json. Catches structural ~70% of bloat before LLM tokens (P5).
-// Semantic ~30% (same fact reworded, no-objective, two-way wording) = Layer-2 AUDIT (T05).
+// Semantic ~30% (same fact reworded, no-objective, two-way wording) = Layer-2 AUDIT (economy-audit).
 // Usage: node lint.mjs <target.md> [--type prompt|adr|aprd|hld|roadmap] [--out path]
 import fs from "node:fs";
 import path from "node:path";

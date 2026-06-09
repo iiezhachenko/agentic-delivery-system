@@ -2,13 +2,12 @@
 
 > Deterministic, NO LLM. Catches structural ~70% of economy violations cheaply (P5) before the
 > clean-room sim spends tokens. Semantic ~30% (same fact reworded, no-objective, two-way wording
-> beyond wordlist) = Layer-2 AUDIT (T05). Oracle = AB1–AB9 (`.hld/skeleton/coding-canon.md`).
+> beyond wordlist) = Layer-2 AUDIT (economy-audit). Oracle = AB1–AB9 (`.hld/skeleton/coding-canon.md`).
 >
-> **Permanent home** (survives `_authoring-improvements/` deletion). FIRST instance of the
+> **Permanent home.** FIRST instance of the
 > deterministic-helper-tool class sanctioned by **ADR-0022 / D22** (spine may shell out to
 > deterministic, NO-LLM helpers) — ratified into `.adr/log/0022-deterministic-helper-tools.md`
-> (Accepted), `adr.lock` v4. Authored under T04; orchestrator/code-canon wiring + registration by T06.
-> Not git-committed yet (T04 do-not-commit); the `.adr/` freeze sits in the working tree.
+> (Accepted), `adr.lock` v4. Orchestrator/code-canon wiring + registration handled at gate wiring.
 
 ## Run
 
@@ -21,7 +20,7 @@ node selftest.mjs        # both-directions discrimination + determinism
 
 Exit 0 = clean, 1 = blocked, 2 = usage. Type inferred from path (`/prompts/`→prompt, `/.adr/`→adr…); `--type` overrides.
 
-## `lint.json` contract (T06 consumes)
+## `lint.json` contract (gate consumes)
 
 ```json
 {
@@ -60,14 +59,14 @@ Linter parameterized by `{artifact-type, thresholds}` (`PROFILES` in `lint.mjs`)
 inline. Other artifact thresholds belong in the **stack profile**, not hard-coded. C2/C3/C5/C6 are
 prompt-frontmatter-specific → gated behind type so a plain ADR body skips them while C1/C4/C7/C8/C9 still apply.
 
-## What lint CANNOT do (→ Layer-2 AUDIT, T05)
+## What lint CANNOT do (→ Layer-2 AUDIT)
 
 Semantic duplication (same fact reworded — the ×12), no-objective prose, two-way wording beyond the
 wordlist, legit-vs-bloat judgment on a long-but-dense prompt (C1 is a signal, not a verdict). A single
 line duplicated exactly 2× sits below C7's spec thresholds (≥3) — multi-line verbatim blocks at 2×
 ARE caught (contiguous-run rule). Lint short-circuits the obvious; AUDIT spends tokens on the residue.
 
-## Wiring (T06, not done here)
+## Wiring
 
 `_orchestrator.md` STEP 4 step-0 (before runner spawn): lint scratch → `lint.json`. blocked → route to
 re-author (DELETE/REWRITE, never ADD), skip the expensive sim. clean → proceed to AUDIT then clean-room.

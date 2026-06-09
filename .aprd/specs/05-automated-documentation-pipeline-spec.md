@@ -2,9 +2,9 @@
 
 > **Status:** design sketch. Built AFTER greenfield delivery pipeline (Phases 0–4) done, per roadmap build order (`.roadmap/`; status derived from disk, not tracker). Authored prompt-by-prompt same way (one role = one prompt, fresh-session sim, artifacts chain on disk, golden fixtures).
 >
-> **Register note (judgment call:):** spec body + pipeline artifacts = caveman, absolute (T01). The produced doc-SET is the external-human-consumer deliverable T01 carves out — its reader prose owned by a restyle pass; ECONOMY still forbids repeating any fact.
+> **Register note (judgment call:):** spec body + pipeline artifacts = caveman, absolute (caveman canon, CLAUDE.md Register). The produced doc-SET is the external-human-consumer deliverable that canon carves out — its reader prose owned by a restyle pass; ECONOMY still forbids repeating any fact.
 >
-> **Change log:** 2026-06-09 — T10 economy cut: register note aligned to T01 (caveman absolute; clean-prose exemption removed, doc-set deliverable marked judgment call), caveman reminder stated once, banned filler killed. New version = the change request (P8).
+> **Change log:** 2026-06-09 — economy cut: register note aligned to caveman canon (absolute; clean-prose exemption removed, doc-set deliverable marked judgment call), caveman reminder stated once, banned filler killed. New version = the change request (P8).
 
 ---
 

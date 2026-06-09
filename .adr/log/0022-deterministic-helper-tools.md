@@ -19,7 +19,7 @@ superseded_by: null
   cheapest + only sound as deterministic code: same input MUST yield the same verdict (an agent running regex
   is NOT deterministic), and they belong BEFORE the expensive LLM/clean-room pass (P5 cheapest-source-first).
   **Decision (tool-agnostic):** the orchestrator and any phase gate MAY invoke a **deterministic helper tool**
-  via Bash. This establishes a reusable component CLASS, not a one-off — the economy LINT (T04) is merely the
+  via Bash. This establishes a reusable component CLASS, not a one-off — the economy LINT (`tools/economy-lint/`) is merely the
   FIRST instance. Every such tool MUST satisfy one contract:
   1. **Deterministic** — same input → byte-identical output. No network, no clock, no randomness.
   2. **Disk-in / disk-out** — reads target artifact(s), writes a schema-valid JSON verdict to a declared path;
@@ -36,7 +36,7 @@ superseded_by: null
   6. **Self-proving (both-directions)** — ships a self-test proving it discriminates (known-good → pass,
      planted-defect → fail) before it is trusted, same mandate as the behavior verifier.
   **Home:** `tools/<tool-name>/` (committed). Deterministic helpers a future stack/project needs drop beside it.
-  **First instance:** economy LINT — `tools/economy-lint/` (T04): Layer-1 structural economy checks (C1–C9 over
+  **First instance:** economy LINT — `tools/economy-lint/`: Layer-1 structural economy checks (C1–C9 over
   AB1–AB9) → `lint.json`, ahead of the Layer-2 clean-room runner. **Future instances** the class anticipates
   (illustrative, not exhaustive): JSON-schema validators, ID-thread (`R→AC→…→commit`) checkers, build-DAG
   cycle detectors, formatters. Each: add under `tools/`, register in the profile, satisfy the contract above —

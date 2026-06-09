@@ -10,7 +10,7 @@
 | **Predecessors** | Phase 0 — `00-automated-aprd-pipeline-spec.md` (WHAT) · Phase 1 — `01-automated-roadmap-pipeline-spec.md` (slices) · Phase 2 — `02-automated-adr-pipeline-spec.md` (WHY-this-HOW) |
 
 **Change log**
-- **v0.3** (2026-06-09) — T10 economy cut (caveman register + AB8 + dedup): killed banned hedge/filler words, H14 skeleton-ripple rationale stated once (§5.10 home; §5.6 freeze cites it). Substance invariant. New version = the change request (P8); re-lock at next freeze.
+- **v0.3** (2026-06-09) — economy cut (caveman register + AB8 + dedup): killed banned hedge/filler words, H14 skeleton-ripple rationale stated once (§5.10 home; §5.6 freeze cites it). Substance invariant. New version = the change request (P8); re-lock at next freeze.
 
 ---
 

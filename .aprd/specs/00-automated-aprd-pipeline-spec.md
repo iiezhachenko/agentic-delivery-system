@@ -9,7 +9,7 @@
 | **Scope** | Intake-to-delivery pipeline. Turns any client request into verified software |
 
 **Change log**
-- **v0.5** (2026-06-09) — T10 economy cut (caveman register + AB7/AB8): killed banned hedge/filler words, trimmed decorative narration (§1 vague-input pep-talk). Substance invariant; only fluff died. New version = the change request (P8); re-lock at next freeze.
+- **v0.5** (2026-06-09) — economy cut (caveman register + AB7/AB8): killed banned hedge/filler words, trimmed decorative narration (§1 vague-input pep-talk). Substance invariant; only fluff died. New version = the change request (P8); re-lock at next freeze.
 - **v0.4** (2026-06-08) — P13 (artifact = downstream context, author to economy) + §2.1 economy invariant `A-ECON`/`INV-ECON` added. New version = the change request (P8); re-lock `aprd.lock` v3→v4 at next freeze; downstream re-trigger: coding-canon CITES P13, foundation-cut injects `INV-ECON`, MAP-NFR buckets economy NFR, VERIFY-OUTPUT NFR check measures it.
 
 ---

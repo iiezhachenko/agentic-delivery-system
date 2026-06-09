@@ -9,7 +9,7 @@
 > judges MEANING — semantic dup lint's n-gram misses, no-objective, ambiguity beyond the wordlist,
 > over-compression (`starvation`). Runs ONLY on lint-clean residue (P5 cheapest-first). Oracle =
 > AB1–AB9 (`.hld/skeleton/coding-canon.md`) + spec §2/§2.1 (`P13`/`A-ECON`, substance floor).
-> Permanent home (survives `_authoring-improvements/` deletion). Not git-committed (T05 do-not-commit).
+> Permanent home.
 
 ## Run (clean-room, mirror operator paste)
 
@@ -18,7 +18,7 @@ sidecar each — clean, the residue precondition). Point a fresh session at `pro
 its `<...>` placeholders to a fixture + its `.lint.json` + an output path. AUDIT writes `economy-audit.json`
 (an output, not kept in the fixture dir). No code — prompt-driven (contrast lint's `selftest.mjs`).
 
-## `economy-audit.json` contract (T06 consumes)
+## `economy-audit.json` contract (gate consumes)
 
 ```json
 {
@@ -31,7 +31,7 @@ its `<...>` placeholders to a fixture + its `.lint.json` + an output path. AUDIT
 ```
 
 - **`fix` ALWAYS `DELETE`/`REWRITE` — never `ADD`** (AB9 keystone, enforced in schema). Loop offers no
-  patch path; defect routes to re-author from the DRY skeleton (T06 enforces).
+  patch path; defect routes to re-author from the DRY skeleton (gate enforces).
 - **Every issue routes to the PRODUCING stage** (default `RE-AUTHOR`; `canon` only when a wrong AB is root).
 
 ## Six categories (oracle = AB1–AB9 + P13/§2.1)
@@ -58,7 +58,7 @@ All three fixtures lint-CLEAN first (residue precondition — Layer-1 misses sem
 Bar (mirror behavior verifier): if AUDIT can't tell tight from bloated OR misses the omission, it's
 broken — fix before trusting. Held across runs. Issues NEVER carry `fix: ADD` (schema-checked).
 
-## Wiring (T06, not done here)
+## Wiring
 
 `_orchestrator.md` STEP-4 verify: lint scratch → blocked? route re-author, skip sim. clean → AUDIT →
-blocked? route re-author (DELETE/REWRITE), skip sim. clean → clean-room sim. T07 = per-project inherit.
+blocked? route re-author (DELETE/REWRITE), skip sim. clean → clean-room sim. Per-project profile inherits.

@@ -10,8 +10,8 @@
 | **Predecessor** | Phase 0 — `00-automated-aprd-pipeline-spec.md` (produces frozen aPRD set this phase slices) |
 
 **Change log**
-- **v0.3** (2026-06-09) — T10 economy cut (caveman register + AB8): killed banned hedge/filler words. Substance invariant. New version = the change request (P8); re-lock at next freeze.
-- **v0.2** (2026-06-08) — §5.7 + §6.1: `cross_slice_invariants` gains TWO sources — aPRD-read (unchanged) + **engine-standing** `INV-ECON` (spec-00 §2.1, grounded P13/`A-ECON`) cut by DEFAULT into EVERY project, cross-cutting like security, stack-independent. Makes economy inherited per-project automatically (consumes T02 P13/INV). New version = the change request (P8). Downstream: `FOUNDATION-CUT` emits `INV-ECON[0]` by default.
+- **v0.3** (2026-06-09) — economy cut (caveman register + AB8): killed banned hedge/filler words. Substance invariant. New version = the change request (P8); re-lock at next freeze.
+- **v0.2** (2026-06-08) — §5.7 + §6.1: `cross_slice_invariants` gains TWO sources — aPRD-read (unchanged) + **engine-standing** `INV-ECON` (spec-00 §2.1, grounded P13/`A-ECON`) cut by DEFAULT into EVERY project, cross-cutting like security, stack-independent. Makes economy inherited per-project automatically (consumes P13/INV economy canon). New version = the change request (P8). Downstream: `FOUNDATION-CUT` emits `INV-ECON[0]` by default.
 
 ---
 

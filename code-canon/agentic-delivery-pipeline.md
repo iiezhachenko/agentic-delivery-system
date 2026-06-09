@@ -48,7 +48,7 @@ verify mechanism      clean-room runner simulation (a fresh Sonnet runner gets t
 Economy is engine-universal (spec-00 `P13` + `A-ECON`/`INV-ECON`, §2.1), NOT owned here. Every stack profile (this one, `terraform.md`, `typescript.md`, …) MUST:
 - **(a) CITE `P13` + `A-ECON`** — never re-state the rule (meta-AB1: economy rule has ONE home = the spec; profile that restates it bloats).
 - **(b) fill the stack-local "one home" definition** — what unit a fact lives in ONCE for THIS stack.
-- **(c) supply per-artifact-type lint thresholds** — T04 `lint.mjs` reads `{artifact-type, thresholds}`.
+- **(c) supply per-artifact-type lint thresholds** — `lint.mjs` reads `{artifact-type, thresholds}`.
 
 Profile omitting any of (a)/(b)/(c) = incomplete. Swap the profile → economy inherited FREE, no spine edit (invariant #1). Swap needing a spine change to keep economy = abstraction leaked → fix spine once (P3), not profile.
 

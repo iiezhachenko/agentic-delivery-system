@@ -11,7 +11,7 @@
 | **Terminal** | Phase 4 **terminal phase** — system delivers verified software to STAGING (demo-accepted). Production release / rollback / handoff **out of scope** (§1.2) |
 
 **Change log**
-- **v0.2** (2026-06-09) — T10 economy cut (caveman register + AB8): killed banned hedge/filler words. Substance invariant. New version = the change request (P8); re-lock at next freeze.
+- **v0.2** (2026-06-09) — economy cut (caveman register + AB8): killed banned hedge/filler words. Substance invariant. New version = the change request (P8); re-lock at next freeze.
 
 ---
 
