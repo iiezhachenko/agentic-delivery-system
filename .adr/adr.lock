@@ -1,11 +1,11 @@
 {
   "artifact": ".adr/log/",
-  "version": "v5",
-  "content_sha256": "509c2bb4cfa59a72a931047ca049d9e185a5f07ca8b980f6c76aa13e4d466bbb",
+  "version": "v6",
+  "content_sha256": "db94b71b02eea7abf482b1d68d3cb42588bbb5711335eac4379c426d27755b9a",
   "signer": "self-host:agentic-delivery-pipeline",
-  "signed_at": "2026-06-09T05:35:41Z",
+  "signed_at": "2026-06-09T06:00:00Z",
   "status": "frozen",
-  "amendment": "v5 (editorial, operator-approved 2026-06-09) — scrubbed build-initiative provenance labels from ADR-0022 body (two inline references to the now-finished authoring scaffolding); no decision content changed, set remains coherent, all 22 bodies otherwise unchanged. Re-signed content_sha256 over the edited log set. v4 added ADR-0022 (D22) — deterministic helper tools, operator-approved 2026-06-08 (review gate = operator per spec §5.8 senior/human reviewer). content_sha256 = sha256 of .adr/log/*.md concatenated in sorted-name order.",
+  "amendment": "v6 added ADR-0023 (D23) — stack ADR `stack = typescript`, the M12 Part-2 second canon profile / agnosticism proof (sibling of D21, NOT active; this repo's active stack stays ADR-0021). Additive to v5 (D1–D22 bodies unchanged); set coherent. Re-signed content_sha256 over the 23-body log set. v5 (editorial, operator-approved 2026-06-09) — scrubbed build-initiative provenance labels from ADR-0022 body (two inline references to the now-finished authoring scaffolding); no decision content changed, set remains coherent, all 22 bodies otherwise unchanged. v4 added ADR-0022 (D22) — deterministic helper tools, operator-approved 2026-06-08 (review gate = operator per spec §5.8 senior/human reviewer). content_sha256 = sha256 of .adr/log/*.md concatenated in sorted-name order.",
   "gate": {
     "reconcile_verdict": "coherent",
     "critique_verdict": "clean"
@@ -299,7 +299,21 @@
       "superseded_by": null,
       "draft_ref": "drafts/0022-deterministic-helper-tools.draft.md",
       "log_ref": "log/0022-deterministic-helper-tools.md"
+    },
+    {
+      "id": "ADR-0023",
+      "dn": "D23",
+      "title": "Stack ADR: `stack = typescript` (second canon profile — agnosticism proof)",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "reasoned",
+      "supersedes": null,
+      "superseded_by": null,
+      "draft_ref": "drafts/0023-stack-adr-stack-typescript-second-profile-agnosticism-proof.draft.md",
+      "log_ref": "log/0023-stack-adr-stack-typescript-second-profile-agnosticism-proof.md",
+      "stack": "typescript"
     }
   ],
-  "adr_count": 22
+  "adr_count": 23
 }

@@ -6,7 +6,7 @@
     "reconcile_verdict": "coherent",
     "critique_verdict": "clean"
   },
-  "note": "Canonical decision index (D1–D22 → ADR-0001..0022). D1–D4 are the foundational conventions; D21 is the stack ADR; D22 (operator-approved amendment) sanctions deterministic helper tools the spine may shell out to. The index lives HERE as JSON, never as a markdown header (canonical fixture layout).",
+  "note": "Canonical decision index (D1–D23 → ADR-0001..0023). D1–D4 are the foundational conventions; D21 is the stack ADR (stack = agentic-delivery-pipeline, this repo's active profile); D22 (operator-approved amendment) sanctions deterministic helper tools the spine may shell out to; D23 adds the second stack ADR (stack = typescript) — the M12 Part-2 agnosticism proof, a sibling profile, not the active one. The index lives HERE as JSON, never as a markdown header (canonical fixture layout).",
   "adrs": [
     {
       "id": "ADR-0001",
@@ -294,10 +294,24 @@
       "superseded_by": null,
       "draft_ref": "drafts/0022-deterministic-helper-tools.draft.md",
       "log_ref": "log/0022-deterministic-helper-tools.md"
+    },
+    {
+      "id": "ADR-0023",
+      "dn": "D23",
+      "title": "Stack ADR: `stack = typescript` (second canon profile — agnosticism proof)",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "reasoned",
+      "supersedes": null,
+      "superseded_by": null,
+      "stack": "typescript",
+      "draft_ref": "drafts/0023-stack-adr-stack-typescript-second-profile-agnosticism-proof.draft.md",
+      "log_ref": "log/0023-stack-adr-stack-typescript-second-profile-agnosticism-proof.md"
     }
   ],
   "adr_counts": {
-    "rendered": 22,
+    "rendered": 23,
     "degenerate_forced": 0,
     "undecided_skipped": 0
   }
