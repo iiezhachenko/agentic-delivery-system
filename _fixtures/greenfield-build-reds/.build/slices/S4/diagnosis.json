@@ -1,0 +1,64 @@
+{
+  "blocked_record_ref": ".build/slices/S4/integration-record.json",
+  "slice_oracle_ref": ".build/slices/S4/oracle/oracle.json",
+  "slice_contracts_ref": ".hld/slices/S4/contracts.json",
+  "slice_components_ref": ".hld/slices/S4/components.json",
+  "slice_build_plan_ref": ".build/slices/S4/build-plan.json",
+  "skeleton_contracts_ref": ".hld/skeleton/contracts.json",
+  "skeleton_integration_ref": ".build/skeleton/integration-record.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "greenfield",
+  "mode": "slice-build",
+  "slice_id": "S4",
+  "red_under_diagnosis": {
+    "from_role": "INTEGRATE",
+    "target": "F4",
+    "failing_tests": ["test_f4_happy_path_project_create_and_list"],
+    "failure_signature": "test_f4_happy_path_project_create_and_list: flow cannot compose — CT9 (C6->C3) declares kind:async_event requiring Web Ingress to enqueue the project page request and not block, but no broker is wired and an asynchronous dispatch cannot return server-rendered HTML inside the synchronous request/response cycle (ADR-0004 MPA/SSR, INV6).",
+    "provisional_hint": { "classification": "my-code-wiring", "route": "self-heal → INTEGRATE" }
+  },
+  "flaky_check": {
+    "deterministic": true,
+    "evidence": "Failure asserts a structural composition impossibility: CT9.kind=async_event requires a broker that cannot exist under INV6 (single-server synchronous, no background job queues — A13/ADR-0001) and cannot return rendered HTML in the synchronous MPA request cycle (ADR-0004). Three identical signatures, zero variance across attempts. Deterministic.",
+    "action": null
+  },
+  "stall_analysis": {
+    "basis": "attempts-trajectory",
+    "same_signature_attempts": 3,
+    "net_new_passes_trend": "flat",
+    "progressing": false,
+    "stall_confirmed": true
+  },
+  "reflection_pass": {
+    "frozen_inputs_reread": [
+      ".hld/slices/S4/contracts.json#CT9",
+      ".build/slices/S4/oracle/flow/test_F4.py",
+      ".build/slices/S4/oracle/conftest.py",
+      "aprd.frozen.md#A13",
+      ".adr/log/0001-adopt-single-deployment-monolith-flat-structure.md#INV6",
+      ".adr/log/0004-adopt-server-rendered-multi-page-application-mpa-ssr-as-api-style.md#ADR-0004"
+    ],
+    "finding": "CT9 declares kind:async_event and shape 'Web Ingress publishes the project page request onto a message queue and does not block; rendered HTML delivered out of band.' This contradicts INV6 + A13 (single-server synchronous request cycle, no background job queues) and ADR-0004 (MPA/SSR — the server renders and returns the HTML inside the request/response). The frozen slice oracle resolves CT9 as a synchronous dispatch (test_F4.py calls dispatch_project_request and asserts a rendered response in-cycle; conftest mocks no broker). CT9 still lists honors_inv:[INV6] — inconsistent with kind:async_event. Wiring a broker would violate INV6 and break the frozen slice oracle. CT9.kind=async_event is the defect — unbuildable as frozen. The implementation already dispatches synchronously; this is the wrong contract, not a wiring gap (the provisional my-code-wiring hint is a mis-classification).",
+    "misread": false
+  },
+  "skeleton_fidelity": {
+    "breached": false,
+    "skeleton_artifacts_checked": ["contracts.json#CT1", "contracts.json#CT8", ".build/skeleton/oracle/flow/test_F1.py", ".build/skeleton/integration-record.json"],
+    "finding": "The defect is in the SLICE contract CT9 (introduced this slice, role:introduced-seam). The frozen skeleton — CT1/CT8, the F1 flow test, and the skeleton composition root (wsgi.py) — needs no change to resolve it; the slice flow F4 inherits the skeleton baseline by reference and does not reshape it. Slice-local Phase-3 re-derive; no skeleton ripple (H14). Not a skeleton-fidelity breach."
+  },
+  "verdict": "escape",
+  "classification": "contract",
+  "routable_diagnosis": {
+    "classification": "contract",
+    "target_phase": "Phase 3",
+    "frozen_ref": ".hld/slices/S4/contracts.json#CT9",
+    "change_request": "Change slice contract CT9.kind from 'async_event' to 'sync_api'. Restore CT9.shape to a synchronous in-process dispatch: Web Ingress routes the authenticated HTTP request in-process to Project Management, which returns a server-rendered HTML response within the request/response cycle (project list/detail/create/edit/delete). Honors INV6 (synchronous, no broker) + ADR-0004 (MPA/SSR). Rationale: INV6 + A13 prohibit background job queues; ADR-0004 mandates server-rendered HTML returned in-cycle; the frozen slice oracle already materializes CT9 as a synchronous dispatch; the implementation already dispatches synchronously. CT9 is a slice-introduced seam — re-derive at the S4 HLD increment; the frozen skeleton is untouched (no ripple). No other CT9 field requires change.",
+    "routable": true
+  },
+  "self_heal": null,
+  "quarantine": null,
+  "diagnosis_counts": { "frozen_inputs_reread": 6, "gates_to_verdict": 4 }
+}

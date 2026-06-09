@@ -1,0 +1,52 @@
+{
+  "slice_build_record_ref": ".build/slices/S4/build-record.json",
+  "slice_flows_ref": ".hld/slices/S4/flows.json",
+  "slice_oracle_lock_ref": ".build/slices/S4/oracle/oracle.lock",
+  "slice_oracle_ref": ".build/slices/S4/oracle/oracle.json",
+  "slice_contracts_ref": ".hld/slices/S4/contracts.json",
+  "slice_components_ref": ".hld/slices/S4/components.json",
+  "slice_build_plan_ref": ".build/slices/S4/build-plan.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "greenfield",
+  "mode": "slice-build",
+  "slice_id": "S4",
+  "slice_name": "Create and manage client projects with currency and billable rate",
+  "flow": "F4",
+  "slice_path": ["C6", "C3", "C2", "C1"],
+  "prior_built_components": ["C1", "C2", "C6"],
+  "inherited_composition": {
+    "skeleton_integration_ref": ".build/skeleton/integration-record.json",
+    "skeleton_flow": "F1",
+    "wsgi_entry": "freelancer_app.wsgi.application",
+    "frozen_verified": true
+  },
+  "status": "blocked",
+  "escape": {
+    "failure_signature": "test_f4_happy_path_project_create_and_list: flow cannot compose — CT9 (C6->C3) declares kind:async_event requiring Web Ingress to enqueue the project page request and not block, but no broker is wired and an asynchronous dispatch cannot return server-rendered HTML inside the synchronous request/response cycle (ADR-0004 MPA/SSR, INV6).",
+    "classification": "my-code-wiring",
+    "diagnosis": "Wiring incomplete: stand up a message queue + async consumer so Web Ingress can publish the page-request event to Project Management.",
+    "route": "self-heal → INTEGRATE",
+    "attempts": [
+      { "signature": "F4 compose error: CT9 async_event dispatch has no broker / cannot return rendered HTML synchronously", "net_new_passes": 0 },
+      { "signature": "F4 compose error: CT9 async_event dispatch has no broker / cannot return rendered HTML synchronously", "net_new_passes": 0 },
+      { "signature": "F4 compose error: CT9 async_event dispatch has no broker / cannot return rendered HTML synchronously", "net_new_passes": 0 }
+    ]
+  },
+  "verification": { "flow": "fail", "method": "static-trace", "contract": "pass-inherited", "acceptance": "not-run" },
+  "provenance": {
+    "integrator_role": "integrator",
+    "built_against": {
+      "slice_oracle_lock": ".build/slices/S4/oracle/oracle.lock",
+      "skeleton_integration": ".build/skeleton/integration-record.json",
+      "skeleton_lock": ".hld/skeleton.lock",
+      "adr_lock": ".adr/adr.lock",
+      "aprd_lock": ".aprd/aprd.lock",
+      "slice_build_plan": ".build/slices/S4/build-plan.json",
+      "slice_build_record": ".build/slices/S4/build-record.json"
+    }
+  },
+  "commits": []
+}

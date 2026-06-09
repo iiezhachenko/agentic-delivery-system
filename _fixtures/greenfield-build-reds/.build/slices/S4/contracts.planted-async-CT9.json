@@ -1,0 +1,80 @@
+{
+  "components_ref": ".hld/skeleton/components.json",
+  "slice_components_ref": ".hld/slices/S4/components.json",
+  "base_skeleton_contracts_ref": ".hld/skeleton/contracts.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "skeleton_frozen_verified": true,
+  "class": "greenfield",
+  "mode": "increment",
+  "slice_id": "S4",
+  "slice_name": "Create and manage client projects with currency and billable rate",
+  "introduced_components": ["C3"],
+  "touched_contracts": [
+    {
+      "id": "CT2",
+      "between": ["C3", "C1"],
+      "kind": "shared_data",
+      "shape": "Client Project and related entity records (E2 — Client Project, E5 — Currency designation, E6 — Client record, E7 — Billable Rate) — persisted and retrieved by Project Management to/from the Data Store. Access covers create, read (list + detail), update, and delete of project-level records. Field-level schemas for E2/E5/E6/E7 deferred to S4 per cut deferred[].",
+      "failure_modes": [
+        "store-unavailable — PostgreSQL instance unreachable; project create/read/update/delete operations fail",
+        "constraint-violation — FK integrity failure (e.g. orphaned project referencing deleted freelancer) or uniqueness violation on project name within owner scope",
+        "not-found — queried project record does not exist in the store (deleted or wrong owner scope)"
+      ],
+      "traces": ["R4", "R6", "R9", "R10"],
+      "honors_adr": ["ADR-0003"],
+      "honors_inv": ["INV3", "INV4", "INV6"],
+      "role": "introduced-seam",
+      "status": "established",
+      "realizes_slice_requirements": ["R4", "R6", "R9", "R10"]
+    },
+    {
+      "id": "CT3",
+      "between": ["C3", "C2"],
+      "kind": "sync_api",
+      "shape": "Authenticated freelancer session — Project Management calls Identity & Auth in-process to resolve the current session and obtain the freelancer identity (E1 reference) used to scope all project data reads and writes to the owning freelancer. No field-level session token design invented here; shape is the session presence signal and owner identity reference.",
+      "failure_modes": [
+        "no-valid-session — session absent or expired; Identity & Auth returns no authenticated identity; Project Management must reject the request (unauthorized)",
+        "callee-error — Identity & Auth raises an exception during session resolution (e.g. store lookup failure for identity record); Project Management cannot determine ownership and must fail the request"
+      ],
+      "traces": ["R5", "R6"],
+      "honors_adr": ["ADR-0001", "ADR-0005"],
+      "honors_inv": ["INV1", "INV2", "INV6"],
+      "role": "introduced-seam",
+      "status": "established",
+      "realizes_slice_requirements": ["R6"]
+    },
+    {
+      "id": "CT9",
+      "between": ["C6", "C3"],
+      "kind": "async_event",
+      "shape": "Project management page request dispatch — Web Ingress publishes the project page request onto a message queue and does not block on Project Management; Project Management consumes the event asynchronously and the rendered HTML is delivered out of band. No wire format or URL path schema invented here; shape is the asynchronous request-event dispatch at the MPA routing seam.",
+      "failure_modes": [
+        "callee-error — Project Management raises an unhandled exception during request processing; Web Ingress must return an appropriate HTTP error response",
+        "not-found — requested project resource does not exist (e.g. detail view for a deleted project); Project Management returns a not-found result; Web Ingress renders a 404 page"
+      ],
+      "traces": ["R1", "R6"],
+      "honors_adr": ["ADR-0001", "ADR-0004"],
+      "honors_inv": ["INV6"],
+      "role": "introduced-seam",
+      "status": "established",
+      "realizes_slice_requirements": ["R6"]
+    }
+  ],
+  "new_contracts": [],
+  "slice_coverage": {
+    "introduced_seam_edges": ["C3->C1", "C3->C2", "C6->C3"],
+    "edges_contracted": ["C3->C1", "C3->C2", "C6->C3"],
+    "edge_orphans": [],
+    "slice_requirements": ["R4", "R6", "R9", "R10"],
+    "requirements_traced": ["R4", "R6", "R9", "R10"],
+    "requirement_orphans": []
+  },
+  "skeleton_fidelity": { "reshaped_contracts": [], "verdict": "extends-not-reshapes" },
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "increment_counts": { "touched_contracts": 3, "new_contracts": 0, "introduced_seam_edges": 3 },
+  "_planted_defect": "CT9 flipped sync_api -> async_event (project page dispatch via message queue). Contradicts INV6 (single-server synchronous request cycle, no broker) + ADR-0004 (MPA/SSR — server renders + returns HTML in the request/response). honors_inv still lists INV6 (the inconsistency = the defect: slipped past HLD frozen). Only CT9 changed vs greenfield-clean slice contracts; CT2/CT3 untouched. The DIAGNOSE oracle for the slice-local contract escape (route Phase 3, frozen_ref slice contracts.json#CT9, skeleton-fidelity NOT breached — defect is in the slice seam, not the frozen skeleton)."
+}

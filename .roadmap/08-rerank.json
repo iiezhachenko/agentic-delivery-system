@@ -102,7 +102,7 @@
       "value": "med",
       "retires_risk": null,
       "unit": "prompts/04-build/DIAGNOSE.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/diagnosis.json",
+      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/diagnosis.json",
       "rationale": "Phase-4 slice-build (D11).",
       "coarse_depends_on": [
         "P-INTEGRATE-SLICE"
