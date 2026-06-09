@@ -1,0 +1,23 @@
+{
+  "name": "agentic-delivery-pipeline",
+  "version": "1.0.0",
+  "description": "Agentic Delivery Pipeline (ADP) — library of executable AI prompts driving a SW project rough-request→verified-software. npx adp init lays runtime into your project + wires a launcher.",
+  "type": "module",
+  "bin": {
+    "adp": "bin/init.mjs"
+  },
+  "files": [
+    "bin/",
+    "manifest.json",
+    "prompts/",
+    "code-canon/",
+    "tools/",
+    "docs/",
+    "canon/",
+    "adapters/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}
