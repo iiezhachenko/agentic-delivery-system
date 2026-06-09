@@ -1,0 +1,58 @@
+{
+  "slice_id": "S4",
+  "high_blast_components": ["C2"],
+  "high_blast_basis": "C2 = Identity & Auth (auth) — auth/money/data-integrity category triggers mutation certification",
+  "certified_tests": [
+    {
+      "oracle_id": "OCT-CT3",
+      "file": "contract/test_CT3.py",
+      "target": "CT3",
+      "reason": "CT3 seam: C3 (Project Management) calls C2 (Identity & Auth) to resolve session; auth ownership-gating — high-blast (auth)",
+      "seeded_faults": [
+        {
+          "fault": "resolve_session returns identity dict even when session_token is None",
+          "killed_by": "test_ct3_failure_no_valid_session — asserts UnauthorizedError raised when resolve_session returns None; returning a non-None value instead makes the test fail"
+        },
+        {
+          "fault": "UnauthorizedError not raised when identity is None (silent pass-through)",
+          "killed_by": "test_ct3_failure_no_valid_session — pytest.raises(UnauthorizedError) will fail if no exception raised"
+        },
+        {
+          "fault": "resolve_session exception swallowed and not re-wrapped as SessionResolutionError",
+          "killed_by": "test_ct3_failure_callee_error — pytest.raises(SessionResolutionError) fails if runtime error silently swallowed"
+        }
+      ],
+      "verdict": "kill-strong"
+    },
+    {
+      "oracle_id": "OA-AC6",
+      "file": "acceptance/visible/test_AC6.py + acceptance/held_out/test_AC6.py",
+      "target": "AC6",
+      "reason": "AC6: ownership-scoped project CRUD — freelancer can only manage their own projects; session-gated create/edit/delete requires active auth",
+      "seeded_faults": [
+        {
+          "fault": "project create succeeds for unauthenticated request (no session check)",
+          "killed_by": "test_f4_failure_ct3_no_valid_session (flow) + ac6 tests assert 2xx only after valid session token"
+        },
+        {
+          "fault": "project list returns projects from a different freelancer's scope",
+          "killed_by": "test_ac6_create_project_appears_in_list / test_ac6_held_out_create_project_appears_in_list — different session tokens yield different scopes; cross-contamination would cause held-out to show visible projects"
+        },
+        {
+          "fault": "delete does not remove project from list (no-op delete)",
+          "killed_by": "test_ac6_delete_project_removed_from_list and held-out equivalent assert project absent after delete"
+        },
+        {
+          "fault": "edit does not persist updated name/rate",
+          "killed_by": "test_ac6_edit_project_name_and_rate / held-out assert updated values present in subsequent list"
+        }
+      ],
+      "verdict": "kill-strong"
+    }
+  ],
+  "uncertified_tests": [
+    { "oracle_id": "OCT-CT2", "reason": "CT2: C3/C1 shared_data seam; C1 (Data Store) not a high-blast component (no auth/money ownership-gate logic in this seam alone)" },
+    { "oracle_id": "OCT-CT9", "reason": "CT9: C6/C3 dispatch seam; no auth/money logic in the dispatch layer itself" }
+  ],
+  "overall_verdict": "kill-strong"
+}

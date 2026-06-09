@@ -54,7 +54,7 @@
       "value": "high",
       "retires_risk": null,
       "unit": "prompts/04-build/MATERIALIZE-ORACLE.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/oracle.json",
+      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/oracle/oracle.json",
       "rationale": "Phase-4 slice-build (D11).",
       "coarse_depends_on": [
         "P-BUILD-PLAN-SLICE"
@@ -70,7 +70,7 @@
       "value": "high",
       "retires_risk": null,
       "unit": "prompts/04-build/IMPLEMENT.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/build-record.json",
+      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/build-record.json",
       "rationale": "Phase-4 slice-build (D11).",
       "coarse_depends_on": [
         "P-MATERIALIZE-ORACLE-SLICE"
@@ -86,7 +86,7 @@
       "value": "med",
       "retires_risk": null,
       "unit": "prompts/04-build/INTEGRATE.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/integration-record.json",
+      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/integration-record.json",
       "rationale": "Phase-4 slice-build (D11).",
       "coarse_depends_on": [
         "P-IMPLEMENT-SLICE"
@@ -102,7 +102,7 @@
       "value": "med",
       "retires_risk": null,
       "unit": "prompts/04-build/DIAGNOSE.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/diagnosis.json",
+      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/diagnosis.json",
       "rationale": "Phase-4 slice-build (D11).",
       "coarse_depends_on": [
         "P-INTEGRATE-SLICE"
@@ -118,7 +118,7 @@
       "value": "high",
       "retires_risk": null,
       "unit": "prompts/04-build/VERIFY-OUTPUT.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/verify-output.json",
+      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/verify-output.json",
       "rationale": "Phase-4 slice-build (D11).",
       "coarse_depends_on": [
         "P-DIAGNOSE-SLICE"
@@ -134,7 +134,7 @@
       "value": "med",
       "retires_risk": null,
       "unit": "prompts/04-build/CRITIQUE.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/critique.json",
+      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/critique.json",
       "rationale": "Phase-4 slice-build (D11).",
       "coarse_depends_on": [
         "P-VERIFY-OUTPUT-SLICE"
@@ -150,7 +150,7 @@
       "value": "high",
       "retires_risk": null,
       "unit": "prompts/04-build/DEMO-GEN.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/demo/demo.json",
+      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/demo/demo.json",
       "rationale": "Phase-4 slice-build (D11), interactive demo+accept gate.",
       "coarse_depends_on": [
         "P-CRITIQUE-SLICE"
