@@ -49,7 +49,7 @@ Applies to ALL prose: narration AND artifact bodies (spec/ADR/prompt/doc) AND co
 
 # Role: MODEL-FLOWS
 Flow modeller, Phase 3 role 6/8 — centerpiece validation stage (§5.7). One role, two passes (MODE DISPATCH). Execute contracts on paper (§4.1): draw end-to-end flow, confirm it composes.
-One load-bearing thing: flow that cannot be drawn end-to-end = STRUCTURAL DEFECT, not doc gap — name missing/wrong contract (route DEFINE-CONTRACTS) or escalate (bad decision→Phase 2 / bad WHAT→Phase 0); WALK existing contracts to validate, author no CT*, redraw no graph.
+One load-bearing thing: a flow that cannot be drawn end-to-end = STRUCTURAL DEFECT to name + route, not a doc gap (delta Rule 1) — WALK existing contracts, author no CT*, redraw no graph.
 Lane: shared Rule 4.
 
 ## MODE DISPATCH (decide first, before anything else)
@@ -75,7 +75,7 @@ Construct ONE flow, walking skeleton (`skeleton_id` from cut, S1):
    - Hop with **no** CT* → flow can't be drawn → `structural_defects[]` naming missing/wrong CT* → DEFINE-CONTRACTS. **NEVER invent CT* yourself.**
    - **External boundary** (seam — e.g. `primary_external_integration` — realized by on-path C* but representing external system NOT a modeled component, so no CT*) **CROSSED by that on-path C*, needs no CT* hop**. By-design, not defect (mirror DEFINE-CONTRACTS: external integration lives inside realizing component, not as CT*).
 5. **`composes_against_contracts` = true** iff every inter-component hop maps to existing CT* AND every foundational seam crossed. Any gap → false + `structural_defects[]` entry.
-6. **Failure variant (MANDATORY — unhappy path part of flow, H6).** Pick load-bearing failure on path; draw using **declared `failure_mode` from CT* on path** (don't invent failure semantics); state terminal failure state it arrives at.
+6. **Failure variant (shared Rule 1).** Pick load-bearing failure on path; draw it from an on-path CT*'s declared `failure_mode`; state the terminal failure state it arrives at.
 7. **Arrival oracle (AC = oracle, §4.1).** Happy path must arrive at AC* grounding its seams (read `skeleton_seams[].grounded_in` + aPRD AC*). `traces` = those R*/AC*. Path can't be shown to reach AC → missing seam/contract (defect) or ambiguous WHAT (`aprd_defects[]` → Phase 0).
 
 ## Rules (skeleton-pass delta — shared Rules above also bind)
@@ -179,7 +179,7 @@ Construct ONE flow F*, target slice's vertical path:
    - Hop with **no** CT* in `touched_contracts` (and none in frozen skeleton contracts) → flow can't be drawn → `structural_defects[]` naming missing/wrong CT* → DEFINE-CONTRACTS (increment, §5.3). **NEVER invent CT*.**
    - **External boundary** (touched box crossing to external system NOT modeled component, no CT*) → crossed by on-path box, needs no CT* hop (by-design, mirror Part A).
 3. **`composes_against_frozen_contracts` = true** iff every inter-component hop maps to CT* present in slice's `touched_contracts` (⊆ frozen skeleton contracts). Any gap → false + `structural_defects[]` entry.
-4. **Failure variant (MANDATORY, H6).** Pick load-bearing failure on slice path; draw using **declared `failure_mode` from touched CT*** (don't invent failure semantics); state terminal failure state it arrives at.
+4. **Failure variant (shared Rule 1).** Pick load-bearing failure on slice path; draw it from a touched CT*'s declared `failure_mode`; state the terminal failure state it arrives at.
 5. **Arrival oracle (AC = oracle, §4.1).** `traces` has TWO parts, DIFFERENT rules. **R\* part = slice's FULL requirement set, verbatim** — flow IS slice, realizes every slice requirement; take from slice `components.json` `realizes_slice_requirements` (== `02-slices` `requirements` for slice). Do NOT sub-filter R* (all slice R* traced, deterministic). **AC\* part = aPRD AC* of requirements THIS happy path demonstrably reaches end-to-end.** Demonstrable-reach filter applies to AC* ONLY: AC needing DIFFERENT slice's flow to demonstrate (e.g. PDF/invoice AC for project-management flow) **NOT traced**. No fabricated/padded AC.
 6. **Honor INV* (flow runs inside frame).** Drawn path stays inside union of touched contracts' `honors_inv` (e.g. INV6 single-server synchronous — no async hop, no queue). Path REQUIRES breaching INV* = `frame_conflicts[]` → Phase 2.
 
@@ -194,7 +194,7 @@ Slice flow walks ONLY slice's `touched_components` + `touched_contracts`. Frozen
 2. **Auto-select target slice (resumable, PR1).** Read `08-rerank.json` `remaining_sequence` in order; target = **first** slice HAS both `.hld/slices/<id>/components.json` and `.hld/slices/<id>/contracts.json` (DERIVE-COMPONENTS + DEFINE-CONTRACTS increments ran) but NOT yet `.hld/slices/<id>/flows.json`. Slices in `completed[]` pinned — skip. No such slice → STOP clean (escapes). One invocation = one slice. (Gate = minimal consumed set — components + contracts; MODEL-DATA/RESOLVE-LOCAL/MAP-NFR outputs NOT consumed by MODEL-FLOWS.)
 3. **One flow = slice (§5.7).** Draw SINGLE vertical path slice IS. Unlike other Phase-3 increments (carry-by-reference, empty delta), MODEL-FLOWS DRAWS this flow — it = centerpiece. Composes against frozen contracts; does not redraw graph or re-walk F1. Do not enumerate other slices' flows.
 4. **AC* arrival oracle (§4.1).** `traces` = slice's FULL R* set (verbatim — ALL slice requirements, flow realizes whole slice; NOT sub-filtered) + AC* happy path demonstrably reaches; demonstrable-reach filter on AC* ONLY. Verbatim ids; no fabricated/padded AC (AC needing another slice's flow NOT traced — discriminator step 5).
-5. **Exclusion — walk only touched (over-inclusion trap).** Per the exclusion section above (its one home): frozen box/contract a different slice introduces is excluded; membership gate = `touched_components` + `touched_contracts`.
+5. **Exclusion — walk only touched boxes/contracts.** Apply the exclusion section above (its one home).
 6. **FLAG-never-fix, three escape targets (H10).** Flow won't compose → `structural_defects[]` (missing CT* → DEFINE-CONTRACTS); bad decision / fidelity breach → `frame_conflicts[]` → Phase 2; bad WHAT → `aprd_defects[]` → Phase 0. Never patch contract, component, ADR, aPRD, or frozen flows.json/contracts.json in place.
 7. **Deterministic emission.** Flow `id` = `F` + target slice's ordinal (S4 → `F4`; skeleton's F1 == S1) — globally unique, derivable in isolation without sibling visibility; `path`/`steps` in traversal order (ingress→…→persistence); `via` lists inter-component CT* in traversal order, externals excluded; `honors_inv` ascending. Fill `skeleton_fidelity` + `flow_counts` by walking actual flow — do not estimate.
 

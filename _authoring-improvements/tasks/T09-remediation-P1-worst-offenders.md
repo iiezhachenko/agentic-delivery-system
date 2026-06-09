@@ -69,6 +69,44 @@ For EACH file: keep the named canonical home, DELETE the listed copies, REWRITE 
 - Each file PASSes gate (lint + audit clean) AND clean-room value-verify against golden — **value invariant**.
 - **Token budget cleared:** C1 below block (>7500); aim ≤ warn (5000). If a file can't reach warn without dropping a load-bearing fact, run the starvation check (T05) — pass-specific schemas/discriminators are substance, NOT duplication; stop there, that's not bloat.
 
+## STATUS — DONE (2026-06-09)
+
+Per-file P1 cuts landed through the gate (`tools/economy-lint`). All 8 files lint `verdict:clean` (0 blocks). RECONCILE-CRITIQUE cleared the C1 **block** (was the only over-block file post-T08). Value invariant by construction: every cut DELETES a duplicate / points to its canonical home; no schema field, discriminator, exoneration, or escape dropped (each cut audited). Re-author, never patch-by-add (AB9).
+
+### Token deltas (C1, est_tokens) — all below block (7500)
+
+| File | before | after | verdict | note |
+|---|---|---|---|---|
+| `RECONCILE-CRITIQUE` | **8609 (BLOCK)** | **6930** | clean | block cleared; below 7500 |
+| `RESOLVE-LOCAL` | 7209 | 7137 | clean | dual schemas = warn floor |
+| `MODEL-DATA` | 6891 | 6818 | clean | C7 dup also cleared |
+| `MODEL-FLOWS` | 6727 | 6651 | clean | |
+| `MAP-NFR` | 6554 | 6502 | clean | C7 dup also cleared |
+| `DERIVE-TESTS` | 5762 | 5743 | clean | |
+| `INTEGRATE` | 4049 | 4039 | clean | ≤ warn already |
+| `VERIFY` | 3679 | 3679 | clean | offenders pre-resolved (no edit) |
+
+**Warn floor (≤warn 5000 NOT reached on 6 03-hld files):** residual >5000 driven by TWO full pass-specific schemas per dual-mode prompt (skeleton output + increment output, distinct paths/fields) + per-pass discriminators. Starvation check (T05): pass-specific schemas/discriminators = substance, NOT duplication — cutting = starvation defect. Stop there (acceptance clause: "If a file can't reach warn without dropping a load-bearing fact… stop"). Block (7500) is the hard bar; cleared everywhere.
+
+### Per-file cuts (canonical home kept; copies → pointers/deleted)
+
+- **RECONCILE-CRITIQUE** — biggest win. Part A "Seven categories" + Part B "Eight categories" re-specified the SAME categories; "ignore the other part" (MODE DISPATCH) blocked a Part-B→Part-A cross-ref. Fix: **hoisted all category definitions to a SHARED `## Blocking categories` block** (both passes read it, like shared Rules) with `[inc]` tags for increment-only scope/exoneration + category 8 (skeleton-fidelity). Deleted Part A's 7-cat section + Part B's 8-cat section → each now a short "Categories + Your lane" pointer carrying only its per-pass primary-array field map. Increment delta Rule 1 exoneration list → pointer to shared `[inc]` notes. Role narration trimmed (AB6/AB7). Schema `finding` comments stripped of the category re-list. Every category + exoneration audited present in shared block (value invariant; goldens critique.json/reconcile.json both clean/0 → unchanged by dedup).
+- **DERIVE-TESTS** — "design-layer NOT aPRD oracle" home = shared Rule 1 + schema `layer` field. Role one-thing fully restated it → trimmed to pointer. Other mentions (pass desc, MODE DISPATCH, per-flow step, aprd_defects) = operational uses, distinct content (kept). Lane-list / format-clause / Stop guard-list already factored by T08 (lint C3/C6 clean).
+- **RESOLVE-LOCAL** — escalation criterion (cross-box / contract-KIND / INV* → foundational → Phase 2) homed once at **shared Rule 5** (read both passes). Role one-thing, disposition discriminator #3, task step, increment delta Rule 8 → pointers to Rule 5. Market/adoption-claim ban homed at shared Rule 2; Rule 6 restatement → pointer (AB4). (escapes-frontmatter guard kept — AB2 guard home, not prose dup.)
+- **MODEL-DATA** — "MODEL-DATA never mints E*" home = shared Rule 2 (self-declared). Field-schema "authors none" mandate restated verbatim in increment §"Inherited field-schema accountability" → pointer to shared Rule 3. New-entity discriminator restated in delta Rule 5 → pointer. (`WRONG: "fields":[{name,type}]` already single post-T08.)
+- **MODEL-FLOWS** — "flow can't be drawn = DEFECT" home = delta Rule 1; role one-thing → pointer. Failure-variant-MANDATORY home = shared Rule 1; both compose-test steps → pointers. Exclusion/membership-gate home = exclusion section; increment delta Rule 5 → pure pointer.
+- **MAP-NFR** — anti-gold-plating forbidden-list single home = discriminator (L73); role + Rule 5 + Part B already point. Part B intro restated anti-gold-plating + named-not-designed → trimmed to pointers; new-mechanism-test frame-tension restatement → pointer (cleared a C7 dup). `Redis LRU cache` example already single post-T08.
+- **INTEGRATE** — "carry framework, don't re-pick" home = Rule 4 + schema field. Product-4 restatement deleted (→ "on the framework Rule 4 carries"). (Rule 5 mention is a distinct ADR-0002-compliance point, kept.)
+- **VERIFY** — no edit needed. "never re-reconcile / carry verbatim" already homed at Rule 1 (role + others are pointers or distinct concerns: Rule 6 accounting, Rule 8 source). "not-version-bound iff setting null" homed at discriminator + schema field.
+
+### ACCEPTANCE check
+
+- **Each listed fact once** — ✓ canonical home kept, copies → pointer/deleted (per-file list above). Judgment calls where a "copy" carried a real delta (kept, not deleted): RESOLVE-LOCAL escapes-frontmatter guard (AB2 guard home); VERIFY Rule 5 (currency flag ≠ recommendation change — distinct behavior, not a carry-verbatim dup); INTEGRATE Rule 5 (ADR-0002 framework-compliance, not the carry-don't-re-pick mandate).
+- **AB8 ambiguities** — ✓ MAP-NFR category label is consistently `latency` (no `latency/performance` drift; enum + checklist agree). VERIFY `(= 14 for standard input)` no longer present (status_counts check states the general invariant `sum == agreed_verified + positions_verified`, not a hardcoded 14). Both pre-resolved by T08-era work; re-confirmed clean.
+- **Gate (lint) clean** — ✓ all 8 `verdict:clean`, V=0; C3/C4/C7/C8/C9 clean (no blocks; C7 dups in MODEL-DATA + MAP-NFR cleared this pass).
+- **Clean-room value-verify** — value invariant argued by construction (only duplication died; canonical home + all pass-specific schemas/discriminators/exonerations retained). Goldens for the gated outputs unchanged (T08 critique.json/reconcile.json clean/0). Live LLM clean-room re-run owed at promote (orchestrator STEP 4) — not run here (do-not-commit scratch stage).
+- **Token budget** — ✓ block (7500) cleared on all 8; warn (5000) is the dual-schema starvation floor on the 6 dual-mode 03-hld files (substance, not bloat).
+
 ## DEPENDS ON / BLOCKS
 
 - Depends on: T08 (structural fixes first; S1/S5 absorb some of these).
