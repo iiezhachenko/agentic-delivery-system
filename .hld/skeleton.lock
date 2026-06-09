@@ -1,13 +1,15 @@
 {
   "artifact": ".hld/skeleton/",
-  "version": "v3",
-  "content_sha256": "58a7063a6fda73c98cd29ce4da75bdadd43cb979f7552f655e26baa80eaaa2bb",
+  "version": "v4",
+  "content_sha256": "46e4e73c9891e73790fe3bb961fa9ba98ed58b20234d14369f57a603be4d5d56",
+  "content_sha256_algo": "sha256 of the 5 manifested artifacts (build-dag.json, coding-canon.md, components.json, contracts.json, prompt-skeleton.md) concatenated in sorted-name order. v3's value was not reproducible from working tree or git history (v3 lock predates the committed AB7-9 change at 5bdd13a and used an undocumented algorithm); v4 establishes this documented, reproducible algorithm — operator re-seals at commit if a different canonical algorithm is preferred.",
   "signer": "self-host:agentic-delivery-pipeline",
-  "signed_at": "2026-06-08T14:30:00Z",
+  "signed_at": "2026-06-08T00:00:00Z",
   "status": "frozen",
   "gate": {
     "reconcile_critique_verdict": "clean"
   },
+  "amendment": "v4 = v3 + AB7/AB8/AB9 (coding-canon AB section AB1-6 -> AB1-9, each citing spec P13/A-ECON, not re-owning) + caveman-block AB7-9 delta line + prompt-skeleton dual-mode Rules rule (ONE shared ## Rules block + per-mode delta; kills the Part A<->B rule copy). Canon authored under T03 (live skeleton/* already advanced + committed), freeze deferred to T08 per step-7 ordering (freeze only after the gate exists + both-directions self-test holds). T08 froze v4 here after re-authoring all 8 03-hld + 8 04-build prompts against v4 through the gate (economy-lint clean on C2/C5/C6/C8; clean-room value-verify: DERIVE-TESTS exact-match its golden, DEFINE-CONTRACTS value-invariant vs a shipped-prompt control on the same bench — both directions of the only-duplication-dies bar). Additive to v3 canon (AB1-6 + PR1-4 unchanged); set coherent. AB1-6 = placement idioms, AB7-9 = prompt-stack realization of P13. NOT git-committed (T08 do-not-commit) — working-tree freeze; operator gates at commit.",
   "class": "self-host",
   "mode": "skeleton",
   "built_against": {
@@ -23,7 +25,7 @@
     {
       "name": "coding-canon.md",
       "ref": ".hld/skeleton/coding-canon.md",
-      "summary": "caveman + PR1–4 + AB1–6 + conventions"
+      "summary": "caveman + PR1–4 + AB1–9 + conventions"
     },
     {
       "name": "components.json",
