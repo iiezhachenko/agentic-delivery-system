@@ -12,16 +12,16 @@ inputs:
   - { path: ".roadmap/06-foundation-cut.json", format: "json — cross_slice_invariants INV* the flow must honor; skeleton_seams[] + skeleton_id (skeleton pass only)" }
   # — skeleton pass —
   - { path: ".hld/skeleton/components.json", format: "json — SKELETON: components[].realizes_seam + coverage.seam_realization = which C* realizes each foundational seam; edges[] = the graph the path walks. Defect blocks gate the run" }
-  - { path: ".hld/skeleton/contracts.json", format: "json (SKELETON, PRIMARY) — contracts[]{id:CT*, between, kind, failure_modes} = the seams the path composes against; each path hop maps to one CT*. Defect blocks gate the run" }
+  - { path: ".hld/skeleton/contracts.json", format: "json (SKELETON, PRIMARY) — seams the path composes against; each hop maps to one CT*" }
   # — increment pass only —
   - { path: ".hld/skeleton.lock", format: "json — DISPATCH signal + freeze gate: status==frozen → INCREMENT PASS composes the slice flow against this baseline (H14)" }
   - { path: ".hld/slices/<slice_id>/components.json", format: "json — DERIVE-COMPONENTS increment: introduced_components[] + touched_components[] (the boxes the slice path walks); membership gate (the over-inclusion guard)" }
-  - { path: ".hld/slices/<slice_id>/contracts.json", format: "json — DEFINE-CONTRACTS increment: touched_contracts[]{id:CT*, between, failure_modes, honors_inv} = the FROZEN seams (carried by reference) each slice hop composes against. Presence = the upstream Phase-3 increments ran (auto-select gate)" }
+  - { path: ".hld/slices/<slice_id>/contracts.json", format: "json — DEFINE-CONTRACTS increment: FROZEN seams (by reference) each slice hop composes against. Presence = auto-select gate" }
   - { path: ".roadmap/08-rerank.json", format: "json — living roadmap: remaining_sequence (target-slice order) + completed[] (pinned) — auto-selects the target slice (increment)" }
   - { path: ".roadmap/02-slices.json", format: "json — slices[].requirements = the R* the target slice realizes (the flow's trace set + AC oracle); slice name (increment)" }
 outputs:
-  - { path: ".hld/skeleton/flows.json", format: "SKELETON: json (Part A schema) — walking-skeleton flow F1 {path, via:[CT*], failure_path, traces} + seam_coverage + compose verdict + defect/route blocks + counts" }
-  - { path: ".hld/slices/<slice_id>/flows.json", format: "INCREMENT: json (Part B schema) — THE slice flow F* {path, via:[CT*], failure_path, traces} composed against frozen contracts + skeleton-fidelity verdict + defect/route blocks + counts" }
+  - { path: ".hld/skeleton/flows.json", format: "SKELETON json (Part A) — walking-skeleton flow F1 + seam_coverage + compose verdict + defect blocks + counts" }
+  - { path: ".hld/slices/<slice_id>/flows.json", format: "INCREMENT json (Part B) — THE slice flow F* composed against frozen contracts + fidelity verdict + defect blocks + counts" }
 escapes:
   # — shared —
   - { when: "any shared input missing/unparseable, OR adr.lock status != frozen", target: "self / HALT (no frame to walk)" }
@@ -58,7 +58,7 @@ Read `.hld/skeleton.lock`. **Absent → SKELETON PASS (Part A):** no frozen base
 ## Rules (shared — both passes)
 1. **Failure variant mandatory (H6).** No flow ships happy-path-only. Failure path reuses CT*'s declared `failure_mode`; does not invent new failure modes (DEFINE-CONTRACTS' artifact — reference, don't author).
 2. **Honor INV* (flow runs inside frame).** Drawn path must not breach any `cross_slice_invariants[]` (e.g. INV1 OAuth-delegation, INV6 single-server synchronous — no async hop, no queue in path). Path REQUIRES breaching INV* = `frame_conflicts[]` → Phase 2, not silent re-decision.
-3. **Cheapest source first; LLM not source (P5/P11).** Truth = components/contracts/cut/aPRD (+ increment: frozen contracts/flows + slice requirements) in front of you — path, CT* it uses, AC it reaches all come from disk, not from how OAuth/CRUD flow "usually" goes. Never mint C*/CT*/R*/AC*/F*; never add hop graph doesn't support.
+3. **Cheapest source first; LLM not source (P5/P11).** Truth = components/contracts/cut/aPRD (+ increment: frozen contracts/flows + slice requirements) in front of you — path, CT* it uses, AC it reaches all come from disk, NOT recalled OAuth/CRUD flow patterns. Never mint C*/CT*/R*/AC*/F*; never add hop graph doesn't support.
 4. **Stay in lane.** No new contracts (DEFINE-CONTRACTS), no re-cut components/edges (DERIVE-COMPONENTS), no local ADRs (RESOLVE-LOCAL), no data model (MODEL-DATA), no NFR mechanisms (MAP-NFR), no test specs / build-DAG (DERIVE-TESTS), no cross-cutting placement (§5.8), no adversarial gate (RECONCILE/CRITIQUE), no implementation design, no client touch. (Increment also: NEVER mutate frozen `flows.json`/`contracts.json` or sibling slice's flow.)
 
 ---
@@ -194,7 +194,7 @@ Slice flow walks ONLY slice's `touched_components` + `touched_contracts`. Frozen
 2. **Auto-select target slice (resumable, PR1).** Read `08-rerank.json` `remaining_sequence` in order; target = **first** slice HAS both `.hld/slices/<id>/components.json` and `.hld/slices/<id>/contracts.json` (DERIVE-COMPONENTS + DEFINE-CONTRACTS increments ran) but NOT yet `.hld/slices/<id>/flows.json`. Slices in `completed[]` pinned — skip. No such slice → STOP clean (escapes). One invocation = one slice. (Gate = minimal consumed set — components + contracts; MODEL-DATA/RESOLVE-LOCAL/MAP-NFR outputs NOT consumed by MODEL-FLOWS.)
 3. **One flow = slice (§5.7).** Draw SINGLE vertical path slice IS. Unlike other Phase-3 increments (carry-by-reference, empty delta), MODEL-FLOWS DRAWS this flow — it = centerpiece. Composes against frozen contracts; does not redraw graph or re-walk F1. Do not enumerate other slices' flows.
 4. **AC* arrival oracle (§4.1).** `traces` = slice's FULL R* set (verbatim — ALL slice requirements, flow realizes whole slice; NOT sub-filtered) + AC* happy path demonstrably reaches; demonstrable-reach filter on AC* ONLY. Verbatim ids; no fabricated/padded AC (AC needing another slice's flow NOT traced — discriminator step 5).
-5. **Exclusion — walk only touched (over-inclusion trap, discriminator above).** Frozen box/contract different slice introduces excluded. Membership gate = `touched_components` + `touched_contracts`.
+5. **Exclusion — walk only touched (over-inclusion trap).** Per the exclusion section above (its one home): frozen box/contract a different slice introduces is excluded; membership gate = `touched_components` + `touched_contracts`.
 6. **FLAG-never-fix, three escape targets (H10).** Flow won't compose → `structural_defects[]` (missing CT* → DEFINE-CONTRACTS); bad decision / fidelity breach → `frame_conflicts[]` → Phase 2; bad WHAT → `aprd_defects[]` → Phase 0. Never patch contract, component, ADR, aPRD, or frozen flows.json/contracts.json in place.
 7. **Deterministic emission.** Flow `id` = `F` + target slice's ordinal (S4 → `F4`; skeleton's F1 == S1) — globally unique, derivable in isolation without sibling visibility; `path`/`steps` in traversal order (ingress→…→persistence); `via` lists inter-component CT* in traversal order, externals excluded; `honors_inv` ascending. Fill `skeleton_fidelity` + `flow_counts` by walking actual flow — do not estimate.
 

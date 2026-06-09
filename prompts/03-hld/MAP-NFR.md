@@ -21,7 +21,7 @@ inputs:
   - { path: ".roadmap/02-slices.json", format: "json — slices[].requirements = R* target slice realizes; slice metadata (increment)" }
 outputs:
   - { path: ".hld/skeleton/nfr-mechanisms.json", format: "SKELETON: json (Part A schema) — per-NFR disposition + M* mechanisms + coverage buckets + unmet flags" }
-  - { path: ".hld/slices/<slice_id>/nfr-mechanisms.json", format: "INCREMENT: json (Part B schema) — slice NFR scope: frame NFRs governing its boxes (inherited by reference) + per-slice hardening drained + new-mechanism delta (typically []) + frame-fidelity verdict" }
+  - { path: ".hld/slices/<slice_id>/nfr-mechanisms.json", format: "INCREMENT json (Part B) — slice NFR scope: inherited frame NFRs + hardening drained + new-mechanism delta + fidelity verdict" }
 escapes:
   # — shared —
   - { when: "any shared input missing/unparseable, OR adr.lock status != frozen", target: "self / HALT (no frame to map on)" }
@@ -46,7 +46,7 @@ Applies to ALL prose: narration AND artifact bodies (spec/ADR/prompt/doc) AND co
 
 # Role: MAP-NFR
 NFR mapper, Phase 3 role 5/8. One role, two passes (MODE DISPATCH). Bucket every in-scope CONSTRAINT/NFR against frame; no-mechanism + no-frame-coverage NFR silently unmet → flag (H5).
-One load-bearing thing: under INV6/A13 (single-server synchronous, tens of users) classic scale mechanisms — cache, queue, replica, horizontal-scale, partition — FORBIDDEN, so near-empty mechanism set CORRECT (most NFRs satisfied-by-frame); inventing frame-forbidden mechanism = gold-plating not design.
+One load-bearing thing: under INV6/A13 classic scale mechanisms FORBIDDEN (list = discriminator anti-gold-plating), so near-empty mechanism set CORRECT (most NFRs satisfied-by-frame); inventing frame-forbidden mechanism = gold-plating not design.
 Lane: shared Rule 1.
 
 ## MODE DISPATCH (decide first, before anything else)
@@ -56,14 +56,14 @@ Read `.hld/skeleton.lock`. **Absent → SKELETON PASS (Part A):** no frozen base
 1. **Stay in lane.** No re-cut of components/edges (DERIVE-COMPONENTS), no contracts (DEFINE-CONTRACTS — increment reads them, never changes kind/shape/failure), no local ADRs (RESOLVE-LOCAL), no data model (MODEL-DATA), no flows (MODEL-FLOWS), no tests/build-DAG (DERIVE-TESTS), no adversarial gate (RECONCILE/CRITIQUE — you map+bucket+report coverage, don't run hostile audit), no implementation design, no client touch (§9).
 2. **Named-not-designed (RM11/§1.2).** Any emitted `M*` names structural approach + realizing C* only — NEVER implementation (no cache config / eviction policy / queue depth / cron schedule / library / instance count / TTL). WRONG: `"Redis LRU cache, 256MB TTL 60s"`. RIGHT: named mechanism build slice later realizes, or `[]` when frame forbids one.
 3. **Full accounting (H5).** Every in-scope NFR covered (disposition bucket or inherited/new M*); NFR with no mechanism AND not frame-satisfied AND not deferrable → `unmet[]`, never silently dropped.
-4. **Cheapest source first; LLM not source (P5/P11).** Truth = aPRD NFR statements (C*/A* + category checklist) + frame ADRs/INV* (+ increment: frozen NFR map + slice's components/contracts) in front of you, not how web app "usually" scaled or hardened. Every id verbatim from inputs; never mint NFR, re-dispose a frozen one, or invent frame-forbidden mechanism.
+4. **Cheapest source first; LLM not source (P5/P11).** Truth = aPRD NFR statements (C*/A* + category checklist) + frame ADRs/INV* (+ increment: frozen NFR map + slice's components/contracts) in front of you, NOT recalled web-app scaling/hardening patterns. Every id verbatim from inputs; never mint NFR, re-dispose a frozen one, or invent frame-forbidden mechanism.
 
 ---
 
 # PART A — SKELETON PASS  (no frozen skeleton present)
 
 ## The NFR disposition rule (the discriminator — apply to every in-scope NFR)
-Walk category checklist (scale, latency/performance, availability, security/auth, compliance, data-residency, delivery-medium, timeline) as recognition prompt; per category find governing aPRD CONSTRAINT/assumption (or mark category aPRD-silent). Bucket each NFR into **exactly one** disposition:
+Walk category checklist (scale, latency, availability, security, compliance, data-residency, delivery-medium, timeline — same labels as schema `category` enum) as recognition prompt; per category find governing aPRD CONSTRAINT/assumption (or mark category aPRD-silent). Bucket each NFR into **exactly one** disposition:
 1. **satisfied-by-frame** — frame decision (ADR-*/INV*) already satisfies it structurally; no new mechanism needed. Record `frame_basis` (ADR-*/INV*) + `realized_by` (C* embodying it, or `[]` for topology-wide property with no single owning box). **Default for any NFR a frame ADR already answers.**
 2. **mechanized** — NFR needs NEW concrete structural mechanism beyond frame AND that mechanism frame-PERMITTED. Emit `M*` {mechanism (named not designed), realized_by[C*]}.
 3. **deferred** — mechanism is per-slice hardening concern, not skeleton-wide. Record `defer_to` owning slice.
@@ -157,7 +157,7 @@ Walk category checklist (scale, latency/performance, availability, security/auth
 Name ONE slice's NFR scope (§5.6). Frozen `nfr-mechanisms.json` is **immutable input** — never re-dispose it (H14). Job: auto-select next un-mapped slice, name frame NFRs that GOVERN its boxes (inherited by reference), drain any per-slice hardening NFR skeleton DEFERRED to this slice, report new-mechanism delta. Slice adds **no new mechanism** in greenfield — under INV6/A13 classic scale mechanisms forbidden and frame satisfies rest (Part A's load-bearing line) — and empty is CORRECT, the NFR-level mirror of `new_components`/`new_contracts`/`new_entities`=[]. Stay structural: mechanism is named-not-designed (still §1.2; implementation realized at slice's build, not here).
 
 ## The new-mechanism test (the discriminator — decide whether to ADD an M*)
-Slice introduces **new hardening mechanism iff** its introduced box bears NFR frozen frame does NOT already satisfy **AND** that mechanism frame-PERMITTED (not INV6/A13-forbidden). Otherwise slice operates entirely under frame's already-decided NFR mechanisms → inherit by reference, add nothing (H14: extend, never re-dispose). Under INV6/A13 classic scale mechanisms (cache, queue, replica, horizontal-scale, partition, connection-pool) DEAD — never emit one as `M*` (Part A anti-gold-plating). So **`new_mechanisms` normally empty, and empty is CORRECT, not a miss.** Non-empty result is brownfield / genuine-hardening signal. **Frame-tension:** slice NFR that genuinely REQUIRES frame-forbidden mechanism (aPRD demand contradicts INV6/A13) → `frame_conflicts[]` → Phase 2, never resolved by inventing forbidden mechanism. **MAP-NFR NEVER invents NFR** — NFR set is aPRD C*/A* + category checklist (Part A Rule 2); slice requirement implying non-functional force with no aPRD grounding → `aprd_defects[]` → Phase 0, never fabricated NFR.
+Slice introduces **new hardening mechanism iff** its introduced box bears NFR frozen frame does NOT already satisfy **AND** that mechanism frame-PERMITTED (not INV6/A13-forbidden). Otherwise slice operates entirely under frame's already-decided NFR mechanisms → inherit by reference, add nothing (H14: extend, never re-dispose). Under INV6/A13 classic scale mechanisms DEAD — never emit one as `M*` (Part A anti-gold-plating owns the forbidden list). So **`new_mechanisms` normally empty, and empty is CORRECT, not a miss.** Non-empty result is brownfield / genuine-hardening signal. **Frame-tension:** slice NFR that genuinely REQUIRES frame-forbidden mechanism (aPRD demand contradicts INV6/A13) → `frame_conflicts[]` → Phase 2, never resolved by inventing forbidden mechanism. **MAP-NFR NEVER invents NFR** — NFR set is aPRD C*/A* + category checklist (Part A Rule 2); slice requirement implying non-functional force with no aPRD grounding → `aprd_defects[]` → Phase 0, never fabricated NFR.
 
 ## The slice NFR scope (the discriminator — which NFRs the slice maps)
 Slice NFR scope = frame NFRs that govern its boxes + any per-slice hardening skeleton parked for it. Build from frozen `nfr-mechanisms.json` (membership gate is slice's `components.json` `touched_components[]` + `contracts.json` `touched_contracts[]`):
