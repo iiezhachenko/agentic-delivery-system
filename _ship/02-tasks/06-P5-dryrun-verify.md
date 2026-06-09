@@ -49,3 +49,61 @@ Then `git diff` of ship branch → root `CLAUDE.md` + `prompts/_orchestrator.md`
 
 ## Deps
 Needs P4 (real tarball) + P1 (launchers it boots). LAST task — satisfying its done-bar = shippable.
+
+---
+
+## DONE — 2026-06-09
+
+Artifact under test = REAL signed tarball `dist/adp-v815ab03+p03b9a94d.l96133636.tgz` (sha256 `00ba47cd…` — `sha256sum -c` OK). Extracted to clean staging, installed FROM payload (NOT repo files). All 4 checks below.
+
+### BLOCKER found + fixed (gate-grade — done-bar unmet without it)
+First install-from-tarball HALTed: `payload src missing: adapters/claude/agents/adp-orchestrator.md`.
+**Root cause:** installer `bin/init.mjs` resolved source as `PKG_ROOT/<row.src>` (repo layout), but the SHIPPED tarball stores allowlisted files under `payload/<row.path>` (path-mapped, gated). P3 only ever tested install against repo-src layout — the shipped artifact was never installed. Ship≠install → real tarball uninstallable.
+**Fix (minimal, additive, `bin/init.mjs`):** source resolution payload-FIRST — `PKG_ROOT/payload/<path>` (shipped artifact) else fall back `PKG_ROOT/<src>` (repo/npm-dev). One resolver serves both artifacts; install what we SHIP. NOT a protected file (ship-only, added P3) → P5.4 invariant intact.
+**Backward-compat verified:** repo-root install (payload present) PASS · pure-src npm-pkg sim (no `payload/`, src dirs only) PASS — both `laid=56 integrity=OK smoke=PASS`.
+
+### P5.1 — Claude scratch · PASS
+`init --harness=claude` from tarball payload → `laid=56 skipped=0 integrity=OK` (all 56 re-hashed vs manifest) · `smoke=PASS (economy-lint both-directions)` · launch `/deliver`. Root pollution = **zero** (only `.claude/`). `_orchestrator.md` correctly path-mapped (NOT `.generic`). Boot chain resolves to installed files: `/deliver` SKILL → `adp-orchestrator` agent → loop body `.claude/adp/prompts/_orchestrator.md` → lazy role prompts `.claude/adp/prompts/<NN>/<ROLE>.md` → `adp-step-runner` → lint `.claude/adp/tools/economy-lint/lint.mjs` — every ref exists.
+**Limit:** live trivial-slice (rough-req→aPRD on disk) = interactive LLM loop, NOT executable in non-interactive sandbox. Boot-chain integrity + smoke = verified proxy. (Same env-class limit as P4 `make`.)
+
+### P5.2 — Kiro scratch · PASS
+`init --harness=kiro` → `laid=55 skipped=0 integrity=OK smoke=PASS` · launch `kiro-cli --agent delivery`. Zero root pollution (only `.kiro/`). `delivery.json` `prompt=file://.kiro/adp/prompts/_orchestrator.md` (exists) · `resources=.kiro/steering/**` (exist) · role dirs `00-aprd…04-build` present · `step.json` executor present.
+**Limit:** `kiro-cli` binary absent in env → live boot not executable; all wiring paths resolve.
+
+### P5.3 — lint survives move · PASS
+Installed `lint.mjs` `inferType` matches on resolved-absolute path substrings — intact under moved layout:
+- `.claude/adp/prompts/00-aprd/EXTRACT.md` → `prompt` ✓
+- root (operator) `.adr/log/0001.md` → `adr` ✓
+- controls `.aprd`→aprd · `.hld`→hld · `.roadmap`→roadmap ✓
+`/prompts/` substring survives nesting under `.claude/adp/`; `/.adr/` fires at operator root.
+
+### P5.4 — self-host regression `[Invariant proof]` · PASS
+Fresh clone `ship@d5c5e32`. Self-host wiring all present: `.claude/skills/self-host/SKILL.md`, `.claude/agents/step-runner.md`, `.kiro/agents/{selfhost,step}.json`, `.kiro/steering/`. Both launchers → repo-root `prompts/_orchestrator.md` + RE-RANK from `.roadmap/08-rerank.json` (state from disk). RE-RANK derivation runs on clone: 9 `remaining_sequence` sentinels all present → **frontier DRAINED** (all prompts shipped). Mechanism discriminates (sim absent sentinel → correctly names `P-RECONCILE-CRITIQUE-INC` next) → boot+derive operational.
+**Protected-file diff audit `git diff master..ship`** — all byte-identical (exist on master, zero A/M/D):
+`CLAUDE.md` · `prompts/_orchestrator.md` · `.claude/skills/self-host/` · `.claude/agents/step-runner.md` · `.kiro/agents/{selfhost,step}.json` · `.kiro/steering/` → **UNCHANGED**. Ship work = additions only.
+
+### Done-bar
+- ✅ Both harnesses boot DELIVERY launcher FROM INSTALLED TARBALL — install + integrity + smoke green; full launch chain resolves to installed files. (Live agent-loop exec = sandbox limit, proxied.)
+- ✅ Smoke selftest green post-install (both harnesses, both-directions).
+- ✅ Lint path inference intact under `.claude/adp/prompts/` + root `.adr/`.
+- ✅ Self-host launch-from-root operational on fresh clone; ship diff = additions only, protected files byte-identical.
+
+### Flow
+```mermaid
+flowchart TD
+  TB["REAL tarball<br/>adp-v815ab03+….tgz (sha OK)"] --> EX["extract → manifest.json + payload/"]
+  EX --> FIX{"install from payload?"}
+  FIX -->|"init read src (P3)"| BLK["HALT: payload src missing"]
+  BLK --> PF["FIX: payload-first src resolution"]
+  PF --> C1["P5.1 claude: laid=56 integrity=OK smoke=PASS · 0 pollution"]
+  PF --> C2["P5.2 kiro: laid=55 integrity=OK smoke=PASS · 0 pollution"]
+  C1 --> C3["P5.3 lint inference: prompt/adr/aprd/hld/roadmap ✓"]
+  C2 --> C3
+  C3 --> C4["P5.4 fresh clone: self-host boots · RE-RANK derives disk · frontier drained"]
+  C4 --> AUD["git diff master..ship: protected files UNCHANGED"]
+  AUD --> SHIP["SHIPPABLE"]
+```
+
+### Deviations
+- Live DELIVER trivial-slice (P5.1) + live `kiro-cli` boot (P5.2): not executable in non-interactive sandbox (no LLM agent-loop / no `kiro-cli` binary). Verified via install-integrity + both-directions smoke + static boot-chain path resolution (every launcher ref → existing installed file). Same env-class limit P4 logged for `make`.
+- P5 required a `bin/init.mjs` fix (above) to make the shipped artifact installable — discovered only here because P5 is first install-from-tarball. Fix additive + backward-compat (repo + pure-src both green); not committed.

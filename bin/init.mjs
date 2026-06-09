@@ -76,7 +76,11 @@ const laid = [], skipped = [], verify = [];   // verify = dests to re-hash in st
 let promptsTouched = false;
 
 for (const row of rows) {
-  const src = path.join(PKG_ROOT, row.src);
+  // src resolution: shipped tarball stores allowlisted files under payload/<path> (path-mapped,
+  // gated). repo/npm-dev layout has originals at <src>. payload-first → install what we SHIP;
+  // fall back to repo src for in-tree dev installs. (one resolution serves both artifacts.)
+  const payloadSrc = path.join(PKG_ROOT, "payload", row.path);
+  const src = fs.existsSync(payloadSrc) ? payloadSrc : path.join(PKG_ROOT, row.src);
   const dest = destFor(row.path, harness);
   if (!fs.existsSync(src)) die(`payload src missing: ${row.src}. Broken package.`);
   const isPrompt = row.path.startsWith("prompts/");
