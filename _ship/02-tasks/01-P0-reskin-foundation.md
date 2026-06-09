@@ -49,3 +49,18 @@ Repo has zero-dep linter: `node tools/economy-lint/lint.mjs <files>` checks cave
 
 ## Deps
 None — first task, blocks ALL others (P1 launcher refs generic canon; P2 manifest lists re-skinned files).
+
+## STATUS — DONE (2026-06-09)
+
+Both NEW files written, additive only:
+- `canon/CLAUDE.generic.md` — 49 ln, est_tokens 1012, lint `clean`.
+- `prompts/_orchestrator.generic.md` — 96 ln, est_tokens 1952, lint `clean`.
+
+Done-bar met:
+- Lint clean both files (caveman + economy, zero violations/warnings).
+- Step-5 grep `self-host|agentic-delivery-pipeline|aprd.frozen|ADR-0021` → EMPTY (exit 1).
+- Generic orchestrator: all 5 phases LIVE (understand→plan→decide→design→build), client checkpoints A/B/C; WORKSPACE_ROOT + DELIVERABLE_TARGET parameterized (chose PARAMETERIZE over fork per P0.2), greenfield+brownfield one loop, roles lazy-loaded.
+- Generic canon: deliverable reframed = USER software; trees generated FRESH in user repo; caveman register verbatim; universal canon kept (one-role-one-prompt, disk source-of-truth, IDs thread, never-overwrite-frozen, verify-before-done, LLM-reconciles, adversarial-hostile, DRY economy).
+- Regression: `git status` → only `canon/` + `prompts/_orchestrator.generic.md` new; root `CLAUDE.md` + `prompts/_orchestrator.md` UNMODIFIED.
+
+Note: lint CLI takes single target → ran per-file (both clean).
