@@ -1,0 +1,42 @@
+{
+  "slices_ref": ".roadmap/02-slices.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "class": "greenfield",
+  "verdict": "all_vertical",
+  "valid": [
+    {
+      "id": "S1",
+      "name": "Sign in via OAuth on the web application",
+      "vertical": true,
+      "qualifying_acceptance": ["AC1", "AC5"],
+      "reason": "AC1: client watches the entry page render in a standard browser over HTTP/HTTPS — black-box (HTTP response visible through browser surface) and user-observable (no technical knowledge required). AC5: client watches the OAuth flow complete and an authenticated session appear in the application with no password entry — black-box (session state surfaces through UI) and user-observable."
+    },
+    {
+      "id": "S2",
+      "name": "Log and persist billable time entries against a project",
+      "vertical": true,
+      "qualifying_acceptance": ["AC2", "AC7"],
+      "reason": "AC2: client watches a submitted time entry appear in the project's time-entry list immediately — black-box (list visible in UI) and user-observable. AC7: client navigates away, returns, and watches the same entry still present linked to the same project and account — black-box (list visible on return) and user-observable, confirming persistence through the product surface."
+    },
+    {
+      "id": "S3",
+      "name": "Export a monthly PDF invoice with line items and monetary totals",
+      "vertical": true,
+      "qualifying_acceptance": ["AC3", "AC8", "AC9", "AC10"],
+      "reason": "AC3: client watches the browser receive a file download with content-type application/pdf after triggering export — black-box (browser file-download surface) and user-observable. AC8: client opens the downloaded PDF and sees exactly one line item per logged entry with date, description, hours, rate, line total, and a matching invoice total — black-box and user-observable. AC9: client sees currency identifier alongside every monetary amount in the UI and in the PDF — black-box and user-observable. AC10: client sets a rate, logs hours, opens the PDF, and verifies the line total equals hours multiplied by the project rate — black-box and user-observable."
+    },
+    {
+      "id": "S4",
+      "name": "Create and manage client projects with currency and billable rate",
+      "vertical": true,
+      "qualifying_acceptance": ["AC4", "AC6"],
+      "reason": "AC6: client watches a newly created project (with name, client, currency, and rate) appear in the project list, then watches edits to name or rate take effect, and watches deletion remove it — black-box (project list and detail visible in UI) and user-observable. AC4: client sets different currencies on two distinct projects and watches each project's invoice display only its own currency with no cross-project mixing — black-box (invoice display through UI/PDF surface) and user-observable."
+    }
+  ],
+  "rejected": [],
+  "slice_counts": {
+    "total": 4,
+    "valid": 4,
+    "rejected": 0
+  }
+}

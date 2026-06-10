@@ -1,0 +1,47 @@
+{
+  "slice_components_ref": ".hld/slices/S4/components.json",
+  "slice_contracts_ref": ".hld/slices/S4/contracts.json",
+  "slice_data_model_ref": ".hld/slices/S4/data-model.json",
+  "slice_nfr_mechanisms_ref": ".hld/slices/S4/nfr-mechanisms.json",
+  "slice_flows_ref": ".hld/slices/S4/flows.json",
+  "slice_test_specs_ref": ".hld/slices/S4/test-specs.json",
+  "slice_deferred_decisions_ref": ".hld/slices/S4/deferred-decisions.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "rerank_ref": ".roadmap/08-rerank.json",
+  "skeleton_frozen_verified": true,
+  "class": "greenfield",
+  "mode": "increment",
+  "slice_id": "S4",
+  "slice_name": "Create and manage client projects with currency and billable rate",
+  "artifacts_reviewed": ["components.json", "contracts.json", "data-model.json", "nfr-mechanisms.json", "flows.json", "test-specs.json", "deferred-decisions.json"],
+  "verdict": "clean",
+  "issues": [],
+  "issue_count": 0,
+  "skeleton_fidelity": {
+    "redrawn_components": [],
+    "reshaped_contracts": [],
+    "re_owned_entities": [],
+    "re_disposed_nfrs": [],
+    "re_authored_contract_tests": [],
+    "re_tested_flows": [],
+    "build_dag_re_emitted": false,
+    "verdict": "extends-not-redraws"
+  },
+  "critique_counts": {
+    "artifacts_reviewed": 7,
+    "issues": 0,
+    "by_category": {
+      "coverage-gap": 0,
+      "ownership-defect": 0,
+      "unmechanized-nfr": 0,
+      "frame-violation": 0,
+      "untestable-contract": 0,
+      "incomplete-flow": 0,
+      "undrained-queue": 0,
+      "skeleton-fidelity": 0
+    }
+  }
+}

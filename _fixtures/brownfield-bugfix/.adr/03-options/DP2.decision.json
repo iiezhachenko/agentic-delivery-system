@@ -1,0 +1,60 @@
+{
+  "id": "DP2",
+  "decision": "Which server-side language, runtime, and web framework should be used to implement the application?",
+  "category": "Tech stack",
+  "forced_by": ["R1", "C1", "A1", "A2"],
+  "cut_ref": "FD1",
+  "options_ref": "03-options/DP2.json",
+  "grounding_source": "reasoned",
+  "evaluation": [
+    {
+      "option": "Node.js (LTS) with Express or Fastify",
+      "assessment": "Satisfies A1: mature server-side PDF generation libraries (Puppeteer, PDFKit) directly available via npm — AC3 (server-side PDF file download) is reachable. Satisfies A2: mature OAuth libraries (Passport.js, openid-client) cover AC5 round-trip. Broad PaaS/VPS support is consistent with A6. Lightweight framework overhead is adequate for A13 scale (no concurrency demands). Under C2, the npm ecosystem provides fast access to required dependencies; however, Express in particular is minimally opinionated, meaning the team must make additional structural decisions (routing conventions, error handling, middleware order) themselves — adding non-feature setup cost. TypeScript adoption, while beneficial, adds build tooling overhead. The CPU-blocking risk of Puppeteer on Node's event loop is real but non-material at A13's low concurrency (INV6). The aPRD raises no force that separates it from Python on any dimension; both are broadly capable stacks for R1/A1/A2/A6/A13.",
+      "decisive_factors": ["A1", "A2", "C2", "A13", "A6", "AC3", "AC5"]
+    },
+    {
+      "option": "Python with Django or Flask/FastAPI",
+      "assessment": "Satisfies A1: strong server-side PDF libraries (WeasyPrint, ReportLab) are well-established and directly address AC3. Satisfies A2: mature OAuth libraries (social-auth-app-django, Authlib) cover AC5. Django's built-in ORM, session framework, and conventions reduce boilerplate for the data model (E1–E7) — a direct C2 benefit, as CRUD scaffolding is faster than with a minimal framework. Broad PaaS/VPS support maintains A6. Django's sync WSGI model with Gunicorn/uWSGI is fully adequate at A13's single-server synchronous assumption (INV6). The cost is Django's full-stack conventions imposing more structure than strictly needed for A13 scale; Flask/FastAPI are lighter but require explicit wiring comparable to Node/Express effort. The aPRD raises no force that separates it from Node.js on any dimension; Django specifically offers a concrete C2 advantage over Express-level minimal frameworks through built-in ORM and session management.",
+      "decisive_factors": ["A1", "A2", "C2", "A13", "A6", "AC3", "AC5"]
+    },
+    {
+      "option": "Ruby with Ruby on Rails",
+      "assessment": "Satisfies A1: PDF generation gems (Prawn, WickedPDF) address AC3's server-side file download requirement. Satisfies A2: OmniAuth gem ecosystem directly addresses AC5's OAuth round-trip. Rails' scaffold generators and ActiveRecord ORM deliver working CRUD slices rapidly — strong C2 alignment. Broad PaaS support (Render, Fly.io) is compatible with A6. Rails' single-process deployment and synchronous request model fits INV6 and A13. The cost the aPRD raises: departing from Rails' full-stack conventions (e.g., if DP6 picks SPA) requires additional configuration; gem currency must be verified for OAuth and PDF dependencies. Ruby's CPU-bound performance is not a material concern at A13 scale. One option cost mentions a smaller developer pool, which is recalled market data the contract does not raise — that cost is disregarded; the contract-grounded cost is the convention-departure overhead if DP6 diverges from Rails' SSR model.",
+      "decisive_factors": ["A1", "A2", "C2", "A6", "A13", "AC3", "AC5"]
+    }
+  ],
+  "decision_made": "Python with Django or Flask/FastAPI",
+  "rationale": "All three options satisfy A1 (server-side PDF generation), A2 (OAuth delegation), A6 (no single-vendor lock-in), A13 (single-server synchronous), R1/C1/AC1, AC3, and AC5 — no hard constraint or INV eliminates any candidate. The deciding force is C2 (two-month timeline). Django's built-in ORM, session framework, and migration tooling provide concrete, measurable C2 benefit: working CRUD scaffolding for E1–E7 is available with significantly less explicit wiring than Express/Fastify or Rails under non-convention paths. Rails' scaffold generators are also fast under C2, but Rails' benefit is maximised when DP6 stays with server-rendered templates; if DP6 diverges, Rails requires additional configuration that consumes C2 time. Django's ORM and session management deliver their C2 benefit regardless of DP6's outcome. Node.js/Express offers the same PDF and OAuth ecosystem capability but requires more explicit structural decisions (routing conventions, middleware order) before being productive — a concrete setup cost under C2 that Django conventions absorb. The aPRD raises no force that distinguishes Node.js from Python on scale, portability, compliance, or feature coverage; Django's convention advantage is a real, contract-grounded C2 differentiator at this scope. Flask/FastAPI is included as the lighter Python option where less convention is preferred, keeping the pick correct regardless of Django vs. Flask sub-choice.",
+  "rejected": [
+    {
+      "option": "Node.js (LTS) with Express or Fastify",
+      "why_rejected": "Express/Fastify are minimally opinionated — routing conventions, error handling, and session management require explicit team decisions before productive feature work begins. This is concrete setup overhead under C2's two-month timeline that Django's built-in ORM, session framework, and CRUD conventions absorb. The aPRD raises no force (scale, portability, PDF, OAuth) on which Node.js outperforms Python; the C2 deficit is the only contract-grounded differentiator, and it favours Python/Django."
+    },
+    {
+      "option": "Ruby with Ruby on Rails",
+      "why_rejected": "Rails delivers strong C2 benefit when DP6 aligns with Rails' server-rendered template model, but if DP6 diverges (REST API + SPA or hybrid), Rails' conventions require additional configuration that consumes C2 time. Django's ORM and session management deliver C2 benefit independent of DP6's outcome, making Python a more robust choice under C2 across the decision space. No other aPRD force distinguishes Rails from Python/Django."
+    }
+  ],
+  "consequences": {
+    "positive": [
+      "Django's built-in ORM satisfies the E1–E7 relational model (R7) with minimal boilerplate, accelerating S1 (skeleton persistence seam) and S4 (project management) under C2.",
+      "social-auth-app-django / Authlib directly supports AC5 OAuth round-trip (A2), closing the FD2 seam with a mature library.",
+      "WeasyPrint / ReportLab libraries satisfy A1's server-side PDF generation requirement for S3 (AC3).",
+      "Django's sync WSGI model (Gunicorn) is a direct expression of INV6's single-server synchronous assumption."
+    ],
+    "accepted_cost": [
+      "Django's full-stack conventions impose structure that may exceed A13 personal-tool scale needs; the ORM, admin, and middleware stack carry overhead unused by the feature set.",
+      "Flask/FastAPI require explicit ORM and session wiring comparable to Node/Express effort — the pick's C2 advantage is realised primarily through Django-style conventions, not the Python language alone.",
+      "Python's sync WSGI deployment requires a process manager (Gunicorn, uWSGI) and WSGI-compatible PaaS configuration — a concrete deployment step Node.js process management avoids."
+    ],
+    "follow_on": [
+      "DP4 (persistence): Django's ORM works best with PostgreSQL or SQLite — both relational options. Django does not natively integrate with MongoDB without third-party packages; a Document store pick in DP4 would add ORM adapter cost.",
+      "DP6 (API style): Django's template engine supports MPA directly; Django REST Framework adds the JSON API layer for SPA approaches — both paths are well-supported, consistent with the rationale's DP6-independence claim.",
+      "DP10 (deployment): Python/Django's WSGI deployment model requires a platform that supports Gunicorn or equivalent; all PaaS and VPS options support this, so no constraint on DP10."
+    ]
+  },
+  "traces": ["R1", "C1", "A1", "A2", "C2", "A6", "A13", "AC3", "AC5", "INV6"],
+  "degenerate_forced": false,
+  "degenerate_reason": null,
+  "lane_note": "Decision content for SYNTHESIZE-ADR (role 6) to render + RECONCILE (role 5) to coherence-check. EVALUATE-DECIDE picks; it does not assign an ADR id, reconcile cross-decision conflicts, or check coverage."
+}

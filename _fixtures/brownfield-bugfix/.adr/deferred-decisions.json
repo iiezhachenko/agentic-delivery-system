@@ -1,0 +1,119 @@
+{
+  "triage_ref": ".adr/02-triage.json",
+  "decision_points_ref": ".adr/01-decision-points.json",
+  "components_ref": ".hld/skeleton/components.json",
+  "contracts_ref": ".hld/skeleton/contracts.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "adr_log_ref": ".adr/log/",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "lock_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton",
+  "skeleton_id": "S1",
+  "baseline_adr_max": "ADR-0006",
+  "local_queue_in": ["DP3", "DP8", "DP9", "DP11"],
+  "resolutions": [
+    {
+      "dp_id": "DP3",
+      "decision": "Which server-side library or tool should generate the PDF invoice file?",
+      "category": "Tech stack",
+      "forced_by": ["A1", "R3", "AC3"],
+      "cut_ref": "deferred:S3",
+      "owning_component": "C5",
+      "disposition": "re-deferred",
+      "adr_id": null,
+      "draft_ref": null,
+      "defer_to": "S3",
+      "escalate_to": null,
+      "rationale": "DP3 carries an explicit cut tag `deferred:S3`; the foundation cut's `deferred[]` names 'PDF generation library/tool selection — defer_to: S3'. C5 (Invoice Export) owns the concern, and S3 is the earliest slice that builds PDF generation. No skeleton seam exercises PDF generation; the walking skeleton (S1) streams no PDF. INV5 fixes the delivery model (server-side + browser download) but does not force the library choice at skeleton time. Resolving now would be premature-waterfall design of a box-internal HOW (§1.2 / RM9)."
+    },
+    {
+      "dp_id": "DP8",
+      "decision": "Which OAuth integration library or mechanism should handle the OAuth handshake, token exchange, and session establishment within the application?",
+      "category": "Cross-cutting",
+      "forced_by": ["R5", "A2", "AC5"],
+      "cut_ref": "FD2",
+      "owning_component": "C2",
+      "disposition": "resolved",
+      "adr_id": "ADR-0007",
+      "draft_ref": "drafts/0007-adopt-framework-native-oauth-library-for-oauth-handshake.draft.md",
+      "defer_to": null,
+      "escalate_to": null,
+      "rationale": "C2 (Identity & Auth) is in-skeleton. FD2 (OAuth provider integration boundary) is needed by S1; the skeleton must complete a full Google OAuth 2.0 round-trip (seam `primary_external_integration`, AC5). S1 cannot be built without a concrete library wiring the redirect, callback, and token exchange routes inside C2. The choice is skeleton-once: every subsequent slice inherits the authenticated session C2 establishes. ADR-0002 fixed Python runtime, eliminating Node.js (Passport.js) and Ruby (OmniAuth) candidates. Among remaining Python options, a framework-native OAuth library (django-allauth or Authlib matching the chosen framework) is preferred over hand-rolled code because no force at A13/INV6 personal-tool scale justifies custom CSRF state and token-validation implementation."
+    },
+    {
+      "dp_id": "DP9",
+      "decision": "How should application secrets and configuration (OAuth credentials, database connection strings, hosting environment values) be injected into the running application?",
+      "category": "Cross-cutting",
+      "forced_by": ["A2", "A6"],
+      "cut_ref": null,
+      "owning_component": "C2",
+      "disposition": "resolved",
+      "adr_id": "ADR-0008",
+      "draft_ref": "drafts/0008-adopt-environment-variables-as-secrets-injection-strategy.draft.md",
+      "defer_to": null,
+      "escalate_to": null,
+      "rationale": "S1 must load OAuth credentials (A2, ADR-0005) and the PostgreSQL connection string (ADR-0003) at startup before any component can function. This is a cross-cutting structural choice the skeleton must fix to be coherent — every component that reads a secret agrees on the injection mechanism. ADR-0006 fixed deployment to a PaaS platform (Render, Fly.io, Railway) whose native env-var UI provides the injection mechanism without additional infrastructure. A6 (portability, no vendor lock-in) eliminates vendor-tied managed secrets services. Dotenv files committed to the repository are rejected on security grounds traceable to A2. Runtime environment variables + dotenv-for-local-dev (gitignored) is the only option satisfying both A2 and A6 at the scale fixed by A13/INV6."
+    },
+    {
+      "dp_id": "DP11",
+      "decision": "What build and test strategy should be used to mechanically prove each acceptance criterion is met: unit and integration tests, end-to-end browser automation, or a mixed approach?",
+      "category": "Build/test strategy",
+      "forced_by": ["AC1", "AC3", "AC5"],
+      "cut_ref": null,
+      "owning_component": null,
+      "disposition": "re-deferred",
+      "adr_id": null,
+      "draft_ref": null,
+      "defer_to": "DERIVE-TESTS",
+      "escalate_to": null,
+      "rationale": "DP11 concerns the CI/build pipeline and test toolchain — 'inside the build pipeline' per its blast_rationale. No component in `components.json` owns the CI/test infrastructure; it is not an HLD box. The skeleton pass draws application domain components only. DERIVE-TESTS (Phase 3 role 7) is the designated resolver for build/test strategy decisions. Resolving here would be out-of-lane (prompt §8: 'No tests/build-DAG (DERIVE-TESTS)'). Deferred to DERIVE-TESTS pass."
+    }
+  ],
+  "resolved": [
+    { "dp_id": "DP8", "adr_id": "ADR-0007" },
+    { "dp_id": "DP9", "adr_id": "ADR-0008" }
+  ],
+  "re_deferred": [
+    { "dp_id": "DP3", "defer_to": "S3" },
+    { "dp_id": "DP11", "defer_to": "DERIVE-TESTS" }
+  ],
+  "escalated": [],
+  "drained": ["DP3", "DP8", "DP9", "DP11"],
+  "local_adrs": [
+    {
+      "id": "ADR-0007",
+      "dp_id": "DP8",
+      "title": "Adopt framework-native OAuth library for OAuth handshake within Identity & Auth",
+      "status": "Proposed",
+      "mode": "slice",
+      "scope": "local",
+      "component": "C2",
+      "category": "Cross-cutting",
+      "traces": ["R5", "A2", "AC5"],
+      "draft_ref": "drafts/0007-adopt-framework-native-oauth-library-for-oauth-handshake.draft.md"
+    },
+    {
+      "id": "ADR-0008",
+      "dp_id": "DP9",
+      "title": "Adopt environment variables as secrets and configuration injection strategy",
+      "status": "Proposed",
+      "mode": "slice",
+      "scope": "local",
+      "component": "C2",
+      "category": "Cross-cutting",
+      "traces": ["A2", "A6"],
+      "draft_ref": "drafts/0008-adopt-environment-variables-as-secrets-injection-strategy.draft.md"
+    }
+  ],
+  "escalations": [],
+  "note": null,
+  "resolve_counts": {
+    "queue_in": 4,
+    "resolved": 2,
+    "re_deferred": 2,
+    "escalated": 0,
+    "local_adrs_emitted": 2
+  }
+}

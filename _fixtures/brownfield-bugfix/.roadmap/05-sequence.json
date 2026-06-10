@@ -1,0 +1,68 @@
+{
+  "skeleton_ref": ".roadmap/04-skeleton.json",
+  "slices_ref": ".roadmap/02-slices.json",
+  "verticality_ref": ".roadmap/03-verticality.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "class": "greenfield",
+  "verdict": "sequenced",
+  "sequence": [
+    {
+      "position": 1,
+      "id": "S1",
+      "name": "Sign in via OAuth on the web application",
+      "skeleton": true,
+      "value": "high",
+      "retires_risk": "OAuth provider integration (A2): first exercise of the external OAuth delegation; proves the provider round-trip works before any other slice depends on an authenticated session.",
+      "depends_on": [],
+      "cost_proxy": 4,
+      "rationale": "Pinned to position 1 by RM4: walking skeleton crosses all four foundational seams (ingress, domain, persistence, primary_external_integration) in a single end-to-end path, retires the OAuth provider integration risk (A2) first, and is the dependency root — every other slice depends on it directly or transitively."
+    },
+    {
+      "position": 2,
+      "id": "S4",
+      "name": "Create and manage client projects with currency and billable rate",
+      "skeleton": false,
+      "value": "high",
+      "retires_risk": null,
+      "depends_on": ["S1"],
+      "cost_proxy": 6,
+      "rationale": "S1 placed; S4 is the only dependency-legal slice at this position (S2 and S3 both require S4, which is not yet placed). Value high; establishes the project container that S2 and S3 depend on, unblocking both downstream slices."
+    },
+    {
+      "position": 3,
+      "id": "S2",
+      "name": "Log and persist billable time entries against a project",
+      "skeleton": false,
+      "value": "high",
+      "retires_risk": null,
+      "depends_on": ["S1", "S4"],
+      "cost_proxy": 4,
+      "rationale": "S1 and S4 placed; S2 is the only dependency-legal slice at this position (S3 requires S2, not yet placed). Value high; delivers the core daily-use capability — logging billable hours — and unblocks S3 (invoice export)."
+    },
+    {
+      "position": 4,
+      "id": "S3",
+      "name": "Export a monthly PDF invoice with line items and monetary totals",
+      "skeleton": false,
+      "value": "high",
+      "retires_risk": "Server-side PDF generation (A1): first exercise of the backend PDF library (e.g. Puppeteer or WeasyPrint); proves file generation and browser-stream delivery work before the feature is considered done.",
+      "depends_on": ["S1", "S2", "S4"],
+      "cost_proxy": 8,
+      "rationale": "S1, S2, and S4 all placed; S3 is now dependency-legal. Value high; delivers the terminal product deliverable (PDF invoice export) and retires server-side PDF generation risk (A1). Placed last because its full depends_on chain (S1, S2, S4) required all prior slices to be built first."
+    }
+  ],
+  "ordering_basis": "Skeleton S1 is pinned to position 1 by RM4 regardless of score — it is the dependency root and retires integration risk before any feature depth is built on top of it. Dependency legality is the hard constraint: no slice may appear before any slice in its own depends_on; this overrides the value×risk/cost heuristic. Within the dependency-legal ready frontier at each step, slices are ordered by: (a) value high > med > low, carried verbatim from 02-slices.json and never re-scored; (b) then retires_risk != null ranks ahead of null (retire risk early, RM5); (c) then lower feature depth as the declared cost proxy — cost_proxy = len(requirements) + len(acceptance) — no cost field exists in the slices so this is the declared proxy, not a fabricated estimate; (d) then lowest S* index as a deterministic tiebreak. At each of positions 2–4 only one slice was dependency-legal, so no heuristic disambiguation was required. Value is client-owned and only proposed here — confirmed or overridden at SEQUENCE-REVIEW.",
+  "dependency_check": {
+    "acyclic": true,
+    "skeleton_is_root": true,
+    "cycles": [],
+    "dangling_depends_on": []
+  },
+  "coverage": {
+    "eligible_slices": ["S1", "S2", "S3", "S4"],
+    "sequenced": ["S1", "S4", "S2", "S3"],
+    "missing": [],
+    "duplicated": []
+  },
+  "sequence_counts": { "total": 4, "positions": 4 }
+}

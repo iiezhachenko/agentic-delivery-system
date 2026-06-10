@@ -1,0 +1,89 @@
+{
+  "oracle_ref": ".build/skeleton/oracle/oracle.json",
+  "certified_at": "2026-06-07T00:00:00Z",
+  "certifier": "test-author:freelancer-time-tracking",
+  "high_blast_components": ["C2"],
+  "high_blast_rationale": "C2 (Identity & Auth) governs authentication — auth is a high-blast domain (session establishment, identity persistence, session gating). Mutations here can silently bypass auth checks or produce phantom sessions.",
+  "verdict": "kill-strong",
+  "certified_tests": [
+    {
+      "oracle_test_id": "OCT-CT1",
+      "file": "contract/test_CT1.py",
+      "target": "CT1",
+      "high_blast_reason": "C2 is the caller; CT1 carries Freelancer identity record (E1, auth data-integrity) between Identity & Auth and Data Store. Mutations to save/load path could produce phantom or partial identity records.",
+      "fault_seeds": [
+        {
+          "fault": "save_identity returns None (silent discard — no acknowledgement)",
+          "killed_by": "test_ct1_shape_persists_identity_record — asserts result is not None"
+        },
+        {
+          "fault": "get_identity returns None after successful save (lost write)",
+          "killed_by": "test_ct1_shape_persists_identity_record — asserts fetched is not None"
+        },
+        {
+          "fault": "store-unavailable exception swallowed — callback proceeds as if write succeeded",
+          "killed_by": "test_ct1_failure_store_unavailable — asserts exception propagates (callback aborts)"
+        },
+        {
+          "fault": "constraint-violation swallowed — duplicate identity record silently created",
+          "killed_by": "test_ct1_failure_constraint_violation — asserts exception raised on duplicate"
+        },
+        {
+          "fault": "partial-failure: connection drop not caught — partial record left in store",
+          "killed_by": "test_ct1_failure_partial_failure — asserts ACID rollback (get_identity returns None)"
+        }
+      ],
+      "kill_strength": "all 5 seeded faults killed by declared test functions"
+    },
+    {
+      "oracle_test_id": "OCT-CT8",
+      "file": "contract/test_CT8.py",
+      "target": "CT8",
+      "high_blast_reason": "C2 is the provider of the session-presence signal; C6 gates all authenticated routes through this seam. Mutations here can bypass authentication entirely (silent pass-through on no-valid-session or exception).",
+      "fault_seeds": [
+        {
+          "fault": "check_session returns a truthy value even when no cookie is present (auth bypass)",
+          "killed_by": "test_ct8_shape_session_presence_signal — asserts unauthenticated result when check_session returns None"
+        },
+        {
+          "fault": "no-valid-session: Web Ingress dispatches to domain component instead of redirecting",
+          "killed_by": "test_ct8_failure_no_valid_session — asserts dispatched=False and redirect_location is not None"
+        },
+        {
+          "fault": "callee-error: exception swallowed — request dispatched to domain component",
+          "killed_by": "test_ct8_failure_callee_error — asserts dispatched=False and redirect_location is not None"
+        },
+        {
+          "fault": "callee-error: exception causes 500 instead of login redirect",
+          "killed_by": "test_ct8_failure_callee_error — asserts redirect_location is not None (login redirect, not 500)"
+        }
+      ],
+      "kill_strength": "all 4 seeded faults killed by declared test functions"
+    },
+    {
+      "oracle_test_id": "OA-AC5",
+      "file": "acceptance/visible/test_AC5.py + acceptance/held_out/test_AC5.py",
+      "target": "AC5",
+      "high_blast_reason": "AC5 asserts the end-to-end OAuth authentication flow — session establishment without password. Mutations here could allow unauthenticated access or accept a fabricated session token.",
+      "fault_seeds": [
+        {
+          "fault": "OAuth callback establishes session without verifying provider token (phantom session)",
+          "killed_by": "test_ac5_oauth_flow_establishes_authenticated_session — asserts callback_status < 500 and session cookie set only after mock_oauth_provider.exchange_code called with real code"
+        },
+        {
+          "fault": "session cookie set on /auth/login before OAuth round-trip completes",
+          "killed_by": "test_ac5_oauth_flow_establishes_authenticated_session — session cookie checked on /auth/callback response, not /auth/login"
+        },
+        {
+          "fault": "held-out: different provider_id silently rejected (only visible provider_id accepted)",
+          "killed_by": "test_ac5_held_out_oauth_flow_establishes_session_different_identity — unguessable provider_id 'google-uid-heldout-9f3a7c2e' must produce a valid session"
+        },
+        {
+          "fault": "password form rendered at /auth/callback (auth bypass via password fallback)",
+          "killed_by": "test_ac5_oauth_flow_establishes_authenticated_session — no password entry required (session established via OAuth only)"
+        }
+      ],
+      "kill_strength": "all 4 seeded faults killed by declared test functions (visible + held_out combined)"
+    }
+  ]
+}

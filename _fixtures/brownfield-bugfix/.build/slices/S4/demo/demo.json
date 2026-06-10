@@ -1,0 +1,46 @@
+{
+  "verify_output_ref": ".build/slices/S4/verify-output.json",
+  "critique_ref": ".build/slices/S4/critique.json",
+  "integration_record_ref": ".build/slices/S4/integration-record.json",
+  "build_record_ref": ".build/slices/S4/build-record.json",
+  "flows_ref": ".hld/slices/S4/flows.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "greenfield",
+  "mode": "slice-build",
+  "slice_id": "S4",
+  "slice_name": "Create and manage client projects with currency and billable rate",
+  "builds_on": ["S1"],
+  "demo_artifact": ".build/slices/S4/demo/demo.md",
+  "demo_modality": "ui-click-through",
+  "flow_demonstrated": "F4",
+  "demonstrated_acs": [
+    {
+      "ac": "AC6",
+      "req_ref": "R6",
+      "plain_outcome": "The freelancer creates a client project (name, currency, billable rate) and it appears in their project list; they can edit its name or rate and delete it, with all project data scoped to their own account.",
+      "route": "POST /projects -> create ; GET /projects -> list ; POST /projects/<slug>/edit -> update ; POST /projects/<slug>/delete -> remove (no valid session -> 302 redirect to /auth/login, no data touched)",
+      "evidence": { "visible": "pass", "held_out": "pass" }
+    }
+  ],
+  "client_response": "accepted",
+  "accepted_by": "client",
+  "accepted_at": "2026-06-09T00:00:00Z",
+  "rejection": null,
+  "learnings": [
+    "Later-slice capabilities C4 (time logging) and C5 (invoice export) remain to build — the project records created here are what those slices log billable hours against and invoice.",
+    "Project records persist via the Data Store at the contract layer in tests; real PostgreSQL persistence (ADR-0003) is wired at integration — production database provisioning remains a deployment prerequisite."
+  ],
+  "signoff": "A — Yes, this is what I expected. Project management is working as described; go ahead with the next piece.",
+  "next": "Phase 1 re-rank (next slice)",
+  "status": "accepted",
+  "demo_counts": {
+    "demonstrated_acs": 1,
+    "acs_visible_passed": 1,
+    "acs_held_out_passed": 1,
+    "learnings": 2
+  }
+}

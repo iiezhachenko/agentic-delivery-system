@@ -1,0 +1,40 @@
+{
+  "components_ref": ".hld/skeleton/components.json",
+  "contracts_ref": ".hld/skeleton/contracts.json",
+  "data_model_ref": ".hld/skeleton/data-model.json",
+  "nfr_mechanisms_ref": ".hld/skeleton/nfr-mechanisms.json",
+  "flows_ref": ".hld/skeleton/flows.json",
+  "test_specs_ref": ".hld/skeleton/test-specs.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "deferred_decisions_ref": ".adr/deferred-decisions.json",
+  "lock_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton",
+  "skeleton_id": "S1",
+  "artifacts_reviewed": [
+    "components.json",
+    "contracts.json",
+    "data-model.json",
+    "nfr-mechanisms.json",
+    "flows.json",
+    "test-specs.json"
+  ],
+  "verdict": "clean",
+  "issues": [],
+  "issue_count": 0,
+  "critique_counts": {
+    "artifacts_reviewed": 6,
+    "issues": 0,
+    "by_category": {
+      "coverage-gap": 0,
+      "ownership-defect": 0,
+      "unmechanized-nfr": 0,
+      "frame-violation": 0,
+      "untestable-contract": 0,
+      "incomplete-flow": 0,
+      "undrained-queue": 0
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "base_skeleton_ref": ".hld/skeleton/components.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "rerank_ref": ".roadmap/08-rerank.json",
+  "slices_ref": ".roadmap/02-slices.json",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "skeleton_frozen_verified": true,
+  "class": "greenfield",
+  "mode": "increment",
+  "slice_id": "S4",
+  "slice_name": "Create and manage client projects with currency and billable rate",
+  "introduced_components": ["C3"],
+  "touched_components": [
+    {
+      "id": "C3",
+      "name": "Project Management",
+      "role": "introduced",
+      "realizes_slice_requirements": ["R4", "R6", "R9", "R10"],
+      "owns_entities": ["E2", "E5", "E6", "E7"],
+      "fleshed_this_slice": true
+    },
+    {
+      "id": "C1",
+      "name": "Data Store",
+      "role": "reused",
+      "built_in": "S1",
+      "why_on_path": "C3 persists and retrieves client project records (E2, E5, E6, E7) from the data store.",
+      "realizes_slice_requirements": [],
+      "fleshed_this_slice": false
+    },
+    {
+      "id": "C2",
+      "name": "Identity & Auth",
+      "role": "reused",
+      "built_in": "S1",
+      "why_on_path": "C3 reads the authenticated freelancer session from C2 to scope all project data to the owning freelancer.",
+      "realizes_slice_requirements": [],
+      "fleshed_this_slice": false
+    },
+    {
+      "id": "C6",
+      "name": "Web Ingress",
+      "role": "reused",
+      "built_in": "S1",
+      "why_on_path": "C6 dispatches project management page requests (create, list, edit, delete) into C3 for this slice.",
+      "realizes_slice_requirements": [],
+      "fleshed_this_slice": false
+    }
+  ],
+  "new_components": [],
+  "new_edges": [],
+  "new_entities_owned": [],
+  "slice_coverage": {
+    "slice_requirements": ["R4", "R6", "R9", "R10"],
+    "requirements_landed": ["R4", "R6", "R9", "R10"],
+    "requirement_orphans": []
+  },
+  "skeleton_fidelity": {
+    "redrawn_components": [],
+    "modified_edges": [],
+    "verdict": "extends-not-redraws"
+  },
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "increment_counts": {
+    "touched": 4,
+    "introduced": 1,
+    "new_components": 0,
+    "new_edges": 0
+  }
+}

@@ -1,0 +1,265 @@
+{
+  "contracts_ref": ".hld/skeleton/contracts.json",
+  "flows_ref": ".hld/skeleton/flows.json",
+  "components_ref": ".hld/skeleton/components.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "adr_lock_ref": ".adr/adr.lock",
+  "lock_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton",
+  "skeleton_id": "S1",
+  "layer": "design-layer oracle — component/contract + flow tests derived from the HLD; DISTINCT from the aPRD black-box acceptance oracle (Phase 0). SPECS not code (Phase 4 MATERIALIZE-ORACLE writes the code).",
+  "contract_tests": [
+    {
+      "id": "T-CT1",
+      "target": "CT1",
+      "between": ["C2", "C1"],
+      "contract_kind": "shared_data",
+      "shape_assertion": "Seam carries Freelancer identity record (E1) — provider token and user profile reference — between Identity & Auth and Data Store; create-or-update on OAuth callback and read on session resolution move across this seam.",
+      "failure_assertions": [
+        {
+          "failure_mode": "store-unavailable — PostgreSQL instance unreachable; OAuth callback cannot persist the identity record, login fails",
+          "expected_behavior": "Identity & Auth receives no successful write acknowledgement; the OAuth callback aborts without persisting the identity record and the login attempt fails."
+        },
+        {
+          "failure_mode": "constraint-violation — uniqueness constraint on provider identity (e.g. duplicate provider_id insert on concurrent callbacks); write fails",
+          "expected_behavior": "Data Store rejects the write with a constraint-violation error; Identity & Auth must handle the rejection and not produce a partial or duplicate identity record."
+        },
+        {
+          "failure_mode": "partial-failure — write begins but connection drops before commit; ACID transaction rolls back, no partial record persisted",
+          "expected_behavior": "ACID transaction rolls back in full; no partial identity record is persisted in the Data Store."
+        }
+      ],
+      "traces": ["R5"]
+    },
+    {
+      "id": "T-CT2",
+      "target": "CT2",
+      "between": ["C3", "C1"],
+      "contract_kind": "shared_data",
+      "shape_assertion": "Seam carries Client Project and related entity records (E2, E5, E6, E7) between Project Management and Data Store; create, read (list + detail), update, and delete of project-level records move across this seam.",
+      "failure_assertions": [
+        {
+          "failure_mode": "store-unavailable — PostgreSQL instance unreachable; project create/read/update/delete operations fail",
+          "expected_behavior": "Project Management receives no successful store response; all project create/read/update/delete operations fail without producing or modifying any record."
+        },
+        {
+          "failure_mode": "constraint-violation — FK integrity failure (e.g. orphaned project referencing deleted freelancer) or uniqueness violation on project name within owner scope",
+          "expected_behavior": "Data Store rejects the write with a constraint-violation error; Project Management must handle the rejection and not persist an inconsistent or duplicate project record."
+        },
+        {
+          "failure_mode": "not-found — queried project record does not exist in the store (deleted or wrong owner scope)",
+          "expected_behavior": "Data Store returns no matching record; Project Management must surface a not-found result to the caller without fabricating project data."
+        }
+      ],
+      "traces": ["R4", "R6", "R9", "R10"]
+    },
+    {
+      "id": "T-CT3",
+      "target": "CT3",
+      "between": ["C3", "C2"],
+      "contract_kind": "sync_api",
+      "shape_assertion": "Seam carries authenticated freelancer session signal — Project Management calls Identity & Auth in-process to resolve current session and obtain the freelancer identity (E1 reference) used to scope all project data reads and writes.",
+      "failure_assertions": [
+        {
+          "failure_mode": "no-valid-session — session absent or expired; Identity & Auth returns no authenticated identity; Project Management must reject the request (unauthorized)",
+          "expected_behavior": "Identity & Auth returns no authenticated identity; Project Management must reject the request as unauthorized without reading or writing any project data."
+        },
+        {
+          "failure_mode": "callee-error — Identity & Auth raises an exception during session resolution (e.g. store lookup failure for identity record); Project Management cannot determine ownership and must fail the request",
+          "expected_behavior": "Identity & Auth raises an exception; Project Management cannot determine ownership and must fail the request without processing any project operation."
+        }
+      ],
+      "traces": ["R5", "R6"]
+    },
+    {
+      "id": "T-CT4",
+      "target": "CT4",
+      "between": ["C4", "C1"],
+      "contract_kind": "shared_data",
+      "shape_assertion": "Seam carries Time Entry records (E3) between Time Logging and Data Store; create (new entry) and read (list entries per project) move across this seam, with project and freelancer association expressed via foreign-key references in E3.",
+      "failure_assertions": [
+        {
+          "failure_mode": "store-unavailable — PostgreSQL instance unreachable; time entry cannot be persisted or retrieved",
+          "expected_behavior": "Time Logging receives no successful store response; time entry cannot be persisted or retrieved and the operation fails."
+        },
+        {
+          "failure_mode": "constraint-violation — FK constraint failure (e.g. referenced project does not exist or is deleted concurrently); write rejected",
+          "expected_behavior": "Data Store rejects the write with a FK constraint-violation error; Time Logging must handle the rejection and not persist the time entry."
+        },
+        {
+          "failure_mode": "not-found — entry set queried for a project returns empty or the project association is missing",
+          "expected_behavior": "Data Store returns no matching time entries; Time Logging must surface an empty or missing result without fabricating entry data."
+        }
+      ],
+      "traces": ["R2", "R7"]
+    },
+    {
+      "id": "T-CT5",
+      "target": "CT5",
+      "between": ["C4", "C3"],
+      "contract_kind": "sync_api",
+      "shape_assertion": "Seam carries Client Project record reference (E2) including Currency (E5) and Billable Rate (E7) — Time Logging calls Project Management in-process to validate the target project exists and is owned by the authenticated freelancer and to inherit project-level currency and rate.",
+      "failure_assertions": [
+        {
+          "failure_mode": "not-found — referenced project does not exist or does not belong to the authenticated freelancer; Time Logging must reject the entry",
+          "expected_behavior": "Project Management returns no matching project; Time Logging must reject the time entry without persisting any association."
+        },
+        {
+          "failure_mode": "callee-error — Project Management raises an exception during project lookup (e.g. transient store error); Time Logging cannot validate the association and must fail",
+          "expected_behavior": "Project Management raises an exception; Time Logging cannot validate the project association and must fail the entry creation without partial state."
+        }
+      ],
+      "traces": ["R2", "R9", "R10"]
+    },
+    {
+      "id": "T-CT6",
+      "target": "CT6",
+      "between": ["C5", "C1"],
+      "contract_kind": "shared_data",
+      "shape_assertion": "Seam carries Time Entry records (E3) queried by Invoice Export from the Data Store — read-only aggregate query filtered by project reference and calendar month for line-item generation.",
+      "failure_assertions": [
+        {
+          "failure_mode": "store-unavailable — PostgreSQL instance unreachable; invoice aggregation query cannot execute; export fails",
+          "expected_behavior": "Invoice Export receives no query result; the aggregation query cannot execute and the export fails without producing partial invoice data."
+        },
+        {
+          "failure_mode": "not-found — no time entries exist for the given project and calendar month; zero-line-item result (edge case the export flow must handle)",
+          "expected_behavior": "Data Store returns an empty result set; Invoice Export must handle the zero-line-item case without treating it as an error or fabricating entries."
+        },
+        {
+          "failure_mode": "partial-failure — query returns a partial result set due to a cursor or connection error mid-read; incomplete invoice line items",
+          "expected_behavior": "Invoice Export detects a partial result set due to mid-read cursor or connection error and must not produce a completed invoice from incomplete data."
+        }
+      ],
+      "traces": ["R3", "R8"]
+    },
+    {
+      "id": "T-CT7",
+      "target": "CT7",
+      "between": ["C5", "C3"],
+      "contract_kind": "sync_api",
+      "shape_assertion": "Seam carries Client Project header data — Currency designation (E5), Billable Rate (E7), and Client record (E6) — from Project Management to Invoice Export in-process for invoice line-item computation and invoice header population.",
+      "failure_assertions": [
+        {
+          "failure_mode": "not-found — referenced project does not exist or is not accessible; invoice export cannot proceed without rate and currency",
+          "expected_behavior": "Project Management returns no matching project; Invoice Export cannot proceed without rate and currency and must fail the export."
+        },
+        {
+          "failure_mode": "callee-error — Project Management raises an exception during project data retrieval; Invoice Export cannot compute monetary totals and must fail the request",
+          "expected_behavior": "Project Management raises an exception; Invoice Export cannot compute monetary totals and must fail the request without generating partial output."
+        }
+      ],
+      "traces": ["R3", "R8", "R9", "R10"]
+    },
+    {
+      "id": "T-CT8",
+      "target": "CT8",
+      "between": ["C6", "C2"],
+      "contract_kind": "sync_api",
+      "shape_assertion": "Seam carries session presence signal — Web Ingress calls Identity & Auth in-process on each authenticated route to verify a valid session before dispatching to a domain component; result is authenticated (dispatch proceeds) or unauthenticated (redirect to login).",
+      "failure_assertions": [
+        {
+          "failure_mode": "no-valid-session — no session cookie present or session is expired; Web Ingress must redirect to the OAuth login entry point rather than dispatching to the domain component",
+          "expected_behavior": "Identity & Auth returns no valid session; Web Ingress must redirect to the OAuth login entry point and must not dispatch the request to any domain component."
+        },
+        {
+          "failure_mode": "callee-error — Identity & Auth raises an exception during session check (e.g. store lookup failure); Web Ingress must treat the request as unauthenticated and redirect",
+          "expected_behavior": "Identity & Auth raises an exception; Web Ingress must treat the request as unauthenticated and redirect to the login entry point without dispatching to any domain component."
+        }
+      ],
+      "traces": ["R1", "R5"]
+    },
+    {
+      "id": "T-CT9",
+      "target": "CT9",
+      "between": ["C6", "C3"],
+      "contract_kind": "sync_api",
+      "shape_assertion": "Seam carries project management page request dispatch — Web Ingress routes an authenticated HTTP request in-process to Project Management, which returns a server-rendered HTML response (project list, detail, create/edit/delete forms).",
+      "failure_assertions": [
+        {
+          "failure_mode": "callee-error — Project Management raises an unhandled exception during request processing; Web Ingress must return an appropriate HTTP error response",
+          "expected_behavior": "Project Management raises an unhandled exception; Web Ingress must return an appropriate HTTP error response and must not propagate the raw exception to the browser."
+        },
+        {
+          "failure_mode": "not-found — requested project resource does not exist (e.g. detail view for a deleted project); Project Management returns a not-found result; Web Ingress renders a 404 page",
+          "expected_behavior": "Project Management returns a not-found result for the requested resource; Web Ingress must render a 404 page response."
+        }
+      ],
+      "traces": ["R1", "R6"]
+    },
+    {
+      "id": "T-CT10",
+      "target": "CT10",
+      "between": ["C6", "C4"],
+      "contract_kind": "sync_api",
+      "shape_assertion": "Seam carries time-logging page request dispatch — Web Ingress routes an authenticated HTTP request in-process to Time Logging, which returns a server-rendered HTML response (time entry form, time entry list per project).",
+      "failure_assertions": [
+        {
+          "failure_mode": "callee-error — Time Logging raises an unhandled exception during request processing; Web Ingress must return an appropriate HTTP error response",
+          "expected_behavior": "Time Logging raises an unhandled exception; Web Ingress must return an appropriate HTTP error response and must not propagate the raw exception to the browser."
+        },
+        {
+          "failure_mode": "not-found — requested project context for time logging does not exist; Time Logging returns a not-found result; Web Ingress renders a 404 page",
+          "expected_behavior": "Time Logging returns a not-found result for the requested project context; Web Ingress must render a 404 page response."
+        }
+      ],
+      "traces": ["R1", "R2"]
+    },
+    {
+      "id": "T-CT11",
+      "target": "CT11",
+      "between": ["C6", "C5"],
+      "contract_kind": "sync_api",
+      "shape_assertion": "Seam carries invoice export request dispatch — Web Ingress routes an authenticated HTTP request in-process to Invoice Export, which streams a PDF binary response to the browser as a file download (content-type application/pdf).",
+      "failure_assertions": [
+        {
+          "failure_mode": "callee-error — Invoice Export raises an unhandled exception during PDF generation or aggregation; Web Ingress must return an appropriate HTTP error response instead of a partial or broken PDF",
+          "expected_behavior": "Invoice Export raises an unhandled exception; Web Ingress must return an appropriate HTTP error response and must not stream a partial or broken PDF to the browser."
+        },
+        {
+          "failure_mode": "not-found — the specified project or calendar month yields no accessible data; Invoice Export cannot produce a valid invoice; Web Ingress renders an error response",
+          "expected_behavior": "Invoice Export cannot produce a valid invoice due to no accessible data for the project or calendar month; Web Ingress must render an error response."
+        }
+      ],
+      "traces": ["R1", "R3"]
+    }
+  ],
+  "flow_tests": [
+    {
+      "id": "T-F1",
+      "target": "F1",
+      "slice": "S1",
+      "path": ["C6", "C2", "C1"],
+      "via": ["CT8", "CT1"],
+      "happy_path": {
+        "assertion": "Walking-skeleton path traverses CT8 (Web Ingress → Identity & Auth session check) and CT1 (Identity & Auth → Data Store identity write/read) and arrives at acceptance oracle AC1 and AC5.",
+        "asserts_ac": ["AC1", "AC5"]
+      },
+      "failure_path": {
+        "exercises": "CT1:store-unavailable",
+        "expected_terminal_state": "OAuth callback cannot persist the identity record; no authenticated session is established; Web Ingress redirects the browser to the login entry point with an error"
+      },
+      "traces": ["R1", "R5", "AC1", "AC5"]
+    }
+  ],
+  "coverage": {
+    "contracts_in_scope": ["CT1", "CT2", "CT3", "CT4", "CT5", "CT6", "CT7", "CT8", "CT9", "CT10", "CT11"],
+    "contracts_tested": ["CT1", "CT2", "CT3", "CT4", "CT5", "CT6", "CT7", "CT8", "CT9", "CT10", "CT11"],
+    "contract_orphans": [],
+    "flows_in_scope": ["F1"],
+    "flows_tested": ["F1"],
+    "flow_orphans": [],
+    "failure_modes_total": 26,
+    "failure_modes_covered": 26
+  },
+  "structural_defects": [],
+  "aprd_defects": [],
+  "test_counts": {
+    "contract_tests": 11,
+    "flow_tests": 1,
+    "shape_assertions": 11,
+    "failure_assertions": 26
+  }
+}

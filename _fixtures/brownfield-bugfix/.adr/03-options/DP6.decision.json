@@ -1,0 +1,60 @@
+{
+  "id": "DP6",
+  "decision": "How should the application's HTTP surface be shaped: a server-rendered multi-page application, a REST/JSON API backend consumed by a single-page frontend, or a hybrid approach?",
+  "category": "API style",
+  "forced_by": ["R1", "C1", "AC1", "A1"],
+  "cut_ref": "FD1",
+  "options_ref": "03-options/DP6.json",
+  "grounding_source": "reasoned",
+  "evaluation": [
+    {
+      "option": "Server-rendered multi-page application (MPA / SSR)",
+      "assessment": "Single deployable unit — no separate frontend build artifact. Fully consistent with INV6 (single-server, synchronous) and DP1's flat-monolith pick. Standard full-page HTTP navigation satisfies AC1 (browser-reachable, no native app install) directly. A1's server-side PDF file-streaming endpoint is a standard server route compatible with MPA routing with no additional integration surface. Session cookies + CSRF tokens are straightforward in MPA — no CORS configuration, no token-based auth complexity, keeping AC5 OAuth integration (A2) simpler at the server boundary. Django template engine (DP2 pick) has first-class MPA support. C2 advantage is real: no frontend build pipeline to configure, no separate artifact to deploy, no SPA framework bundle to manage. At A13 scale the CRUD feature set (project list, time-entry list, invoice export) does not require rich client-side interactivity to satisfy any AC*; full-page reloads are acceptable. The UI interactivity constraint is the cost: inline editing or dynamic filtering requires additional JavaScript or HTMX augmentation, but the aPRD raises no AC* requiring real-time inline updates without page reloads.",
+      "decisive_factors": ["R1", "C1", "C2", "A1", "A13", "AC1", "INV6"]
+    },
+    {
+      "option": "REST/JSON API backend with a single-page application frontend",
+      "assessment": "Introduces two build pipelines (server + SPA), two deployment artifacts (or a bundling step), CORS policy configuration, and token-based session management (or cookie/CORS adaptation). These are concrete setup costs under C2 that do not exist in the MPA option. A1's PDF streaming endpoint is compatible (SPA triggers a link navigation to the server route) but adds an integration coordination point. AC1 is satisfied, but the SPA JS bundle and framework overhead (React/Vue/Svelte) exceeds the actual UI complexity of the aPRD feature set at A13 scale. No AC* requires real-time inline updates that would justify SPA complexity; the CRUD flows (time entry form, project form, invoice month-picker) are well-served by server-rendered forms and standard navigation. Clean API contract and future integration flexibility are real strengths, but no force in the aPRD (no R* or AC* requiring a mobile client, third-party integration, or offline mode) activates them at this scope.",
+      "decisive_factors": ["C2", "A13", "R1", "AC1", "INV6", "A1"]
+    },
+    {
+      "option": "Hybrid: server-rendered HTML with API endpoints for dynamic interactions (e.g., HTMX or light SPA islands)",
+      "assessment": "Retains single-process deployment (INV6-compatible) and adds targeted interactivity (partial page updates) without a full SPA build pipeline. HTMX/Turbo are lightweight and compatible with Django templates (DP2 pick). A1's PDF streaming endpoint is a standard server route unchanged by the hybrid strategy. The cost over MPA: introduces a client-side interaction library (HTMX/Turbo) with its own mental model; partial-HTML endpoint responses create a two-response-format convention (full HTML for navigation, partial HTML for HTMX swaps) that must be maintained consistently across slices. No AC* requires the targeted interactivity HTMX provides — the CRUD forms satisfy AC2, AC6, AC10 with standard full-page form submission. Under C2, the hybrid approach adds library adoption and partial-response routing overhead without addressing any unsatisfied force. The gradual adoption path (start MPA-pure, add HTMX later) is the rational approach — but starting MPA-pure is the MPA option, not this one.",
+      "decisive_factors": ["C2", "A13", "R1", "AC1", "INV6", "A1"]
+    }
+  ],
+  "decision_made": "Server-rendered multi-page application (MPA / SSR)",
+  "rationale": "All three options satisfy R1/C1/AC1/A1 and are INV6-compliant (single-server). The deciding forces are C2 (two-month timeline) and A13 (personal-tool scale), weighted against the actual AC* requirements. The aPRD's AC* (AC2: time entry appears in list; AC3: PDF file download; AC5: OAuth round-trip; AC6: project CRUD; AC7: entry survives navigation; AC8–AC10: PDF content) are all satisfiable with standard server-rendered form submissions and full-page navigation. No AC* requires real-time inline updates without page reloads, offline capability, or a mobile client. At A13 scale, full-page reloads are operationally acceptable. The MPA option eliminates: a frontend build pipeline, a separate deployment artifact, CORS configuration, token-based auth complexity, and SPA framework bundle overhead — all concrete C2 costs that appear in the SPA option with no corresponding AC* benefit at this scope. The hybrid option eliminates the SPA build pipeline but adds a client-side interaction library and a two-response-format convention without satisfying any AC* the MPA option leaves unmet. Django template engine (DP2) is first-class MPA, making the stack coherent. The MPA option's accepted cost (full-page reloads, limited inline interactivity) is acceptable because no contract force penalises it.",
+  "rejected": [
+    {
+      "option": "REST/JSON API backend with a single-page application frontend",
+      "why_rejected": "Two separate build pipelines (server + SPA), CORS configuration, and token-based session management are concrete C2 setup costs. No AC* requires the real-time inline interactivity or future integration surface a SPA provides at A13 personal-tool scale — the CRUD feature set is fully served by server-rendered forms. The added complexity consumes C2 timeline for no contract-grounded benefit at this scope, ruled out by C2 weighted against A13."
+    },
+    {
+      "option": "Hybrid: server-rendered HTML with API endpoints for dynamic interactions (e.g., HTMX or light SPA islands)",
+      "why_rejected": "Adds a client-side interaction library (HTMX/Turbo) and a two-response-format convention (full HTML vs partial HTML) that must be maintained across slices. No AC* requires the targeted interactivity the hybrid provides beyond what MPA server-rendered forms already deliver — AC2, AC6, AC10 are satisfied by standard form submission with full-page response. The overhead exists (C2 cost) with no AC*-grounded return at A13 scale."
+    }
+  ],
+  "consequences": {
+    "positive": [
+      "Single deployable artifact with no frontend build pipeline — the skeleton (S1) reaches the FD1 ingress seam faster under C2.",
+      "Session cookies + CSRF via Django middleware close the FD2 OAuth seam (AC5) with no CORS or token-based complexity.",
+      "A1's server-side PDF file-streaming endpoint (AC3) is a standard Django view — no additional integration surface beyond the MPA route.",
+      "Full-page navigation is standard-browser-compatible, satisfying AC1 with zero client-side framework overhead."
+    ],
+    "accepted_cost": [
+      "Full-page reloads on every form submission and list navigation; inline editing or dynamic filtering requires JavaScript augmentation if desired in a later slice — no AC* currently requires it, so the cost is deferred.",
+      "If a richer frontend is required after delivery (e.g., mobile app or third-party API consumer), migrating from MPA to an API-driven model requires significant server-layer refactoring."
+    ],
+    "follow_on": [
+      "DP1 (architecture): MPA / SSR is the most natural companion to the flat-monolith pick — all HTTP views and template logic co-located in one flat codebase.",
+      "DP2 (tech stack): Django's template engine and class-based views are optimised for MPA; the pick is coherent with Python/Django.",
+      "S2 (time-entry slice): time-entry form submission and list rendering are straightforward Django form views + template rendering — no frontend framework needed.",
+      "S4 (project management slice): project CRUD follows the same MPA pattern — Django ModelForm + redirect-after-POST, satisfying AC6."
+    ]
+  },
+  "traces": ["R1", "C1", "AC1", "A1", "C2", "A13", "A2", "INV6"],
+  "degenerate_forced": false,
+  "degenerate_reason": null,
+  "lane_note": "Decision content for SYNTHESIZE-ADR (role 6) to render + RECONCILE (role 5) to coherence-check. EVALUATE-DECIDE picks; it does not assign an ADR id, reconcile cross-decision conflicts, or check coverage."
+}

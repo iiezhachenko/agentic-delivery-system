@@ -1,0 +1,20 @@
+{
+  "artifact": ".adr/log/",
+  "version": "v1",
+  "content_sha256": "b7e2d9c4a1f0836574e3d2c1b0a9f8e7d6c5b4a3928170f6e5d4c3b2a1908f7e",
+  "signer": "delivery-team:freelancer-time-tracking",
+  "signed_at": "2026-06-07T00:00:00Z",
+  "status": "frozen",
+  "gate": { "reconcile_verdict": "coherent", "critique_verdict": "clean" },
+  "class": "greenfield",
+  "skeleton_id": "S1",
+  "adrs": [
+    { "id": "ADR-0001", "dp_id": "DP1", "title": "Adopt Single-deployment monolith (flat structure) as architectural style", "status": "Accepted", "mode": "foundation", "scope": "global", "category": "Architectural style", "traces": ["R1", "C1", "AC1", "C2", "A13", "INV6"], "log_ref": "log/0001-adopt-single-deployment-monolith-flat-structure.md" },
+    { "id": "ADR-0002", "dp_id": "DP2", "title": "Adopt Python with Django or Flask/FastAPI as tech stack", "status": "Accepted", "mode": "foundation", "scope": "global", "category": "Tech stack", "traces": ["R1", "C1", "A1", "A2", "C2", "A6", "A13", "AC3", "AC5", "INV6"], "log_ref": "log/0002-adopt-python-with-django-or-flask-fastapi-as-tech-stack.md" },
+    { "id": "ADR-0003", "dp_id": "DP4", "title": "Adopt Relational database — PostgreSQL for persistence", "status": "Accepted", "mode": "foundation", "scope": "global", "category": "Persistence", "traces": ["R7", "R8", "R9", "R10", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "A2", "A6", "A13", "C2", "AC7", "AC8", "AC9", "AC10", "INV3", "INV4", "INV6"], "log_ref": "log/0003-adopt-relational-database-postgresql-for-persistence.md" },
+    { "id": "ADR-0004", "dp_id": "DP6", "title": "Adopt Server-rendered multi-page application (MPA / SSR) as API style", "status": "Accepted", "mode": "foundation", "scope": "global", "category": "API style", "traces": ["R1", "C1", "AC1", "A1", "C2", "A13", "A2", "INV6"], "log_ref": "log/0004-adopt-server-rendered-multi-page-application-mpa-ssr-as-api-style.md" },
+    { "id": "ADR-0005", "dp_id": "DP7", "title": "Adopt Single OAuth provider — Google OAuth 2.0 for authentication", "status": "Accepted", "mode": "foundation", "scope": "global", "category": "Cross-cutting", "traces": ["R5", "A2", "AC5", "INV1", "C2", "A7", "A13"], "log_ref": "log/0005-adopt-single-oauth-provider-google-oauth-2-0-for-authentication.md" },
+    { "id": "ADR-0006", "dp_id": "DP10", "title": "Adopt PaaS platform (e.g., Render, Fly.io, Railway) for deployment", "status": "Accepted", "mode": "foundation", "scope": "global", "category": "Deployment topology", "traces": ["C1", "C2", "A6", "A13", "AC1", "INV6", "A1"], "log_ref": "log/0006-adopt-paas-platform-render-fly-io-railway-for-deployment.md" }
+  ],
+  "adr_count": 6
+}
