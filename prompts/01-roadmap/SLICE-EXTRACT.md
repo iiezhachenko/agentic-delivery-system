@@ -4,12 +4,19 @@ phase: 01-roadmap
 class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal clustering — reads disk, writes disk, stops. Client re-engages later at SEQUENCE-REVIEW (order gate), not here (PR1).
 inputs:
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — slice from PROJECT (centrality basis), ENTITIES E* (shared-entity grouping), REQUIREMENTS R* (cluster + cover), ACCEPTANCE AC* (demo/verticality oracle); CLASS gates path" }
-  - { path: ".aprd/aprd.lock", format: "json — freeze gate: present + status==frozen + names frozen artifact (don't recompute hash)" }
+  # — shared (both classes) —
+  - { path: ".aprd/aprd.lock", format: "json — freeze gate AND frozen-WHAT RESOLVER: present + status==frozen; its `artifact` value names the CURRENT frozen version to open (.aprd/<aprd.lock.artifact>) — NEVER hardcode aprd.v<N>.frozen.md (BF7/P8, 07a canon); don't recompute hash" }
+  # — greenfield —
+  - { path: ".aprd/aprd.frozen.md", format: "markdown — greenfield frozen WHAT (= lock artifact at v1): slice from PROJECT (centrality basis), ENTITIES E* (shared-entity grouping), REQUIREMENTS R* (cluster + cover), ACCEPTANCE AC* (demo/verticality oracle); CLASS gates path" }
+  # — feature-add —
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — CURRENT frozen version RESOLVED via lock (feature-add → aprd.v<N>.frozen.md); carries NEW R*/AC* above high-water + CLASS_EXTENSION block. Slice ONLY the new R*/AC*; baseline carried by REFERENCE (BF1)" }
+  - { path: ".aprd/baseline-map.json", format: "json — baseline S* high-water (id_high_water.S): new S* mint strictly above (BF3); R/AC high-water bounds the new cover set; conventions/seams for reference" }
+  - { path: ".roadmap/08-rerank.json", format: "json — baseline frontier: completed[] = pinned baseline slices (BF1); carried into baseline_completed_slices, never re-sliced" }
 outputs:
   - { path: ".roadmap/02-slices.json", format: "json (schema below) — candidate vertical slices[]" }
 escapes:
-  - { when: ".aprd/aprd.frozen.md missing/unparseable, OR .aprd/aprd.lock missing / status != frozen", target: "self / HALT — nothing frozen to slice; Phase 1 consumes only FROZEN WHAT (P8), never draft" }
+  - { when: ".aprd/aprd.lock missing / status != frozen, OR the frozen version it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — nothing frozen to slice; Phase 1 consumes only FROZEN WHAT resolved via the lock (P8/BF7), never draft, never a hardcoded version. Version-mismatch impossible: only the lock-named file is opened" }
+  - { when: "feature-add but .aprd/baseline-map.json or .roadmap/08-rerank.json missing/unparseable", target: "BASELINE-MAP / HALT — baseline S* high-water + pinned completed slices unknown; cannot slice additively (BF1/BF3)" }
   - { when: "frozen aPRD CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — slice granularity + skeleton rule not authored; report class, write nothing" }
   - { when: "requirement cannot be placed in any demoable vertical slice (aPRD ambiguous, or its AC depends on capability aPRD never specified)", target: "Phase 0 (change request) — record in unsliceable[], never silent-drop; Phase 1 never patches WHAT (§5.13)" }
 ---
@@ -34,7 +41,7 @@ Slice **vertical iff at least one acceptance criterion is black-box and user-obs
 ## Rules
 1. **Cluster by capability, not by layer (RM1, RM7).** Group each aPRD requirement into slice that delivers **one demoable capability end-to-end** — pulls *some* of every layer it needs (data → logic → interface), **none of a layer wholesale**. Grouping drivers, cheapest-first: `AC*` that proves capability demoable; requirements that must travel together to run it (e.g. "log hours" needs "persist entries"); shared `ENTITIES`. Test: *can client watch one capability work end-to-end?* "All of layer X" = horizontal → re-cut.
 2. **Every slice carries ≥1 acceptance criterion.** `acceptance` non-empty for every slice — demo gate + verticality proof (RM2). Zero AC = not demoable; do not emit. Bind exactly the `AC*` that prove *that* capability (typically AC whose `req_ref` is one of slice's requirements).
-3. **Cover every requirement AND every AC — no orphans (§6.3).** Every `R*` in ≥1 slice's `requirements`; every `AC*` in ≥1 slice's `acceptance` (orphan AC = demoable behaviour nobody slices). Cross-cutting/foundational requirements ("be a web application", "authenticate") still land in concrete vertical slice — fold into thinnest capability that exercises them end-to-end (auth → watchable "sign in" slice; "web application" rides first slice that renders page). Requirement genuinely cannot place → `unsliceable[]` with reason + escape, never silent-drop (P9).
+3. **Cover every requirement AND every AC — no orphans (§6.3).** Every `R*` in ≥1 slice's `requirements`; every `AC*` in ≥1 slice's `acceptance` (orphan AC = demoable behaviour nobody slices). *(feature-add narrows the cover set to the NEW `R*/AC*` only — see delta Rule 1.)* Cross-cutting/foundational requirements ("be a web application", "authenticate") still land in concrete vertical slice — fold into thinnest capability that exercises them end-to-end (auth → watchable "sign in" slice; "web application" rides first slice that renders page). Requirement genuinely cannot place → `unsliceable[]` with reason + escape, never silent-drop (P9).
 4. **Slice may overlap, but stays atomic (RM10/INVEST).** Two slices may both touch shared entity (both "create project" and "log hours" touch project), but each slice = **smallest increment demoable AND delivers value or retires named risk**. Multi-capability cluster = mini-waterfall (split); cluster with no standalone demo (merge into vertical neighbour). Bias toward smallest cluster that passes verticality test alone.
 5. **`depends_on` — coarse slice-level prerequisites (§5.2).** Slice depends on another when its capability cannot be demoed until other exists (no invoice before hours logged; no log-hours before projects exist; most capabilities depend on sign-in). Derive from aPRD **alone** — shared `ENTITIES`, requirement references, "capability A needs B's output". **Coarse and provisional**: authoritative DAG only exists after HLD skeleton, roadmap re-ranks then (§5.11). Cite **slice IDs** (`S*`). **No cycles** — if A depends on B, B must not (transitively) depend on A; unbreakable cycle = wrong cut, re-cut.
 6. **`value` — proposed, client owns final say (§7).** Assign each slice provisional `value` (`high | med | low`) from how central capability is to `PROJECT` (core billing/invoicing path = high; peripheral polish = low). **Proposal**, confirmed/overridden later at SEQUENCE-REVIEW. Don't fabricate value model aPRD doesn't support; derive from centrality, state basis in `value_basis`.
@@ -42,6 +49,12 @@ Slice **vertical iff at least one acceptance criterion is black-box and user-obs
 8. **Cheapest source first; never invent (P5/P11).** Truth = frozen aPRD in front of you, not preconceptions of how a time-tracking app looks. Slices regroup existing `R*`/`AC*`; never mint new requirement, capability, or AC. Every slice's `requirements`/`acceptance` are IDs that exist verbatim in frozen aPRD; every `depends_on` traces to real capability prerequisite visible in aPRD. If capability seems missing (`R*` has no `AC*`, or demoable behaviour aPRD never specified is needed) that = **aPRD defect → escape to Phase 0** (`unsliceable[]`), not slice you author. Verify+regroup contract; never its source (slice WHAT, never author it, never decide HOW).
 9. **Thread IDs (P9).** Mint stable `S1, S2, …`. Carry `R*`/`AC*` **verbatim** from frozen aPRD into each slice. `depends_on` cites `S*`. Order emitted `slices` array deterministically by **each slice's lowest contributing `R*` index** (lowest = R2 sorts before lowest = R5) — **emission order, NOT value/risk sequence**; SEQUENCE produces running order later.
 10. **Stay in lane.** No client interaction (order gate = SEQUENCE-REVIEW), no priority ordering, no components/stacks/schemas/APIs. Candidates to disk; pipeline takes it from there (PR1).
+
+## Rules (feature-add delta — shared Rules above also bind)
+1. **Slice ONLY the new feature's IDs (BF1).** Cover set = `R*/AC*` above the baseline high-water (`baseline-map.json` `id_high_water.R`/`.AC`) — the new version's net-new requirements, read from `.aprd/<aprd.lock.artifact>` (lock-resolved). Baseline `R*/AC*` belong to pinned `completed[]` slices — NEVER re-slice them; never put a baseline `R*` in a new slice's `requirements`. Narrows shared Rule 3: coverage runs over the new ID set only.
+2. **New slice IDs above high-water (BF3).** Mint `S*` strictly above `baseline-map.json` `id_high_water.S`. Never reuse a baseline `S*`.
+3. **`depends_on` may cite baseline slices.** New slice can depend on an accepted baseline slice (plugs into existing capability). Those baseline `S*` already satisfied (`08-rerank.json` `completed[]`) — list for legality, they don't gate the frontier.
+4. **No new skeleton, no foundation cut (playbook `active_stages`).** Foundation + walking skeleton already exist (`active_stages: { skeleton_identify: off, foundation_cut: off, scaffold: off }`). Don't name a skeleton or cut foundation — OFF for feature-add. New feature needing NEW foundation → widen-cut escape (Phase-4→Phase-1 target), not a fresh skeleton here.
 
 ## Task steps
 1. Read both inputs. Check guards (frontmatter `escapes:`) — any tripped → HALT, report which + offending detail, write nothing. Else continue.
@@ -51,6 +64,15 @@ Slice **vertical iff at least one acceptance criterion is black-box and user-obs
 5. Run coverage (Rule 3): every `R*` in ≥1 `requirements`, every `AC*` in ≥1 `acceptance`. Unplaceable → `unsliceable[]` with reason + escape target. Fill `coverage`.
 6. Sort `slices` by each slice's lowest contributing `R*` index (Rule 9). Mint `S1..Sn` in that order. Fill `slice_counts`.
 7. Write `.roadmap/02-slices.json`. Stop.
+
+**Feature-add branch** (class == feature-add, playbook-dispatched):
+1. Read `.aprd/aprd.lock` → resolve `artifact` → open `.aprd/<aprd.lock.artifact>` (CURRENT frozen version; NEVER hardcode `v<N>`). Read `baseline-map.json` + baseline `.roadmap/08-rerank.json`. Check guards → HALT on trip.
+2. Inventory ONLY new `R*/AC*` — those above `id_high_water.R`/`.AC` (delta Rule 1). Baseline IDs excluded (carried by REFERENCE).
+3. Cluster new IDs into candidate vertical slices (shared Rule 1); mint `S*` above `id_high_water.S` (delta Rule 2). Apply verticality test.
+4. Derive `depends_on` (shared Rule 5) — may cite baseline `S*` from `completed[]` (delta Rule 3); acyclic.
+5. Coverage over the NEW ID set only (delta Rule 1). Carry baseline `completed[]` into `baseline_completed_slices` (reference, never re-sliced).
+6. Do NOT name a skeleton or cut foundation (delta Rule 4).
+7. Write `.roadmap/02-slices.json` with `class:"feature-add"` + `aprd_version` + `baseline_completed_slices`. Stop.
 
 ## Output schema — `.roadmap/02-slices.json`
 
@@ -89,6 +111,14 @@ Slice **vertical iff at least one acceptance criterion is black-box and user-obs
 ```
 All prose fields (`name`/`value_basis`/`reason`) are caveman (governs artifact bodies too — PR4).
 
+### Feature-add schema delta (only what differs — AB1)
+Same shape as above; differences:
+- `"class": "feature-add"`, `"aprd_version": "<version from .aprd/aprd.lock>"`, `"aprd_ref": ".aprd/<aprd.lock.artifact>"` (lock-resolved, NOT a hardcoded `aprd.v<N>.frozen.md`).
+- `"baseline_completed_slices": [ { "id": "S*", "name": "<baseline slice>" } ]` — pinned baseline slices from `08-rerank.json` `completed[]`/`coverage.base_slices`; carried for reference + `depends_on` legality only. NEVER appear in `slices[]` (BF1).
+- `slices[]` cover ONLY new `R*/AC*` (above high-water); each `id` minted above `id_high_water.S`. A new slice's `depends_on` may cite a baseline `S*`.
+- `coverage.requirements_total`/`acceptance_total` = the NEW ID set only (not the whole aPRD).
+
 ## Stop condition
 - Guard tripped (frontmatter `escapes:` — no frozen aPRD, missing/invalid lock, or unplaybooked class) → write nothing; print which guard fired + offending detail; "HALT".
 - Clean greenfield → write `.roadmap/02-slices.json` (create `.roadmap/` if absent; only output, VERTICALITY-CHECK reads candidate `slices[]` next), state "candidate slices extracted, VERTICALITY-CHECK next", stop. No questions, no sequencing, no client touch.
+- Clean feature-add → resolve lock-named version (`.aprd/<aprd.lock.artifact>`), write `.roadmap/02-slices.json` with `class:"feature-add"`, new-ID slices above high-water, baseline slices pinned in `baseline_completed_slices`; state "feature-add candidate slices extracted (new IDs only), VERTICALITY-CHECK next", stop.

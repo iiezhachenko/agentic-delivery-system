@@ -1,0 +1,28 @@
+{
+  "base_ref": ".roadmap/07-sequence-reviewed.json",
+  "build_dag_ref": ".hld/skeleton/build-dag.json",
+  "components_ref": ".hld/skeleton/components.json",
+  "slices_ref": ".roadmap/02-slices.json",
+  "class": "greenfield",
+  "roadmap_version": 2,
+  "verdict": "all_shipped",
+  "completed": [
+    { "position": 1, "id": "S1", "name": "Sign in via OAuth on the web application", "status": "accepted", "demo_ref": ".build/skeleton/demo/demo.json" },
+    { "position": 2, "id": "S4", "name": "Create and manage client projects with currency and billable rate", "status": "accepted", "demo_ref": ".build/slices/S4/demo/demo.json" },
+    { "position": 3, "id": "S2", "name": "Log and persist billable time entries against a project", "status": "accepted", "demo_ref": ".build/slices/S2/demo/demo.json" },
+    { "position": 4, "id": "S3", "name": "Export a monthly PDF invoice with line items and monetary totals", "status": "accepted", "demo_ref": ".build/slices/S3/demo/demo.json" }
+  ],
+  "remaining_sequence": [],
+  "dependency_check": { "acyclic": true, "legal": true, "against": "real_component_dag", "cycles": [], "dangling_real_depends_on": [] },
+  "coverage": {
+    "base_slices": ["S1", "S4", "S2", "S3"],
+    "completed": ["S1", "S4", "S2", "S3"],
+    "remaining_ranked": [],
+    "missing": [],
+    "duplicated": []
+  },
+  "structural_defects": [],
+  "aprd_defects": [],
+  "foundation_gaps": [],
+  "rerank_counts": { "completed": 4, "remaining": 0, "reordered": 0, "deps_removed": 0, "deps_added": 0 }
+}

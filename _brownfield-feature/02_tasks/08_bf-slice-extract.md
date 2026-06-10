@@ -70,3 +70,22 @@ The feature adds new requirements above the baseline. Roadmap must slice only th
 - Frozen-WHAT input RESOLVED via `aprd.lock.artifact` (no hardcoded `aprd.v<N>.frozen.md` as the WHAT path); freeze-gate guard rewritten to verify the named artifact exists (BF7/P8 + 07a canon).
 - Golden feature-add `02-slices.json` slices only new IDs, mints `S*` above high-water, pins baseline slices.
 - Both-directions check holds (incl. stale-version-walk planted defect FAILs).
+
+## STATUS — DONE
+
+**`prompts/01-roadmap/SLICE-EXTRACT.md` overlay added:**
+- Frontmatter `inputs` regrouped shared/greenfield/feature-add: `.aprd/aprd.lock` REWRITTEN to carry freeze-gate AND frozen-WHAT RESOLVER role (`artifact` names version to open; NEVER hardcode `aprd.v<N>` — BF7/P8, 07a canon); feature-add adds resolved WHAT `.aprd/<aprd.lock.artifact>` + `.aprd/baseline-map.json` + baseline `.roadmap/08-rerank.json`. No second WHAT input added (AB9/P1).
+- `escapes` freeze-gate REWRITTEN (not added — AB9): lock missing/`status!=frozen` OR lock-named artifact missing/unparseable → HALT; version-mismatch impossible by construction. New feature-add baseline-missing escape (`baseline-map.json`/`08-rerank.json` absent → BASELINE-MAP/HALT).
+- Shared Rule 3 carries one-line pointer; cover-set narrowing lives in delta (AB1, one home).
+- `## Rules (feature-add delta — shared Rules above also bind)` — 4 rules: slice-only-new-IDs above high-water (BF1), mint `S*` above `id_high_water.S` (BF3), `depends_on` may cite baseline `completed[]` slices, no-skeleton/no-foundation-cut (`active_stages` OFF).
+- Feature-add branch in `## Task steps` (resolve lock → open named version → inventory new IDs → cluster → coverage over new set → write); feature-add schema delta (`class`/`aprd_version`/`aprd_ref` lock-resolved + `baseline_completed_slices[]` + new-ID-only coverage); feature-add stop condition.
+
+**Golden fixtures — `_fixtures/brownfield-feature/.roadmap/`:**
+- `08-rerank.json` (baseline frontier input) — fully-shipped greenfield: S1–S4 all `accepted` in `completed[]`.
+- `02-slices.json` (golden) — `class:feature-add`, `aprd_version:v2`, `aprd_ref` = lock-resolved `.aprd/aprd.v2.frozen.md`. Two candidate slices cover ONLY new IDs: **S5** Tag a time entry (R11+R13 / AC11+AC13, retires CT2-extend seam risk A14, depends_on baseline S2), **S6** Filter by tag (R12 / AC12, depends_on S2+S5). `S*` minted above high-water S4. Baseline S1–S4 pinned in `baseline_completed_slices`, absent from candidates.
+
+**Verify (both-directions, run):**
+- Known-good golden → new-IDs-only (R11–13/AC11–13), `S5/S6` above hw(S4), baseline pinned+absent, `aprd_ref`==lock artifact → **PASS**.
+- Planted defect baseline-re-slice (R2 in a candidate) → **FAIL** (BF1).
+- Planted defect `S*`-collision (reuse S2) → **FAIL** (BF3).
+- Planted defect stale-version-walk (hardcode `aprd.frozen.md`, slice R1–R10) → **FAIL** (BF7/P8 + new-IDs-only, the 07a defect guarded here too).

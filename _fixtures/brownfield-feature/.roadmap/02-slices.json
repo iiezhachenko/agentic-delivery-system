@@ -1,0 +1,47 @@
+{
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "aprd_version": "v2",
+  "lock_verified": true,
+  "class": "feature-add",
+  "project": "Tag time entries and filter the time-entry list by tag — feature-add extending the frozen freelancer time-tracking baseline (v1).",
+  "baseline_completed_slices": [
+    { "id": "S1", "name": "Sign in via OAuth on the web application" },
+    { "id": "S2", "name": "Log and persist billable time entries against a project" },
+    { "id": "S3", "name": "Export a monthly PDF invoice with line items and monetary totals" },
+    { "id": "S4", "name": "Create and manage client projects with currency and billable rate" }
+  ],
+  "slices": [
+    {
+      "id": "S5",
+      "name": "Tag a time entry with a label",
+      "requirements": ["R11", "R13"],
+      "acceptance": ["AC11", "AC13"],
+      "value": "high",
+      "value_basis": "Core of new feature: R11 sets label, R13 persists it — travel together (set means nothing unless stored). Filtering (S6) has no value until entries carry tags.",
+      "retires_risk": "Tag persistence by EXTENDING contract CT2 (A14): first exercise of additive label field on existing time-entry record at the C1 seam; proves extend-existing-contract approach before filtering depends on stored tags.",
+      "depends_on": ["S2"],
+      "candidate": true
+    },
+    {
+      "id": "S6",
+      "name": "Filter the time-entry list by tag",
+      "requirements": ["R12"],
+      "acceptance": ["AC12"],
+      "value": "med",
+      "value_basis": "Reads labels set by S5; secondary to tagging — useful once entries carry tags, peripheral to core log/persist path.",
+      "retires_risk": null,
+      "depends_on": ["S2", "S5"],
+      "candidate": true
+    }
+  ],
+  "unsliceable": [],
+  "coverage": {
+    "requirements_total": ["R11", "R12", "R13"],
+    "requirements_covered": ["R11", "R12", "R13"],
+    "requirement_orphans": [],
+    "acceptance_total": ["AC11", "AC12", "AC13"],
+    "acceptance_covered": ["AC11", "AC12", "AC13"],
+    "acceptance_orphans": []
+  },
+  "slice_counts": { "total": 2 }
+}
