@@ -1,183 +1,26 @@
 {
   "extraction_ref": ".aprd/02-extraction.json",
   "grounding_ref": null,
-  "class": "greenfield",
+  "class": "bugfix",
+  "baseline_map_ref": ".aprd/baseline-map.json",
+  "baseline_aprd_ref": ".aprd/aprd.frozen.md",
   "gaps": [
     {
       "id": "G1",
-      "gap": "PDF invoice generation mechanism is unspecified — two structurally different implementations are equally supported by the requirement.",
-      "refs": ["R3", "E4"],
+      "gap": "Baseline is silent on how a null billable_rate should render in the project list — the correct behavior the defect exposes is under-specified.",
+      "refs": ["R11", "U1"],
+      "seam_ref": null,
       "interpretations": [
-        "Server-side PDF rendering: a backend service (e.g. headless browser, PDF library such as Puppeteer or WeasyPrint) generates the PDF file and streams it to the client on demand.",
-        "Client-side browser print: the invoice is rendered as an HTML/CSS page in the browser and the user triggers a print-to-PDF flow; no server-side PDF dependency."
+        "Render a null billable_rate as a blank placeholder (an em-dash '—') in the rate column; the row renders, no numeric format applied to a null value.",
+        "Render a null billable_rate as zero ('0.00') in the rate column, formatted like any numeric rate.",
+        "Omit the rate field entirely for a null-rate project; the row renders name and currency only."
       ],
-      "recommended_default": "Server-side PDF rendering: a backend service (e.g. headless browser, PDF library such as Puppeteer or WeasyPrint) generates the PDF file and streams it to the client on demand.",
-      "blast_radius": "architecture",
-      "disposition": "ask",
-      "reason": "The two builds differ in external dependencies and stack layers: server-side requires a PDF generation library or headless browser process; client-side requires only CSS print styles. The dependency and deployment surface diverge before any code is shared. Architecture tier because it changes external dependencies and fundamental implementation mechanism for this capability."
-    },
-    {
-      "id": "G2",
-      "gap": "Authentication mechanism is unspecified — two structurally different approaches are equally implied by the requirement.",
-      "refs": ["R5", "U2"],
-      "interpretations": [
-        "Email and password authentication: the system stores hashed credentials, manages sessions, and handles password reset — no third-party auth dependency.",
-        "OAuth / social login (e.g. Google, GitHub) or SSO: authentication delegates to an external identity provider; the system stores only provider tokens and user profile references, not credentials."
-      ],
-      "recommended_default": "Email and password authentication: the system stores hashed credentials, manages sessions, and handles password reset — no third-party auth dependency.",
-      "blast_radius": "architecture",
-      "disposition": "ask",
-      "reason": "OAuth/SSO adds an external identity-provider dependency and changes the user data model (no stored credentials, token columns instead). Email+password keeps the auth stack entirely in-house. The external dependency fork makes this architecture tier."
-    },
-    {
-      "id": "G3",
-      "gap": "Client entity role is unspecified — client could be a passive data record or an active system user with their own portal.",
-      "refs": ["E6", "U3"],
-      "interpretations": [
-        "Client is a data record only: the client entity stores name, contact details, and billing address visible only to the freelancer; no client-facing login or portal exists.",
-        "Client has a login and portal: the client entity is also an authenticated user who can log in, view their invoices, and interact with the system — requiring a second user role, separate auth flow, and client-facing UI."
-      ],
-      "recommended_default": "Client is a data record only: the client entity stores name, contact details, and billing address visible only to the freelancer; no client-facing login or portal exists.",
-      "blast_radius": "architecture",
-      "disposition": "ask",
-      "reason": "A client portal introduces a second authenticated user type, a new role in the data model, and a separate UI surface. The data model shape changes (client gains auth identity) and a new external-facing deliverable is added. Architecture tier because the data-model shape and the deliverable scope both diverge."
-    },
-    {
-      "id": "G4",
-      "gap": "Currency granularity is unspecified — the level at which a currency designation is attached changes the data model shape.",
-      "refs": ["E5", "E7", "U1"],
-      "interpretations": [
-        "Currency is set at the project level: each Client Project carries a single currency; all time entries and the resulting invoice inherit that currency — no currency field on Time Entry or Billable Rate rows.",
-        "Currency is set at the time-entry level: each Time Entry (and/or Billable Rate) carries its own currency designation — the Invoice must then handle line items in mixed currencies, requiring a currency column on the time-entry table and aggregation logic."
-      ],
-      "recommended_default": "Currency is set at the project level: each Client Project carries a single currency; all time entries and the resulting invoice inherit that currency — no currency field on Time Entry or Billable Rate rows.",
-      "blast_radius": "architecture",
-      "disposition": "ask",
-      "reason": "The two builds differ in which tables carry a currency foreign key. Project-level currency: currency lives only on the project table. Entry-level currency: currency column added to time_entries and/or billable_rates, and invoice aggregation must handle mixed-currency sums. Different data-model shape — architecture tier."
-    },
-    {
-      "id": "G5",
-      "gap": "Multi-currency support scope is unspecified — the system may store amounts in multiple currencies independently, or may also convert between them using live rates.",
-      "refs": ["R4", "R9", "U8"],
-      "interpretations": [
-        "Each project and invoice is fixed to a single currency; no conversion occurs — the system stores and displays amounts in the currency chosen at creation time, and no exchange-rate data or external rate service is needed.",
-        "The system performs live exchange-rate conversion: an external exchange-rate API is integrated, amounts can be converted between currencies on demand, and the data model stores both original and converted amounts."
-      ],
-      "recommended_default": "Each project and invoice is fixed to a single currency; no conversion occurs — the system stores and displays amounts in the currency chosen at creation time, and no exchange-rate data or external rate service is needed.",
-      "blast_radius": "architecture",
-      "disposition": "ask",
-      "reason": "Live exchange-rate conversion requires integrating an external API dependency (e.g. Open Exchange Rates, Fixer.io), storing rate snapshots, and adding conversion columns to the data model. The no-conversion build has none of these. External integration fork — architecture tier."
-    },
-    {
-      "id": "G6",
-      "gap": "Hosting and infrastructure provider are unspecified — a mandated provider constrains the stack and pulls provider-specific dependencies.",
-      "refs": ["C1", "C3", "U10"],
-      "interpretations": [
-        "No hosting preference: the team selects the stack and provider freely (e.g. any cloud, VPS, or PaaS) based on cost, timeline, and technical fit.",
-        "A specific hosting provider or infrastructure constraint is mandated (e.g. AWS only, Azure, on-premises, specific region for data residency): the stack and deployment pipeline must conform to that provider's services and tooling."
-      ],
-      "recommended_default": "No hosting preference: the team selects the stack and provider freely (e.g. any cloud, VPS, or PaaS) based on cost, timeline, and technical fit.",
-      "blast_radius": "architecture",
-      "disposition": "ask",
-      "reason": "A mandated provider pulls provider-specific SDKs, storage services, and deployment tooling into the stack — changing external dependencies. Free choice leaves the stack open. Architecture tier because a mandated provider is a stack and external-dependency constraint per the rubric."
-    },
-    {
-      "id": "G7",
-      "gap": "Account model is unspecified — the system may be strictly single-freelancer per account or may support team and agency accounts with multiple freelancers.",
-      "refs": ["R5", "E1", "U11"],
-      "interpretations": [
-        "Single-freelancer accounts only: each account belongs to exactly one freelancer; no organisation entity, no multi-user membership, no role management.",
-        "Team or agency accounts: an Organisation entity sits above the Freelancer, multiple freelancers can belong to one organisation, and role-based access control governs what each member can see or do — requiring new tables and relationships."
-      ],
-      "recommended_default": "Single-freelancer accounts only: each account belongs to exactly one freelancer; no organisation entity, no multi-user membership, no role management.",
-      "blast_radius": "architecture",
-      "disposition": "ask",
-      "reason": "Team accounts introduce an Organisation entity, membership join tables, and role columns — materially changing the data-model shape and relationships. Single-freelancer build has none of these. Data-model shape fork — architecture tier."
-    },
-    {
-      "id": "G8",
-      "gap": "Billable rate granularity and attachment point are unspecified — where the rate lives in the data model is underdetermined.",
-      "refs": ["E7", "R10", "U7"],
-      "interpretations": [
-        "Rate is set at the project level: a single Billable Rate record is attached to each Client Project; all time entries in that project inherit the same rate — no rate field on individual time entries.",
-        "Rate is set per individual time entry: each Time Entry carries its own rate (allowing rate variation within a project over time), requiring a rate column on the time_entries table and making the Billable Rate entity a property of each entry rather than the project."
-      ],
-      "recommended_default": "Rate is set at the project level: a single Billable Rate record is attached to each Client Project; all time entries in that project inherit the same rate — no rate field on individual time entries.",
-      "blast_radius": "architecture",
-      "disposition": "ask",
-      "reason": "Project-level rate: rate FK lives on the project table. Entry-level rate: rate column lives on time_entries, requiring different schema, different invoice-line computation logic, and potentially a rate-history model. Data-model shape diverges between builds — architecture tier."
-    },
-    {
-      "id": "G9",
-      "gap": "Compliance and data-residency requirements are unspecified — presence of GDPR or similar obligations changes the data model and possibly the hosting architecture.",
-      "refs": ["U12"],
-      "interpretations": [
-        "No specific compliance requirements: standard data practices apply — no mandated audit logs, no right-to-erasure data model, no data-residency hosting constraint.",
-        "GDPR or equivalent compliance is required: the data model must include soft-delete / erasure capability, audit logging tables, and hosting must be in a compliant region — adding tables and hosting constraints to the build."
-      ],
-      "recommended_default": "No specific compliance requirements: standard data practices apply — no mandated audit logs, no right-to-erasure data model, no data-residency hosting constraint.",
-      "blast_radius": "architecture",
-      "disposition": "ask",
-      "reason": "GDPR compliance adds audit-log tables, soft-delete columns, and may mandate a specific hosting region (intersecting with G6). The data-model shape changes and an infrastructure constraint may be added. Architecture tier because both data-model shape and potentially external/hosting constraints diverge."
-    },
-    {
-      "id": "G10",
-      "gap": "Billing period definition is unspecified — invoice may cover a fixed calendar month or a configurable date range chosen by the freelancer.",
-      "refs": ["R3", "U6"],
-      "interpretations": [
-        "Invoice period is always a fixed calendar month: the export UI presents a month-picker; the system generates an invoice for all entries in that calendar month — no custom date-range input required.",
-        "Billing period is configurable: the freelancer can specify an arbitrary start and end date (e.g. 15th to 14th, or any project span) — an additional date-range UI control and parameterised query are added, while the underlying model is unchanged."
-      ],
-      "recommended_default": "Invoice period is always a fixed calendar month: the export UI presents a month-picker; the system generates an invoice for all entries in that calendar month — no custom date-range input required.",
+      "recommended_default": "Render a null billable_rate as a blank placeholder (an em-dash '—') in the rate column; the row renders, no numeric format applied to a null value.",
       "blast_radius": "scope",
       "disposition": "ask",
-      "reason": "Both interpretations share the same data model (time entries with timestamps, project FK) and the same PDF generation mechanism. The difference is whether a configurable date-range feature ships alongside the monthly default. Same structure, feature in/out — scope tier."
-    },
-    {
-      "id": "G11",
-      "gap": "Multi-client and multi-project limits per account are unspecified — the system may allow unbounded counts or enforce a cap.",
-      "refs": ["R6", "E2", "U4"],
-      "interpretations": [
-        "Unbounded: a freelancer account can hold any number of clients and projects with no enforced limit — no quota logic, no limit enforcement in the application or data layer.",
-        "Bounded: a maximum number of clients and/or projects per account is enforced (e.g. a configurable cap) — requiring limit-check logic and corresponding UI feedback, while the data model shape remains the same."
-      ],
-      "recommended_default": "Unbounded: a freelancer account can hold any number of clients and projects with no enforced limit — no quota logic, no limit enforcement in the application or data layer.",
-      "blast_radius": "scope",
-      "disposition": "ask",
-      "reason": "Both builds use the same tables and relationships. A limit is application-layer enforcement logic — an optional feature on top of the unchanged model. Same structure, feature in/out — scope tier."
-    },
-    {
-      "id": "G12",
-      "gap": "Invoice content and formatting requirements are unspecified — the fields and layout that must appear on the PDF are undetermined.",
-      "refs": ["R8", "E4", "U5"],
-      "interpretations": [
-        "Minimal invoice: the PDF contains only the line items (date, description, hours, rate, line total) and an invoice total — no logo, no legal fields, no payment terms, no custom numbering scheme.",
-        "Full-featured invoice: the PDF includes freelancer and client legal details, a logo, payment terms, due date, sequential invoice number, tax fields, and notes — each additional field may require additional data stored on the freelancer or client record."
-      ],
-      "recommended_default": "Minimal invoice: the PDF contains only the line items (date, description, hours, rate, line total) and an invoice total — no logo, no legal fields, no payment terms, no custom numbering scheme.",
-      "blast_radius": "scope",
-      "disposition": "ask",
-      "reason": "The PDF generation mechanism and data model core are the same either way. Additional invoice fields (logo, legal details, payment terms) are features that extend the freelancer and client records but do not change the structural model. Same stack, same model shape, features in/out — scope tier."
-    },
-    {
-      "id": "G13",
-      "gap": "Expected user and concurrency scale are unspecified — the scale tier determines which infrastructure and scaling features must ship.",
-      "refs": ["U9"],
-      "interpretations": [
-        "Small personal tool (tens of users, low concurrency): a single-server deployment with a straightforward synchronous request cycle suffices — no background job queues, no horizontal scaling, no caching layer required.",
-        "Multi-tenant SaaS scale (hundreds to thousands of users, meaningful concurrency): the build requires background job processing for PDF generation, connection pooling, caching, and a deployment model that supports horizontal scaling."
-      ],
-      "recommended_default": "Small personal tool (tens of users, low concurrency): a single-server deployment with a straightforward synchronous request cycle suffices — no background job queues, no horizontal scaling, no caching layer required.",
-      "blast_radius": "scope",
-      "disposition": "ask",
-      "reason": "Both builds share the same data-model shape, stack, and external dependencies. The difference is which scalability features (queues, caching, horizontal deployment) ship. Same structure, infrastructure feature set in/out — scope tier."
+      "reason": "All three builds share the same data model, stack, and the same _render surface; the list-500 is settled-wrong actual behavior (the defect), not a fork. What moves is which spec-consistent display the correct behavior shows for the null-rate case — a presentation choice on the unchanged render path. No new capability and no new tech (bugfix delta Rule 3), so scope, not architecture."
     }
   ],
-  "dismissed_unknowns": [
-    {
-      "id": "U1",
-      "reason": "Partially fed into G4 (currency granularity — the data-model fork). The sub-question 'which specific currencies must be supported' does not fork builds: adding or removing currency codes from a supported list uses the same data model and carries no structural consequence. Dismissing the currency-list sub-question as cosmetic — a configuration choice that changes neither stack nor model shape."
-    }
-  ],
-  "gap_counts": { "architecture": 9, "scope": 4, "cosmetic": 0, "total": 13 }
+  "dismissed_unknowns": [],
+  "gap_counts": { "architecture": 0, "scope": 1, "cosmetic": 0, "total": 1 }
 }

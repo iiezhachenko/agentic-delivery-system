@@ -1,15 +1,15 @@
 {
   "request_ref": ".aprd/00-raw-request.md",
   "is_compound": false,
-  "overall_confidence": 0.95,
+  "overall_confidence": 0.96,
   "needs_confirmation": false,
   "subrequests": [
     {
       "id": "SR1",
-      "text": "We want a web app where freelancers can log their billable hours against client projects and export a monthly PDF invoice. No existing system — we're starting from scratch. Should support multiple currencies. Ideally live in a couple of months.",
-      "class": "greenfield",
-      "confidence": 0.95,
-      "reason": "'No existing system — we're starting from scratch' is an explicit greenfield declaration. All capabilities (hour logging, PDF invoice export, multi-currency) are additive features of one net-new product, not separate work orders against existing systems."
+      "text": "Fix the project-list page so it renders every project in the existing freelancer time-tracking app; it currently 500s when a project's billable_rate is null.",
+      "class": "bugfix",
+      "confidence": 0.96,
+      "reason": "'app you already built' + existing behavior is wrong (list 500s instead of rendering) + repair to spec, no new capability + no new tech = bugfix against an existing codebase. One defect, not compound."
     }
   ],
   "confirmation_questions": [],

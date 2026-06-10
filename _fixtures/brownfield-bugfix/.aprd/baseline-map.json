@@ -1,0 +1,32 @@
+{
+  "built_by": "greenfield-spine",
+  "baseline_aprd_ref": ".aprd/aprd.frozen.md",
+  "accepted_slices": ["S1", "S4"],
+  "built_components": ["C1", "C2", "C3", "C6"],
+  "id_high_water": { "R": 10, "AC": 10, "S": 4, "ADR": 6, "C": 6, "E": 7, "CT": 11, "A": 13, "F": 4 },
+  "conventions": {
+    "lang": "Python >=3.11 (ADR-0002)",
+    "layout": "src/freelancer_app/<component_snake>/*.py; one package per component (C1 data_store, C2 identity_auth, C3 project_management, C4 time_logging, C5 invoice_export, C6 web_ingress)",
+    "lint": "pyproject.toml [tool.pytest.ini_options] pythonpath=['src']; setuptools build; no ruff/black config present",
+    "naming": "module dir = snake_case(component.name); module files snake_case (e.g. session_gate.py, oauth_callback.py, project_store.py, identity_record_store.py); pkg = freelancer-app"
+  },
+  "integration_seams": [
+    { "at": "C1", "kind": "persistence", "contract_ref": "CT2" },
+    { "at": "C2", "kind": "domain", "contract_ref": "CT3" },
+    { "at": "C2", "kind": "primary_external_integration", "contract_ref": "CT8" },
+    { "at": "C6", "kind": "ingress", "contract_ref": "CT9" }
+  ],
+  "existing_oracle": {
+    "suites": [".build/skeleton/oracle/", ".build/slices/S4/oracle/"],
+    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5", "OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
+    "must_stay_green": true
+  },
+  "frozen_locks": {
+    ".aprd/aprd.lock": "frozen",
+    ".adr/adr.lock": "frozen",
+    ".hld/skeleton.lock": "frozen",
+    ".build/skeleton/oracle/oracle.lock": "frozen",
+    ".build/slices/S4/oracle/oracle.lock": "frozen"
+  },
+  "note": "Baseline = greenfield-built, demo-accepted project (S1 sign-in + S4 projects accepted; C1/C2/C3/C6 built) carrying a latent defect: _render formats billable_rate with ':.2f', null rate 500s the project list. CR-bug-001 repairs the C3 project-list render at the S4 surface (oracle suite .build/slices/S4/oracle/, baseline AC6 must stay green, BF4). New repro IDs continue strictly above the high-water marks (BF3); baseline frozen artifacts are immutable (BF1)."
+}

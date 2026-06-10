@@ -1,244 +1,26 @@
 {
-  "request_ref": ".aprd/00-raw-request.md",
+  "request_ref": ".aprd/change-requests/CR-bug-001.md",
   "classification_ref": ".aprd/01-classification.json",
-  "class": "greenfield",
-  "entities": [
-    {
-      "id": "E1",
-      "name": "Freelancer",
-      "note": "Primary user of the system; logs hours and exports invoices.",
-      "inferred": false,
-      "source": "freelancers can log their billable hours",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "E2",
-      "name": "Client Project",
-      "note": "A named project owned by a client, against which a freelancer logs billable hours.",
-      "inferred": false,
-      "source": "log their billable hours against client projects",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "E3",
-      "name": "Time Entry",
-      "note": "A single logged unit of billable work (hours) tied to a project.",
-      "inferred": false,
-      "source": "log their billable hours",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "E4",
-      "name": "Invoice",
-      "note": "A monthly PDF document summarising billable hours for a client project.",
-      "inferred": false,
-      "source": "export a monthly PDF invoice",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "E5",
-      "name": "Currency",
-      "note": "A currency designation applied to monetary amounts (rates, totals) in the system.",
-      "inferred": false,
-      "source": "support multiple currencies",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "E6",
-      "name": "Client",
-      "note": "The party that owns a project and to whom an invoice is addressed. Named indirectly via 'client projects' and the invoicing context.",
-      "inferred": true,
-      "rationale": "Invoicing is addressed to a billable party. 'Client projects' presupposes a client record to associate projects and invoice recipients.",
-      "source": "client projects … export a monthly PDF invoice",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "E7",
-      "name": "Billable Rate",
-      "note": "A monetary rate (per hour) used to compute invoice totals from logged hours.",
-      "inferred": true,
-      "rationale": "'Billable hours' on an invoice must produce a monetary amount; a rate is the only mechanism to convert hours to money.",
-      "source": "billable hours … export a monthly PDF invoice … multiple currencies",
-      "sr_ref": "SR1"
-    }
-  ],
+  "class": "bugfix",
+  "baseline_map_ref": ".aprd/baseline-map.json",
+  "entities": [],
   "explicit_requirements": [
     {
-      "id": "R1",
-      "text": "The system must be delivered as a web application.",
+      "id": "R11",
+      "text": "The project list must render every owned project, including a project whose billable_rate is null.",
       "inferred": false,
-      "source": "We want a web app",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "R2",
-      "text": "A freelancer must be able to log billable hours against a client project.",
-      "inferred": false,
-      "source": "freelancers can log their billable hours against client projects",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "R3",
-      "text": "A freelancer must be able to export a monthly PDF invoice.",
-      "inferred": false,
-      "source": "export a monthly PDF invoice",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "R4",
-      "text": "The system must support multiple currencies.",
-      "inferred": false,
-      "source": "Should support multiple currencies",
-      "sr_ref": "SR1"
+      "source": "the list view crashes instead of rendering … Expected: 200, list renders every project (CR-bug-001 REPRO_STEPS + Class)",
+      "sr_ref": "SR1",
+      "baseline_ref": "R6"
     }
   ],
-  "implied_requirements": [
-    {
-      "id": "R5",
-      "text": "A freelancer must be able to create and authenticate an account.",
-      "inferred": true,
-      "source": "freelancers can log their billable hours",
-      "rationale": "Logging hours is a user-owned action; the system must distinguish one freelancer's data from another's, requiring identity and authentication.",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "R6",
-      "text": "A freelancer must be able to create and manage client projects within the system.",
-      "inferred": true,
-      "source": "log their billable hours against client projects",
-      "rationale": "Hours cannot be logged 'against' a project that does not yet exist in the system. Project creation is a prerequisite.",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "R7",
-      "text": "All logged time entries must be persisted and associated with their project and freelancer.",
-      "inferred": true,
-      "source": "log their billable hours … export a monthly PDF invoice",
-      "rationale": "The invoice aggregates hours over a month. Hours must be stored and queryable by period to generate the invoice.",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "R8",
-      "text": "The generated PDF invoice must aggregate the month's time entries into line items showing hours, rate, and total.",
-      "inferred": true,
-      "source": "export a monthly PDF invoice",
-      "rationale": "A PDF invoice for billable hours is not meaningful without itemised hours and resulting monetary amounts. This is the minimum content a recipient would require to verify the bill.",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "R9",
-      "text": "Each monetary value in the system (rate, line-item total, invoice total) must be stored and displayed with its associated currency.",
-      "inferred": true,
-      "source": "support multiple currencies",
-      "rationale": "Multi-currency support requires every monetary amount to carry a currency designation; otherwise amounts from different currencies are indistinguishable.",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "R10",
-      "text": "A billable hourly rate must be configurable per project or per time entry to compute invoice monetary totals.",
-      "inferred": true,
-      "source": "billable hours … export a monthly PDF invoice … multiple currencies",
-      "rationale": "'Billable hours' on an invoice must produce a monetary total. A rate is the only mechanism to convert hours to currency amounts. Without it no invoice total can be calculated.",
-      "sr_ref": "SR1"
-    }
-  ],
-  "stated_constraints": [
-    {
-      "id": "C1",
-      "text": "The product must be a web application.",
-      "kind": "platform",
-      "inferred": false,
-      "source": "We want a web app",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "C2",
-      "text": "The system should be live within approximately two months.",
-      "kind": "timeline",
-      "inferred": false,
-      "source": "Ideally live in a couple of months",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "C3",
-      "text": "This is a net-new build with no existing system or codebase.",
-      "kind": "stack",
-      "inferred": false,
-      "source": "No existing system — we're starting from scratch",
-      "sr_ref": "SR1"
-    }
-  ],
+  "implied_requirements": [],
+  "stated_constraints": [],
   "unknowns": [
     {
       "id": "U1",
-      "text": "Which specific currencies must be supported, and at what granularity is currency set (per-freelancer, per-client, per-project, or per-time-entry)?",
-      "source": "support multiple currencies",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "U2",
-      "text": "What authentication mechanism is required (email + password, OAuth/social login, SSO)?",
-      "source": "freelancers can log their billable hours",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "U3",
-      "text": "Is a 'client' a data record only visible to the freelancer, or does the client also have a login and portal?",
-      "source": "client projects … export a monthly PDF invoice",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "U4",
-      "text": "Can one freelancer account manage multiple clients and projects, and is there a limit?",
-      "source": "log their billable hours against client projects",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "U5",
-      "text": "What are the PDF invoice content and formatting requirements (logo, legal fields, payment terms, numbering scheme, template)?",
-      "source": "export a monthly PDF invoice",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "U6",
-      "text": "Does 'monthly' invoice mean a fixed calendar month, or is the billing period configurable (e.g. any date range)?",
-      "source": "export a monthly PDF invoice",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "U7",
-      "text": "Where is the billable rate configured — per project, per client, or per individual time entry — and can it vary over time?",
-      "source": "billable hours … export a monthly PDF invoice",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "U8",
-      "text": "Does multi-currency require live exchange-rate conversion between currencies, or is each project/invoice fixed to a single currency?",
-      "source": "support multiple currencies",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "U9",
-      "text": "What is the expected user (freelancer) volume and concurrent usage scale?",
-      "source": "We want a web app",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "U10",
-      "text": "Are there hosting, cloud provider, or infrastructure preferences or constraints?",
-      "source": "No existing system — we're starting from scratch",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "U11",
-      "text": "Are there team or agency accounts (multiple freelancers under one organisation), or is the system strictly single-freelancer per account?",
-      "source": "freelancers can log their billable hours",
-      "sr_ref": "SR1"
-    },
-    {
-      "id": "U12",
-      "text": "Are there compliance or data-residency requirements (GDPR, financial record retention, etc.)?",
-      "source": "export a monthly PDF invoice … multiple currencies",
+      "text": "How should a null billable_rate display in the project list — blank/placeholder, zero, or the rate field omitted? Baseline is silent on the null-rate case.",
+      "source": "Correct behavior for a null rate is under-specified by baseline (CR-bug-001 Class)",
       "sr_ref": "SR1"
     }
   ]

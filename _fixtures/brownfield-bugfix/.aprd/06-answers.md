@@ -1,9 +1,5 @@
-# Client Answers
+# Gap answers (bugfix CR-bug-001)
 
-Reply per question with the letter that fits, or "Something else — <description>". Skip any question to accept its recommended default.
+> No client response within window. Recommended default applied (07-assumptions source `default-applied`). Gap → assumption A14.
 
-Q1: A
-Q2: B
-Q3: A
-Q4: A
-Q6: Something else — No strong preference on hosting. We trust the team to pick a simple managed host; just keep monthly running cost low and avoid locking us into one big cloud vendor.
+- **G1** → no answer → default: null billable_rate renders as a blank placeholder ('—') in the rate column (A14).

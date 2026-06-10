@@ -1,9 +1,0 @@
-{
-  "aprd_ref": ".aprd/drafts/aprd.v1.md",
-  "assumptions_ref": ".aprd/07-assumptions.json",
-  "gaps_ref": ".aprd/04-gaps.json",
-  "class": "greenfield",
-  "verdict": "clean",
-  "issues": [],
-  "issue_count": 0
-}
