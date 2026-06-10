@@ -20,7 +20,7 @@ Drive the delivery pipeline on the user's project — rough-request→verified-s
 - **WORKSPACE_ROOT = `<param>`** — user repo root. ALL phase trees write here; do not look outside it.
 - **DELIVERABLE_TARGET = `<param>`** — stack/canon profile naming how to scaffold / write / verify one output. Read the profile; never special-case it.
 - **MODE = `greenfield | brownfield`** — brownfield reads existing user code into the understand phase before any write; greenfield starts empty. Loop otherwise identical.
-- **Verify harness = clean-room runner sim** (`.claude/agents/step-runner.md`, Sonnet/High) against a `_test_bench` root. Use the registered judge; invent none.
+- **Verify harness = clean-room `step-runner` executor** registered for the active harness (dispatch mechanics live in adapter steering), run against a `_test_bench` root. Use the registered judge; invent none.
 - **Role prompts = `prompts/<NN-phase>/<ROLE>.md`** — LAZY-LOAD per step from disk (lean context; never preload the library).
 
 **Write no bookkeeping file.** State derived from disk: trees + locks + promoted outputs + git. "Done" = artifact on disk, not a changelog append. Control loop below IS the run loop.
@@ -61,7 +61,7 @@ Per slice on the roadmap frontier, one step per turn:
 3. **Verify (cheapest-source-first, both directions):**
    - **Layer 1 lint** — `tools/economy-lint/lint.mjs` on scratch → `lint.json`. `blocked` → re-author, skip rest.
    - **Layer 2 ECONOMY-AUDIT** — only if lint clean: adversarial LLM on scratch → `economy-audit.json`. `blocked` → re-author.
-   - **Layer 3 clean-room** — prose-clean scratch only: clear `_test_bench`, seed declared fixture inputs, spawn runner (step-runner, Sonnet/High) whose prompt = scratch verbatim + bench path (no orchestrator context leaks in). Verify AGAINST DISK: output at declared path, schema-valid, IDs threaded, acceptance satisfied. Judgment-heavy → SEPARATE verifier spawn (no self-grading). Both directions: known-good PASS + planted-defect FAIL.
+   - **Layer 3 clean-room** — prose-clean scratch only: clear `_test_bench`, seed declared fixture inputs, spawn `step-runner` executor whose prompt = scratch verbatim + bench path (no orchestrator context leaks in). Verify AGAINST DISK: output at declared path, schema-valid, IDs threaded, acceptance satisfied. Judgment-heavy → SEPARATE verifier spawn (no self-grading). Both directions: known-good PASS + planted-defect FAIL.
    - **Routing keystone:** any flaw ⇒ defect in the PROMPT, not artifact. `fix` = `DELETE | REWRITE`, never ADD, never hand-patch. ONE retry budget across layers: 3 → HALT, report layer + artifact, do not promote.
 4. **CHECKPOINT C demo** — present verified slice to client. Value primary (correct behavior on staging), then both-directions held. Accept → promote scratch atomically to its home (the ship). Reject (value) → re-author. Reject (spine leak) → fix spine once, re-run.
 

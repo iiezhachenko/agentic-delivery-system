@@ -102,3 +102,28 @@ Self-host devs run ADP on Kiro too → hit SAME C1+C2 bugs. Add NEW `.kiro/steer
 
 ## Deps
 Needs P0 (generic orchestrator sibling), P1 (kiro adapter), P2 (manifest generator), P4 (pack). Re-runs P4 pack to ship. Feeds a P5-style re-verify on Kiro (dispatch writes file to disk + big-file write succeeds).
+
+---
+
+## DONE — 2026-06-10
+
+All AC met. Strictly additive; protected files byte-identical.
+
+### What landed
+- **P6.1+P6.2 — NEW `adapters/kiro/steering/20-kiro-runtime.md`** (`harness: kiro`, 46 ln / 709 tok, lint clean):
+  - §dispatch (C1): `invoke_sub_agent name:general-task-execution` for every step-runner dispatch (workspace `.kiro/agents/*.json` won't resolve); `prompt` = `_step-runner.md` preamble + §write rule + `\n\n---\n\n` + role prompt verbatim; `contextFiles` = role `inputs:` paths; verifier = SAME assembly, SEPARATE call; clean-room invariants stated. Canonical pseudocode block for reuse.
+  - §write (C2): chunked-write rule verbatim (fsWrite ≤50 first, fsAppend ≤200-line chunks, never whole big file). Auto-loads into `delivery` + `step` (steering); injected into dispatched runner (prepended after preamble, before `---`) — one rule, two paths.
+- **P6.3 — `prompts/_orchestrator.generic.md` neutralized** (P0 sibling, NOT protected; self-host `_orchestrator.md` untouched):
+  - L23: `.claude/agents/step-runner.md` path → "clean-room `step-runner` executor registered for active harness (dispatch mechanics in adapter steering)".
+  - L64: "spawn runner (step-runner, Sonnet/High)" → "spawn `step-runner` executor". Mechanism = adapter's job.
+  - L78 already-neutral role name + substantive model/effort note kept (no `.claude/` path, no harness mechanism). Lint clean, zero self-host tokens.
+- **P6.5 — NEW `.kiro/steering/20-kiro-runtime.md`** (self-host parity, identical content). Additive — protected `00-exclusive.md`/`10-self-host.md`/agents/`_orchestrator.md` untouched. `selfhost.json` + `step.json` already load `.kiro/steering/**`.
+- **P6.4 — manifest regen + repack**:
+  - `gen-manifest.mjs` → 61 files, new kiro steering row present (`harness: kiro`), in kiro matrix only (absent from claude matrix), version moved `p03b9a94d` → `pafe4432e` (orchestrator sha changed). NO generator edit.
+  - `pack.mjs` → gate GREEN (selftest both-directions green), tarball `adp-v956447a+pafe4432e.l96133636.tgz` ships `package/payload/adapters/kiro/steering/20-kiro-runtime.md` (installs → `.kiro/steering/20-kiro-runtime.md` via `destFor`).
+
+### Verify
+- KIRO-ONLY confirmed: C1/C2 content absent from `adapters/claude/**` + all `harness: all` prompts.
+- Lint clean ×3 (new kiro steering, orchestrator generic, self-host steering).
+- Regression: protected files (`CLAUDE.md`, `prompts/_orchestrator.md`, `.kiro/agents/*`, `.kiro/steering/{00-exclusive,10-self-host}.md`, claude self-host wiring) — git shows NO modification.
+- Change set = NEW ×2 + modified `_orchestrator.generic.md` + regen `manifest.json`. Exactly as scoped.

@@ -1,5 +1,5 @@
 {
-  "version": "d42e863+p03b9a94d.l96133636",
+  "version": "956447a+pafe4432e.l96133636",
   "files": [
     {
       "src": "adapters/claude/agents/adp-orchestrator.md",
@@ -53,6 +53,12 @@
       "src": "adapters/kiro/steering/10-canon.md",
       "path": "adapters/kiro/steering/10-canon.md",
       "sha256": "58e5dcb9544e405a7ce3309c99a952ada08d290211235be8ee7a454af08a3e7d",
+      "harness": "kiro"
+    },
+    {
+      "src": "adapters/kiro/steering/20-kiro-runtime.md",
+      "path": "adapters/kiro/steering/20-kiro-runtime.md",
+      "sha256": "59df1637b4c73276af7c1bdc1875849f58a0b1818708e8ce7fe0ad9eb627e47b",
       "harness": "kiro"
     },
     {
@@ -322,7 +328,7 @@
     {
       "src": "prompts/_orchestrator.generic.md",
       "path": "prompts/_orchestrator.md",
-      "sha256": "f5e8f472a0704926e7cdb202db3cd8a9d29fb7a1df40b0c12a1064a3edd923a5",
+      "sha256": "7c951138efe4153ab5e98591db40d9432222db9b2e95b3c62391bb1f16a26bf5",
       "harness": "all"
     },
     {
@@ -426,6 +432,7 @@
       "adapters/kiro/agents/step.json",
       "adapters/kiro/steering/00-exclusive.md",
       "adapters/kiro/steering/10-canon.md",
+      "adapters/kiro/steering/20-kiro-runtime.md",
       "canon/CLAUDE.generic.md",
       "code-canon/typescript.md",
       "docs/generic-usage-guide.md",
