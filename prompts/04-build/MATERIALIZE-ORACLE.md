@@ -21,6 +21,9 @@ inputs:
   - { path: ".build/skeleton/oracle/oracle.lock", format: "json — DISPATCH signal (present+frozen → SLICE-BUILD) + FROZEN skeleton oracle inherited by reference (never re-materialized/edited, B4/H14)" }
   - { path: ".build/skeleton/oracle/oracle.json", format: "json — frozen oracle manifest: already-materialized contract/flow/acceptance tests (the inherited set the slice must NOT re-materialize)" }
   - { path: ".roadmap/08-rerank.json", format: "json — living roadmap: remaining_sequence + completed[] — auto-selects the target slice (§5.3)" }
+  # — slice-build feature-add (class dispatched by playbook) —
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — CURRENT frozen WHAT RESOLVED via lock (read .aprd/aprd.lock, open .aprd/ + its artifact value; feature-add → aprd.v<N>.frozen.md, e.g. aprd.v2 — NEVER a hardcoded version path; BF7/P8 + 07a canon). Carries CLASS_EXTENSION → REGRESSION_GUARD: which existing AC*/suites the feature touches (BF4)" }
+  - { path: ".aprd/baseline-map.json", format: "json — baseline inventory: existing_oracle (suites that must stay green) + integration_seams (where the feature plugs in). The regression layer materializes from this BY REFERENCE (never re-author, H14 analog)" }
 outputs:
   # — skeleton-build —
   - { path: ".build/skeleton/oracle/oracle.json", format: "json (schema below) — manifest: per-layer materialized tests + held-out split + mutation-certified set + coverage + counts" }
@@ -32,7 +35,7 @@ outputs:
   - { path: ".build/slices/<slice_id>/oracle/{contract,flow,acceptance/visible,acceptance/held_out}/test_*.py + conftest.py + mutation-certification.json", format: "executable pytest (red-first) — the slice's NEW tests; conftest = contract-level mocks" }
 escapes:
   # — shared —
-  - { when: "any input missing/unparseable, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate.reconcile_critique_verdict != clean", target: "self / HALT — no clean-gated frozen frame to author oracle on (§5.1, B5). Report which" }
+  - { when: "any input missing/unparseable, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR the artifact aprd.lock names (.aprd/<aprd.lock.artifact>) missing/unparseable, OR skeleton.lock gate.reconcile_critique_verdict != clean", target: "self / HALT — no clean-gated frozen frame to author oracle on (§5.1, B5; BF7/P8 — walk the lock-named version, never a hardcoded aprd.frozen.md). Report which" }
   - { when: "frozen CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — oracle depth not authored (B13/§11). Report class" }
   - { when: "a real-seam CT* declares empty failure_assertions, OR a flow traces no AC*", target: "Phase 3 / DERIVE-CONTRACTS|DERIVE-TESTS (failure) or Phase 0 (no AC) — record materialization_gaps[]; never fabricate a failure mode or AC" }
   - { when: "frozen spec too thin to materialize (e.g. shape with no observable), OR a needed frozen DECISION absent from the ADR frame", target: "Phase 3 / DERIVE-TESTS or Phase 2 — record materialization_gaps[] {target, gap, route}; never invent the observable or pick the decision (B4/B5)" }
@@ -45,6 +48,8 @@ escapes:
   - { when: "SLICE-BUILD: target slice's build-plan.json or test-specs.json carries non-empty structural_defects / aprd_defects / frame_conflicts", target: "self / HALT — upstream slice routed an unresolved escape; don't author oracle on a defective slice. Report which block in which file" }
   - { when: "SLICE-BUILD: materializing would re-author / re-run / edit a test in the frozen skeleton oracle (skeleton-fidelity breach)", target: "Phase 2 (change request) — record in frame_conflicts[]; NEVER mutate the frozen oracle (B4/H14)" }
   - { when: "SLICE-BUILD: a touched real-seam CT* has NO frozen T-CT* in skeleton test-specs.json", target: "Phase 3 / DERIVE-TESTS skeleton — record materialization_gaps[]; the slice cannot materialize a spec that does not exist. Never re-author it here (H14)" }
+  - { when: "SLICE-BUILD feature-add: .aprd/baseline-map.json missing/unparseable, OR the resolved .aprd/<aprd.lock.artifact> carries no CLASS_EXTENSION/REGRESSION_GUARD block", target: "self / HALT — no regression-guard scope to materialize the MANDATORY regression layer against (BF4). Report which" }
+  - { when: "SLICE-BUILD feature-add: the regression layer would re-author / re-run-author / edit / weaken a baseline test in a REGRESSION_GUARD suite (frozen-overwrite breach)", target: "Phase 2 (change request) — record in frame_conflicts[]; reference baseline suites only, NEVER mutate one (BF1/BF4, H14 analog)" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.
@@ -260,7 +265,7 @@ Materialize ONE slice's NEW tests against the FROZEN skeleton oracle + prior-bui
 1. **Contract tests — the slice's REAL seams not yet in the frozen oracle.** Slice build-plan `build_units[].provides_contracts` (the built component's callee surface) ∪ `consumes_seams[status:real]` (its calls to prior-built deps) = the seams now real on both ends. Materialize each whose executable test is **ABSENT** from the frozen `oracle.json` `contract_tests` — drawing `shape_assertion`/`failure_assertions` from the FROZEN design spec `T-CT*` in skeleton `test-specs.json` (the slice test-specs names which via `inherited_contract_tests[].source_ref`). A seam already in the frozen oracle is inherited, NOT re-materialized (fidelity). Deps mocked at contract via `conftest.py`.
 2. **Flow test — the slice flow (new).** One per slice flow F* (slice test-specs `flow_tests[0]`): happy composes `via[]` `CT*` and asserts arrival at `happy_path.asserts_ac`; failure reuses `failure_path`. Prior-built deps are real along the path.
 3. **Acceptance tests — the slice flow's traced AC* (new).** Each AC* the slice flow traces that is NOT already materialized in the frozen oracle → visible + held_out (B7), same property / different unguessable input.
-4. **Class extension** — greenfield slice: **none fire** (`class_ext: []`).
+4. **Class extension** — greenfield slice: **none fire** (`class_ext: []`). **Feature-add: the regression layer FIRES** (`class_ext += regression`, BF4) — a MANDATORY fourth layer scoped to the touched surface + the feature's seams (feature-add delta below).
 
 Then **mutation-certify** high-blast among the slice's NEW tests (C2/auth — e.g. CT3 resolves the session, AC6 scopes ownership to the owning freelancer), then **FREEZE** the per-slice `oracle.lock` (test-author signer, `built_against` the frozen skeleton oracle + the slice build-plan).
 
@@ -271,6 +276,14 @@ Then **mutation-certify** high-blast among the slice's NEW tests (C2/auth — e.
 4. **FLAG-never-fix, escape targets.** Re-materialized/edited frozen test → `skeleton_fidelity` breach → `frame_conflicts[]` → Phase 2; spec too thin / CT* w/o failure / flow w/o AC → `materialization_gaps[]` (Phase 3 / Phase 0). Never patch a frozen oracle, spec, or AC.
 5. **Auto-select target slice (resumable, PR1).** Read `08-rerank.json` `remaining_sequence` in order; target = **first** slice with BOTH `.build/slices/<id>/build-plan.json` and `.hld/slices/<id>/test-specs.json` but NO sibling `.build/slices/<id>/oracle/oracle.lock`. `completed[]` pinned — skip. None ready → STOP clean. One invocation = one slice.
 
+### feature-add delta (slice-build — class dispatched by playbook; shared + slice-build Rules above also bind)
+> Fires only when the playbook sets `class: feature-add` (`oracle_layers: [contract, flow, acceptance, regression]`, `build_depth: per-slice-no-scaffold`). Greenfield leaves `class_ext: []` (slice-build Rules untouched). Carries ONLY what differs (AB1).
+1. **Resolve frozen-WHAT via lock, never a hardcoded version (BF7/P8, 07a canon).** Read `.aprd/aprd.lock` → open `.aprd/<aprd.lock.artifact>` (CURRENT frozen version carrying `CLASS_EXTENSION` → `REGRESSION_GUARD`). NEVER hardcode `aprd.v<N>.frozen.md` — a literal version path walks STALE WHAT one bump later (`v2` in the bench is an EXAMPLE, never the binding). Lock missing / `status != frozen` / named artifact absent → HALT (guard).
+2. **Materialize a MANDATORY regression layer (BF4).** `class_ext += regression`. Regression layer = executable tests proving the existing `AC*`/suites named in `REGRESSION_GUARD` still pass after the feature lands. Materialize from the EXISTING oracle inventory (`baseline-map.json` `existing_oracle.suites`) BY REFERENCE — assert the prior-green tests stay green; NEVER re-author, re-run-author, or weaken them (`rematerialized:false`; H14 analog).
+3. **Scope to touched surface + seams (Risk R4).** Regression layer covers ONLY the existing `AC*`/contracts the feature's `INTEGRATION_SEAMS` touch + the surface the new `R*/AC*` alter. Do NOT materialize the whole inherited suite per slice (full re-run blows cost/time on a large baseline). Cite the scope basis (the `REGRESSION_GUARD` refs + the seam).
+4. **Inherit, never mutate (BF1/BF4).** Existing oracle suites are FROZEN — reference them in the regression manifest, never edit a baseline test. A regression test needing a baseline-test edit = a defect → escape (frozen-overwrite breach → `frame_conflicts[]` → Phase 2), never patch.
+5. **MODE=slice, no scaffold (playbook `build_depth: per-slice-no-scaffold`).** Harness already exists — lay no scaffold here.
+
 ## Task steps (slice-build)
 1. Read inputs (shared + slice-build). Check guards (frontmatter `escapes:`) — any tripped → HALT (or STOP clean for "no ready slice"), report which + detail, write nothing. Else continue.
 2. Auto-select target slice (delta Rule 5). None ready → STOP clean.
@@ -280,6 +293,11 @@ Then **mutation-certify** high-blast among the slice's NEW tests (C2/auth — e.
 6. Acceptance (AC* order): per NEW traced AC*, write `acceptance/visible/test_<AC>.py` + `acceptance/held_out/test_<AC>.py`.
 7. Write `conftest.py` (contract-level mocks for the slice's seams). Mutation-certify high-blast → `mutation-certification.json`. `class_ext` = `[]`.
 8. Build `oracle.json` (`inherited_oracle` ref + the slice's NEW tests + coverage/counts by **walking** actual files; bijection on the NEW seams; `skeleton_fidelity` verdict). FREEZE `oracle.lock` (`built_against` the frozen skeleton oracle + slice build-plan). Stop.
+
+**Feature-add branch** (class == feature-add, playbook-dispatched — steps 1–7 run as above; then BEFORE freeze, ADD):
+- **7a.** Resolve frozen-WHAT: read `.aprd/aprd.lock` → open `.aprd/<aprd.lock.artifact>` (delta Rule 1, NEVER a hardcoded `v<N>`). Read its `CLASS_EXTENSION` → `REGRESSION_GUARD` (which existing `AC*`/suites the feature touches) + `baseline-map.json` `existing_oracle` + `integration_seams`. No `CLASS_EXTENSION`/`REGRESSION_GUARD`, or baseline-map missing → HALT (guard).
+- **7b.** Materialize the scoped regression layer BY REFERENCE (delta Rules 2–4): assert each `REGRESSION_GUARD` `AC*`/suite stays green; scope to the touched surface + the feature's `INTEGRATION_SEAMS` ONLY (NOT the whole inherited suite — Risk R4). Reference the baseline suites — never edit/re-author/weaken them (a needed edit → `frame_conflicts[]` → Phase 2). `class_ext += [{ layer:"regression", scope, scope_basis, asserts, source_suites, rematerialized:false, baseline_tests_edited:false }]`.
+- **8 (feature-add).** Build `oracle.json` as above PLUS `class:"feature-add"` + `aprd_ref` (resolved) + `regression_guard_ref` + the regression layer in `class_ext` + `oracle_counts.regression_tests` (walk to count). FREEZE `oracle.lock`. Stop.
 
 ## Output schema (slice) — `.build/slices/<slice_id>/oracle/oracle.json`
 Per-test entries (`contract_tests`/`flow_tests`/`acceptance_tests`), `held_out_split`, `mutation_certification`, `conftest`, `class_ext`, `materialization_gaps`, `oracle_counts` — **same shape as Part A**. The slice deltas (everything else is carried verbatim):
@@ -392,8 +410,30 @@ Same shape as Part A `oracle.lock`; slice deltas:
 }
 ```
 
+### Feature-add schema delta (slice-build, class == feature-add — only what differs, AB1)
+Same shape as the slice schema above; differences:
+- `"class": "feature-add"` (was `"greenfield"`); `"aprd_ref": ".aprd/<aprd.lock.artifact>"` (lock-resolved, NEVER a hardcoded `aprd.v<N>.frozen.md`); `"aprd_version": "<version from .aprd/aprd.lock>"`.
+- `"regression_guard_ref"`: the resolved aPRD `CLASS_EXTENSION` → `REGRESSION_GUARD` block (names the existing `AC*`/suites that must stay green).
+- `class_ext` FIRES the regression layer (greenfield = `[]`):
+
+```json
+"class_ext": [
+  {
+    "layer": "regression",
+    "scope": "touched-surface + seams",          // Risk R4 — NOT the whole inherited suite
+    "scope_basis": "REGRESSION_GUARD AC2,AC7 (time-entry log + persistence, parent of the tagged entry) + integration_seam C1/CT2 (label field additive on the time-entry record)",
+    "asserts": ["AC2", "AC7"],                    // existing AC*/suite refs that must stay green (verbatim from REGRESSION_GUARD)
+    "source_suites": [".build/skeleton/oracle/", ".build/slices/S4/oracle/"], // baseline suites referenced (baseline-map existing_oracle), scoped to touched
+    "rematerialized": false,                      // referenced, NEVER re-authored/re-run-authored/weakened (BF1/BF4, H14 analog)
+    "baseline_tests_edited": false                // MUST be false — referencing a frozen baseline test, never editing it
+  }
+],
+```
+- `oracle_counts` adds `"regression_tests": <N>` (walk to count).
+
 ## Stop condition (slice-build)
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which fired + detail; HALT.
 - No ready slice → write nothing; STOP clean.
 - A defect was recorded (routed per the task steps) → write the rest; state the route; stop.
-- Done → write the slice suite tree + `oracle.json` + FREEZE `oracle.lock`, state "slice oracle materialized (N contract + 1 flow + M acceptance, held-out split, mutation-certified, frozen oracle inherited) + red-first, IMPLEMENT next", stop. Lane per shared Rule 11.
+- Done (greenfield) → write the slice suite tree + `oracle.json` + FREEZE `oracle.lock`, state "slice oracle materialized (N contract + 1 flow + M acceptance, held-out split, mutation-certified, frozen oracle inherited) + red-first, IMPLEMENT next", stop. Lane per shared Rule 11.
+- Done (feature-add) → as above PLUS the slice `oracle.json` carries a scoped `regression` layer in `class_ext` (referencing the touched baseline suites, no baseline test mutated) + `class:"feature-add"` + `regression_guard_ref`. State "feature-add slice oracle materialized (N contract + 1 flow + M acceptance + scoped regression layer, held-out split, mutation-certified, frozen oracle inherited) + red-first, IMPLEMENT next", stop.

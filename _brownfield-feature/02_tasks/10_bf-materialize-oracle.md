@@ -1,5 +1,7 @@
 # Task 10 — BF-MATERIALIZE-ORACLE (OVERLAY)
 
+> **STATUS: DONE** (2026-06-10). Feature-add regression delta added to MATERIALIZE-ORACLE slice-build part; frozen-WHAT resolved via `aprd.lock.artifact`; golden S5 slice `oracle.json` carries a scoped regression layer (no baseline test mutated). See §COMPLETION.
+
 > Self-contained. Everything needed embedded below — do NOT hunt other files.
 
 ## TL;DR
@@ -69,3 +71,26 @@ Feature-add must guarantee nothing previously green goes red (BF4). The oracle i
 - Frozen-WHAT RESOLVED via `aprd.lock.artifact` (no hardcoded version path); freeze-gate guard verifies the named artifact exists (BF7/P8 + 07a canon).
 - Golden feature-add slice `oracle.json` carries a scoped `regression` layer; no baseline test mutated.
 - Both-directions check holds (incl. stale-version-walk FAIL).
+
+## COMPLETION (2026-06-10)
+
+### What changed — `prompts/04-build/MATERIALIZE-ORACLE.md` (slice-build / Part B; shared + slice-build Rules substance UNTOUCHED, AB1)
+1. **Frontmatter inputs** — added `# — slice-build feature-add` block: `.aprd/<aprd.lock.artifact>` (frozen-WHAT RESOLVED via lock → CURRENT version carrying `CLASS_EXTENSION`/`REGRESSION_GUARD`; NEVER hardcode `aprd.v<N>`; BF7/P8 + 07a canon) + `.aprd/baseline-map.json` (`existing_oracle` + `integration_seams`).
+2. **Freeze-gate guard REWRITTEN, not added (AB9)** — shared escape now HALTs when `aprd.lock` names an artifact (`.aprd/<aprd.lock.artifact>`) missing/unparseable (version-mismatch impossible by construction — only the lock-named file is opened). Added 2 feature-add slice-build guards: no `CLASS_EXTENSION`/`REGRESSION_GUARD` or missing baseline-map → HALT; regression layer editing/weakening a baseline test (frozen-overwrite breach) → `frame_conflicts[]` → Phase 2.
+3. **Discriminator #4** — feature-add FIRES the regression layer (`class_ext += regression`, BF4); greenfield stays `[]`.
+4. **`### feature-add delta (slice-build)`** block (5 rules): lock-resolve frozen-WHAT (BF7/P8); MANDATORY regression layer materialized BY REFERENCE from `existing_oracle.suites` (BF4, `rematerialized:false`); scope to touched surface + `INTEGRATION_SEAMS` only (Risk R4); inherit-never-mutate baseline (BF1/BF4); MODE=slice, no scaffold.
+5. **Task-steps feature-add branch** — after the slice's NEW contract/flow/acceptance tests: resolve lock → read `REGRESSION_GUARD` + `existing_oracle`/`integration_seams` (7a) → materialize scoped regression layer by reference → fill `class_ext` (7b) → emit `class:"feature-add"` + `regression_guard_ref` + `oracle_counts.regression_tests` → FREEZE. Greenfield steps intact.
+6. **Feature-add schema delta** — `class:"feature-add"`, resolved `aprd_ref`/`aprd_version`, `regression_guard_ref`, `class_ext` regression entry (`scope`/`scope_basis`/`asserts`/`source_suites`/`rematerialized:false`/`baseline_tests_edited:false`), `oracle_counts.regression_tests`.
+7. **Stop condition** — feature-add line: scoped regression layer in `class_ext`, no baseline test mutated.
+
+### Golden sentinel
+`_fixtures/brownfield-feature/.build/slices/S5/oracle/oracle.json` (+ frozen `oracle.lock`): target slice S5 (Tag a time entry), `class:"feature-add"`, `aprd_ref:.aprd/aprd.v2.frozen.md` (lock-resolved), `regression_guard_ref`, `class_ext` regression layer scoped to `REGRESSION_GUARD` AC2/AC7 + seam C1/CT2, `source_suites:[.build/skeleton/oracle/,.build/slices/S4/oracle/]`, `rematerialized:false`, `baseline_tests_edited:false`. Valid JSON.
+
+### Verify — both-directions (prompt now enforces all 5)
+- **Known-good** — feature-add S5 → scoped `regression` layer referencing touched baseline suites. PASS (golden).
+- **Planted: missing regression layer** (`class_ext:[]` for feature-add) → FAIL (delta Rule 2 + discriminator #4 + stop condition mandate it).
+- **Planted: baseline test edited** → FAIL (delta Rule 4 + frozen-overwrite guard → Phase 2).
+- **Planted: full-suite regression** (unscoped) → FLAG (delta Rule 3 + `scope`/`scope_basis` fields; Risk R4).
+- **Planted: stale-version walk** (hardcoded `aprd.v<N>.frozen.md`) → FAIL/HALT (delta Rule 1 + rewritten freeze-gate guard; BF7/P8).
+
+> Note: bench `_fixtures/brownfield-feature` currently `.aprd/.roadmap` + this golden `.build/slices/S5/oracle/`; full clean-room bench assembly (skeleton/S4 suites the regression layer references) = Task 14 BF-FIXTURE-ORACLE.

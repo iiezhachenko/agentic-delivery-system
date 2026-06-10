@@ -1,0 +1,32 @@
+{
+  "artifact": ".build/slices/S5/oracle/",
+  "version": "v1",
+  "content_sha256": "<64-hex freeze signature — mechanical; consumers check status+manifest, do NOT recompute>",
+  "signer": "test-author:freelancer-time-tracking",
+  "signed_at": "2026-06-10T00:00:00Z",
+  "status": "frozen",
+  "starts_red": true,
+  "builder_may_not_edit": true,
+  "mode": "slice-build",
+  "class": "feature-add",
+  "slice_id": "S5",
+  "regression_guard_ref": ".aprd/aprd.v2.frozen.md#CLASS_EXTENSION/REGRESSION_GUARD",
+  "built_against": {
+    "skeleton_oracle_lock": ".build/skeleton/oracle/oracle.lock",
+    "skeleton_lock": ".hld/skeleton.lock",
+    "adr_lock": ".adr/adr.lock",
+    "aprd_lock": ".aprd/aprd.lock",
+    "aprd_resolved": ".aprd/aprd.v2.frozen.md",
+    "slice_build_plan": ".build/slices/S5/build-plan.json"
+  },
+  "manifest": "oracle.json",
+  "test_files": [
+    "contract/test_CT2_label.py",
+    "flow/test_F5.py",
+    "acceptance/visible/test_AC11.py", "acceptance/visible/test_AC13.py",
+    "acceptance/held_out/test_AC11.py", "acceptance/held_out/test_AC13.py",
+    "conftest.py"
+  ],
+  "class_ext_layers": ["regression"],
+  "mutation_certified": []
+}
