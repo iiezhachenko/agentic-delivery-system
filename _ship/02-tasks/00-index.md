@@ -18,6 +18,7 @@ Terse caveman. Substance stays, fluff dies. Pattern: [thing] [action] [reason]. 
 | `04-P3-installer.md` | P3 | P4 | `package.json` + `bin/init.mjs` (zero-dep, idempotent, integrity-checked) |
 | `05-P4-pack-pipeline.md` | P4 | P5 | `pack` script + `make pack` gate (runs own lint+selftest before tarball) |
 | `06-P5-dryrun-verify.md` | P5 | — | install REAL artifact both harnesses + self-host regression gate |
+| `07-P6-kiro-runtime.md` | P6 | — | POST-SHIP: fix 2 Kiro-only runtime bugs (subagent dispatch name-resolution + large-file write) at adapter edge |
 
 ## DAG
 ```mermaid
@@ -30,8 +31,9 @@ flowchart TD
   P3 --> P4
   P4 --> P5
   P1 --> P5
+  P5 --> P6["P6 · Kiro runtime fix<br/>(post-ship, adapter edge)"]
 ```
-P1 + P2 parallel after P0. P3 needs both. P4 needs P3. P5 last.
+P1 + P2 parallel after P0. P3 needs both. P4 needs P3. P5 last of initial ship. **P6 = post-ship hardening** (Kiro-only dispatch + write bugs), additive at adapter edge, re-runs P4 pack.
 
 ## Definition of shippable (all hold)
 1. Launcher trio authored, both harnesses boot (P1,P5).
