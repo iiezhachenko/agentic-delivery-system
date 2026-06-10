@@ -1,12 +1,14 @@
 {
   "defect": "convention-drift",
-  "invariant": "BF5 — new code must conform to the captured CONVENTION_BASELINE, not canon defaults; CRITIQUE flags drift",
+  "invariant": "BF5 — new code must conform to the captured CONVENTION_BASELINE, not canon defaults",
   "seed": [
-    "overlay defects/convention-drift/tagService.py → src/freelancer_app/tags/tagService.py (new canon-default file)",
-    "(result of running CRITIQUE) = defects/convention-drift/critique.flagged.json → .build/slices/S5/critique.json"
+    "overlay defects/convention-drift/tagService.py → src/freelancer_app/tags/tagService.py (new canon-default file: new top-level package, camelCase, swallows CT2 failures)",
+    "(authoritative blocking output of running CRITIQUE clean-room) = defects/convention-drift/critique.flagged.json → .build/slices/S5/critique.json"
   ],
-  "load_bearing_assertion": "CRITIQUE verdict == 'blocked' with a convention-drift issue (layout/naming/error-handling diverge from CONVENTION_BASELINE). Golden critique verdict == 'clean', drift_detected == false.",
+  "load_bearing_assertion": "CRITIQUE verdict == 'blocked'. The drift manifests as two of CRITIQUE's five anti-cheat categories: gold-plating (an unowned new package `tags/` violating CONVENTION_BASELINE layout 'one package per component', tracing to no R*/AC*) + swallowed-failure (catches CT2 store-unavailable/constraint-violation → returns None). Golden critique verdict == 'clean', 0 issues.",
   "expected_verdict": "blocked",
-  "expected_signal": { "convention_drift_check.drift_detected": true, "verdict": "blocked", "issues[].category": ["convention-drift", "swallowed-failure"] },
-  "separates_from_golden_by": "convention_drift_check.drift_detected (false in golden / true here) + critique verdict — the BF5 invariant."
+  "expected_signal": { "verdict": "blocked", "issues[].category": ["gold-plating", "swallowed-failure"], "routes_to": "IMPLEMENT" },
+  "separates_from_golden_by": "critique verdict (clean→blocked) + issue_count (0→2) — the BF5 invariant.",
+  "note": "CRITIQUE owns NO named 'convention-drift' category; BF5 drift surfaces through its gold-plating + swallowed-failure categories (an off-convention file is also an unowned/untraceable file). IMPLEMENT is the primary BF5 owner (conforms_to_conventions self-check + CONVENTION_BASELINE grounding); CRITIQUE is the hostile backstop that blocks the shipped drift.",
+  "e2e_validated": "2026-06-10 — clean-room step-runner ran prompts/04-build/CRITIQUE.md against the drift bench → verdict 'blocked', issues [gold-plating, swallowed-failure] on tags/tagService.py, both routed to IMPLEMENT. Golden bench → 'clean', 0 issues. Oracle separates."
 }

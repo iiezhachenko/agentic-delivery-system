@@ -1,16 +1,16 @@
 {
   "defect": "id-collision",
   "invariant": "BF3 — new IDs must continue strictly above the baseline high-water; no reuse of a baseline index",
+  "owning_role": "EXTRACT (00-aprd/EXTRACT.md) — mints feature R*/E* strictly above baseline-map id_high_water. This is the PREVENTION point.",
+  "not_owned_by": "SYNTHESIZE — it carries upstream ids forward UNCHANGED (shared Rule 1, P9) and has NO collision guard. Proven by e2e: fed a planted R10 in 02-extraction, SYNTHESIZE reproduced R10 into aprd.v2 without HALT or renumber (faithful, by design).",
+  "detection_if_leaked": "a downstream thread-integrity check (the P2+P3 VERIFY-ONLY checkpoint, Task 07) comparing the new aprd.v<N> R*/AC*/E* against baseline-map id_high_water.",
   "seed": [
-    "overlay defects/id-collision/aprd.v2.collision.frozen.md → .aprd/aprd.v2.frozen.md",
-    "run SYNTHESIZE/VERIFY (P2+P3 verify-only) against baseline-map id_high_water"
+    "overlay defects/id-collision/aprd.v2.collision.frozen.md → .aprd/aprd.v2.frozen.md (a frozen version whose new R/AC reuse baseline R10/AC10)"
   ],
-  "load_bearing_assertion": "Verifier detects new R10/AC10 collide with baseline R10/AC10 (high_water R:10, AC:10). Verdict 'rejected'/'aprd_defect'. Golden uses R11/R13 + AC11/AC13 — all strictly above high-water, zero collisions.",
-  "expected_verdict": "rejected",
-  "expected_signal": {
-    "id_threading.collisions": ["R10", "AC10"],
-    "id_threading.verdict": "collision",
-    "basis": "baseline-map.id_high_water { R:10, AC:10 } — new R10/AC10 reuse a baseline index"
-  },
-  "separates_from_golden_by": "id_threading.collisions (empty in golden / [R10,AC10] here) — the BF3 invariant, not cosmetics."
+  "load_bearing_assertion": "A correctly-run feature-add NEVER produces a new R*/AC* at-or-below baseline high-water (R:10/AC:10). The golden aprd.v2 uses R11/R13 + AC11/AC13 — all strictly above. The overlay (R10/AC10) is an illegal state any thread-integrity verifier must reject.",
+  "expected_verdict": "rejected (at EXTRACT mint-time, or at the P2/P3 thread-integrity checkpoint)",
+  "expected_signal": { "new_ids_at_or_below_high_water": ["R10", "AC10"], "high_water": { "R": 10, "AC": 10 } },
+  "separates_from_golden_by": "new-id-vs-high-water (golden all > 10 / overlay reuses 10).",
+  "e2e_finding": "2026-06-10 — clean-room SYNTHESIZE run on a bench whose 02-extraction planted R10 REPRODUCED R10 into aprd.v2 (did not catch). Confirms BF3 is prevent-at-EXTRACT + detect-at-verify-checkpoint, NOT a SYNTHESIZE judgment.",
+  "e2e_prevention_proven": "2026-06-10 — clean-room EXTRACT run, both directions (high-water sensitivity): golden bench (id_high_water R:10/E:7) → minted E8 + R11/R12/R13 (all > watermark); shifted bench (id_high_water R:20/E:15) → minted E16 + R21/R22/R23 (all > watermark). EXTRACT is genuinely high-water-driven (mints strictly above whatever id_high_water says), NOT hardcoded — a hardcoded prompt would have emitted R11 in BOTH and collided. BF3 prevention at EXTRACT is real."
 }

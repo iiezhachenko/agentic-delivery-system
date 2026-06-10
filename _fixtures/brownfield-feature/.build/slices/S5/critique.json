@@ -6,12 +6,10 @@
   "slice_contracts_ref": ".hld/slices/S5/contracts.json",
   "slice_oracle_ref": ".build/slices/S5/oracle/oracle.json",
   "aprd_ref": ".aprd/aprd.v2.frozen.md",
-  "convention_baseline_ref": ".aprd/aprd.v2.frozen.md#CLASS_EXTENSION/CONVENTION_BASELINE",
-  "baseline_map_ref": ".aprd/baseline-map.json",
   "slice_components_ref": ".hld/slices/S5/components.json",
   "slice_oracle_lock_ref": ".build/slices/S5/oracle/oracle.lock",
   "skeleton_oracle_ref": ".build/skeleton/oracle/oracle.json",
-  "slice_s4_oracle_ref": ".build/slices/S4/oracle/oracle.json",
+  "skeleton_integration_ref": ".build/skeleton/integration-record.json",
   "skeleton_lock_ref": ".hld/skeleton.lock",
   "adr_lock_ref": ".adr/adr.lock",
   "aprd_lock_ref": ".aprd/aprd.lock",
@@ -24,45 +22,30 @@
   "prior_built_components": ["C1", "C2", "C3", "C6"],
   "files_reviewed": [
     "src/freelancer_app/project_management/project_label.py",
-    "src/freelancer_app/web_ingress/project_label_dispatch.py",
-    "src/freelancer_app/wsgi.py"
+    "src/freelancer_app/web_ingress/project_label_dispatch.py"
   ],
-  "convention_drift_check": {
-    "source": ".aprd/aprd.v2.frozen.md#CLASS_EXTENSION/CONVENTION_BASELINE + baseline-map conventions",
-    "checked": {
-      "lang": "Python >=3.11 (ADR-0002) — conforms; no canon-default newer/older stack introduced",
-      "layout": "src/freelancer_app/project_management/*.py + web_ingress/*.py — additive files in existing packages; conforms; no new top-level layout invented",
-      "lint": "no ruff/black config present — new files match existing hand-style; no reformat of baseline files",
-      "naming": "project_label.py / project_label_dispatch.py snake_case, matching existing project_store.py / dispatcher.py idiom — conforms; not a canon-default name"
-    },
-    "drift_detected": false,
-    "verdict": "convention-conformant (BF5)"
-  },
   "skeleton_fidelity": {
     "breached": false,
     "skeleton_artifacts_checked": [
-      ".build/skeleton/integration-record.json (skeleton F1 routes)",
-      ".build/slices/S4/integration-record.json (S4 F4 project routes)",
+      ".build/skeleton/integration-record.json (skeleton F1 routes: GET /, /auth/login, /auth/callback)",
       ".build/skeleton/oracle/oracle.json",
-      ".build/slices/S4/oracle/oracle.json"
+      ".build/skeleton/oracle/ (test files — no slice test re-materializes or edits these)"
     ],
-    "note": "Diff is additive. project_label.py + project_label_dispatch.py are NEW files (no existing project_management/web_ingress file edited). wsgi.py APPENDS the S5 label composition (_ProjectLabelAdapter, _view_set_project_label) and path('projects/<slug>/label') route only — the S4 _ProjectManagementAdapter + project routes and the F1 skeleton routes are unchanged. No frozen skeleton/S4 component internals rewritten. No frozen oracle test re-greened or edited. No baseline frozen artifact (aprd.frozen.md/skeleton.frozen.md/ADR bodies) touched. Baseline extended, not reshaped (H14/B8/BF1/BF6)."
+    "note": "Slice diff is additive: project_label.py is a new file in the existing project_management package; project_label_dispatch.py is a new file in web_ingress. wsgi.py carries S5 wiring appended after the S4 section (new _ProjectLabelAdapter class, new _view_set_project_label view, one new urlpattern entry) — skeleton F1 routes (GET /, /auth/login, /auth/callback) and S4 F4 routes untouched; no frozen skeleton component internal rewritten; no frozen skeleton oracle test re-greened or edited. Baseline extended additively (H14/B8/BF1)."
   },
   "verdict": "clean",
   "issues": [],
   "issue_count": 0,
   "critique_counts": {
     "components_reviewed": 1,
-    "files_reviewed": 3,
+    "files_reviewed": 2,
     "issues": 0,
     "by_category": {
       "hardcoded-fixture": 0,
       "swallowed-failure": 0,
       "stub-branch": 0,
       "under-complexity": 0,
-      "gold-plating": 0,
-      "convention-drift": 0,
-      "baseline-overwrite": 0
+      "gold-plating": 0
     }
   }
 }

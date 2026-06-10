@@ -1,0 +1,243 @@
+{
+  "integration_record_ref": ".build/slices/S5/integration-record.json",
+  "build_record_ref": ".build/slices/S5/build-record.json",
+  "slice_oracle_lock_ref": ".build/slices/S5/oracle/oracle.lock",
+  "slice_oracle_ref": ".build/slices/S5/oracle/oracle.json",
+  "slice_nfr_mechanisms_ref": ".hld/slices/S5/nfr-mechanisms.json",
+  "slice_components_ref": ".hld/slices/S5/components.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "aprd_version": "v2",
+  "baseline_map_ref": ".aprd/baseline-map.json",
+  "regression_guard_ref": ".aprd/aprd.v2.frozen.md#CLASS_EXTENSION/REGRESSION_GUARD",
+  "locks_verified": true,
+  "class": "feature-add",
+  "mode": "slice-build",
+  "slice_id": "S5",
+  "slice_name": "Tag a client project with a label",
+  "flow": "F5",
+  "slice_path": ["C6", "C3", "C2", "C1"],
+  "prior_built_components": ["C1", "C2", "C3", "C6"],
+  "verification_method": "static-trace",
+  "inherited_oracle": {
+    "skeleton_oracle_ref": ".build/skeleton/oracle/oracle.json",
+    "skeleton_integration_ref": ".build/skeleton/integration-record.json",
+    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5", "OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
+    "frozen_verified": true,
+    "re_run": false
+  },
+  "ladder": {
+    "contract": {
+      "layer_verdict": "pass",
+      "tests": [
+        {
+          "id": "OCT-CT2-LABEL",
+          "target": "CT2",
+          "scope": "extension-only",
+          "provider": "C1",
+          "caller": "C3",
+          "module": "freelancer_app.project_management.project_label",
+          "shape": {
+            "test": "test_ct2_label_field_persists_on_project_record",
+            "result": "pass",
+            "trace": "ProjectLabeler(mock_data_store).set_label('proj-1','freelancer-42','client-acme') calls self._store.update_project('proj-1','freelancer-42',{'label':'client-acme'}). Mock returns labeled record. payload.get('label')=='client-acme' TRUE; result['label']=='client-acme' TRUE; result['id']=='proj-1' TRUE; result['name']=='Acme Website' TRUE. All assertions hold."
+          },
+          "failures": [
+            {
+              "test": "test_ct2_label_failure_store_unavailable",
+              "result": "pass",
+              "trace": "mock_data_store.update_project side_effect=StoreUnavailableError. set_label has no try/catch — exception propagates unmodified. pytest.raises(StoreUnavailableError) satisfied; call_count==1 TRUE."
+            },
+            {
+              "test": "test_ct2_label_failure_constraint_violation",
+              "result": "pass",
+              "trace": "mock_data_store.update_project side_effect=ConstraintViolationError. Same propagate-not-catch idiom. pytest.raises(ConstraintViolationError) satisfied; call_count==1 TRUE."
+            }
+          ]
+        }
+      ]
+    },
+    "flow": {
+      "layer_verdict": "pass",
+      "tests": [
+        {
+          "id": "OF-F5",
+          "target": "F5",
+          "path": ["C6", "C3", "C2", "C1"],
+          "wsgi_entry": "freelancer_app.wsgi.application",
+          "happy": {
+            "test": "test_f5_happy_path_set_label_persists_and_renders",
+            "asserts_ac": ["AC11", "AC13"],
+            "result": "pass",
+            "trace": "dispatch_project_label_request calls mock_project_management.handle_request with side_effect=_simulate_set_label_flow. Simulator: resolve_session({'session_token':'sess-f5-valid'}) -> {'freelancer_id':'freelancer-42'}; update_project('proj-1','freelancer-42',{'label':'client-acme'}) -> labeled_project; returns {status:200,...}. set_response['status']=200 in (200,201,302) TRUE. Second call: mock returns projects=[labeled_project]; any(p['id']=='proj-1' and p['label']=='client-acme') TRUE (AC11). Reload: mock_data_store.list_projects.return_value[0]['label']=='client-acme' and ['id']=='proj-1' TRUE (AC13). All 3 assertions pass."
+          },
+          "failure": {
+            "test": "test_f5_failure_ct2_store_unavailable",
+            "exercises": "CT2:store-unavailable",
+            "result": "pass",
+            "trace": "mock_data_store.update_project side_effect=StoreUnavailableError. _failing_handler calls update_project -> raises StoreUnavailableError -> propagates as mock handle_request side_effect. dispatch_project_label_request catches StoreUnavailableError -> returns {status:503,...}. 503 in (500,503) TRUE. mock_data_store.list_projects.return_value=[] -> not any(p.get('label')=='client-acme' for p in []) TRUE (label not persisted)."
+          }
+        }
+      ]
+    },
+    "acceptance": {
+      "layer_verdict": "fail",
+      "per_ac": [
+        {
+          "ac": "AC11",
+          "req_ref": "R11",
+          "visible": {
+            "file": "acceptance/visible/test_AC11.py",
+            "result": "fail",
+            "trace": "test_ac11_set_label_persists_and_renders: POST /projects creates 'Acme Website' without a label field. _ProjectManagementAdapter.create() calls ProjectStore.create({'id':'acme-website','owner_id':'freelancer-42','name':'Acme Website','currency':'USD','billable_rate':'150.00'}). DEFECT: ProjectStore.create() checks if not payload.get('label') -> True -> returns {} WITHOUT calling self._store.create_project. Record never written to _InProcessProjectDataStore._by_owner. POST /projects/acme-website/label: _ProjectLabelAdapter.handle_request resolves session OK, calls self._labeler.set_label('acme-website','freelancer-42','client-acme') -> _InProcessProjectDataStore.update_project('acme-website','freelancer-42',{'label':'client-acme'}) -> 'acme-website' not in owned (project was silently dropped) -> raises _NotFoundError. dispatch_project_label_request catches NotFoundError -> returns {status:404}. assert set_resp['status'] in (200,201,302) FAILS (got 404). AssertionError."
+          },
+          "held_out": {
+            "file": "acceptance/held_out/test_AC11.py",
+            "result": "fail",
+            "trace": "test_ac11_held_out_set_label_persists_and_renders: same defect path with 'Zeta Analytics' (no label in create payload). POST /projects returns 201 (create() returns {}, wsgi returns 201) but record not stored. POST /projects/zeta-analytics/label -> NotFoundError -> 404. assert set_resp['status'] in (200,201,302) FAILS (got 404)."
+          }
+        },
+        {
+          "ac": "AC13",
+          "req_ref": "R13",
+          "visible": {
+            "file": "acceptance/visible/test_AC13.py",
+            "result": "fail",
+            "trace": "test_ac13_label_persists_across_navigation: POST /projects 'Delta Co' without label — ProjectStore.create() silently drops record. POST /projects/delta-co/label -> _InProcessProjectDataStore.update_project: 'delta-co' not in owned -> _NotFoundError -> dispatch returns {status:404}. GET /projects/delta-co/label reload also returns 404. assert reload_view['status'] == 200 FAILS (got 404)."
+          },
+          "held_out": {
+            "file": "acceptance/held_out/test_AC13.py",
+            "result": "fail",
+            "trace": "test_ac13_held_out_label_persists_across_navigation: same defect path with 'Omega Ltd'. POST /projects record silently dropped. POST /projects/omega-ltd/label -> NotFoundError -> 404. assert reload_view['status'] == 200 FAILS (got 404)."
+          }
+        }
+      ]
+    },
+    "class_ext": {
+      "layer_verdict": "fail",
+      "kinds": [
+        {
+          "kind": "regression",
+          "scope": "touched-surface + seams",
+          "scope_basis": "REGRESSION_GUARD AC6 (create+manage projects, parent of the tagged project) + integration_seam C1/CT2 (label field additive on the project record)",
+          "asserts": ["AC6"],
+          "result": "fail"
+        }
+      ],
+      "note": "Scoped regression layer materialized (feature-add class). AC6 FAILS — see regression block."
+    },
+    "nfr": {
+      "layer_verdict": "pass",
+      "mechanisms_checked": [],
+      "note": "slice nfr-mechanisms.json new_mechanisms == [] — inherited NFRs A13/A2 satisfied-by-frame (INV6/A13/ADR-0005/INV1); no M* requires wiring check (MAP-NFR). NFR layer passes vacuously."
+    }
+  },
+  "regression": {
+    "ran": true,
+    "scope": "touched-surface + seams",
+    "scope_basis": "REGRESSION_GUARD AC6 (create and manage client projects — R6, parent of R11/R12/R13) + integration seam C1/CT2 (label field additive on the project record); NOT the whole inherited suite (Risk R4)",
+    "suites_run": [".build/skeleton/oracle/", ".build/slices/S4/oracle/"],
+    "asserts": ["AC6"],
+    "results": [
+      {
+        "ref": "AC6",
+        "result": "red",
+        "trace": "AC6 create-project-appears-in-list: POST /projects with payload {name:'Gamma Design', currency:'GBP', billable_rate:'95.00', no label}. _ProjectManagementAdapter.create() -> ProjectStore.create(payload) -> DEFECT: if not payload.get('label'): return {} — returns empty dict, never calls self._store.create_project. _InProcessProjectDataStore._by_owner remains empty for owner 'freelancer-42'. GET /projects -> list_projects('freelancer-42') -> []. assert 'Gamma Design' in list_resp['body'] FAILS. Held-out ('Zeta Analytics', same no-label payload) identical failure. This is a real regression (BF4): ProjectStore.create() was modified to require a label field, which was not part of the original AC6-green baseline. The label field was supposed to be ADDITIVE/optional; the defect violates BF6 (existing baseline file edited to break existing behavior)."
+      }
+    ],
+    "verdict": "red",
+    "reds": [
+      {
+        "ref": "AC6",
+        "was": "green",
+        "now": "red",
+        "what": "ProjectStore.create() now silently drops any project created without a label field (if not payload.get('label'): return {}). Baseline projects never carried a label field; create-without-label was the entire AC6 happy path. All AC6 subtests (create+appears-in-list, edit, delete) fail because the project is never persisted. Real regression — the feature broke existing AC6 behavior (BF4); not a flake."
+      }
+    ],
+    "baseline_tests_edited": false
+  },
+  "skeleton_fidelity": {
+    "breached": false,
+    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5", "OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
+    "note": "Slice ladder verified on slice oracle tests only. No frozen skeleton test re-run/re-greened, no skeleton composition root edited. The defect is in the S5 feature code (project_store.py edited non-additively); that is a build defect, not a skeleton-fidelity breach. Frozen skeleton oracle untouched (H14)."
+  },
+  "per_ac_summary": [
+    { "ac": "AC11", "visible": "fail", "held_out": "fail" },
+    { "ac": "AC13", "visible": "fail", "held_out": "fail" }
+  ],
+  "verdict": "blocked",
+  "escape": {
+    "failing": [
+      {
+        "layer": "acceptance",
+        "id": "AC11",
+        "subcase": "visible",
+        "what": "POST /projects (no label field) -> ProjectStore.create() DEFECT returns {} without persisting. POST /projects/acme-website/label -> _InProcessProjectDataStore: project not found -> NotFoundError -> 404. assert set_resp['status'] in (200,201,302) FAILS."
+      },
+      {
+        "layer": "acceptance",
+        "id": "AC11",
+        "subcase": "held_out",
+        "what": "Same defect path with held-out project 'Zeta Analytics'. Project create silently dropped; label set returns 404. assert in (200,201,302) FAILS."
+      },
+      {
+        "layer": "acceptance",
+        "id": "AC13",
+        "subcase": "visible",
+        "what": "POST /projects 'Delta Co' not persisted (same defect). GET /projects/delta-co/label returns 404. assert reload_view['status'] == 200 FAILS."
+      },
+      {
+        "layer": "acceptance",
+        "id": "AC13",
+        "subcase": "held_out",
+        "what": "POST /projects 'Omega Ltd' not persisted. GET /projects/omega-ltd/label returns 404. assert reload_view['status'] == 200 FAILS."
+      },
+      {
+        "layer": "regression",
+        "id": "AC6",
+        "subcase": "regression",
+        "what": "ProjectStore.create() edited to require a label field (if not payload.get('label'): return {}). Baseline AC6 creates projects without a label — silently dropped, never appear in list. Previously-green AC6 (create+list, edit, delete) all fail. Real regression (BF4) — the feature broke existing behavior by non-additively modifying project_store.py."
+      }
+    ],
+    "failure_signature": "AssertionError: AC11/AC13 — set_resp['status']=404 (not in 200/201/302); root cause: ProjectStore.create() returns {} for no-label payload, so project never exists when label write is attempted. AC6 regression — create-without-label projects silently dropped; 'Gamma Design'/'Zeta Analytics' absent from list.",
+    "classification": "my-code",
+    "route": "self-heal -> DIAGNOSE"
+  },
+  "provenance": {
+    "verifier_role": "verifier",
+    "built_against": {
+      "slice_oracle_lock": ".build/slices/S5/oracle/oracle.lock",
+      "skeleton_oracle": ".build/skeleton/oracle/oracle.json",
+      "skeleton_integration": ".build/skeleton/integration-record.json",
+      "skeleton_lock": ".hld/skeleton.lock",
+      "adr_lock": ".adr/adr.lock",
+      "aprd_lock": ".aprd/aprd.lock",
+      "aprd_resolved": ".aprd/aprd.v2.frozen.md",
+      "baseline_map": ".aprd/baseline-map.json",
+      "slice_build_plan": ".build/slices/S5/build-plan.json",
+      "slice_build_record": ".build/slices/S5/build-record.json",
+      "slice_integration_record": ".build/slices/S5/integration-record.json"
+    }
+  },
+  "verification_counts": {
+    "contract_tests": 1,
+    "contract_assertions": 3,
+    "flow_assertions": 5,
+    "acceptance_acs": 2,
+    "acceptance_visible_passed": 0,
+    "acceptance_visible_failed": 2,
+    "acceptance_held_out_passed": 0,
+    "acceptance_held_out_failed": 2,
+    "regression_asserts": 1,
+    "regression_asserts_passed": 0,
+    "regression_asserts_failed": 1,
+    "class_ext_layers": 1,
+    "mechanisms_checked": 0,
+    "inherited_tests_not_run": 10,
+    "layers_applicable": 5,
+    "layers_passed": 2,
+    "layers_failed": 3
+  }
+}

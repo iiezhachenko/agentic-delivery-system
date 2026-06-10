@@ -124,4 +124,40 @@ Each defect dir carries planted artifact(s) + `expected-verdict.json` (load-bear
 - ✅ all 4 defects FAIL, each on its own invariant (BF1/BF3/BF4/BF5).
 - ✅ verifier separates golden from each defect by the real invariant signal (not cosmetics).
 
+### Clean-room e2e — both-directions PROVEN at the judge roles (2026-06-10)
+Ran the two build-phase judges clean-room via the step-runner (authored prompt fed verbatim, bench seeded outside `_fixtures/`, no golden visible):
+
+| run | prompt | bench | verdict | invariant |
+|---|---|---|---|---|
+| VERIFY-OUTPUT golden | `04-build/VERIFY-OUTPUT.md` | clean | `verified`, regression **green** | — |
+| VERIFY-OUTPUT regression | same | +`project_store.regressed.py` | **blocked**, regression **red** (AC6, cascade AC11/AC13), escape→DIAGNOSE | **BF4** |
+| CRITIQUE golden | `04-build/CRITIQUE.md` | clean | `clean`, 0 issues | — |
+| CRITIQUE drift | same | +`tags/tagService.py` | **blocked**, 2 issues [gold-plating, swallowed-failure]→IMPLEMENT | **BF5** |
+
+Oracle separated golden from defect in every case. **The golden `.build/slices/S5/{verify-output,critique}.json` + the defect `verify-output.blocked.json` / `critique.flagged.json` were REPLACED with these authoritative clean-room outputs.** Two fidelity corrections the e2e surfaced + fixed: (1) real reject verdict is `blocked` (+escape DIAGNOSE), not `rejected`; (2) CRITIQUE has no named `convention-drift` category — BF5 drift surfaces as `gold-plating` (unowned off-CONVENTION_BASELINE package) + `swallowed-failure`; my invented `convention_drift_check` block was dropped to match the real CRITIQUE schema.
+
+**BF1 + BF3 — SYNTHESIZE clean-room run (2026-06-10), 3 benches:**
+
+| run | bench | result | meaning |
+|---|---|---|---|
+| SYNTHESIZE golden | clean front-end, v1 lock frozen | emitted `aprd.v2` (R11/R12/R13, AC11–13, E8, A14–16, CLASS_EXTENSION), re-signed lock v1→v2, **`aprd.frozen.md` byte-identical** | **BF1** prevention proven |
+| SYNTHESIZE freeze-gate | baseline lock `status:draft` | **HALT** (escape #3), wrote nothing | **BF1** freeze-gate proven |
+| SYNTHESIZE id-collision | 02-extraction plants `R10` | **reproduced R10** into aprd.v2, no HALT | **BF3 FINDING** ↓ |
+
+**BF3 — EXTRACT clean-room run (2026-06-10), 2 benches (high-water sensitivity):**
+
+| run | id_high_water | minted | above watermark? |
+|---|---|---|---|
+| EXTRACT golden | R:10, E:7 | E8, R11/R12/R13 | ✅ |
+| EXTRACT shifted | R:20, E:15 | E16, R21/R22/R23 | ✅ |
+
+EXTRACT is genuinely high-water-driven — shifting the watermark to 20 made it mint R21+ (a hardcoded prompt would have emitted R11 in both → collision). **BF3 prevention at EXTRACT is PROVEN both directions.**
+
+**Findings (corrected in the fixture):**
+- **BF3 is owned by EXTRACT, not SYNTHESIZE.** EXTRACT mints strictly above high-water (proven both directions ↑). SYNTHESIZE carries upstream ids forward unchanged (Rule 1) — it does NOT adjudicate a collision (proven: fed R10, reproduced R10). BF3 is prevented at EXTRACT + detected at the P2/P3 thread-integrity checkpoint. Corrected `defects/id-collision/expected-verdict.json` (was mis-attributed to SYNTHESIZE).
+- **BF1 mechanical detection is rule/gate-based, not sha-recompute.** Locks carry nominal `content_sha256` (consumers don't recompute; both runners flagged v1 lock sha ≠ file hash). BF1 holds via the no-write-frozen rule + version-to-new-file discipline + freeze-gate; a byte-equality verifier with a real recorded sha (or git diff) is what would mechanically reject a mutated-v1 overlay. Noted in `defects/frozen-overwrite/expected-verdict.json`.
+- Minor: the golden SYNTHESIZE run cited REGRESSION_GUARD AC6+AC7; the fixture golden uses AC6 only (AC7 is a time-entry AC, not a project AC — fixture is the tighter/more-correct form).
+
+**Net:** the two build-phase judges (BF4/BF5) are proven both-directions by runnable judges; the two front-end invariants (BF1/BF3) are proven prevent-by-construction + freeze-gate, with their true ownership now recorded. Oracle is trustworthy; role attributions corrected to match what the prompts actually do.
+
 > Note: verification is **static-trace** (no pytest runtime in bench, per pipeline); `.py` oracle/src files are the materialized oracle, verdicts carried in the JSON records. Lock `content_sha256` values are nominal (consumers check status+manifest, do NOT recompute).

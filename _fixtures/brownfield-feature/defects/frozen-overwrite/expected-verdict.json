@@ -1,16 +1,17 @@
 {
   "defect": "frozen-overwrite",
   "invariant": "BF1 — never overwrite a frozen artifact; a change is a new version + change request",
+  "owning_role": "SYNTHESIZE (00-aprd/SYNTHESIZE.md) — versions to a NEW aprd.v<N+1>.frozen.md + re-signs the lock; leaves the baseline aprd.frozen.md byte-identical. 'Touching aprd.frozen.md is the one fatal error this stage exists to avoid.'",
   "seed": [
-    "overlay defects/frozen-overwrite/aprd.frozen.mutated.md → .aprd/aprd.frozen.md",
-    "run VERIFY (baseline immutability check) against .aprd/aprd.lock (status frozen; v2 lock supersedes.v1.content_sha256 f3a1c0...)"
+    "overlay defects/frozen-overwrite/aprd.frozen.mutated.md → .aprd/aprd.frozen.md (baseline mutated in place: tag jammed into v1 instead of versioning)"
   ],
-  "load_bearing_assertion": "Verifier detects the frozen baseline aprd.frozen.md was modified (the tag feature jammed into v1 instead of aprd.v2). Verdict 'rejected'/'immutability-breach'. Golden keeps aprd.frozen.md byte-unchanged and puts all new IDs in aprd.v2.frozen.md.",
-  "expected_verdict": "rejected",
-  "expected_signal": {
-    "baseline_immutability.frozen_artifacts_modified": [".aprd/aprd.frozen.md"],
-    "baseline_immutability.verdict": "breach",
-    "basis": ".aprd/aprd.lock status:frozen + v2 supersedes.v1 sha — baseline body must not change; change requires a new version"
+  "load_bearing_assertion": "A correctly-run feature-add NEVER writes the baseline aprd.frozen.md; new content goes to aprd.v2.frozen.md. The mutated-v1 overlay is the illegal state.",
+  "expected_verdict": "rejected / HALT",
+  "e2e_validated": {
+    "date": "2026-06-10",
+    "prevention_proven": "clean-room SYNTHESIZE golden run left .aprd/aprd.frozen.md BYTE-IDENTICAL (md5 unchanged) while producing aprd.v2.frozen.md + re-signing the lock v1→v2 (status frozen). BF1 prevention discipline holds.",
+    "freeze_gate_proven": "clean-room SYNTHESIZE run on a bench with aprd.lock status='draft' tripped escape #3 ('feature-add but baseline aprd.frozen.md/aprd.lock not present+frozen') → HALT, wrote nothing. Cannot extend an unfrozen baseline."
   },
-  "separates_from_golden_by": "baseline_immutability.frozen_artifacts_modified (empty in golden / [aprd.frozen.md] here) — the BF1 invariant."
+  "detection_caveat": "Mechanical detection of a POST-HOC mutated-yet-still-frozen v1 (the overlay) is NOT exercised by a sha-recompute: the locks carry NOMINAL content_sha256 values (oracle/lock convention: 'consumers check status+manifest, do NOT recompute'; both runners noted the v1 lock sha f3a1c0... ≠ the file's actual hash). BF1 is therefore enforced by (a) the rule — no stage writes a frozen artifact, (b) SYNTHESIZE's version-to-new-file discipline, (c) the freeze-gate. A byte-equality/integrity verifier with a REAL recorded sha (or git-tracked baseline diff) is what would mechanically reject the mutated-v1 overlay.",
+  "separates_from_golden_by": "aprd.frozen.md byte-identity (golden: unchanged / overlay: mutated)."
 }

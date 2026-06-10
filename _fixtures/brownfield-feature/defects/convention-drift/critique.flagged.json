@@ -1,26 +1,70 @@
 {
-  "_defect": "convention-drift / BF5 — overlay → .build/slices/S5/critique.json. New code diverges from the captured CONVENTION_BASELINE; CRITIQUE flags + BLOCKS.",
+  "verify_output_ref": ".build/slices/S5/verify-output.json",
+  "build_record_ref": ".build/slices/S5/build-record.json",
+  "integration_record_ref": ".build/slices/S5/integration-record.json",
+  "build_plan_ref": ".build/slices/S5/build-plan.json",
+  "slice_contracts_ref": ".hld/slices/S5/contracts.json",
+  "slice_oracle_ref": ".build/slices/S5/oracle/oracle.json",
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "slice_components_ref": ".hld/slices/S5/components.json",
+  "slice_oracle_lock_ref": ".build/slices/S5/oracle/oracle.lock",
+  "skeleton_oracle_ref": ".build/skeleton/oracle/oracle.json",
+  "skeleton_integration_ref": ".build/skeleton/integration-record.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
   "class": "feature-add",
   "mode": "slice-build",
   "slice_id": "S5",
+  "slice_name": "Tag a client project with a label",
   "components_reviewed": ["C3"],
-  "convention_baseline_ref": ".aprd/aprd.v2.frozen.md#CLASS_EXTENSION/CONVENTION_BASELINE",
-  "files_reviewed": ["src/freelancer_app/tags/tagService.py"],
-  "convention_drift_check": {
-    "drift_detected": true,
-    "checked": {
-      "layout": "FAIL — invents new top-level package freelancer_app/tags/ instead of extending project_management (CONVENTION_BASELINE: one package per component, label extends C3).",
-      "naming": "FAIL — camelCase module file tagService.py + camelCase methods (setLabel); captured idiom is snake_case (project_store.py / set_label).",
-      "lint": "FAIL — diverges from existing hand-style; introduces canon-default structure not present in the baseline.",
-      "error_handling": "FAIL — swallows the CT2 store-unavailable failure (try/except → return None) instead of propagating unmodified (baseline propagate-not-catch idiom)."
-    },
-    "verdict": "convention-drift (BF5)"
+  "prior_built_components": ["C1", "C2", "C6"],
+  "files_reviewed": [
+    "src/freelancer_app/project_management/project_label.py",
+    "src/freelancer_app/web_ingress/project_label_dispatch.py",
+    "src/freelancer_app/wsgi.py",
+    "src/freelancer_app/tags/tagService.py"
+  ],
+  "skeleton_fidelity": {
+    "breached": false,
+    "skeleton_artifacts_checked": [
+      ".build/skeleton/integration-record.json (skeleton F1 routes)",
+      ".build/skeleton/oracle/oracle.json",
+      ".build/slices/S4/integration-record.json (S4 F4 project routes)"
+    ],
+    "note": "Slice diff is additive. project_management/project_label.py is new (C3 extended, additive file). web_ingress/project_label_dispatch.py is a new additive file. wsgi.py APPENDS only _ProjectLabelAdapter, _view_set_project_label, and path('projects/<slug>/label') — skeleton F1 routes (GET /, /auth/login, /auth/callback) and S4 routes (/projects, /projects/, /projects/<slug>/edit, /projects/<slug>/delete) are byte-unchanged. No frozen skeleton component internals rewritten. No frozen skeleton or S4 oracle test re-greened or edited. Baseline extended, not reshaped (H14/B8)."
   },
   "verdict": "blocked",
   "issues": [
-    { "category": "convention-drift", "severity": "block", "file": "src/freelancer_app/tags/tagService.py", "detail": "New top-level package + camelCase naming contradict CONVENTION_BASELINE (one package per component, snake_case). New code used canon defaults instead of the captured baseline conventions (BF5)." },
-    { "category": "swallowed-failure", "severity": "block", "file": "src/freelancer_app/tags/tagService.py", "detail": "setLabel catches all exceptions and returns None — swallows CT2 store-unavailable/constraint-violation; baseline idiom propagates unmodified." }
+    {
+      "id": "I1",
+      "category": "gold-plating",
+      "target": "src/freelancer_app/tags/tagService.py:TagService",
+      "finding": "Entire module freelancer_app/tags/tagService.py is introduced in a new top-level package 'tags' that no component in the S5 build_set (C3) or prior build_set owns. CONVENTION_BASELINE mandates one package per component (src/freelancer_app/<component_snake>/*.py); C3's namespace is project_management. TagService carries no R*/AC* trace from the S5 build_set (R11/R13 are satisfied by project_management/project_label.py + project_label_dispatch.py). No CT* obligation, no flow step, no ADR mandate references this module or the tags/ package. Code is untraceable drift — a hostile reviewer blocks demo because an unowned, untraceable module ships to production with no requirement behind it, and the CONVENTION_BASELINE package structure is violated without a recorded decision.",
+      "routes_to": "IMPLEMENT",
+      "fix_hint": "Delete src/freelancer_app/tags/tagService.py and the tags/ package. Label capability is fully satisfied by project_management/project_label.py (C3, build_set file). No separate package or class should be introduced outside the declared component namespace for this feature."
+    },
+    {
+      "id": "I2",
+      "category": "swallowed-failure",
+      "target": "src/freelancer_app/tags/tagService.py:TagService.setLabel",
+      "finding": "setLabel wraps self.dataStore.update_project(...) in a bare 'except Exception: return None' that swallows CT2 extended failure modes StoreUnavailableError and ConstraintViolationError. CT2 extended failure modes (from .hld/slices/S5/contracts.json) require these errors to propagate unmodified — the baseline propagate-not-catch idiom (project_label.py, project_store.py) and test_ct2_label_failure_store_unavailable / test_ct2_label_failure_constraint_violation both assert that the caller receives the raised exception. Returning None on a store-unavailable or constraint-violation fakes success to the caller and silently loses the label write in production — a hostile reviewer blocks demo because the failure path that CT2 mandates is hidden and the running app fabricates success on real persistence failure.",
+      "routes_to": "IMPLEMENT",
+      "fix_hint": "Remove the try/except entirely (or remove this file per I1 fix). CT2 failure modes must propagate unmodified; no catch-all is permitted around the store call. The correct pattern is the bare delegation in project_label.py:ProjectLabeler.set_label — no try/except."
+    }
   ],
   "issue_count": 2,
-  "critique_counts": { "components_reviewed": 1, "files_reviewed": 1, "issues": 2, "by_category": { "convention-drift": 1, "swallowed-failure": 1, "baseline-overwrite": 0, "hardcoded-fixture": 0, "stub-branch": 0, "under-complexity": 0, "gold-plating": 0 } }
+  "critique_counts": {
+    "components_reviewed": 1,
+    "files_reviewed": 4,
+    "issues": 2,
+    "by_category": {
+      "hardcoded-fixture": 0,
+      "swallowed-failure": 1,
+      "stub-branch": 0,
+      "under-complexity": 0,
+      "gold-plating": 1
+    }
+  }
 }
