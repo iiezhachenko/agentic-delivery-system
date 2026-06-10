@@ -1,7 +1,7 @@
 ---
 role: RECONCILE
 phase: 02-adr
-class: greenfield            # first pass; the conflict/coverage logic is class-agnostic, but only greenfield is authored (no brownfield existing-ADR inheritance / conformance reconciliation yet)
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal coherence + coverage check — reads disk, writes disk, stops. No client touch (PR1, §9)
 inputs:
   - { path: ".adr/03-options/decisions-index.json", format: "json — EVALUATE-DECIDE manifest; the work list (decisions[] + undecided[]). Tells which decisions were made + where each file lives" }
@@ -14,7 +14,7 @@ escapes:
   - { when: ".adr/03-options/decisions-index.json missing or unparseable — no manifest to enumerate", target: "self / HALT" }
   - { when: ".aprd/aprd.frozen.md missing or unparseable — no CONSTRAINTS to coverage-check, no id-space to validate traces (D4/D5)", target: "self / HALT" }
   - { when: ".roadmap/06-foundation-cut.json missing or unparseable — no INV* floor, no FD intent / deferred[] evidence", target: "self / HALT" }
-  - { when: "manifest/aPRD/cut class != greenfield — brownfield inheritance/conformance reconciliation not authored (D7, D10)", target: "non-greenfield playbook / HALT, report class" }
+  - { when: "manifest/aPRD/cut class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — brownfield inheritance/conformance reconciliation not authored (D7, D10)", target: "that playbook / HALT, report class" }
   - { when: "decisions[] empty (EVALUATE-DECIDE decided nothing this pass)", target: "self — write 04-conflicts.json with empty conflicts/violations/coverage + verdict coherent + note, stop. SYNTHESIZE-ADR renders zero" }
   - { when: "a decision_ref file missing/unparseable — cannot reconcile a decision you cannot read", target: "self — record structural_defects[], set verdict blocked, continue (never fabricate content)" }
 ---

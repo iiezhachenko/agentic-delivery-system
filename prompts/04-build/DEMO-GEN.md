@@ -1,7 +1,7 @@
 ---
 role: DEMO-GEN
 phase: 04-build
-class: greenfield            # class-agnostic gate; demo modality per class — only greenfield (UI click-through) authored. Other-class modalities (API trace / benchmark chart) not authored (B13/§11)
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 mode: skeleton-build|slice-build   # one role, two modes (dispatch: MODE DISPATCH §). Skeleton-build = walking skeleton demo (§5.10/§8); slice-build = a verified+critiqued slice demoed against the accepted prior increments (§5.10/D11)
 interactive: true           # THE Phase-4 client gate — §9 client re-engagement completing phase symmetry (client owns WHAT/P0 + WHEN/P1 + confirms RUNNING RESULT/P4). PR3 — deliberate PR1 exception
 interaction:
@@ -41,7 +41,7 @@ escapes:
   - { when: "the active critique.json missing OR verdict != clean (slice-build: OR skeleton_fidelity.breached==true)", target: "self / HALT — anti-cheat must pass before client watches (fraudulent green must not reach demo). Report verdict + issues, write nothing" }
   - { when: "the active integration-record.json missing OR status != integrated", target: "self / HALT — no running composition to narrate (§5.6 precedes §5.10). Report status" }
   - { when: "skeleton.lock | adr.lock | aprd.lock status != frozen OR skeleton.lock gate not clean", target: "self / HALT — no frozen frame to demo against (§5.1). Report which" }
-  - { when: "frozen CLASS != greenfield (skeleton.lock / adr.lock class)", target: "non-greenfield playbook — demo modality per class (API trace / benchmark chart) not authored (B13/§11). Report class" }
+  - { when: "frozen CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — demo modality per class (API trace / benchmark chart) not authored (B13/§11). Report class" }
   - { when: "no demonstrable AC — the active flow's traces ∩ verified per_ac (verdict pass) empty (nothing verified build actually runs end-to-end for client to watch)", target: "self / HALT — verified build with no client-watchable AC = defect; report it, do NOT fabricate screen/result to manufacture a demo" }
   # — skeleton-build —
   - { when: "SKELETON-BUILD: .build/skeleton/demo/demo.json already present with status: accepted", target: "self / STOP — already accepted; acceptance record immutable (§10). Phase 1 re-rank (next slice) / DONE. Not error, not slice-build trigger (needs .build/slices/, D11)" }

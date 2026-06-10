@@ -1,7 +1,7 @@
 ---
 role: SLICE-EXTRACT
 phase: 01-roadmap
-class: greenfield            # first pass; slicer class-agnostic by design, but only greenfield has upstream + downstream prompts authored yet
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal clustering — reads disk, writes disk, stops. Client re-engages later at SEQUENCE-REVIEW (order gate), not here (PR1).
 inputs:
   - { path: ".aprd/aprd.frozen.md", format: "markdown — slice from PROJECT (centrality basis), ENTITIES E* (shared-entity grouping), REQUIREMENTS R* (cluster + cover), ACCEPTANCE AC* (demo/verticality oracle); CLASS gates path" }
@@ -10,7 +10,7 @@ outputs:
   - { path: ".roadmap/02-slices.json", format: "json (schema below) — candidate vertical slices[]" }
 escapes:
   - { when: ".aprd/aprd.frozen.md missing/unparseable, OR .aprd/aprd.lock missing / status != frozen", target: "self / HALT — nothing frozen to slice; Phase 1 consumes only FROZEN WHAT (P8), never draft" }
-  - { when: "frozen aPRD CLASS != greenfield", target: "non-greenfield playbook — that playbook's slice granularity + skeleton rule not authored; report class, write nothing" }
+  - { when: "frozen aPRD CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — slice granularity + skeleton rule not authored; report class, write nothing" }
   - { when: "requirement cannot be placed in any demoable vertical slice (aPRD ambiguous, or its AC depends on capability aPRD never specified)", target: "Phase 0 (change request) — record in unsliceable[], never silent-drop; Phase 1 never patches WHAT (§5.13)" }
 ---
 # Register
@@ -90,5 +90,5 @@ Slice **vertical iff at least one acceptance criterion is black-box and user-obs
 All prose fields (`name`/`value_basis`/`reason`) are caveman (governs artifact bodies too — PR4).
 
 ## Stop condition
-- Guard tripped (frontmatter `escapes:` — no frozen aPRD, missing/invalid lock, or non-greenfield class) → write nothing; print which guard fired + offending detail; "HALT".
+- Guard tripped (frontmatter `escapes:` — no frozen aPRD, missing/invalid lock, or unplaybooked class) → write nothing; print which guard fired + offending detail; "HALT".
 - Clean greenfield → write `.roadmap/02-slices.json` (create `.roadmap/` if absent; only output, VERTICALITY-CHECK reads candidate `slices[]` next), state "candidate slices extracted, VERTICALITY-CHECK next", stop. No questions, no sequencing, no client touch.

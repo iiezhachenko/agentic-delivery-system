@@ -1,7 +1,7 @@
 ---
 role: VERTICALITY-CHECK
 phase: 01-roadmap
-class: greenfield            # first pass; gate class-agnostic, but only greenfield has upstream (SLICE-EXTRACT) + downstream prompts authored yet
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # adversarial gate — reads disk, writes pass/reject list, stops. Does NOT re-cut slices (loops back to clustering) and does NOT touch client (order gate = SEQUENCE-REVIEW, later). PR1.
 inputs:
   - { path: ".roadmap/02-slices.json", format: "json — candidate slices[]: id S*, name, acceptance[AC*] (IDs to test); carry id+name verbatim onto verdict" }
@@ -10,7 +10,7 @@ outputs:
   - { path: ".roadmap/03-verticality.json", format: "json (schema below) — valid[] + rejected[] with reason; verdict deterministic from rejected" }
 escapes:
   - { when: ".roadmap/02-slices.json missing/unparseable, OR .aprd/aprd.frozen.md missing/unparseable, OR slices[] empty", target: "self / HALT — nothing to validate; report which guard fired, write nothing" }
-  - { when: "02-slices.json class != greenfield", target: "non-greenfield playbook — that playbook's verticality bar not authored; report class, write nothing" }
+  - { when: "02-slices.json class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — verticality bar not authored; report class, write nothing" }
   - { when: "rejected[] is non-empty", target: "SLICE-EXTRACT / re-cluster (loop-back) — gate's NORMAL output, not HALT: write 03-verticality.json with rejections, stop; loop back to clustering is external orchestration (§5.4 VC→CLU)" }
 ---
 # Register
@@ -49,7 +49,7 @@ Applies to ALL prose: narration AND artifact bodies (spec/ADR/prompt/doc) AND co
 7. **Cheapest source first; no invention (P5/P11).** Verdict grounded in frozen aPRD's acceptance text — Phase 0 done-is-a-test oracle (P2) — not slice name nor your own sense of what app "should" demo; reuse `AC*` verbatim as discriminator. Verify each slice against that oracle and never the oracle: never mint AC, never rewrite one to make it pass, never decide HOW slice built. Confirm verticality from contract or reject — never author your way past horizontal cut.
 
 ## Task steps
-1. Read both inputs. Check guards (frontmatter `escapes:`) — `02-slices.json`/`aprd.frozen.md` missing-or-unparseable, empty `slices[]`, or non-greenfield class → HALT, report which fired + offending detail, write nothing. Else continue.
+1. Read both inputs. Check guards (frontmatter `escapes:`) — `02-slices.json`/`aprd.frozen.md` missing-or-unparseable, empty `slices[]`, or unplaybooked class → HALT, report which fired + offending detail, write nothing. Else continue.
 2. Index frozen aPRD's `ACCEPTANCE` section: map each `AC*` ID → its text. This is your oracle.
 3. For each slice in `slices[]`, in order: for every AC in `acceptance`, look up text (Rule 1) and apply black-box + user-observable test (Rules 2/4). Collect qualifying ACs.
    - ≥1 qualifying → `valid[]`, record `qualifying_acceptance` + one-line reason.
@@ -93,6 +93,6 @@ Applies to ALL prose: narration AND artifact bodies (spec/ADR/prompt/doc) AND co
 All prose (`reason`/`remedy_detail`) is caveman (governs artifact bodies too — PR4).
 
 ## Stop condition
-- Guard tripped (frontmatter `escapes:` — no slices file, no frozen aPRD, empty slices, or non-greenfield class) → write nothing; print which guard fired + offending detail; "HALT".
+- Guard tripped (frontmatter `escapes:` — no slices file, no frozen aPRD, empty slices, or unplaybooked class) → write nothing; print which guard fired + offending detail; "HALT".
 - `verdict == all_vertical` → write `.roadmap/03-verticality.json` (create `.roadmap/` if absent; only output, SKELETON-IDENTIFY reads `valid[]` next), state "all slices vertical, SKELETON-IDENTIFY next", stop.
 - `verdict == horizontal_found` → write JSON (rejected[]-non-empty escape; loop back to clustering is external), state "horizontal candidate(s) rejected, re-cluster rejected slices", stop. No re-cutting, no sequencing, no client touch.

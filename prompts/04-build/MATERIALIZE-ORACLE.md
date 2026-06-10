@@ -1,7 +1,7 @@
 ---
 role: MATERIALIZE-ORACLE
 phase: 04-build
-class: greenfield            # class-agnostic by design; only greenfield authored
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 mode: skeleton-build|slice-build   # DISPATCHED on disk: no .build/skeleton/oracle/oracle.lock → SKELETON-BUILD (Part A: materialize the walking-skeleton oracle once, §5.3/B9); present+frozen → SLICE-BUILD (Part B: materialize ONE slice's NEW tests against the frozen skeleton oracle + prior-built slices, §5.3/D11). One role, two modes
 interactive: false          # internal — team owns HOW; client signed WHAT (P0) + ordered slices (P1). Demo gate later (PR1, §9)
 inputs:
@@ -33,7 +33,7 @@ outputs:
 escapes:
   # — shared —
   - { when: "any input missing/unparseable, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate.reconcile_critique_verdict != clean", target: "self / HALT — no clean-gated frozen frame to author oracle on (§5.1, B5). Report which" }
-  - { when: "frozen CLASS != greenfield (skeleton.lock / adr.lock class)", target: "non-greenfield playbook — oracle depth not authored (B13/§11). Report class" }
+  - { when: "frozen CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — oracle depth not authored (B13/§11). Report class" }
   - { when: "a real-seam CT* declares empty failure_assertions, OR a flow traces no AC*", target: "Phase 3 / DERIVE-CONTRACTS|DERIVE-TESTS (failure) or Phase 0 (no AC) — record materialization_gaps[]; never fabricate a failure mode or AC" }
   - { when: "frozen spec too thin to materialize (e.g. shape with no observable), OR a needed frozen DECISION absent from the ADR frame", target: "Phase 3 / DERIVE-TESTS or Phase 2 — record materialization_gaps[] {target, gap, route}; never invent the observable or pick the decision (B4/B5)" }
   # — skeleton-build —

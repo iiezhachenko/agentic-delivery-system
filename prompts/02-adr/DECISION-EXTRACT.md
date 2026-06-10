@@ -1,7 +1,7 @@
 ---
 role: DECISION-EXTRACT
 phase: 02-adr
-class: greenfield            # first pass; the extractor is class-agnostic by design, but only greenfield has upstream (Phase 0/1) + downstream prompts authored yet
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal sweep — reads disk, writes disk, stops. Decisions are the delivery team's domain; client signed the WHAT, no client touch (PR1, §9)
 inputs:
   - { path: ".aprd/aprd.frozen.md", format: "markdown — Phase 0 FROZEN aPRD; the contract walked for forks (PROJECT, ENTITIES E*, REQUIREMENTS R*, CONSTRAINTS C*, ASSUMPTIONS A*, OUT_OF_SCOPE, ACCEPTANCE AC*)" }
@@ -12,7 +12,7 @@ outputs:
 escapes:
   - { when: ".aprd/aprd.frozen.md missing/unparseable, OR .aprd/aprd.lock missing / status != frozen", target: "self / HALT — nothing frozen to decide against; Phase 2 consumes only the FROZEN WHAT (P8/D9), never a draft" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no cut to scope the foundation pass; cannot extract against an absent cut" }
-  - { when: "frozen aPRD CLASS != greenfield (or cut class != greenfield)", target: "non-greenfield playbook — decision-category depth + brownfield conformance not authored (D10). Report the class, HALT" }
+  - { when: "frozen aPRD/cut CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — decision-category depth + brownfield conformance not authored (D10). Report the class, HALT" }
   - { when: "a force is internally contradictory or so underspecified NO decision point can be framed (cannot name the fork — aPRD never says enough to make it a fork)", target: "Phase 0 (change request) — record in aprd_defects[], NOT silently resolved; Phase 2 never patches the WHAT (D9, §5.10)" }
 ---
 # Register

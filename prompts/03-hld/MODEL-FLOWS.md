@@ -1,7 +1,7 @@
 ---
 role: MODEL-FLOWS
 phase: 03-hld
-class: greenfield            # class-agnostic by design; only greenfield authored
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A: the walking-skeleton flow F1, drawn once, touching every foundational seam); frozen skeleton present → INCREMENT PASS (Part B: THE slice IS a flow F* — its vertical path composed against the frozen skeleton contracts, incl. failure variant; §5.7 increment centerpiece). One role, two modes (H13/D9/D14)
 interactive: false          # internal validation sweep; client signed the WHAT, team owns the HOW (PR1, §9)
 inputs:
@@ -25,7 +25,7 @@ outputs:
 escapes:
   # — shared —
   - { when: "any shared input missing/unparseable, OR adr.lock status != frozen", target: "self / HALT (no frame to walk)" }
-  - { when: "frozen CLASS != greenfield (or lock class != greenfield)", target: "non-greenfield playbook — not authored (H11/D10). Report class" }
+  - { when: "frozen/lock CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — not authored (H11/D10). Report class" }
   - { when: "a path hop has no CT* in scope → the flow can't be drawn end-to-end", target: "record structural_defects[] (name the missing/wrong CT*) → DEFINE-CONTRACTS §5.3; flag never invent the contract" }
   - { when: "the flow reveals a bad foundational decision (a frame ADR makes the path impossible)", target: "frame_conflicts[] → Phase 2; never silently re-decide" }
   - { when: "the flow reveals an ambiguous/contradictory requirement (can't tell where the path arrives)", target: "aprd_defects[] → Phase 0; never patch the WHAT" }

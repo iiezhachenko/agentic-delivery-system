@@ -1,7 +1,7 @@
 ---
 role: EXTRACT
 phase: 00-aprd
-class: greenfield            # class-agnostic by design; only greenfield has downstream prompts authored yet
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # pure structural extraction — reads disk, writes disk, stops. No client touch (PR1)
 inputs:
   - { path: ".aprd/00-raw-request.md", format: "markdown — verbatim client request + attachment refs; the sole greenfield source-of-truth (client intent = the words)" }
@@ -10,7 +10,7 @@ outputs:
   - { path: ".aprd/02-extraction.json", format: "json (schema below) — entities, explicit/implied requirements, constraints, unknowns" }
 escapes:
   - { when: "01-classification.json needs_confirmation == true", target: "self / HALT — class unconfirmed; extraction must not run on an unresolved classification (wrong source-of-truth risk)" }
-  - { when: "any subrequest non-greenfield (escape non-null)", target: "non-greenfield playbook — not authored yet; HALT and report which SR*" }
+  - { when: "any subrequest unplaybooked (escape non-null)", target: "that playbook — not authored yet; HALT and report which SR*" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.

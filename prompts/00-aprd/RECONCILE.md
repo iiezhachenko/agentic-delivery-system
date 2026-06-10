@@ -1,7 +1,7 @@
 ---
 role: RECONCILE
 phase: 00-aprd
-class: greenfield            # research/canon grounding sub-pipeline (§7). Canon grounding serves greenfield + feature-add; only greenfield is authored downstream yet.
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # pure reconciliation — reads disk, writes disk, stops. No client touch (PR1). Client approves agreed[] and decides conflicts[] later, after VERIFY.
 inputs:
   - { path: ".aprd/03-grounding/rules-extracted.json", format: "json (EXTRACT-RULES output) — flat per-source atomic rules[] RULE*, each pinned to its SRC* with verbatim evidence; plus unfetched_sources[] + extraction_meta" }
@@ -9,7 +9,7 @@ outputs:
   - { path: ".aprd/03-grounding/rules-reconciled.json", format: "json (schema below) — agreed[] AGR* + conflicts[] CONF*, every input RULE* accounted exactly once, per-source detail preserved for VERIFY" }
 escapes:
   - { when: ".aprd/03-grounding/rules-extracted.json missing/unreadable", target: "self / HALT — nothing to reconcile; cannot run" }
-  - { when: "rules-extracted.json class != greenfield", target: "self / HALT — that canon playbook not authored; report rather than reconcile under the wrong corpus" }
+  - { when: "rules-extracted.json class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "self / HALT — that canon playbook not authored; report rather than reconcile under the wrong corpus" }
   - { when: "rules-extracted.json has empty rules[] (every source unfetched or yielded nothing)", target: "self / HALT — no rules to reconcile; report and stop" }
 ---
 # Register

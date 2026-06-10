@@ -1,7 +1,7 @@
 ---
 role: EXTRACT-RULES
 phase: 00-aprd
-class: greenfield            # research/canon grounding sub-pipeline (§7). Canon grounding serves greenfield + feature-add; only greenfield is authored downstream yet.
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # pure manifest parsing — reads disk, writes disk, stops. No client touch (PR1). Client approves the canon later (RECONCILE/VERIFY emit agreed[]+conflicts[]).
 inputs:
   - { path: ".aprd/03-grounding/sources.json", format: "json — curated source allowlist + fetch index; per-source SRC* entry carries tier/tool/version/kind/url. Built by upstream mechanical step, not an LLM stage." }
@@ -11,7 +11,7 @@ outputs:
 escapes:
   - { when: ".aprd/03-grounding/sources.json missing/unreadable", target: "self / HALT — no allowlist to extract against; cannot run" }
   - { when: "manifests/ directory absent OR every source file named in sources.json missing on disk", target: "self / HALT — fetch produced nothing to parse" }
-  - { when: "sources.json class != greenfield", target: "non-greenfield playbook — that canon playbook not authored; HALT and report rather than extract under the wrong corpus" }
+  - { when: "sources.json class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — that canon playbook not authored; HALT and report rather than extract under the wrong corpus" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.

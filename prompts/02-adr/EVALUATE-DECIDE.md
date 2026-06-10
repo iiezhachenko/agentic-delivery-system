@@ -1,7 +1,7 @@
 ---
 role: EVALUATE-DECIDE
 phase: 02-adr
-class: greenfield            # first pass; the score-and-pick logic is class-agnostic, but only greenfield is authored (no existing-system conformance weighting / brownfield inheritance yet)
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal evaluation + decision — reads disk, writes disk, stops. The HOW is the delivery team's domain; no client touch (PR1, §9) — client-visible decisions are a downstream GATE concern
 inputs:
   - { path: ".adr/03-options/index.json", format: "json — OPTION-GEN manifest; enumeration entry point: which DPs have option sets + where each file lives (option_files[] + degenerate[]/skipped[])" }
@@ -15,7 +15,7 @@ escapes:
   - { when: ".adr/03-options/index.json missing/unparseable", target: "self / HALT — no manifest to enumerate; cannot know which option sets to decide" }
   - { when: ".aprd/aprd.frozen.md missing/unparseable", target: "self / HALT — no CONSTRAINTS/ACCEPTANCE/NFR forces to score against; Phase 2 decides against the frozen WHAT" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no cross_slice_invariants INV* to validate the pick against the hard floor (§5.5/§5.6)" }
-  - { when: "index/aPRD/cut class != greenfield", target: "non-greenfield playbook — existing-system conformance weighting + brownfield ADR inheritance not authored (D7, D10). Report the class, HALT" }
+  - { when: "index/aPRD/cut class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — existing-system conformance weighting + brownfield ADR inheritance not authored (D7, D10). Report the class, HALT" }
   - { when: "option_files[] empty (OPTION-GEN grounded nothing — empty resolution_queue this pass)", target: "report + write empty manifest — write decisions-index.json with empty decisions[] + a note, write no per-DP decision files, stop. RECONCILE reads zero" }
 ---
 # Register

@@ -1,7 +1,7 @@
 ---
 role: VERIFY
 phase: 00-aprd
-class: greenfield            # research/canon grounding sub-pipeline (§7). Canon grounding serves greenfield + feature-add; only greenfield is authored downstream yet.
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # pure currency check — reads disk, annotates, writes disk, stops. No client touch (PR1). Client approves agreed[] and decides conflicts[] later, on the verified canon.
 inputs:
   - { path: ".aprd/03-grounding/rules-reconciled.json", format: "json (RECONCILE output) — agreed[] AGR* + conflicts[] CONF*; each source carries tier/tool/tool_version_pinned/setting/evidence (carry all verbatim, currency-check the setting); plus unfetched_sources[] (carry through) and reconcile_meta" }
@@ -9,7 +9,7 @@ outputs:
   - { path: ".aprd/03-grounding/rules-verified.json", format: "json (schema below) — FINAL canon: every agreed[] entry + conflict position carried verbatim, annotated with verification block. GAP-DETECT reads it" }
 escapes:
   - { when: ".aprd/03-grounding/rules-reconciled.json missing/unreadable", target: "self / HALT — nothing to verify; cannot run" }
-  - { when: "rules-reconciled.json class != greenfield", target: "self / HALT — that canon playbook not authored; report rather than verify under the wrong corpus" }
+  - { when: "rules-reconciled.json class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "self / HALT — that canon playbook not authored; report rather than verify under the wrong corpus" }
   - { when: "rules-reconciled.json has empty agreed[] AND empty conflicts[]", target: "self / HALT — no canon to verify; report and stop" }
 ---
 # Register

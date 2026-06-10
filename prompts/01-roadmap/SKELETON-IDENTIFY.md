@@ -1,7 +1,7 @@
 ---
 role: SKELETON-IDENTIFY
 phase: 01-roadmap
-class: greenfield            # first pass; skeleton rule class-agnostic, but only greenfield has upstream (SLICE-EXTRACT, VERTICALITY-CHECK) authored yet + skeleton rule defined (§5.5)
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal designation — reads disk, writes skeleton + seams, stops. Does NOT sequence other slices (SEQUENCE), define foundation cut (FOUNDATION-CUT), or touch client (order gate = SEQUENCE-REVIEW, later). PR1.
 inputs:
   - { path: ".roadmap/03-verticality.json", format: "json — verdict (must be all_vertical) + valid[] = ELIGIBILITY set; only validated-vertical slice can be skeleton" }
@@ -11,7 +11,7 @@ outputs:
   - { path: ".roadmap/04-skeleton.json", format: "json (schema below) — walking-skeleton designation S* + foundational seams it must establish" }
 escapes:
   - { when: "any of three inputs missing/unparseable, OR 03-verticality.json verdict != all_vertical, OR valid[] empty", target: "self / HALT — slice set not clean validated-vertical set; rejected/horizontal candidate must re-cut before skeleton named (§5.14 SkeletonNamed follows Verticalized); report which guard fired, write nothing" }
-  - { when: "02-slices.json or 03-verticality.json class != greenfield", target: "non-greenfield playbook — that playbook's skeleton rule + seam set not authored; report class, write nothing" }
+  - { when: "02-slices.json or 03-verticality.json class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — skeleton rule + seam set not authored; report class, write nothing" }
   - { when: "no single eligible slice crosses every present foundational seam once (seams scattered across slices, or thinnest seam-crossing path never cut)", target: "SLICE-EXTRACT / re-cut (loop-back) — recorded diagnosis, NOT HALT: write 04-skeleton.json with skeleton:null + reason + uncovered_seams, stop; re-cut is external orchestration (§5.13)" }
 ---
 # Register
@@ -57,7 +57,7 @@ Slice satisfying these in order = walking skeleton; assign `kind: walking_skelet
 9. **Cheapest source first; stay in lane (P5/RM11).** Eligibility from `valid[]`, slice bodies from 02, seam identification + "which seam does this slice cross" from frozen aPRD's text (ENTITIES, CONSTRAINTS, ASSUMPTIONS, ACCEPTANCE) — verify against that oracle, you never the oracle (P11). Skeleton designation + its seams only: do **not** order remaining slices (SEQUENCE), name foundation cut's `foundational_decisions`/`cross_slice_invariants` (FOUNDATION-CUT), assign `kind` to non-skeleton slices, specify components/stack/schemas/APIs (Phases 2–4), or touch client. One designation, then stop.
 
 ## Task steps
-1. Read all three inputs. Check guards (frontmatter `escapes:`) — any input missing/unparseable, non-greenfield class, `verdict` != all_vertical, or empty `valid[]` → HALT, report which fired + offending detail, write nothing. Else continue.
+1. Read all three inputs. Check guards (frontmatter `escapes:`) — any input missing/unparseable, unplaybooked class, `verdict` != all_vertical, or empty `valid[]` → HALT, report which fired + offending detail, write nothing. Else continue.
 2. Identify foundational seams concretely from aPRD (Rule 2): for ingress, domain, persistence, primary external integration, name instance + ground in aPRD IDs; mark any genuinely-absent category `present: false` + reason.
 3. Build eligibility set = `valid[]` ids; join each to its full body in `02-slices.json` `slices[]` (Rule 1).
 4. Map each eligible slice → foundational seams its `requirements`/`acceptance` cross, from aPRD text (Rule 3).

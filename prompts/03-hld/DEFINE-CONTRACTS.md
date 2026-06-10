@@ -1,7 +1,7 @@
 ---
 role: DEFINE-CONTRACTS
 phase: 03-hld
-class: greenfield            # class-agnostic by design; only greenfield authored
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment    # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A: contract every edge of full graph, drawn once); frozen skeleton present → INCREMENT PASS (Part B: only contracts a slice's flow needs beyond frozen skeleton). One role, two modes (H13/D9/D14)
 interactive: false          # internal structural sweep; client signed the WHAT, team owns the HOW (PR1, §9)
 inputs:
@@ -25,7 +25,7 @@ escapes:
   - { when: ".aprd/aprd.frozen.md missing/unparseable", target: "self / HALT — no R* trace oracle / no E* payload reference; Phase 3 consumes only FROZEN WHAT (P8/H9)" }
   - { when: ".adr/adr.lock missing OR status != frozen, OR .adr/log/ missing/empty", target: "self / HALT — no baselined frame to decide KIND (H2)" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no INV* floor (esp. INV6) + no deferred[] list of schemas not to invent" }
-  - { when: "frozen CLASS != greenfield (or lock class != greenfield)", target: "non-greenfield playbook — depth/brownfield-existing-seam-conformance not authored (H11/D10). Report class" }
+  - { when: "frozen/lock CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — depth/brownfield-existing-seam-conformance not authored (H11/D10). Report class" }
   - { when: "a seam genuinely needs a KIND frame forbids (edge satisfiable only by async event/broker but INV6 mandates single-server synchronous; or two ADRs make it unspecifiable)", target: "Phase 2 (change request) — record in frame_conflicts[], never silently re-decide (H2/H10)" }
   # — skeleton pass —
   - { when: "SKELETON: .hld/skeleton/components.json missing/unparseable", target: "self / HALT — no component graph whose seams to contract" }

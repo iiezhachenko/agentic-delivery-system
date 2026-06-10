@@ -1,7 +1,7 @@
 ---
 role: SEQUENCE
 phase: 01-roadmap
-class: greenfield            # first pass; ordering rule class-agnostic, but only greenfield has upstream (SLICE-EXTRACT, VERTICALITY-CHECK, SKELETON-IDENTIFY) authored
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal ordering — reads disk, writes proposed running order, stops. Client order gate is SEQUENCE-REVIEW (role 7/7), later. PR1
 inputs:
   - { path: ".roadmap/04-skeleton.json", format: "json — skeleton{id} MUST lead order [RM4, position 1]; eligible_slices[] = set to sequence" }
@@ -11,7 +11,7 @@ outputs:
   - { path: ".roadmap/05-sequence.json", format: "json (schema below) — dependency-legal running order, skeleton-first, value×risk/cost ordered, one-line rationale per position" }
 escapes:
   - { when: "any input missing/unparseable, OR 03 verdict != all_vertical, OR 04 skeleton == null, OR eligible_slices empty", target: "self / HALT — re-cut already routed upstream / nothing to order; report which guard, write nothing (§5.14: Sequenced follows SkeletonNamed follows Verticalized)" }
-  - { when: "02 / 03 / 04 class != greenfield", target: "non-greenfield playbook — sequencing depth not authored; HALT, report class" }
+  - { when: "02 / 03 / 04 class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — sequencing depth not authored; HALT, report class" }
   - { when: "depends_on contains CYCLE, OR depends_on references slice not in eligible set (dangling), OR skeleton carries non-empty depends_on on eligible slice (cannot both lead and depend)", target: "SLICE-EXTRACT / re-cut — slicing defect (§8, RM5, §5.13). NOT HALT: write 05 with verdict:dependency_defect + cycle/dangling refs + sequence:[], stop; re-cut is external orchestration" }
 ---
 # Register

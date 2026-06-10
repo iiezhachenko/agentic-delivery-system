@@ -1,7 +1,7 @@
 ---
 role: BUILD-PLAN
 phase: 04-build
-class: greenfield            # class-agnostic by design; only greenfield authored
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 mode: skeleton-build|slice-build   # DISPATCHED on disk state: no .build/skeleton/build-plan.json → SKELETON-BUILD (Part A: plan the walking-skeleton build once, §5.4/B9); present → SLICE-BUILD (Part B: plan ONE slice's build against the frozen skeleton + prior-built slices, real-vs-mock per seam, §5.4/D11). One role, two modes
 interactive: false          # internal — team owns HOW; client signed WHAT (P0) + ordered slices (P1). Demo gate later (PR1, §9)
 inputs:
@@ -28,7 +28,7 @@ escapes:
   - { when: ".hld/skeleton.lock missing OR status != frozen OR gate.reconcile_critique_verdict != clean", target: "self / HALT — no clean-gated frozen skeleton to build against (§5.1). Report which" }
   - { when: ".adr/adr.lock OR .aprd/aprd.lock missing OR status != frozen", target: "self / HALT — frame/WHAT not frozen; Phase 4 builds only against frozen upstream locks (B5, §5.1)" }
   - { when: "build-dag.json missing/unparseable, OR carries non-empty cycles[] OR all_nodes_ordered != true", target: "Phase 3 / DERIVE-TESTS (boundary defect) — record in structural_defects[]; never break a cycle to force an order (B5)" }
-  - { when: "frozen CLASS != greenfield (skeleton.lock / adr.lock class)", target: "non-greenfield playbook — build depth not authored (B13/§11). Report class" }
+  - { when: "frozen CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — build depth not authored (B13/§11). Report class" }
   # — skeleton-build —
   - { when: "SKELETON-BUILD: flows.json / components.json / contracts.json missing/unparseable", target: "self / HALT — no skeleton to plan" }
   - { when: "SKELETON-BUILD: components.json / contracts.json / flows.json carries non-empty structural_defects / frame_conflicts / aprd_defects, OR flows.json composes_against_contracts != true", target: "self / HALT — upstream HLD routed an unresolved escape; don't plan a build on a defective skeleton. Report which block in which file" }

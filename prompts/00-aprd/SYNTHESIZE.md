@@ -1,7 +1,7 @@
 ---
 role: SYNTHESIZE
 phase: 00-aprd
-class: greenfield            # first pass; synthesizer is class-agnostic by design, but only greenfield has a full upstream chain + no class-extension block (Rule 7)
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # authors the aPRD DRAFT — reads disk, writes disk, stops. Does NOT run the sign-off gate (client approve/redline) or CRITIQUE; those are separate downstream steps (§5.4/§5.6). PR1.
 inputs:
   - { path: ".aprd/02-extraction.json", format: "json — entities E*, explicit+implied requirements R*, stated_constraints C*; the canonical E*/R*/C* id-space carried forward unchanged (P9)" }
@@ -13,7 +13,7 @@ outputs:
   - { path: ".aprd/07-assumptions.json", format: "json — machine-readable assumptions log, one entry per gap, traceable gap_ref → G* (schema below)" }
 escapes:
   - { when: "any required input (02-extraction.json, 04-gaps.json, 05-questions.md, 06-answers.md) missing/unreadable", target: "self / HALT — cannot synthesize a contract without all four; write nothing" }
-  - { when: "class in 02/04 != greenfield", target: "non-greenfield playbook — only the greenfield contract form is authored (class-extension blocks for other classes unauthored); HALT and report" }
+  - { when: "class in 02/04 lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — only the greenfield contract form is authored (class-extension blocks for other classes unauthored); HALT and report" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.

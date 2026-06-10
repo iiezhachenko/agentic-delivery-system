@@ -1,7 +1,7 @@
 ---
 role: IMPLEMENT
 phase: 04-build
-class: greenfield            # class-agnostic by design; only greenfield authored
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 mode: skeleton-build|slice-build   # DISPATCHED on disk: a ready frozen slice oracle (.build/slices/<id>/oracle/oracle.lock, build-record absent/incomplete) → SLICE-BUILD (Part B: implement ONE slice component against the frozen slice oracle + prior-built slices, §5.5/D11); none → SKELETON-BUILD (Part A: implement ONE walking-skeleton component to contract-green, §5.5/B3). One role, two modes
 interactive: false          # internal — team owns HOW + LLD (B8); client signed WHAT (P0) + ordered slices (P1). Demo gate later (PR1, §9)
 inputs:
@@ -38,7 +38,7 @@ escapes:
   # — shared —
   - { when: "the active oracle.lock missing OR status != frozen OR builder_may_not_edit != true OR starts_red != true, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate not clean", target: "self / HALT — no frozen oracle/frame to build against (§5.1, B4). Report which" }
   - { when: "the active build-plan missing/unparseable OR build-plan structural_defects non-empty OR oracle.json materialization_gaps non-empty OR oracle.json starts_red != true", target: "self / HALT — upstream routed an unresolved escape; don't build on a defective plan/oracle. Report which" }
-  - { when: "frozen CLASS != greenfield (skeleton.lock / adr.lock class)", target: "non-greenfield playbook — build depth not authored (B13/§11). Report class" }
+  - { when: "frozen CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — build depth not authored (B13/§11). Report class" }
   - { when: "making a frozen test pass would require EDITING the test / oracle / a frozen contract / a frozen decision / the WHAT (the seam is wrong, not the code)", target: "ESCAPE not edit (B5) — record build_unit.escape{failure_signature,classification,diagnosis,route} + status:blocked; route contract→Phase 3 / decision→Phase 2 / WHAT→Phase 0 / missing-foundation→Phase 1. Never edit a frozen artifact" }
   - { when: "STALL — K=3 consecutive attempts with the same failure signature and no net-new passing tests, after one reflection pass re-reading the frozen contract/ADR/AC (§5.8, B6)", target: "ESCAPE with the routable diagnosis (as above). An escape with no diagnosis is a builder bug, not an upstream defect" }
   # — skeleton-build —

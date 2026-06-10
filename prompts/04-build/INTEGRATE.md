@@ -1,7 +1,7 @@
 ---
 role: INTEGRATE
 phase: 04-build
-class: greenfield            # class-agnostic by design; only greenfield authored
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 mode: skeleton-build|slice-build   # one role, two modes (dispatch: MODE DISPATCH §)
 interactive: false          # internal — team owns HOW + wiring; client signed WHAT (P0) + ordered slices (P1). Demo gate later (PR1, §9)
 inputs:
@@ -45,7 +45,7 @@ escapes:
   - { when: "the active build-record.json missing/unparseable OR any build_set unit status != green (unit still blocked/un-built)", target: "self / HALT — nothing real to compose; contract layer must be green first (§5.6). Report which unit" }
   - { when: "the active oracle.lock missing OR status != frozen OR builder_may_not_edit != true, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate not clean", target: "self / HALT — no frozen oracle/frame to integrate against (§5.1, B4). Report which" }
   - { when: "the active oracle.json has no flow_test whose slice==target (no flow test), OR the active flows.json composes_against_(frozen_)contracts != true / non-empty structural_defects", target: "self / HALT — upstream HLD routed unresolved escape, or nothing to integrate; don't compose on defective flow. Report which" }
-  - { when: "frozen CLASS != greenfield (skeleton.lock / adr.lock class)", target: "non-greenfield playbook — integrate depth not authored (B13/§11). Report class" }
+  - { when: "frozen CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — integrate depth not authored (B13/§11). Report class" }
   - { when: "flow will not compose because COMPONENT's contract-layer code wrong (real impl violates own frozen contract — not a wiring gap)", target: "back to IMPLEMENT / §5.5 (my-code-component) — record escape{classification:my-code-component, route:IMPLEMENT} + status:blocked; do NOT rewrite the sibling component's internals here (lane), do NOT edit a frozen test" }
   - { when: "making the flow compose would require EDITING a frozen flow test / oracle / contract / decision / WHAT (seam or spec wrong, not wiring)", target: "ESCAPE not edit (B5) — record escape{failure_signature,classification,diagnosis,route} + status:blocked; route contract→Phase 3 / decision→Phase 2 / WHAT→Phase 0 / missing-foundation→Phase 1. Never edit a frozen artifact" }
   - { when: "STALL — K=3 consecutive attempts same failure signature, no net-new passing flow assertions, after one reflection pass re-reading the frozen flow test / contract / ADR (§5.8, B6)", target: "ESCAPE with routable diagnosis (as above). Escape with no diagnosis = integrator bug, not upstream defect" }

@@ -1,7 +1,7 @@
 ---
 role: RE-RANK
 phase: 01-roadmap
-class: greenfield            # first pass; re-rank rule class-agnostic, but only greenfield has upstream chain (SEQUENCE-REVIEW + HLD skeleton + skeleton-build demo) authored
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal re-rank — reads disk, writes re-ranked living roadmap, stops. Client saw order at SEQUENCE-REVIEW; re-ranks surface as updates + per-slice demo, not re-negotiation (§9). PR1
 inputs:
   - { path: ".roadmap/07-sequence-reviewed.json", format: "json — client-confirmed base sequence; sequence[] carried verbatim (coarse aPRD-derived depends_on) = order to re-rank + value/risk to carry, never re-scored" }
@@ -13,7 +13,7 @@ outputs:
   - { path: ".roadmap/08-rerank.json", format: "json (schema below) — re-ranked LIVING roadmap (roadmap_version bumped): completed slices pinned + remaining slices re-ordered dependency-legal against real DAG" }
 escapes:
   - { when: "any input missing/unparseable, OR no demo record with client_response:accepted exists (foundation loop not complete — nothing built to re-rank against)", target: "self / HALT — report which guard, write nothing (§5.11 runs AFTER foundation loop)" }
-  - { when: "07 / build-dag / components / 02 class != greenfield", target: "non-greenfield playbook — re-rank depth not authored; HALT, report class" }
+  - { when: "07 / build-dag / components / 02 class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — re-rank depth not authored; HALT, report class" }
   - { when: "real DAG projected to slices induces CYCLE among remaining slices, OR real depends_on references slice absent from base sequence", target: "SLICE-EXTRACT / re-cut — slicing defect (§5.13, RM5). NOT HALT: write 08 with verdict:dependency_defect + cycle/dangling refs + remaining_sequence:[], stop; re-cut is external orchestration" }
   - { when: "learning reveals aPRD ambiguous/wrong (remaining slice cannot be built as scoped)", target: "Phase 0 change request — record in aprd_defects[], FLAG never patch WHAT (§5.13, RM11); re-rank slices that CAN proceed, stop" }
   - { when: "learnings show foundational surprise flood (foundation cut too thin — remaining slice needs un-built foundation)", target: "FOUNDATION-CUT / widen cut — record in foundation_gaps[] (§5.13); re-rank what unblocked, stop" }

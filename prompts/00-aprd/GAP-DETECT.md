@@ -1,7 +1,7 @@
 ---
 role: GAP-DETECT
 phase: 00-aprd
-class: greenfield            # class-agnostic by design; only greenfield has downstream prompts authored yet
+class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # adversarial analysis — reads disk, writes disk, stops. Questions are authored later by QUESTION-GEN (PR1)
 inputs:
   - { path: ".aprd/02-extraction.json", format: "json — entities E*, requirements R* (explicit+implied), constraints C*, unknowns U*; the items each gap traces to via refs" }
@@ -10,7 +10,7 @@ outputs:
   - { path: ".aprd/04-gaps.json", format: "json (schema below) — blast-ranked gaps[] with interpretations + recommended_default + disposition" }
 escapes:
   - { when: "02-extraction.json missing or unreadable", target: "self / HALT — nothing to detect gaps in; cannot run" }
-  - { when: "02-extraction.json class != greenfield", target: "non-greenfield playbook — not authored yet; HALT and report the class rather than rank gaps under the wrong grounding model" }
+  - { when: "02-extraction.json class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — not authored yet; HALT and report the class rather than rank gaps under the wrong grounding model" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.
