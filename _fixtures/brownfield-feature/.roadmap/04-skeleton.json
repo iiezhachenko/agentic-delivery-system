@@ -1,0 +1,107 @@
+{
+  "verticality_ref": ".roadmap/03-verticality.json",
+  "slices_ref": ".roadmap/02-slices.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "class": "greenfield",
+  "foundational_seams": [
+    {
+      "seam": "ingress",
+      "present": true,
+      "instance": "A request enters the system via an HTTP/HTTPS browser session; the web application's entry page must be reachable and renderable in a standard browser without a native install.",
+      "grounded_in": ["R1", "C1", "AC1"]
+    },
+    {
+      "seam": "domain",
+      "present": true,
+      "instance": "The Freelancer entity is authenticated and a session is established; the system's core business rule that all access is gated by an authenticated freelancer identity is exercised.",
+      "grounded_in": ["E1", "R5", "AC5"]
+    },
+    {
+      "seam": "persistence",
+      "present": true,
+      "instance": "The authenticated freelancer's identity (provider token and user profile reference) is stored and retrievable; state survives beyond the OAuth callback so the session can be resumed.",
+      "grounded_in": ["A2", "E1", "R5", "A7"]
+    },
+    {
+      "seam": "primary_external_integration",
+      "present": true,
+      "instance": "The system delegates authentication to an external OAuth provider; the OAuth handshake round-trip completes and the application obtains a valid authenticated session — no password is stored or managed internally.",
+      "grounded_in": ["A2", "R5", "AC5", "E1"]
+    }
+  ],
+  "eligible_slices": ["S1", "S2", "S3", "S4"],
+  "skeleton": {
+    "id": "S1",
+    "name": "Sign in via OAuth on the web application",
+    "kind": "walking_skeleton",
+    "requirements": ["R1", "R5"],
+    "acceptance": ["AC1", "AC5"],
+    "qualifying_acceptance": ["AC1", "AC5"],
+    "retires_risk": "OAuth provider integration (A2): first exercise of the external OAuth delegation; proves the provider round-trip works before any other slice depends on an authenticated session.",
+    "depends_on": [],
+    "seam_coverage": [
+      {
+        "seam": "ingress",
+        "touched_by": "AC1",
+        "establishes": "The web application is reachable over HTTP/HTTPS in a standard browser and its entry page renders without a native install — proving the system's request-entry surface is alive and serving responses."
+      },
+      {
+        "seam": "domain",
+        "touched_by": "AC5",
+        "establishes": "The core authentication business rule is exercised: a Freelancer initiates sign-in, the system delegates to an external OAuth provider, and an authenticated session exists in the application — proving the domain's identity gate operates correctly."
+      },
+      {
+        "seam": "persistence",
+        "touched_by": "AC5",
+        "establishes": "The provider token and user profile reference are stored and retrieved so the authenticated session persists in the application after the OAuth callback completes — proving state survives a round-trip through the data store."
+      },
+      {
+        "seam": "primary_external_integration",
+        "touched_by": "AC5",
+        "establishes": "The application completes an external OAuth handshake end-to-end — the Freelancer is redirected to the provider, grants authorisation, and the application receives and resolves the callback to an authenticated session with no password entry."
+      }
+    ],
+    "minimal_behaviour_rationale": "S1 carries only two requirements (R1, R5) and two acceptance criteria (AC1, AC5). The entire product surface beyond entry-page rendering and OAuth sign-in — project creation, time logging, invoice export, currency configuration, rate management — is deferred to later slices. No business data is created or displayed; the only state written is the minimal identity record (provider token and user profile reference) that proves the persistence seam. Everything else remains hardcoded or absent.",
+    "selection_rationale": "S1 is the only eligible slice that crosses all four foundational seams in a single end-to-end path. S2, S3, and S4 all miss the primary_external_integration seam — none of their requirements or acceptance criteria exercise the external OAuth handshake. S1 also sits at the root of the dependency graph (depends_on is empty); every other slice depends on S1 directly or transitively. Its retires_risk explicitly names the OAuth provider integration (A2) — the riskiest unproven foundational dependency, which gates every other slice. Among the eligible slices, S1 carries the least feature depth, making it the thinnest possible end-to-end proof of composition."
+  },
+  "skeleton_seams": [
+    {
+      "seam": "ingress",
+      "must_establish": "The web application accepts HTTP/HTTPS requests in a standard browser and serves its entry page — the request-entry surface is live and functional.",
+      "grounded_in": ["R1", "C1", "AC1"]
+    },
+    {
+      "seam": "domain",
+      "must_establish": "The authentication business rule operates end-to-end: a Freelancer can initiate sign-in, the system applies the OAuth delegation rule, and a valid authenticated session is established in the application.",
+      "grounded_in": ["E1", "R5", "AC5"]
+    },
+    {
+      "seam": "persistence",
+      "must_establish": "The Freelancer's identity (provider token and user profile reference) is written to and read from the data store; the authenticated session survives the OAuth callback and is retrievable on subsequent requests.",
+      "grounded_in": ["A2", "E1", "R5", "A7"]
+    },
+    {
+      "seam": "primary_external_integration",
+      "must_establish": "The application completes a full external OAuth provider handshake — initiating the redirect, receiving the callback, and resolving it to an authenticated session — proving the external delegation round-trip works before any other slice depends on it.",
+      "grounded_in": ["A2", "R5", "AC5"]
+    }
+  ],
+  "rejected_as_skeleton": [
+    {
+      "id": "S2",
+      "name": "Log and persist billable time entries against a project",
+      "reason": "Misses the primary_external_integration seam — neither R2/R7 nor AC2/AC7 exercise the external OAuth handshake. Also not the dependency root: depends_on includes S1 and S4, meaning it cannot be built first."
+    },
+    {
+      "id": "S3",
+      "name": "Export a monthly PDF invoice with line items and monetary totals",
+      "reason": "Misses the primary_external_integration seam — none of its requirements (R3, R8, R9, R10) or acceptance criteria (AC3, AC8, AC9, AC10) exercise the external OAuth handshake. Deepest node in the dependency graph (depends_on: S1, S2, S4) and carries the most feature depth of any eligible slice."
+    },
+    {
+      "id": "S4",
+      "name": "Create and manage client projects with currency and billable rate",
+      "reason": "Misses the primary_external_integration seam — neither R4/R6/R9/R10 nor AC4/AC6 exercise the external OAuth handshake. Also not the dependency root: depends_on includes S1."
+    }
+  ],
+  "uncovered_seams": []
+}

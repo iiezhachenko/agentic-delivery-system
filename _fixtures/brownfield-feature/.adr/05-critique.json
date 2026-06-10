@@ -1,0 +1,25 @@
+{
+  "adr_index_ref": ".adr/adr-index.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "conflicts_ref": ".adr/04-conflicts.json",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "class": "greenfield",
+  "skeleton_id": "S1",
+  "adrs_reviewed": ["ADR-0001", "ADR-0002", "ADR-0003", "ADR-0004", "ADR-0005", "ADR-0006"],
+  "verdict": "clean",
+  "issues": [],
+  "issue_count": 0,
+  "critique_counts": {
+    "adrs_reviewed": 6,
+    "issues": 0,
+    "by_category": {
+      "strawman-alternative": 0,
+      "untraceable-adr": 0,
+      "uncovered-constraint": 0,
+      "contradictory-adrs": 0,
+      "over-decided": 0,
+      "unforced-decision": 0,
+      "not-yet": 0
+    }
+  }
+}

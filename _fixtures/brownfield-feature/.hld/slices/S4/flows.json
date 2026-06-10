@@ -1,0 +1,78 @@
+{
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "adr_log_ref": ".adr/log/",
+  "base_flows_ref": ".hld/skeleton/flows.json",
+  "base_contracts_ref": ".hld/skeleton/contracts.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "slice_components_ref": ".hld/slices/S4/components.json",
+  "slice_contracts_ref": ".hld/slices/S4/contracts.json",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "skeleton_frozen_verified": true,
+  "class": "greenfield",
+  "mode": "increment",
+  "slice_id": "S4",
+  "slice_name": "Create and manage client projects with currency and billable rate",
+  "introduced_components": ["C3"],
+  "touched_components": ["C6", "C3", "C2", "C1"],
+  "flows": [
+    {
+      "id": "F4",
+      "slice": "S4",
+      "name": "Freelancer creates and manages a client project with currency and billable rate",
+      "trigger": "Authenticated freelancer submits a project create, edit, or delete request via the web application",
+      "path": ["C6", "C3", "C2", "C1"],
+      "steps": [
+        {
+          "from": "C6",
+          "to": "C3",
+          "via": "CT9",
+          "seam": "ingress->domain",
+          "external": false,
+          "action": "Web Ingress receives the HTTP project management request (create/edit/delete/list) and dispatches it in-process to Project Management, which returns a server-rendered HTML response"
+        },
+        {
+          "from": "C3",
+          "to": "C2",
+          "via": "CT3",
+          "seam": "in-domain session scope",
+          "external": false,
+          "action": "Project Management calls Identity & Auth in-process to resolve the current authenticated session and obtain the freelancer identity (E1 reference) used to scope all project data reads and writes to the owning freelancer"
+        },
+        {
+          "from": "C3",
+          "to": "C1",
+          "via": "CT2",
+          "seam": "domain->persistence",
+          "external": false,
+          "action": "Project Management persists and retrieves client project records (E2 — Client Project, E5 — Currency, E6 — Client, E7 — Billable Rate) to/from Data Store, scoped to the resolved freelancer identity; covers create, read (list + detail), update, and delete"
+        }
+      ],
+      "via": ["CT9", "CT3", "CT2"],
+      "failure_path": {
+        "trigger": "Freelancer submits a project management request but has no valid authenticated session (session absent or expired)",
+        "exercises": "CT3:no-valid-session",
+        "arrives_at": "Identity & Auth returns no authenticated identity; Project Management cannot determine ownership and rejects the request as unauthorized; Web Ingress returns an appropriate HTTP error response (e.g. redirect to sign-in)"
+      },
+      "traces": ["R4", "R6", "R9", "R10", "AC6"],
+      "honors_inv": ["INV1", "INV2", "INV3", "INV4", "INV6"]
+    }
+  ],
+  "composes_against_frozen_contracts": true,
+  "skeleton_fidelity": {
+    "reused_contracts_walked": ["CT9", "CT3", "CT2"],
+    "reshaped_contracts": [],
+    "redrawn_flows": [],
+    "verdict": "composes-against-frozen"
+  },
+  "structural_defects": [],
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "flow_counts": {
+    "flows": 1,
+    "hops": 3,
+    "hops_contracted": 3,
+    "external_boundaries": 0,
+    "structural_defects": 0
+  }
+}

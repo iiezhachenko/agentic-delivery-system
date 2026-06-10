@@ -1,0 +1,52 @@
+{
+  "verification_ref": ".build/skeleton/verification.json",
+  "critique_ref": ".build/skeleton/critique.json",
+  "integration_record_ref": ".build/skeleton/integration-record.json",
+  "build_record_ref": ".build/skeleton/build-record.json",
+  "flows_ref": ".hld/skeleton/flows.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton-build",
+  "slice": "S1",
+  "demo_artifact": ".build/skeleton/demo/demo.md",
+  "demo_modality": "ui-click-through",
+  "flow_demonstrated": "F1",
+  "demonstrated_acs": [
+    {
+      "ac": "AC1",
+      "req_ref": "R1",
+      "plain_outcome": "The app loads in any standard browser over HTTP or HTTPS — no app install required.",
+      "route": "GET / -> _view_entry_page -> HttpResponse(200, non-empty HTML)",
+      "evidence": { "visible": "pass", "held_out": "pass" }
+    },
+    {
+      "ac": "AC5",
+      "req_ref": "R5",
+      "plain_outcome": "A freelancer can complete the full Google sign-in flow and arrive at an authenticated session — no password entered.",
+      "route": "GET /auth/login -> HttpResponseRedirect(302 to OAuth) ; GET /auth/callback -> exchange_code -> handle_callback -> save_identity -> set_cookie(session) -> HttpResponseRedirect(/)",
+      "evidence": { "visible": "pass", "held_out": "pass" }
+    }
+  ],
+  "client_response": "accepted",
+  "accepted_by": "client",
+  "accepted_at": "2026-06-08T00:00:00Z",
+  "rejection": null,
+  "learnings": [
+    "Google OAuth 2.0 external boundary remains mocked (identity_auth.oauth_provider.exchange_code via frozen conftest mock_oauth_provider) — real Google credentials and redirect-URI registration must be wired before production deployment.",
+    "Later-slice components C3 (Project Management), C4 (Time Logging), C5 (Invoice Export) are mocked via frozen conftest (CT9/CT10/CT11); these are the next capabilities to build and wire.",
+    "Data store uses in-memory dict at contract layer in tests; real PostgreSQL persistence (ADR-0003) is wired at integration — production database provisioning and connection-string configuration are a deployment prerequisite."
+  ],
+  "signoff": "A — Yes, that's exactly what I wanted. The Google sign-in is clean and I like that there's no password to manage. Go ahead and build the next piece.",
+  "next": "Phase 1 re-rank (next slice)",
+  "status": "accepted",
+  "demo_counts": {
+    "demonstrated_acs": 2,
+    "acs_visible_passed": 2,
+    "acs_held_out_passed": 2,
+    "learnings": 3
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "defect": "regression",
+  "invariant": "BF4 — feature must not break an existing AC (scoped regression guard)",
+  "seed": [
+    "overlay defects/regression/project_store.regressed.py → src/freelancer_app/project_management/project_store.py",
+    "(result of running VERIFY-OUTPUT on the regressed tree) = defects/regression/verify-output.regression-red.json → .build/slices/S5/verify-output.json"
+  ],
+  "load_bearing_assertion": "VERIFY-OUTPUT verdict == 'rejected' (regression layer RED on AC6). Golden verdict == 'verified' (regression green).",
+  "expected_verdict": "rejected",
+  "expected_signal": { "regression.verdict": "red", "regression.reds": ["AC6"], "class_ext.layer_verdict": "fail" },
+  "separates_from_golden_by": "regression.verdict (green in golden / red here) — the REAL invariant under test, not a cosmetic difference."
+}

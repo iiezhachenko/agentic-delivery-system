@@ -7,28 +7,28 @@
   "gaps": [
     {
       "id": "G1",
-      "gap": "Tag stored as free-text string on the time-entry record, or as a first-class Tag entity with its own table + relation to the entry?",
+      "gap": "Tag stored as free-text string on the existing project record, or as a first-class Tag entity with its own table + relation to the project?",
       "refs": ["E8", "U2", "R13"],
       "seam_ref": { "at": "C1", "contract_ref": "CT2" },
       "interpretations": [
-        "Tag = free-text string field added to the existing time-entry record; extend persistence contract CT2, no new table.",
-        "Tag = first-class entity with its own table + many-to-one/many relation to the time entry; freelancer manages a controlled vocabulary."
+        "Tag = free-text string field added to the existing project record; extend persistence contract CT2, no new table.",
+        "Tag = first-class entity with its own table + many-to-one/many relation to the project; freelancer manages a controlled vocabulary."
       ],
-      "recommended_default": "Tag = free-text string field added to the existing time-entry record; extend persistence contract CT2, no new table.",
+      "recommended_default": "Tag = free-text string field added to the existing project record; extend persistence contract CT2, no new table.",
       "blast_radius": "architecture",
       "disposition": "ask",
       "reason": "Two builds differ in data-model shape (scalar column on existing entity vs new Tag table + FK relationship) and in how the feature plugs into the C1 persistence seam (extend CT2 vs new contract). Data-model + seam fork = architecture."
     },
     {
       "id": "G2",
-      "gap": "Does a time entry carry exactly one label, or multiple tags?",
+      "gap": "Does a project carry exactly one label, or multiple tags?",
       "refs": ["U1", "R11"],
       "seam_ref": null,
       "interpretations": [
-        "Each time entry carries exactly one label (singular, as the CR words it).",
-        "A time entry carries multiple tags."
+        "Each project carries exactly one label (singular, as the CR words it).",
+        "A project carries multiple tags."
       ],
-      "recommended_default": "Each time entry carries exactly one label (singular, as the CR words it).",
+      "recommended_default": "Each project carries exactly one label (singular, as the CR words it).",
       "blast_radius": "scope",
       "disposition": "ask",
       "reason": "CR says 'a label' (singular); the live fork is the optional additional capability of multi-tag riding on the same surface. In/out of multi-tag, structure unchanged either way = scope."
@@ -39,10 +39,10 @@
       "refs": ["U3", "R12"],
       "seam_ref": null,
       "interpretations": [
-        "Filter the time-entry list by a single tag at a time.",
+        "Filter the project list by a single tag at a time.",
         "Filter by multiple tags combined with AND/OR semantics."
       ],
-      "recommended_default": "Filter the time-entry list by a single tag at a time.",
+      "recommended_default": "Filter the project list by a single tag at a time.",
       "blast_radius": "scope",
       "disposition": "ask",
       "reason": "Same query surface either way; what moves is how much filtering capability ships (single vs combinatorial). Pure in/out of capability = scope, not architecture."

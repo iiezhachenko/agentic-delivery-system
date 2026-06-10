@@ -1,0 +1,53 @@
+{
+  "slice_components_ref": ".hld/slices/S5/components.json",
+  "slice_contracts_ref": ".hld/slices/S5/contracts.json",
+  "slice_data_model_ref": ".hld/slices/S5/data-model.json",
+  "slice_nfr_mechanisms_ref": ".hld/slices/S5/nfr-mechanisms.json",
+  "slice_flows_ref": ".hld/slices/S5/flows.json",
+  "slice_test_specs_ref": ".hld/slices/S5/test-specs.json",
+  "slice_deferred_decisions_ref": ".hld/slices/S5/deferred-decisions.json",
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "baseline_map_ref": ".aprd/baseline-map.json",
+  "adr_lock_ref": ".adr/adr.lock",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "rerank_ref": ".roadmap/08-rerank.json",
+  "skeleton_frozen_verified": true,
+  "class": "feature-add",
+  "mode": "increment",
+  "slice_id": "S5",
+  "slice_name": "Tag a client project with a label",
+  "artifacts_reviewed": ["components.json", "contracts.json", "data-model.json", "nfr-mechanisms.json", "flows.json", "test-specs.json", "deferred-decisions.json"],
+  "verdict": "clean",
+  "issues": [],
+  "issue_count": 0,
+  "skeleton_fidelity": {
+    "redrawn_components": [],
+    "reshaped_contracts": [],
+    "re_owned_entities": [],
+    "re_disposed_nfrs": [],
+    "re_authored_contract_tests": [],
+    "re_tested_flows": [],
+    "build_dag_re_emitted": false,
+    "verdict": "extends-not-redraws"
+  },
+  "baseline_fidelity": {
+    "baseline_frozen_artifacts_touched": [],
+    "ct2_extension_additive": true,
+    "verdict": "additive-extension-baseline-intact"
+  },
+  "critique_counts": {
+    "artifacts_reviewed": 7,
+    "issues": 0,
+    "by_category": {
+      "coverage-gap": 0,
+      "ownership-defect": 0,
+      "unmechanized-nfr": 0,
+      "frame-violation": 0,
+      "untestable-contract": 0,
+      "incomplete-flow": 0,
+      "undrained-queue": 0,
+      "skeleton-fidelity": 0,
+      "baseline-fidelity": 0
+    }
+  }
+}

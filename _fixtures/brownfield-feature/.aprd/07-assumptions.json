@@ -10,29 +10,29 @@
     {
       "id": "A14",
       "gap_ref": "G1",
-      "text": "A tag is a free-text string field added to the existing time-entry record; persistence contract CT2 is extended with the new field. No separate Tag table, relation, or controlled vocabulary is introduced.",
+      "text": "A tag is a free-text string field added to the existing project record; persistence contract CT2 is extended with the new field. No separate Tag table, relation, or controlled vocabulary is introduced.",
       "source": "default-applied",
-      "chosen_interpretation": "Tag = free-text string field added to the existing time-entry record; extend persistence contract CT2, no new table.",
+      "chosen_interpretation": "Tag = free-text string field added to the existing project record; extend persistence contract CT2, no new table.",
       "rejected_interpretations": [
-        "Tag = first-class entity with its own table + many-to-one/many relation to the time entry; freelancer manages a controlled vocabulary."
+        "Tag = first-class entity with its own table + many-to-one/many relation to the project; freelancer manages a controlled vocabulary."
       ]
     },
     {
       "id": "A15",
       "gap_ref": "G2",
-      "text": "Each time entry carries exactly one label (singular, as the CR words it). Multiple tags per entry are not supported.",
+      "text": "Each project carries exactly one label (singular, as the CR words it). Multiple tags per project are not supported.",
       "source": "default-applied",
-      "chosen_interpretation": "Each time entry carries exactly one label (singular, as the CR words it).",
+      "chosen_interpretation": "Each project carries exactly one label (singular, as the CR words it).",
       "rejected_interpretations": [
-        "A time entry carries multiple tags."
+        "A project carries multiple tags."
       ]
     },
     {
       "id": "A16",
       "gap_ref": "G3",
-      "text": "Filtering selects the time-entry list by a single tag at a time. Combining multiple tags with AND/OR semantics is not supported.",
+      "text": "Filtering selects the project list by a single tag at a time. Combining multiple tags with AND/OR semantics is not supported.",
       "source": "default-applied",
-      "chosen_interpretation": "Filter the time-entry list by a single tag at a time.",
+      "chosen_interpretation": "Filter the project list by a single tag at a time.",
       "rejected_interpretations": [
         "Filter by multiple tags combined with AND/OR semantics."
       ]
@@ -42,6 +42,6 @@
   "assumption_count": 3,
   "touch_set": [
     { "kind": "net-new", "requirements": ["R11", "R12", "R13"], "note": "tag feature is net-new — introduces net-new slice(s); no existing slice's R*/AC* altered." },
-    { "kind": "seam-extended", "seam": { "at": "C1", "contract_ref": "CT2" }, "note": "tag persistence extends the C1 data_store seam via CT2 (label field added, no new contract); the slice owning CT2 re-enters remaining_sequence for RE-RANK." }
+    { "kind": "seam-extended", "seam": { "at": "C1", "contract_ref": "CT2" }, "note": "tag persistence extends the C1 data_store seam via CT2 (label field added on the project record, no new contract); the slice owning CT2 re-enters remaining_sequence for RE-RANK." }
   ]
 }

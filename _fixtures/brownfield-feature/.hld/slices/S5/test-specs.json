@@ -1,0 +1,79 @@
+{
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "base_test_specs_ref": ".hld/skeleton/test-specs.json",
+  "base_contracts_ref": ".hld/skeleton/contracts.json",
+  "baseline_map_ref": ".aprd/baseline-map.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "slice_flows_ref": ".hld/slices/S5/flows.json",
+  "slice_contracts_ref": ".hld/slices/S5/contracts.json",
+  "skeleton_frozen_verified": true,
+  "class": "feature-add",
+  "mode": "increment",
+  "slice_id": "S5",
+  "slice_name": "Tag a client project with a label",
+  "layer": "design-layer oracle — the slice's flow test (new) + the NEW CT2 label-extension contract test + the frozen contract tests its seams inherit (by reference) + the MANDATORY scoped regression layer (feature-add). SPECS not code.",
+  "flow_tests": [
+    {
+      "id": "T-F5",
+      "target": "F5",
+      "slice": "S5",
+      "path": ["C6", "C3", "C2", "C1"],
+      "via": ["CT9", "CT3", "CT2"],
+      "happy_path": {
+        "assertion": "F5 traverses CT9 (Web Ingress → Project Management set-label dispatch), CT3 (session resolve), and CT2-extension (Project Management → Data Store label persist/read), arriving at acceptance oracles AC11 + AC13.",
+        "asserts_ac": ["AC11", "AC13"]
+      },
+      "failure_path": {
+        "exercises": "CT2:store-unavailable",
+        "expected_terminal_state": "Data Store raises StoreUnavailableError on the label write; Project Management propagates unmodified; Web Ingress returns 503; label not persisted"
+      },
+      "traces": ["R11", "R13", "AC11", "AC13"]
+    }
+  ],
+  "new_contract_tests": [
+    {
+      "id": "T-CT2-LABEL",
+      "target": "CT2",
+      "between": ["C3", "C1"],
+      "contract_kind": "shared_data",
+      "scope": "extension-only",
+      "assertion": "NEW additive label-field assertion on the CT2 extension (A14): set_label persists the free-text label on the existing project record and reads it back; store-unavailable / constraint-violation propagate unmodified. The inherited CT2 BASE shape test (S4) is NOT re-authored (H14).",
+      "traces": ["R11", "R13"]
+    }
+  ],
+  "inherited_contract_tests": [
+    { "id": "T-CT2", "target": "CT2", "between": ["C3", "C1"], "contract_kind": "shared_data", "scope": "base-shape", "source_ref": ".build/slices/S4/oracle/contract/test_CT2.py" },
+    { "id": "T-CT3", "target": "CT3", "between": ["C3", "C2"], "contract_kind": "sync_api", "source_ref": ".build/slices/S4/oracle/contract/test_CT3.py" },
+    { "id": "T-CT9", "target": "CT9", "between": ["C6", "C3"], "contract_kind": "sync_api", "source_ref": ".build/slices/S4/oracle/contract/test_CT9.py" }
+  ],
+  "class_ext_specs": [
+    {
+      "layer": "regression",
+      "scope": "touched-surface + seams",
+      "asserts": ["AC6"],
+      "source_suites": [".build/skeleton/oracle/", ".build/slices/S4/oracle/"],
+      "basis": "REGRESSION_GUARD AC6 (create+manage projects, parent of the tagged project) + integration_seam C1/CT2 (label additive on the project record); NOT the whole inherited suite (Risk R4)."
+    }
+  ],
+  "skeleton_fidelity": {
+    "inherited_contract_tests": ["T-CT2", "T-CT3", "T-CT9"],
+    "re_authored_contract_tests": [],
+    "re_tested_flows": [],
+    "build_dag_re_emitted": false,
+    "verdict": "inherits-frozen-oracle"
+  },
+  "coverage": {
+    "touched_contracts": ["CT2", "CT3", "CT9"],
+    "contracts_covered": ["CT2", "CT3", "CT9"],
+    "contract_orphans": [],
+    "slice_flow": "F5",
+    "flow_tested": "F5",
+    "asserted_acs": ["AC11", "AC13"],
+    "regression_asserts": ["AC6"]
+  },
+  "structural_defects": [],
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "test_counts": { "flow_tests": 1, "new_contract_tests": 1, "inherited_contract_tests": 3, "regression_layers": 1 }
+}

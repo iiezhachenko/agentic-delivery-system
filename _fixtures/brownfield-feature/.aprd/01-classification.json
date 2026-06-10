@@ -6,7 +6,7 @@
   "subrequests": [
     {
       "id": "SR1",
-      "text": "Add the ability to tag each time entry with a label, and filter the time-entry list by tag, in the existing freelancer time-logging app.",
+      "text": "Add the ability to tag each client project with a label, and filter the project list by tag, in the existing freelancer time-tracking app.",
       "class": "feature-add",
       "confidence": 0.93,
       "reason": "'app you already built' + 'add the ability to ...' + 'Everything else stays as-is' = new behavior into an existing codebase. One atomic feature (tag + filter, same surface, same system), not compound."

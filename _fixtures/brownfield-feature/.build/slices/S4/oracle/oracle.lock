@@ -1,0 +1,31 @@
+{
+  "artifact": ".build/slices/S4/oracle/",
+  "version": "v1",
+  "content_sha256": "d8e4f1a2b7c3059614e3d2c1b0a9f8e7d6c5b4a3928170f6e5d4c3b2a1908e4d",
+  "signer": "test-author:freelancer-time-tracking",
+  "signed_at": "2026-06-09T00:00:00Z",
+  "status": "frozen",
+  "starts_red": true,
+  "builder_may_not_edit": true,
+  "mode": "slice-build",
+  "class": "greenfield",
+  "slice_id": "S4",
+  "built_against": {
+    "skeleton_oracle_lock": ".build/skeleton/oracle/oracle.lock",
+    "skeleton_lock": ".hld/skeleton.lock",
+    "adr_lock": ".adr/adr.lock",
+    "aprd_lock": ".aprd/aprd.lock",
+    "slice_build_plan": ".build/slices/S4/build-plan.json"
+  },
+  "manifest": "oracle.json",
+  "test_files": [
+    "contract/test_CT2.py",
+    "contract/test_CT3.py",
+    "contract/test_CT9.py",
+    "flow/test_F4.py",
+    "acceptance/visible/test_AC6.py",
+    "acceptance/held_out/test_AC6.py",
+    "conftest.py"
+  ],
+  "mutation_certified": ["OCT-CT3", "OA-AC6"]
+}

@@ -1,0 +1,69 @@
+{
+  "components_ref": ".hld/skeleton/components.json",
+  "slice_components_ref": ".hld/slices/S5/components.json",
+  "base_skeleton_contracts_ref": ".hld/skeleton/contracts.json",
+  "baseline_map_ref": ".aprd/baseline-map.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "skeleton_frozen_verified": true,
+  "class": "feature-add",
+  "mode": "increment",
+  "slice_id": "S5",
+  "slice_name": "Tag a client project with a label",
+  "extended_components": ["C3"],
+  "touched_contracts": [
+    {
+      "id": "CT2",
+      "between": ["C3", "C1"],
+      "kind": "shared_data",
+      "base_shape_ref": ".hld/skeleton/contracts.json#CT2",
+      "extension": "Additive: a free-text `label` field on the existing project record (E8, A14). Base CT2 shape (E2/E5/E6/E7 create/read/update/delete) UNCHANGED and inherited frozen. set-label writes the label via the existing update surface; list reads it back. No new contract; C1 internals untouched.",
+      "extended_failure_modes": [
+        "store-unavailable — PostgreSQL unreachable; label write fails, no partial record (inherited CT2 failure mode, applies to the label write)",
+        "constraint-violation — label write violates a store constraint; write rejected (inherited CT2 failure mode)"
+      ],
+      "traces": ["R11", "R13"],
+      "honors_adr": ["ADR-0003"],
+      "honors_inv": ["INV3", "INV4", "INV6"],
+      "role": "extended-seam",
+      "status": "established",
+      "realizes_slice_requirements": ["R11", "R13"]
+    },
+    {
+      "id": "CT3",
+      "between": ["C3", "C2"],
+      "kind": "sync_api",
+      "base_shape_ref": ".hld/skeleton/contracts.json#CT3",
+      "role": "reused-seam",
+      "status": "inherited-frozen",
+      "realizes_slice_requirements": ["R11"],
+      "note": "Reused unchanged: C3 resolves the authenticated session before writing the label, scoping it to the owning freelancer's project."
+    },
+    {
+      "id": "CT9",
+      "between": ["C6", "C3"],
+      "kind": "sync_api",
+      "base_shape_ref": ".hld/skeleton/contracts.json#CT9",
+      "role": "reused-seam",
+      "status": "inherited-frozen",
+      "realizes_slice_requirements": ["R11"],
+      "note": "Reused unchanged: C6 dispatches the new additive set-label request into C3; same MPA/SSR dispatch shape."
+    }
+  ],
+  "new_contracts": [],
+  "slice_coverage": {
+    "extended_seam_edges": ["C3->C1"],
+    "reused_seam_edges": ["C3->C2", "C6->C3"],
+    "edges_contracted": ["C3->C1", "C3->C2", "C6->C3"],
+    "edge_orphans": [],
+    "slice_requirements": ["R11", "R13"],
+    "requirements_traced": ["R11", "R13"],
+    "requirement_orphans": []
+  },
+  "skeleton_fidelity": { "reshaped_contracts": [], "verdict": "extends-not-reshapes" },
+  "baseline_fidelity": { "baseline_contracts_reshaped": [], "verdict": "extends-CT2-additively-no-reshape" },
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "increment_counts": { "touched_contracts": 3, "extended_contracts": 1, "new_contracts": 0, "extended_seam_edges": 1 }
+}

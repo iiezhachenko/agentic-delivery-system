@@ -1,0 +1,53 @@
+{
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "adr_log_ref": ".adr/log/",
+  "base_nfr_ref": ".hld/skeleton/nfr-mechanisms.json",
+  "baseline_map_ref": ".aprd/baseline-map.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "slice_components_ref": ".hld/slices/S5/components.json",
+  "slice_contracts_ref": ".hld/slices/S5/contracts.json",
+  "skeleton_frozen_verified": true,
+  "class": "feature-add",
+  "mode": "increment",
+  "slice_id": "S5",
+  "slice_name": "Tag a client project with a label",
+  "extended_components": ["C3"],
+  "touched_components": ["C3", "C1", "C2", "C6"],
+  "inherited_nfrs": [
+    {
+      "nfr_ref": "A13",
+      "category": "scale",
+      "disposition": "satisfied-by-frame",
+      "mechanism_ref": null,
+      "frame_basis": ["ADR-0001", "ADR-0006", "INV6"],
+      "realized_by": [],
+      "scope_role": "inherited-governing",
+      "governs_basis": "Topology-wide frame property. The additive label write rides the single-server synchronous monolith at A13 scale; no scale mechanism permitted or needed."
+    },
+    {
+      "nfr_ref": "A2",
+      "category": "security",
+      "disposition": "satisfied-by-frame",
+      "mechanism_ref": null,
+      "frame_basis": ["ADR-0005", "INV1"],
+      "realized_by": ["C2"],
+      "scope_role": "inherited-governing",
+      "governs_basis": "C2 touched: C3 calls C2 via CT3 to resolve the session and scope the label write to the owning freelancer — A2/INV1 security frame governs this reused seam (label field itself is non-auth data)."
+    }
+  ],
+  "slice_nfr_queue": [],
+  "resolutions": [],
+  "new_mechanisms": [],
+  "slice_coverage": {
+    "slice_requirements": ["R11", "R13"],
+    "requirements_with_nfr": ["R11"],
+    "requirements_no_nfr_footprint": ["R13"],
+    "requirement_orphans": []
+  },
+  "frame_fidelity": { "re_disposed_nfrs": [], "re_realized_nfrs": [], "verdict": "extends-not-re-disposes" },
+  "unmet": [],
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "increment_counts": { "inherited_nfrs": 2, "slice_nfr_queue": 0, "new_mechanisms": 0, "unmet": 0 }
+}

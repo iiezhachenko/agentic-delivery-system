@@ -1,0 +1,120 @@
+{
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "adr_log_ref": ".adr/log/",
+  "components_ref": ".hld/skeleton/components.json",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "lock_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton",
+  "skeleton_id": "S1",
+  "nfr_inventory": [
+    {
+      "nfr_ref": "A13",
+      "category": "scale",
+      "statement": "The system is built for small personal-tool scale (tens of users, low concurrency). A single-server deployment with a synchronous request cycle is sufficient; no background job queues, horizontal scaling, or caching layer is required.",
+      "disposition": "satisfied-by-frame",
+      "mechanism_ref": null,
+      "frame_basis": ["ADR-0001", "ADR-0006", "INV6"],
+      "realized_by": [],
+      "defer_to": null,
+      "rationale": "ADR-0001 (flat monolith) + ADR-0006 (single-instance PaaS) + INV6 (single-server synchronous mandate) are the direct architectural expression of A13; no additional mechanism needed or permitted."
+    },
+    {
+      "nfr_ref": "latency",
+      "category": "latency",
+      "statement": "No latency or response-time target stated in aPRD.",
+      "disposition": "not-applicable",
+      "mechanism_ref": null,
+      "frame_basis": [],
+      "realized_by": [],
+      "defer_to": null,
+      "rationale": "aPRD contains no C*/A* specifying a latency SLA; category is aPRD-silent and genuinely not required at A13 personal-tool scale."
+    },
+    {
+      "nfr_ref": "availability",
+      "category": "availability",
+      "statement": "No availability or uptime SLA stated in aPRD.",
+      "disposition": "not-applicable",
+      "mechanism_ref": null,
+      "frame_basis": [],
+      "realized_by": [],
+      "defer_to": null,
+      "rationale": "aPRD contains no C*/A* specifying an uptime target; category is aPRD-silent. PaaS best-effort uptime (ADR-0006) is adequate for personal-tool use."
+    },
+    {
+      "nfr_ref": "A2",
+      "category": "security",
+      "statement": "Authentication delegates to an external OAuth or social-login provider (e.g. Google or GitHub). The system stores only the provider token and user profile reference; it does not store hashed passwords or manage password resets internally.",
+      "disposition": "satisfied-by-frame",
+      "mechanism_ref": null,
+      "frame_basis": ["ADR-0005", "INV1"],
+      "realized_by": ["C2"],
+      "defer_to": null,
+      "rationale": "ADR-0005 (Google OAuth 2.0 delegation) + INV1 (no stored credentials invariant) structurally satisfy A2; C2 (Identity & Auth) is the realizing component."
+    },
+    {
+      "nfr_ref": "A9",
+      "category": "compliance",
+      "statement": "No specific compliance requirements apply. Standard data practices are used; no mandated audit logs, right-to-erasure data model, or data-residency hosting constraint.",
+      "disposition": "not-applicable",
+      "mechanism_ref": null,
+      "frame_basis": ["INV7"],
+      "realized_by": [],
+      "defer_to": null,
+      "rationale": "A9 explicitly waives all compliance requirements; INV7 encodes this as a cross-slice invariant — no audit logs, erasure capability, or compliance mechanism needed."
+    },
+    {
+      "nfr_ref": "data-residency",
+      "category": "data-residency",
+      "statement": "No data-residency hosting constraint applies (waived by A9).",
+      "disposition": "not-applicable",
+      "mechanism_ref": null,
+      "frame_basis": ["INV7"],
+      "realized_by": [],
+      "defer_to": null,
+      "rationale": "A9 explicitly waives data-residency hosting constraints; INV7 confirms no slice requires geographic data placement controls."
+    },
+    {
+      "nfr_ref": "C1",
+      "category": "delivery-medium",
+      "statement": "The product must be a web application.",
+      "disposition": "satisfied-by-frame",
+      "mechanism_ref": null,
+      "frame_basis": ["ADR-0001", "ADR-0004", "ADR-0006"],
+      "realized_by": ["C6"],
+      "defer_to": null,
+      "rationale": "ADR-0001 (single-deployment monolith), ADR-0004 (MPA/SSR), and ADR-0006 (PaaS HTTPS endpoint) together satisfy C1; C6 (Web Ingress) is the realizing component at the ingress seam."
+    },
+    {
+      "nfr_ref": "C2",
+      "category": "timeline",
+      "statement": "The system should be live within approximately two months.",
+      "disposition": "satisfied-by-frame",
+      "mechanism_ref": null,
+      "frame_basis": ["ADR-0001", "ADR-0006"],
+      "realized_by": [],
+      "defer_to": null,
+      "rationale": "ADR-0001 (flat monolith, minimal scaffolding) and ADR-0006 (PaaS, zero server-config cost) were both chosen explicitly to satisfy C2's two-month constraint; timeline is a topology-wide property with no single owning component."
+    }
+  ],
+  "mechanisms": [],
+  "coverage": {
+    "nfrs_in_scope": ["A13", "latency", "availability", "A2", "A9", "data-residency", "C1", "C2"],
+    "mechanized": [],
+    "satisfied_by_frame": ["A13", "A2", "C1", "C2"],
+    "deferred": [],
+    "not_applicable": ["latency", "availability", "A9", "data-residency"],
+    "all_nfrs_dispositioned": true
+  },
+  "unmet": [],
+  "frame_conflicts": [],
+  "nfr_counts": {
+    "in_scope": 8,
+    "mechanized": 0,
+    "satisfied_by_frame": 4,
+    "deferred": 0,
+    "not_applicable": 4,
+    "unmet": 0
+  }
+}

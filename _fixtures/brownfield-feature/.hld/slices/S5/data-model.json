@@ -1,0 +1,76 @@
+{
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "base_data_model_ref": ".hld/skeleton/data-model.json",
+  "baseline_map_ref": ".aprd/baseline-map.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "slice_components_ref": ".hld/slices/S5/components.json",
+  "slice_contracts_ref": ".hld/slices/S5/contracts.json",
+  "skeleton_frozen_verified": true,
+  "class": "feature-add",
+  "mode": "increment",
+  "slice_id": "S5",
+  "slice_name": "Tag a client project with a label",
+  "extended_components": ["C3"],
+  "touched_components": ["C3", "C1", "C2", "C6"],
+  "persistence": {
+    "inherited_from": ".hld/skeleton/data-model.json",
+    "adr_refs": ["ADR-0003"],
+    "store": "Relational database — PostgreSQL (managed)",
+    "note": "single frozen store; slice introduces no new persistence component — adds one additive scalar field to the existing project record (A14)"
+  },
+  "slice_entities": [
+    {
+      "id": "E8",
+      "name": "Tag",
+      "owner": "C3",
+      "persisted": true,
+      "role": "owned-introduced",
+      "status": "established",
+      "via_contracts": ["CT2"],
+      "representation": "Free-text string `label` field on the existing project record (E2). NOT a separate table/relation (A14). At most one label per project (A15).",
+      "relationships": [
+        { "to": "E2", "cardinality": "one-to-one", "basis": "Each project carries at most one label as an additive scalar field on its own record; A14/A15." }
+      ],
+      "field_schema_deferred_to": "S5",
+      "field_schema_owned_here": true,
+      "honors_inv": ["INV3", "INV4"],
+      "traces": ["R11", "R13"],
+      "in_scope_basis": "C3 (extended) owns E8 as an additive label field on E2 via the CT2 extension (shared_data C3→C1 read-write); sole writer confirmed"
+    },
+    {
+      "id": "E2",
+      "name": "Client Project",
+      "owner": "C3",
+      "persisted": true,
+      "role": "referenced-extended",
+      "status": "established",
+      "via_contracts": ["CT2"],
+      "relationships": [
+        { "to": "E8", "cardinality": "one-to-one", "basis": "The project record gains one additive label field (E8); base E2 schema (S4) unchanged." }
+      ],
+      "field_schema_deferred_to": "S4",
+      "field_schema_owned_here": false,
+      "honors_inv": ["INV2", "INV3", "INV4"],
+      "traces": ["R11", "R13"],
+      "in_scope_basis": "E2 base schema established in S4 (frozen); this slice adds only the additive label field, base fields untouched"
+    }
+  ],
+  "new_entities": ["E8"],
+  "slice_coverage": {
+    "slice_requirements": ["R11", "R13"],
+    "requirements_with_data": ["R11", "R13"],
+    "requirements_no_data_footprint": [],
+    "requirement_orphans": []
+  },
+  "ownership_fidelity": {
+    "re_owned_entities": [],
+    "remodeled_entities": [],
+    "verdict": "extends-not-re-models"
+  },
+  "baseline_fidelity": { "baseline_entities_remodeled": [], "verdict": "additive-field-on-E2-no-remodel" },
+  "ownership_defects": [],
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "increment_counts": { "slice_entities": 2, "owned_introduced": 1, "referenced_extended": 1, "new_entities": 1, "field_schemas_owned_here": 1 }
+}

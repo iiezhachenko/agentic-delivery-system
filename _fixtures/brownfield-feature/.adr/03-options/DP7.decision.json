@@ -1,0 +1,59 @@
+{
+  "id": "DP7",
+  "decision": "Which OAuth provider type or set of providers should the system support for freelancer authentication?",
+  "category": "Cross-cutting",
+  "forced_by": ["R5", "A2", "AC5"],
+  "cut_ref": "FD2",
+  "options_ref": "03-options/DP7.json",
+  "grounding_source": "reasoned",
+  "evaluation": [
+    {
+      "option": "Single OAuth provider — Google OAuth 2.0",
+      "assessment": "Fully compliant with INV1 (OAuth delegation, no stored passwords). A2 requires OAuth delegation — Google OAuth 2.0 satisfies this directly. AC5 names Google explicitly ('e.g. Google or GitHub') as a compliant provider; selecting Google is a direct path to closing the acceptance criterion. Single provider means one redirect URI, one callback handler, one token shape — the skeleton's FD2 authentication seam is the simplest possible implementation. Under C2, single-provider integration is concretely less setup cost than multi-provider routing. A7 (single-freelancer, single account) means provider diversity adds no per-user value — one provider per deployment is operationally correct at this scale. The cost that the option notes (freelancers without a Google account cannot authenticate) is real; however, the aPRD names Google as an exemplar in AC5, meaning a Google-only deployment is within the contract's scope. The contract does not rank providers by account coverage — that ranking would be recalled market data. The contract is indifferent between Google and GitHub as single-provider picks; both are AC5-compliant.",
+      "decisive_factors": ["R5", "A2", "AC5", "INV1", "C2", "A7"]
+    },
+    {
+      "option": "Single OAuth provider — GitHub OAuth 2.0",
+      "assessment": "Fully compliant with INV1. A2 requires OAuth delegation — GitHub OAuth 2.0 satisfies this directly. AC5 explicitly names GitHub ('e.g. Google or GitHub') as a compliant provider; selecting GitHub is an equally direct path to AC5. Single provider means the same low integration surface area as Google — one redirect URI, one callback handler, one token shape. Under C2 and A7, single-provider is the correct scale for this deployment. The cost that the option notes (non-technical freelancers may not hold GitHub accounts) is real; however, the aPRD does not state or imply any user-demographic requirement beyond R5's generic 'freelancer can create and authenticate an account'. The contract does not rank providers by demographic reach — that is recalled market data. The contract is indifferent between GitHub and Google as single-provider picks; both satisfy R5/A2/AC5/INV1 identically.",
+      "decisive_factors": ["R5", "A2", "AC5", "INV1", "C2", "A7"]
+    },
+    {
+      "option": "Configurable multi-provider OAuth 2.0 / OIDC abstraction",
+      "assessment": "Compliant with INV1 (still OAuth delegation, no stored passwords). A6 (no vendor lock-in) is a strength argument — provider-neutral design allows switching with config changes. However, A6 applies to hosting (the assumption gap it closes is G6: 'no specific hosting provider mandated'); applying it to OAuth provider selection extends it beyond its stated scope. The concrete cost under C2: multi-provider routing logic, provider-selection UI, per-provider configuration management, and per-provider client ID/secret pairs all must be built and tested. A7 states each account belongs to exactly one freelancer with no multi-user membership — configuring multiple providers for one user adds operational complexity (which-provider-was-used state in the identity record) with no A7-grounded benefit. A13 (personal-tool scale, single user) means the deployment will activate at most one provider; the multi-provider abstraction's flexibility is never exercised in practice. The multi-provider option's strengths (provider neutrality, configuration flexibility) are real but not activated by any R*, AC*, or A* force at this scope and scale.",
+      "decisive_factors": ["R5", "A2", "AC5", "C2", "A7", "A13", "INV1"]
+    }
+  ],
+  "decision_made": "Single OAuth provider — Google OAuth 2.0",
+  "rationale": "All three options satisfy INV1 (OAuth delegation, no stored passwords). The multi-provider option is ruled out by C2 and A7/A13: multi-provider routing logic, provider-selection UI, and per-provider secret management consume C2 timeline for flexibility that A7 (single freelancer, single account) and A13 (personal-tool scale) mean will never be exercised — one provider is active per deployment, making the abstraction complexity unjustified by any contract force. Between the two single-provider options (Google and GitHub), the contract is genuinely indifferent: AC5 names both as acceptable examples ('e.g. Google or GitHub'), and no R*, AC*, A*, or INV* in the aPRD ranks one over the other on any force. Both satisfy R5/A2/AC5/INV1 identically; both have the same integration surface area under C2; both are single-vendor OAuth 2.0 dependencies of equal depth. The aPRD raises no force that separates them — demographic reach or account prevalence are recalled market facts, not contract forces. Google OAuth 2.0 is chosen as a default among equals: AC5 names it first, it is the OIDC-standard provider (OpenID Connect layer is more formally standardised in the Google implementation), and the option is explicitly endorsed as an example in the acceptance criterion. The contract does not distinguish the two; this is an honest default pick among contract-equivalent options.",
+  "rejected": [
+    {
+      "option": "Single OAuth provider — GitHub OAuth 2.0",
+      "why_rejected": "Equivalent under the contract on R5/A2/AC5/INV1; Google OAuth 2.0 chosen as default among equals. AC5 names both providers as interchangeable examples; no contract force distinguishes them. The difference is below the contract's resolution."
+    },
+    {
+      "option": "Configurable multi-provider OAuth 2.0 / OIDC abstraction",
+      "why_rejected": "Multi-provider routing logic, provider-selection UI, and per-provider secret management are concrete C2 build costs. A7 (single freelancer, single account per deployment) and A13 (personal-tool scale) mean the multi-provider flexibility is never exercised in practice — one provider is active. The abstraction adds complexity with no R*/AC* force activating its benefit at this scope; ruled out by C2 weighted against A7 and A13."
+    }
+  ],
+  "consequences": {
+    "positive": [
+      "Single redirect URI, single callback handler, single token shape — the FD2 skeleton authentication seam (AC5 OAuth round-trip) is implemented with minimum surface area under C2.",
+      "Google's OIDC layer (OpenID Connect) provides a standardised ID token format, simplifying provider token storage (A2: system stores only the provider token and user profile reference) for the E1 Freelancer identity record.",
+      "No provider-selection UI required — skeleton UI is simpler (one 'Sign in with Google' button); session establishment (AC5) requires fewer moving parts."
+    ],
+    "accepted_cost": [
+      "Freelancers without a Google account cannot authenticate — the system is inaccessible to them without a provider change.",
+      "Vendor dependency on Google's OAuth 2.0 service availability and consent-screen policy; a Google policy change (scope, consent, branding) directly affects all users.",
+      "Adding a second provider later (e.g., GitHub) requires refactoring the provider-specific callback and identity-record paths if built tightly around Google's endpoints."
+    ],
+    "follow_on": [
+      "DP2 (tech stack): Python/Django with social-auth-app-django or Authlib supports Google OAuth 2.0 directly; the FD2 seam closes with library configuration, not custom OAuth code.",
+      "DP4 (persistence): the E1 Freelancer identity record stores Google's provider token and OIDC sub (user profile reference) per A2; schema columns for provider_id, provider_token needed at skeleton time.",
+      "INV1: the pick is the direct expression of INV1 — OAuth delegation, no stored passwords or password reset flows. No slice may later introduce Google password-based login as an alternative."
+    ]
+  },
+  "traces": ["R5", "A2", "AC5", "INV1", "C2", "A7", "A13"],
+  "degenerate_forced": false,
+  "degenerate_reason": null,
+  "lane_note": "Decision content for SYNTHESIZE-ADR (role 6) to render + RECONCILE (role 5) to coherence-check. EVALUATE-DECIDE picks; it does not assign an ADR id, reconcile cross-decision conflicts, or check coverage."
+}

@@ -1,0 +1,61 @@
+{
+  "id": "DP4",
+  "decision": "Which datastore paradigm and technology should be used to persist all application state (freelancer identity, projects, time entries, invoices)?",
+  "category": "Persistence",
+  "forced_by": ["R7", "E1", "A2"],
+  "cut_ref": "FD3",
+  "options_ref": "03-options/DP4.json",
+  "grounding_source": "reasoned",
+  "evaluation": [
+    {
+      "option": "Relational database — PostgreSQL",
+      "assessment": "The aPRD entity model (E1–E7) is explicitly relational: Freelancer owns Client Projects (via foreign key), Client Projects own Time Entries, Time Entries aggregate into Invoices. PostgreSQL's foreign-key constraints, SQL joins, and aggregate functions (SUM, GROUP BY) directly satisfy R7 (time entry persistence and association), R8 (invoice line-item aggregation), R9 (currency display per entry and total), R10 (rate-derived totals), AC7 (entry survives navigation), AC8 (PDF line items), AC9 (currency alongside amounts), AC10 (rate × hours = line total). INV3 (project-level currency) and INV4 (project-level rate) are schema-level foreign-key enforcements in PostgreSQL — no application-layer discipline required. ACID transactions guarantee the persistence seam (FD3) is durable. Broad PaaS/VPS managed offering support (Render Postgres, Supabase, Railway) maintains A6. The cost is a separate database process and managed-service hosting overhead; at A13 scale these are real but minor — managed Postgres costs $5–10/month on Render/Railway. Schema migration management (Alembic for Django) adds one deployment step per slice. Compatible with DP2 Django ORM natively.",
+      "decisive_factors": ["R7", "R8", "R9", "R10", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "A2", "A6", "A13", "AC7", "INV3", "INV4"]
+    },
+    {
+      "option": "Relational database — SQLite (embedded)",
+      "assessment": "SQLite satisfies the same relational model as PostgreSQL: foreign keys, SQL joins, and aggregate functions address R7, R8, R9, R10, AC7, AC8, AC9, AC10. INV3 and INV4 are equally expressible as schema constraints. Zero separate database process: the application and data travel as one unit, simplifying A13-scale deployment and local development. Compatible with Django ORM (minimal config change vs PostgreSQL). The critical cost under DP10 interaction: several PaaS platforms (Render, Railway on basic tiers) use ephemeral filesystems — SQLite requires a persistent-volume mount for data to survive redeploy. If DP10 picks PaaS without volume support, SQLite data is lost on each deploy; this is a deployment-configuration constraint the team must resolve, not an INV breach, but it is a concrete operational risk at C2 timeline. Write concurrency ceiling (single writer) is not material at A13 scale (INV6). Migration to PostgreSQL later if scale grows is non-trivial but within the aPRD's 'may never happen' assumption envelope.",
+      "decisive_factors": ["R7", "A6", "A13", "C2", "INV3", "INV4", "INV6"]
+    },
+    {
+      "option": "Document store — MongoDB",
+      "assessment": "MongoDB can store the freelancer profile and project documents, satisfying A2/E1 at a basic level. The critical misfit is the aPRD entity model: E1–E7 is explicitly relational — freelancers own projects own time entries with foreign-key associations. MongoDB has no native referential integrity; the invariant that every Time Entry (E3) is associated with a valid Client Project (E2) and Freelancer (E1) per R7/AC7 must be enforced at the application layer. INV3 (project-level currency) and INV4 (project-level rate) are relational invariants; in a document store they require application-layer discipline rather than schema-level constraints — a leak in either produces silent data corruption. R8/AC8 (invoice aggregation: SUM of line totals for a project + month) requires a MongoDB aggregation pipeline rather than a single SQL query — materially higher implementation complexity for S3. The schema-flexibility benefit (no formal migrations) is a real strength during early development but does not address any force the aPRD raises; A9 (no compliance requirements) means no regulatory driver for schema audit trails that would differentiate document from relational. No INV breach — MongoDB is deployable on a single server (INV6) — but the relational mismatch against E1–E7, R7, R8, INV3, INV4 is the decisive unfavourable factor.",
+      "decisive_factors": ["R7", "R8", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "INV3", "INV4", "AC7"]
+    }
+  ],
+  "decision_made": "Relational database — PostgreSQL",
+  "rationale": "The aPRD entity model (E1–E7) is explicitly relational, and the forces R7, R8, R9, R10, INV3, and INV4 together require schema-level foreign-key integrity, SQL aggregate functions, and project-level currency/rate constraints. PostgreSQL satisfies all of these directly; SQLite satisfies them equally at the SQL level. The discriminating force between the two relational options is the DP10 interaction: PaaS platforms (the natural C2-aligned deployment target) frequently use ephemeral filesystems on basic tiers, requiring explicit persistent-volume configuration for SQLite. PostgreSQL managed add-ons (Render Postgres, Railway Postgres, Supabase) are available on the same platforms with no volume-mount concern — the relational persistence seam (FD3) closes with one managed-service provisioning step rather than a volume-configuration step that may not be available on all DP10 candidates. A6 is satisfied by PostgreSQL's multi-platform managed offerings. At A13 scale the marginal cost of a managed Postgres instance versus embedded SQLite is small and acceptable. The Django ORM (DP2 pick) integrates with PostgreSQL natively with no adapter overhead. MongoDB is ruled out by R7/INV3/INV4/R8: the aPRD's relational entity model requires schema-level integrity that a document store cannot provide without application-layer duplication of constraint logic.",
+  "rejected": [
+    {
+      "option": "Relational database — SQLite (embedded)",
+      "why_rejected": "SQLite satisfies the same relational contract (R7, R8, R9, R10, INV3, INV4) but introduces a concrete deployment risk: PaaS platforms (the C2-aligned deployment target) frequently use ephemeral filesystems on basic tiers, requiring persistent-volume configuration that may not be available or requires additional setup — a configuration burden that does not exist with a managed PostgreSQL add-on. This concrete deployment-path constraint under C2 tips the choice to PostgreSQL, whose managed offerings on the same platforms eliminate the volume-mount concern."
+    },
+    {
+      "option": "Document store — MongoDB",
+      "why_rejected": "The aPRD entity model (E1–E7) is explicitly relational. MongoDB provides no native referential integrity, so the R7 requirement (time entries associated with their project and freelancer) and AC7 (entry survives navigation) must be enforced at the application layer — a source of silent data-integrity failures if missed. INV3 (project-level currency) and INV4 (project-level rate) are schema-level relational invariants; enforcing them in a document store requires application-layer discipline that schema constraints automatically provide. R8/AC8's invoice aggregation requires a MongoDB aggregation pipeline rather than a SQL query — higher S3 implementation complexity with no contract-grounded benefit. Ruled out by R7, R8, INV3, INV4 combined: the relational mismatch is fundamental to the aPRD's data model, not incidental."
+    }
+  ],
+  "consequences": {
+    "positive": [
+      "Schema-level foreign-key integrity enforces the E1→E2→E3→E4 entity chain, satisfying R7 and AC7 with no application-layer redundancy.",
+      "SQL aggregate functions (SUM, GROUP BY) directly support invoice line-item totalling (R8, AC8, R9, AC9, R10, AC10) in S3 without application-layer reduce logic.",
+      "ACID transactions guarantee the persistence seam (FD3) is durable — provider token and user profile reference survive the OAuth callback per A2.",
+      "PostgreSQL managed add-ons on PaaS platforms (Render, Railway) require no volume-mount configuration, simplifying DP10 deployment under C2.",
+      "Django ORM (DP2 pick) integrates with PostgreSQL natively via Alembic/Django migrations — schema evolution per slice is managed."
+    ],
+    "accepted_cost": [
+      "Two-process deployment: application server + managed Postgres instance; slightly more hosting cost than embedded SQLite at A13 scale.",
+      "Schema migration management (Alembic or Django migrations) adds one deployment step per slice that embedded SQLite would not require for simple cases.",
+      "Upfront schema design for the FD3 skeleton seam (Freelancer identity table) must be committed before the skeleton can exercise persistence."
+    ],
+    "follow_on": [
+      "DP10 (deployment): the PostgreSQL pick eliminates the PaaS ephemeral-filesystem concern for SQLite; DP10 should prefer PaaS platforms that provide managed Postgres add-ons (Render, Railway, Fly.io with attached Postgres) over bare VPS self-install.",
+      "S4 (project management slice): Client Project, Client, and Currency schema columns must be designed at S4 time (deferred per cut); the PostgreSQL relational model is ready to receive them.",
+      "S3 (invoice export slice): invoice aggregation queries are SQL GROUP BY + SUM against the time-entry table — the PostgreSQL pick makes this the natural implementation path; no aggregation pipeline design work is required."
+    ]
+  },
+  "traces": ["R7", "R8", "R9", "R10", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "A2", "A6", "A13", "C2", "AC7", "AC8", "AC9", "AC10", "INV3", "INV4", "INV6"],
+  "degenerate_forced": false,
+  "degenerate_reason": null,
+  "lane_note": "Decision content for SYNTHESIZE-ADR (role 6) to render + RECONCILE (role 5) to coherence-check. EVALUATE-DECIDE picks; it does not assign an ADR id, reconcile cross-decision conflicts, or check coverage."
+}

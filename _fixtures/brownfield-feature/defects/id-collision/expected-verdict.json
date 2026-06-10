@@ -1,0 +1,16 @@
+{
+  "defect": "id-collision",
+  "invariant": "BF3 — new IDs must continue strictly above the baseline high-water; no reuse of a baseline index",
+  "seed": [
+    "overlay defects/id-collision/aprd.v2.collision.frozen.md → .aprd/aprd.v2.frozen.md",
+    "run SYNTHESIZE/VERIFY (P2+P3 verify-only) against baseline-map id_high_water"
+  ],
+  "load_bearing_assertion": "Verifier detects new R10/AC10 collide with baseline R10/AC10 (high_water R:10, AC:10). Verdict 'rejected'/'aprd_defect'. Golden uses R11/R13 + AC11/AC13 — all strictly above high-water, zero collisions.",
+  "expected_verdict": "rejected",
+  "expected_signal": {
+    "id_threading.collisions": ["R10", "AC10"],
+    "id_threading.verdict": "collision",
+    "basis": "baseline-map.id_high_water { R:10, AC:10 } — new R10/AC10 reuse a baseline index"
+  },
+  "separates_from_golden_by": "id_threading.collisions (empty in golden / [R10,AC10] here) — the BF3 invariant, not cosmetics."
+}

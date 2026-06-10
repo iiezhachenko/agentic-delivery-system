@@ -16,30 +16,32 @@
   "class": "feature-add",
   "mode": "slice-build",
   "slice_id": "S5",
-  "slice_name": "Tag a time entry with a label",
+  "slice_name": "Tag a client project with a label",
   "flow": "F5",
-  "slice_path": ["C6", "C4", "C2", "C1"],
+  "slice_path": ["C6", "C3", "C2", "C1"],
   "prior_built_components": ["C1", "C2", "C3", "C6"],
   "verification_method": "static-trace",
   "inherited_oracle": {
     "skeleton_oracle_ref": ".build/skeleton/oracle/oracle.json",
     "skeleton_integration_ref": ".build/skeleton/integration-record.json",
-    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5"],
+    "slice_s4_oracle_ref": ".build/slices/S4/oracle/oracle.json",
+    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5", "OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
     "frozen_verified": true,
-    "re_run": false
+    "re_run": false,
+    "note": "Skeleton + S4 greens frozen-verified at their build; inherited by reference (H14). Not re-run here, EXCEPT the scoped regression layer (AC6) which re-runs by reference under the feature-add regression guard."
   },
   "ladder": {
     "contract": {
       "layer_verdict": "pass",
       "tests": [
         {
-          "id": "OCT-CT2-LABEL", "target": "CT2", "provider": "C1", "caller": "C4", "module": "freelancer_app.time_logging.label_store",
-          "shape": { "test": "test_ct2_label_field_persists_on_time_entry_record", "result": "pass" },
+          "id": "OCT-CT2-LABEL", "target": "CT2", "provider": "C1", "caller": "C3", "module": "freelancer_app.project_management.project_label",
+          "shape": { "test": "test_ct2_label_field_persists_on_project_record", "result": "pass" },
           "failures": [
             { "test": "test_ct2_label_failure_store_unavailable", "result": "pass" },
             { "test": "test_ct2_label_failure_constraint_violation", "result": "pass" }
           ],
-          "trace": "set_label persists the additive label field on the existing time-entry record via C1 (CT2 extension, A14); StoreUnavailableError/ConstraintViolationError propagate unmodified — every assertion satisfied. Inherited CT2 base shape test NOT re-run (frozen, H14)."
+          "trace": "set_label persists the additive label field on the existing project record via C1 by reusing update_project (CT2 extension, A14); the persisted label equals the submitted text; StoreUnavailableError/ConstraintViolationError propagate unmodified — every assertion satisfied. Inherited CT2 BASE shape test (OCT-CT2, S4) NOT re-run (frozen, H14)."
         }
       ]
     },
@@ -47,10 +49,10 @@
       "layer_verdict": "pass",
       "tests": [
         {
-          "id": "OF-F5", "target": "F5", "path": ["C6", "C4", "C2", "C1"], "wsgi_entry": "freelancer_app.wsgi.application",
+          "id": "OF-F5", "target": "F5", "path": ["C6", "C3", "C2", "C1"], "wsgi_entry": "freelancer_app.wsgi.application",
           "happy": { "test": "test_f5_happy_path_set_label_persists_and_renders", "asserts_ac": ["AC11", "AC13"], "result": "pass" },
           "failure": { "test": "test_f5_failure_ct2_store_unavailable", "exercises": "CT2:store-unavailable", "result": "pass" },
-          "trace": "POST time-entries/<id>/label → _view_set_label resolves session via C2 (CT3) → C4.set_label persists label via C1 (CT2 extension) → label renders in list (AC11); label still holds value on reload, linked to same entry (AC13); failure: StoreUnavailableError propagates → 503, label not persisted."
+          "trace": "POST projects/<slug>/label → _view_set_project_label resolves session via C2 (CT3) → C3 ProjectLabeler.set_label persists label via C1 (CT2 extension) → label renders in list (AC11); label still holds value on reload, linked to same project (AC13); failure: StoreUnavailableError propagates → 503, label not persisted."
         }
       ]
     },
@@ -59,13 +61,13 @@
       "per_ac": [
         {
           "ac": "AC11", "req_ref": "R11",
-          "visible":  { "file": "acceptance/visible/test_AC11.py",  "result": "pass", "trace": "freelancer sets label 'client-acme' on a time entry, saves → stored label field holds the text and renders on the entry in the list." },
-          "held_out": { "file": "acceptance/held_out/test_AC11.py", "result": "pass", "trace": "same property with a DIFFERENT unguessable label text + entry → label persists + renders; not hardcoded to the visible label (B7)." }
+          "visible":  { "file": "acceptance/visible/test_AC11.py",  "result": "pass", "trace": "freelancer sets label 'client-acme' on project 'Acme Website', saves → stored label field holds the text and renders on the project in the list." },
+          "held_out": { "file": "acceptance/held_out/test_AC11.py", "result": "pass", "trace": "same property with DIFFERENT unguessable label 'vip-zeta' + project 'Zeta Analytics' + session/freelancer → label persists + renders; not hardcoded to the visible label (B7)." }
         },
         {
           "ac": "AC13", "req_ref": "R13",
-          "visible":  { "file": "acceptance/visible/test_AC13.py",  "result": "pass", "trace": "after setting a label and navigating away, on return the entry's label field still holds the value, linked to the same time entry." },
-          "held_out": { "file": "acceptance/held_out/test_AC13.py", "result": "pass", "trace": "same persist-across-reload property with a DIFFERENT unguessable label/entry → still holds; not hardcoded to the visible case (B7)." }
+          "visible":  { "file": "acceptance/visible/test_AC13.py",  "result": "pass", "trace": "after setting label 'archived-delta' on 'Delta Co' and navigating away, on return the project's label field still holds the value, linked to the same project." },
+          "held_out": { "file": "acceptance/held_out/test_AC13.py", "result": "pass", "trace": "same persist-across-navigation property with DIFFERENT unguessable label 'lead-omega' / project 'Omega Ltd' / session → still holds; not hardcoded to the visible case (B7)." }
         }
       ]
     },
@@ -75,7 +77,7 @@
         {
           "kind": "regression",
           "scope": "touched-surface + seams",
-          "asserts": ["AC2", "AC7"],
+          "asserts": ["AC6"],
           "result": "pass"
         }
       ],
@@ -90,12 +92,11 @@
   "regression": {
     "ran": true,
     "scope": "touched-surface + seams",
-    "scope_basis": "REGRESSION_GUARD AC2,AC7 (time-entry log + persistence, parent of the tagged entry) + integration_seam C1/CT2 (label additive on the time-entry record); NOT the whole inherited suite (Risk R4)",
+    "scope_basis": "REGRESSION_GUARD AC6 (create + manage projects, parent of the tagged project) + integration_seam C1/CT2 (label additive on the project record); NOT the whole inherited suite (Risk R4)",
     "suites_run": [".build/skeleton/oracle/", ".build/slices/S4/oracle/"],
-    "asserts": ["AC2", "AC7"],
+    "asserts": ["AC6"],
     "results": [
-      { "ref": "AC2", "result": "pass", "trace": "log-a-time-entry suite still green: set_label is additive on the time-entry record; entry-logging path (create + list) unchanged by the label field." },
-      { "ref": "AC7", "result": "pass", "trace": "time-entry persistence suite still green: the additive label field does not alter existing record persistence/read behavior — entries without a label still round-trip." }
+      { "ref": "AC6", "result": "pass", "trace": "create-and-manage-project suite still green: set_label is additive on the project record (reuses update_project with a new key); project create / list / edit / delete paths unchanged by the label field; entries without a label still round-trip. Baseline AC6 visible + held_out both still pass." }
     ],
     "verdict": "green",
     "reds": [],
@@ -103,8 +104,21 @@
   },
   "skeleton_fidelity": {
     "breached": false,
-    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5"],
-    "note": "Slice ladder verified on the slice oracle (CT2-LABEL, F5, AC11/AC13) + scoped regression (AC2/AC7 by reference). No frozen skeleton test re-run/re-greened, no skeleton composition root edited, no baseline regression test mutated. Baseline untouched (H14/BF1)."
+    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5", "OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
+    "note": "Slice ladder verified on the slice oracle (CT2-LABEL, F5, AC11/AC13) + scoped regression (AC6 by reference). No frozen skeleton/S4 test re-run/re-greened, no composition root baseline route edited (S5 route appended only), no baseline regression test mutated. Baseline untouched (H14/BF1)."
+  },
+  "baseline_immutability": {
+    "checked": [".aprd/aprd.frozen.md", ".hld/skeleton.frozen.md", ".adr/log/", ".build/skeleton/oracle/oracle.lock", ".build/slices/S4/oracle/oracle.lock"],
+    "frozen_artifacts_modified": [],
+    "aprd_v1_intact": true,
+    "verdict": "baseline-byte-unchanged (BF1)"
+  },
+  "id_threading": {
+    "new_ids_above_high_water": true,
+    "high_water": { "R": 10, "AC": 10, "E": 7, "S": 4, "ADR": 6, "CT": 11, "F": 4 },
+    "new_ids": { "R": ["R11", "R13"], "AC": ["AC11", "AC13"], "E": ["E8"], "S": ["S5"], "F": ["F5"] },
+    "collisions": [],
+    "verdict": "no-collision (BF3)"
   },
   "per_ac_summary": [
     { "ac": "AC11", "visible": "pass", "held_out": "pass" },
@@ -113,10 +127,11 @@
   "verdict": "verified",
   "escape": null,
   "provenance": {
-    "verifier_role": "verifier",
+    "verifier_role": "VERIFY-OUTPUT",
     "built_against": {
       "slice_oracle_lock": ".build/slices/S5/oracle/oracle.lock",
       "skeleton_oracle": ".build/skeleton/oracle/oracle.json",
+      "slice_s4_oracle": ".build/slices/S4/oracle/oracle.json",
       "skeleton_integration": ".build/skeleton/integration-record.json",
       "skeleton_lock": ".hld/skeleton.lock",
       "adr_lock": ".adr/adr.lock",
@@ -136,10 +151,10 @@
     "acceptance_visible_passed": 2,
     "acceptance_held_out_passed": 2,
     "class_ext_layers": 1,
-    "regression_asserts": 2,
-    "regression_asserts_passed": 2,
+    "regression_asserts": 1,
+    "regression_asserts_passed": 1,
     "mechanisms_checked": 0,
-    "inherited_tests_not_run": 5,
+    "inherited_tests_not_run": 10,
     "layers_applicable": 5,
     "layers_passed": 5,
     "layers_failed": 0

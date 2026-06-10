@@ -1,0 +1,116 @@
+{
+  "build_plan_ref": ".build/skeleton/build-plan.json",
+  "oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
+  "oracle_ref": ".build/skeleton/oracle/oracle.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton-build",
+  "slice": "S1",
+  "build_set": ["C1", "C2", "C6"],
+  "build_units": [
+    {
+      "component": "C1",
+      "name": "Data Store",
+      "module_namespace": "freelancer_app.data_store",
+      "implements_contracts": ["CT1"],
+      "mocked_deps": [],
+      "traces": ["R7", "R8", "R9", "R10"],
+      "files": [
+        "src/freelancer_app/__init__.py",
+        "src/freelancer_app/data_store/__init__.py",
+        "src/freelancer_app/data_store/identity_record_store.py",
+        "pyproject.toml"
+      ],
+      "contract_tests_greened": ["test_ct1_shape_persists_identity_record"],
+      "lld_notes": "Framework: Django (ADR-0002 — Python/Django stack; WSGI/ORM wired at INTEGRATE). Contract layer is framework-agnostic plain Python. Internals: in-process dict-backed store at contract layer; real persistence via Django ORM + psycopg2 against PostgreSQL (ADR-0003) wired by INTEGRATE. save_identity: create-or-update keyed on (provider, provider_id); returns dict acknowledgement with provider, provider_id, profile_ref, persisted:True. get_identity: read by (provider, provider_id); returns dict or None. Failure modes propagate as-raised: ConnectionError (store-unavailable), ValueError (constraint-violation), RuntimeError (partial-failure) — no swallowing. Synchronous, no async/queue (INV6). E1 field-level schema deferred to S1 cut FD3 per data-model.json.",
+      "status": "green",
+      "escape": null
+    },
+    {
+      "component": "C2",
+      "name": "Identity & Auth",
+      "module_namespace": "freelancer_app.identity_auth",
+      "implements_contracts": ["CT8"],
+      "mocked_deps": [],
+      "traces": ["R5"],
+      "files": [
+        "src/freelancer_app/identity_auth/__init__.py",
+        "src/freelancer_app/identity_auth/oauth_callback.py",
+        "src/freelancer_app/identity_auth/session_checker.py"
+      ],
+      "contract_tests_greened": [
+        "test_ct1_failure_store_unavailable",
+        "test_ct1_failure_constraint_violation",
+        "test_ct1_failure_partial_failure"
+      ],
+      "lld_notes": "Framework: Django (ADR-0002). Contract layer is framework-agnostic plain Python. oauth_callback.handle_callback: receives (provider, provider_id, profile_ref) from Google OAuth 2.0 exchange (ADR-0005); delegates persistence to C1 via CT1 seam (data_store.identity_record_store.save_identity); propagates all exceptions unmodified — ConnectionError (store-unavailable), ValueError (constraint-violation), RuntimeError (partial-failure) — no swallowing, callback aborts on any failure, no partial record produced. Access pattern: imports freelancer_app.data_store package and accesses identity_record_store attribute at call time so frozen conftest monkeypatch on freelancer_app.data_store.identity_record_store takes effect. session_checker.check_session: CT8 provider surface; returns session dict or None; real DB lookup (PostgreSQL session store, ADR-0003) wired at INTEGRATE; conftest mock_identity_auth_ct8 patches this module for C6 tests (raising=False, so absent module handled). E1 stores only provider token and user profile reference — no stored credentials (ADR-0005 delegation, INV1). Synchronous, no async/queue (INV6).",
+      "status": "green",
+      "escape": null
+    },
+    {
+      "component": "C6",
+      "name": "Web Ingress",
+      "module_namespace": "freelancer_app.web_ingress",
+      "implements_contracts": ["CT8"],
+      "mocked_deps": ["C3", "C4", "C5"],
+      "traces": ["R1"],
+      "files": [
+        "src/freelancer_app/web_ingress/__init__.py",
+        "src/freelancer_app/web_ingress/session_gate.py"
+      ],
+      "contract_tests_greened": [
+        "test_ct8_shape_session_presence_signal",
+        "test_ct8_failure_no_valid_session",
+        "test_ct8_failure_callee_error"
+      ],
+      "lld_notes": "Framework: Django (ADR-0002). Contract layer is framework-agnostic plain Python. session_gate.check(request_cookies): extracts 'session' cookie; calls identity_auth.session_checker.check_session(cookie_value) via package attribute access so frozen conftest monkeypatch takes effect; returns session dict when check_session returns non-None, else {'authenticated': False}. session_gate.handle_authenticated_request(request_cookies, dispatch_target): calls check(); on callee exception (RuntimeError) → catches via except Exception → returns {'redirect': '/login', 'dispatched': False}; on no valid session (authenticated=False) → returns {'redirect': '/login', 'dispatched': False}; on valid session → returns {'dispatched': True, 'session': session_result} (real domain dispatch wired at INTEGRATE). Failure modes: no-valid-session and callee-error both redirect, never dispatch (CT8). Later-slice deps C3/C4/C5 mocked via frozen conftest (CT9/CT10/CT11 mocks). MPA/SSR routing entry (ADR-0004). Synchronous, no async/queue (INV6).",
+      "status": "green",
+      "escape": null
+    }
+  ],
+  "oracle": {
+    "lock": ".build/skeleton/oracle/oracle.lock",
+    "builder_may_not_edit": true,
+    "starts_red": true
+  },
+  "verification": {
+    "contract": "pass",
+    "method": "static-trace",
+    "static_trace_notes": "No Python interpreter in build harness (§5.7). C1: test_ct1_shape_persists_identity_record — mock_data_store_ct1 patches freelancer_app.data_store.identity_record_store; test imports it (gets mock); mock.save_identity returns non-None dict → assert result is not None PASS; mock.get_identity returns dict → fetched not None PASS; isinstance(dict) PASS. C2: test_ct1_failure_store_unavailable — monkeypatch replaces identity_record_store; handle_callback calls data_store.identity_record_store.save_identity at call time → mock raises ConnectionError → propagates → pytest.raises catches → mock.save_identity.called=True PASS. test_ct1_failure_constraint_violation — ValueError side_effect; both handle_callback calls raise → pytest.raises catches → call_count>=1 PASS. test_ct1_failure_partial_failure — RuntimeError side_effect; handle_callback raises → caught; get_identity.return_value=None → result is None PASS. C6: test_ct8_shape_session_presence_signal — mock_identity_auth_ct8 patches freelancer_app.identity_auth.session_checker; check({'session':'valid-token'}) calls mock.check_session('valid-token') → {'authenticated':True,'identity_ref':'uid-shape-test'} → returned → result.get('authenticated')=True PASS; check_session.return_value=None; check({}) → mock.check_session(None) → None → {'authenticated':False} → is_authenticated_unauth=False PASS. test_ct8_failure_no_valid_session — check_session.return_value=None; handle_authenticated_request({}, 'project_management') → check({}) → {'authenticated':False} → no exception → authenticated=False → {'redirect':'/login','dispatched':False} → redirect not None PASS; dispatched=False PASS. test_ct8_failure_callee_error — check_session.side_effect=RuntimeError; handle_authenticated_request({'session':'maybe-valid'}, 'project_management') → check() → check_session('maybe-valid') raises RuntimeError → propagates from check → except Exception catches → {'redirect':'/login','dispatched':False} → redirect not None PASS; dispatched=False PASS. Authoritative execution owed at VERIFY-OUTPUT.",
+    "flow": "not-run",
+    "acceptance": "not-run"
+  },
+  "provenance": {
+    "builder_role": "builder",
+    "built_against": {
+      "oracle_lock": ".build/skeleton/oracle/oracle.lock",
+      "skeleton_lock": ".hld/skeleton.lock",
+      "adr_lock": ".adr/adr.lock",
+      "aprd_lock": ".aprd/aprd.lock",
+      "build_plan": ".build/skeleton/build-plan.json"
+    }
+  },
+  "commits": [
+    {
+      "message": "C1 Data Store: identity record persistence (CT1) — shape_persists_identity_record green",
+      "traces": ["R7", "R8", "R9", "R10"]
+    },
+    {
+      "message": "C2 Identity & Auth: OAuth callback + session checker (CT1 failure obligations + CT8 provider surface)",
+      "traces": ["R5"]
+    },
+    {
+      "message": "C6 Web Ingress: session gate CT8 — check + handle_authenticated_request (no-valid-session, callee-error redirect)",
+      "traces": ["R1"]
+    }
+  ],
+  "build_record_counts": {
+    "build_units_green": 3,
+    "build_units_blocked": 0,
+    "build_units_total_in_set": 3,
+    "contract_tests_greened": 7
+  }
+}

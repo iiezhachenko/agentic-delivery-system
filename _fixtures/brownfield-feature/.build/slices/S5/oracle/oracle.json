@@ -2,10 +2,13 @@
   "slice_build_plan_ref": ".build/slices/S5/build-plan.json",
   "slice_test_specs_ref": ".hld/slices/S5/test-specs.json",
   "base_test_specs_ref": ".hld/skeleton/test-specs.json",
+  "baseline_map_ref": ".aprd/baseline-map.json",
   "inherited_oracle": {
-    "oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
-    "oracle_json_ref": ".build/skeleton/oracle/oracle.json",
-    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5"],
+    "skeleton_oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
+    "skeleton_oracle_json_ref": ".build/skeleton/oracle/oracle.json",
+    "slice_s4_oracle_lock_ref": ".build/slices/S4/oracle/oracle.lock",
+    "slice_s4_oracle_json_ref": ".build/slices/S4/oracle/oracle.json",
+    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5", "OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
     "frozen_verified": true
   },
   "skeleton_lock_ref": ".hld/skeleton.lock",
@@ -18,30 +21,30 @@
   "class": "feature-add",
   "mode": "slice-build",
   "slice_id": "S5",
-  "slice_name": "Tag a time entry with a label",
+  "slice_name": "Tag a client project with a label",
   "slice_flow": "F5",
   "role": "test-author",
   "starts_red": true,
   "stack": { "language": "Python", "test_runner": "pytest", "grounded_in": ["ADR-0002"], "target": "contract-level interfaces + the app WSGI/HTTP entry; framework is IMPLEMENT-stage LLD (B4/B8)" },
-  "build_set": ["C4"],
+  "build_set": ["C3"],
   "prior_built_components": ["C1", "C2", "C3", "C6"],
   "high_blast_components": ["C2"],
   "contract_tests": [
-    { "id": "OCT-CT2-LABEL", "target": "CT2", "provider": "C1", "caller": "C4", "kind": "shared_data", "file": "contract/test_CT2_label.py", "mocked_deps": ["C1"], "shape_test": "test_ct2_label_field_persists_on_time_entry_record", "failure_tests": ["store-unavailable", "constraint-violation"], "mutation_certified": false, "traces": ["R11", "R13"], "status": "red", "note": "NEW additive label-field assertion on the CT2 extension (A14); the inherited CT2 base shape test stays in the frozen oracle, NOT re-materialized (H14)" }
+    { "id": "OCT-CT2-LABEL", "target": "CT2", "provider": "C1", "caller": "C3", "kind": "shared_data", "scope": "extension-only", "file": "contract/test_CT2_label.py", "mocked_deps": ["C1"], "shape_test": "test_ct2_label_field_persists_on_project_record", "failure_tests": ["store-unavailable", "constraint-violation"], "mutation_certified": false, "traces": ["R11", "R13"], "status": "red", "note": "NEW additive label-field assertion on the CT2 extension (A14); the inherited CT2 BASE shape test (OCT-CT2, S4) stays in the frozen oracle, NOT re-materialized (H14)" }
   ],
   "flow_tests": [
-    { "id": "OF-F5", "target": "F5", "slice": "S5", "path": ["C6", "C4", "C2", "C1"], "via": ["CT9", "CT3", "CT2"], "file": "flow/test_F5.py", "happy": { "asserts_ac": ["AC11", "AC13"] }, "failure": { "exercises": "CT2:store-unavailable", "arrives_at": "label not persisted; time-logging surfaces the persistence error; Web Ingress returns an HTTP error" }, "traces": ["R11", "R13", "AC11", "AC13"], "status": "red" }
+    { "id": "OF-F5", "target": "F5", "slice": "S5", "path": ["C6", "C3", "C2", "C1"], "via": ["CT9", "CT3", "CT2"], "file": "flow/test_F5.py", "happy": { "asserts_ac": ["AC11", "AC13"] }, "failure": { "exercises": "CT2:store-unavailable", "arrives_at": "label not persisted; project management surfaces the persistence error; Web Ingress returns an HTTP error" }, "traces": ["R11", "R13", "AC11", "AC13"], "status": "red" }
   ],
   "acceptance_tests": [
-    { "id": "OA-AC11", "target": "AC11", "req_ref": "R11", "visible": { "file": "acceptance/visible/test_AC11.py", "asserts": "freelancer sets a label on a time entry and saves; stored label field holds the submitted text and renders on the entry in the list" }, "held_out": { "file": "acceptance/held_out/test_AC11.py", "asserts": "same property, different unguessable label text + entry (gate-only, builder never sees)" }, "mutation_certified": false, "traces": ["R11"], "status": "red" },
-    { "id": "OA-AC13", "target": "AC13", "req_ref": "R13", "visible": { "file": "acceptance/visible/test_AC13.py", "asserts": "after setting a label and navigating away, on return the entry's label field still holds the same value and stays linked to the same time entry" }, "held_out": { "file": "acceptance/held_out/test_AC13.py", "asserts": "same property, different unguessable label/entry across a reload (gate-only)" }, "mutation_certified": false, "traces": ["R13"], "status": "red" }
+    { "id": "OA-AC11", "target": "AC11", "req_ref": "R11", "visible": { "file": "acceptance/visible/test_AC11.py", "asserts": "freelancer sets a label on a project and saves; stored label field holds the submitted text and renders on the project in the list" }, "held_out": { "file": "acceptance/held_out/test_AC11.py", "asserts": "same property, different unguessable label text + project (gate-only, builder never sees)" }, "mutation_certified": false, "traces": ["R11"], "status": "red" },
+    { "id": "OA-AC13", "target": "AC13", "req_ref": "R13", "visible": { "file": "acceptance/visible/test_AC13.py", "asserts": "after setting a label and navigating away, on return the project's label field still holds the same value and stays linked to the same project" }, "held_out": { "file": "acceptance/held_out/test_AC13.py", "asserts": "same property, different unguessable label/project across a reload (gate-only)" }, "mutation_certified": false, "traces": ["R13"], "status": "red" }
   ],
   "class_ext": [
     {
       "layer": "regression",
       "scope": "touched-surface + seams",
-      "scope_basis": "REGRESSION_GUARD AC2,AC7 (time-entry log + persistence, parent of the tagged entry) + integration_seam C1/CT2 (label field additive on the time-entry record); NOT the whole inherited suite (Risk R4)",
-      "asserts": ["AC2", "AC7"],
+      "scope_basis": "REGRESSION_GUARD AC6 (create+manage projects, parent of the tagged project) + integration_seam C1/CT2 (label field additive on the project record); NOT the whole inherited suite (Risk R4)",
+      "asserts": ["AC6"],
       "source_suites": [".build/skeleton/oracle/", ".build/slices/S4/oracle/"],
       "rematerialized": false,
       "baseline_tests_edited": false
@@ -51,7 +54,7 @@
   "mutation_certification": { "ref": "mutation-certification.json", "certified_tests": [], "verdict": "n/a — no NEW high-blast (C2/auth) test in this slice; label field is non-auth data" },
   "conftest": "conftest.py",
   "skeleton_fidelity": {
-    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5"],
+    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5", "OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
     "re_materialized_frozen_tests": [],
     "re_run_frozen_tests": [],
     "frozen_oracle_edited": false,
@@ -59,9 +62,9 @@
   },
   "coverage": {
     "real_seams": ["CT2"],
-    "frozen_oracle_seams": ["CT1", "CT8"],
-    "contracts_to_materialize": ["CT2"],
-    "contracts_materialized": ["CT2"],
+    "frozen_oracle_seams": ["CT2-base", "CT3", "CT9"],
+    "contracts_to_materialize": ["CT2-label-extension"],
+    "contracts_materialized": ["CT2-label-extension"],
     "contract_gaps": [],
     "slice_flow": "F5",
     "flows_materialized": ["F5"],
@@ -69,8 +72,8 @@
     "acs_materialized": ["AC11", "AC13"],
     "failure_assertions_total": 2,
     "failure_assertions_materialized": 2,
-    "regression_asserts_total": ["AC2", "AC7"],
-    "regression_asserts_materialized": ["AC2", "AC7"]
+    "regression_asserts_total": ["AC6"],
+    "regression_asserts_materialized": ["AC6"]
   },
   "oracle_lock_ref": "oracle.lock",
   "materialization_gaps": [],
@@ -79,8 +82,8 @@
     "flow_tests": 1,
     "acceptance_tests": 2,
     "held_out_files": 2,
-    "regression_tests": 2,
+    "regression_tests": 1,
     "mutation_certified_tests": 0,
-    "test_files": 6
+    "test_files": 7
   }
 }

@@ -1,0 +1,62 @@
+{
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "build_dag_ref": ".hld/skeleton/build-dag.json",
+  "slice_components_ref": ".hld/slices/S4/components.json",
+  "slice_contracts_ref": ".hld/slices/S4/contracts.json",
+  "slice_flows_ref": ".hld/slices/S4/flows.json",
+  "skeleton_build_plan_ref": ".build/skeleton/build-plan.json",
+  "rerank_ref": ".roadmap/08-rerank.json",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "greenfield",
+  "mode": "slice-build",
+  "slice_id": "S4",
+  "slice_name": "Create and manage client projects with currency and billable rate",
+  "slice_flow": "F4",
+  "build_set": ["C3"],
+  "prior_built_components": ["C1", "C2", "C6"],
+  "later_slice_components": ["C4", "C5"],
+  "build_order": ["C3"],
+  "parallel_groups": [
+    { "wave": 2, "components": ["C3"] }
+  ],
+  "build_units": [
+    {
+      "component": "C3",
+      "name": "Project Management",
+      "wave": 2,
+      "traces": ["R4", "R6", "R9", "R10"],
+      "provides_contracts": ["CT9"],
+      "consumes_seams": [
+        { "via": "CT2", "dep": "C1", "status": "real" },
+        { "via": "CT3", "dep": "C2", "status": "real" }
+      ],
+      "mocked_deps": [],
+      "status": "planned"
+    }
+  ],
+  "mock_map": {},
+  "lock_set": [],
+  "coverage": {
+    "slice_flow": "F4",
+    "slice_path_components": ["C6", "C3", "C2", "C1"],
+    "build_set_components": ["C3"],
+    "prior_built_on_path": ["C6", "C2", "C1"],
+    "components_planned": ["C3"],
+    "unplanned_build_set_components": [],
+    "consumed_seams_total": 2,
+    "consumed_seams_classified": 2,
+    "real_seams": ["CT2", "CT3"],
+    "mocked_seams": [],
+    "provided_seams": ["CT9"]
+  },
+  "structural_defects": [],
+  "build_plan_counts": {
+    "build_units": 1,
+    "real_seams": 2,
+    "mocked_seams": 0,
+    "active_waves": 1,
+    "locks": 0
+  }
+}

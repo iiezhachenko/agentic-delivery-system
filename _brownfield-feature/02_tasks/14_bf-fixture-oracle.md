@@ -83,3 +83,45 @@ The known-good golden (C) PASSes. If the verifier cannot tell the golden from an
 - The known-good golden PASSes clean-room.
 - All four planted defects (regression / ID collision / frozen-overwrite / convention drift) FAIL.
 - The verifier demonstrably separates golden from each defect (oracle trustworthy).
+
+---
+
+## STATUS — DONE (2026-06-10)
+
+Built `_fixtures/brownfield-feature/` (159 files). Feature CR-001 = **tag a client project with a label + filter project list by tag** (extends project record C3, not time entries — chosen because the greenfield-clean baseline builds C1/C2/C3/C6 only; time-logging C4 is unbuilt, so tagging projects is the atomic feature that plugs into a built, demo-accepted surface).
+
+### What landed
+- **A. Baseline (immutable):** copied greenfield-clean wholesale — `.adr/`, `.hld/skeleton+slices/S4`, `.build/skeleton+slices/S4`, `.roadmap/03-07+roadmap.md`, `src/` (C1/C2/C3/C6), `pyproject.toml`, `aprd.frozen.md`+`aprd.lock`. `aprd.frozen.md` BYTE-IDENTICAL to greenfield (verified `diff -q`). High-water: R10/AC10/E7/C6/S4/ADR-0006/CT11/A13/F4.
+- **B. CR:** `.aprd/change-requests/CR-001.md` + feature-add front-end (00 raw, 01 class, 02 extract, 04 gaps, 05 q, 06 a, 07 assumptions).
+- **C. Golden:** `aprd.v2.frozen.md` (R11/R13, AC11/AC13, E8, A14–16, `CLASS_EXTENSION`: seam CT2 / regression-guard AC6 / convention-baseline), `baseline-map.json`, roadmap `02-slices`+`08-rerank` (S5/S6, baseline S1+S4 pinned), `.hld/slices/S5/*` (CT2 label extension, flow F5), `.build/slices/S5/*` (build-plan, oracle .json+.lock+7 `.py` test files, build-record, integration-record, verify-output verdict `verified`, critique `clean`), additive `src/` `project_management/project_label.py` + `web_ingress/project_label_dispatch.py` + appended WSGI label route. New IDs all strictly above high-water; baseline frozen artifacts untouched.
+- **D. Both-directions oracle:** `defects/` + root `README.md` (scenario→verdict table + mermaid). Golden PASSes (verified/green/clean); 4 defects FAIL on the real invariant only.
+
+### Oracle map (the four brownfield risks)
+
+```mermaid
+flowchart LR
+    BASE["immutable baseline\n(greenfield-clean, byte-frozen)"] --> GOLD
+    CR["CR-001 tag projects"] --> GOLD
+    GOLD["golden S5 trees\nverify-output=verified"] -->|known-good| PASS([PASS])
+    GOLD -. overlay defect .-> R["regression\nAC6 RED"] -->|BF4| F4([rejected])
+    GOLD -. overlay defect .-> I["id-collision\nR10/AC10 reuse"] -->|BF3| F3([rejected])
+    GOLD -. overlay defect .-> O["frozen-overwrite\naprd.frozen.md mutated"] -->|BF1| F1([rejected])
+    GOLD -. overlay defect .-> C["convention-drift\nnew tags/ pkg, camelCase"] -->|BF5| F5([blocked])
+```
+
+| defect dir | invariant | seed → path | role | golden | defect |
+|---|---|---|---|---|---|
+| `regression` | BF4 | `project_store.regressed.py` → project_store.py | VERIFY-OUTPUT | regression green / verified | regression RED / rejected |
+| `id-collision` | BF3 | `aprd.v2.collision.frozen.md` → aprd.v2.frozen.md | SYNTHESIZE/verify | no collision | R10/AC10 collide / rejected |
+| `frozen-overwrite` | BF1 | `aprd.frozen.mutated.md` → aprd.frozen.md | VERIFY | baseline byte-unchanged | immutability breach / rejected |
+| `convention-drift` | BF5 | `tagService.py` → src/freelancer_app/tags/ | CRITIQUE | clean / drift=false | convention-drift flagged / blocked |
+
+Each defect dir carries planted artifact(s) + `expected-verdict.json` (load-bearing assertion). Separation verified: golden `verified/green/clean` vs defects `rejected×3/blocked`; all JSON valid (`jq`).
+
+### Acceptance criteria — met
+- ✅ baseline seeded immutable + accepted (S1/S4) + CR-001 + golden extended trees on disk.
+- ✅ golden PASSes (verify-output `verified`, 5/5 layers, regression green).
+- ✅ all 4 defects FAIL, each on its own invariant (BF1/BF3/BF4/BF5).
+- ✅ verifier separates golden from each defect by the real invariant signal (not cosmetics).
+
+> Note: verification is **static-trace** (no pytest runtime in bench, per pipeline); `.py` oracle/src files are the materialized oracle, verdicts carried in the JSON records. Lock `content_sha256` values are nominal (consumers check status+manifest, do NOT recompute).

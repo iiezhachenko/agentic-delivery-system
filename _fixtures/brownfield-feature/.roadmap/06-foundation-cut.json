@@ -1,0 +1,178 @@
+{
+  "skeleton_ref": ".roadmap/04-skeleton.json",
+  "sequence_ref": ".roadmap/05-sequence.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "class": "greenfield",
+  "skeleton_id": "S1",
+  "foundation_cut": {
+    "foundational_decisions": [
+      {
+        "id": "FD1",
+        "category": "Web application architectural style and language/framework stack",
+        "needed_by": ["S1"],
+        "why_foundational": "The skeleton must serve HTTP/HTTPS requests and render an entry page in a standard browser (AC1, R1, C1). The style and stack category must be decided once before the skeleton can be built; every subsequent slice builds on top of this choice. Cannot be deferred — no slice can be built without a web application runtime in place.",
+        "grounded_in": ["R1", "C1", "AC1"]
+      },
+      {
+        "id": "FD2",
+        "category": "External OAuth provider selection and integration boundary",
+        "needed_by": ["S1"],
+        "why_foundational": "The skeleton's primary external integration seam requires completing an OAuth handshake round-trip (AC5, R5, A2). Which provider type is used and how the application boundary interacts with it must be decided once before the skeleton's authentication path can be built. Every subsequent slice depends on an authenticated session that this seam establishes.",
+        "grounded_in": ["A2", "R5", "AC5"]
+      },
+      {
+        "id": "FD3",
+        "category": "Persistence/datastore technology",
+        "needed_by": ["S1"],
+        "why_foundational": "The skeleton must write and read the Freelancer identity record (provider token and user profile reference) to prove state survives the OAuth callback (A2, E1, R5, A7). The datastore technology category must be decided once; every subsequent slice (S4, S2, S3) writes its own state to the same store. Cannot be deferred — the skeleton's persistence seam cannot be exercised without a datastore in place.",
+        "grounded_in": ["A2", "E1", "R5", "A7"]
+      },
+      {
+        "id": "FD4",
+        "category": "Deployment and hosting target",
+        "needed_by": ["S1"],
+        "why_foundational": "The skeleton must be reachable over HTTP/HTTPS in a standard browser (AC1, C1, C2, A6). The deployment and hosting target must be decided once before the skeleton can be verified end-to-end. All slices deploy to the same target; the choice constrains the runtime environment, build pipeline, and environment-variable strategy for every slice.",
+        "grounded_in": ["C1", "C2", "A6", "AC1"]
+      }
+    ],
+    "skeleton_seams": [
+      {
+        "seam": "ingress",
+        "must_establish": "The web application accepts HTTP/HTTPS requests in a standard browser and serves its entry page — the request-entry surface is live and functional.",
+        "grounded_in": ["R1", "C1", "AC1"]
+      },
+      {
+        "seam": "domain",
+        "must_establish": "The authentication business rule operates end-to-end: a Freelancer can initiate sign-in, the system applies the OAuth delegation rule, and a valid authenticated session is established in the application.",
+        "grounded_in": ["E1", "R5", "AC5"]
+      },
+      {
+        "seam": "persistence",
+        "must_establish": "The Freelancer's identity (provider token and user profile reference) is written to and read from the data store; the authenticated session survives the OAuth callback and is retrievable on subsequent requests.",
+        "grounded_in": ["A2", "E1", "R5", "A7"]
+      },
+      {
+        "seam": "primary_external_integration",
+        "must_establish": "The application completes a full external OAuth provider handshake — initiating the redirect, receiving the callback, and resolving it to an authenticated session — proving the external delegation round-trip works before any other slice depends on it.",
+        "grounded_in": ["A2", "R5", "AC5"]
+      }
+    ],
+    "cross_slice_invariants": [
+      {
+        "id": "INV1",
+        "invariant": "Authentication delegates to an external OAuth provider. The system stores only the provider token and user profile reference; it does not store hashed passwords or manage password resets internally.",
+        "applies_to": "Every slice that gates access behind an authenticated session inherits this model. No slice may introduce stored credentials or an in-house session management flow.",
+        "grounded_in": ["A2", "E1"]
+      },
+      {
+        "id": "INV2",
+        "invariant": "Each account belongs to exactly one freelancer. There is no organisation entity, no multi-user membership, and no role management.",
+        "applies_to": "Every slice that creates or reads data scoped to a freelancer account must apply the single-owner model. No slice may introduce multi-user membership, org-level access, or role-based access control.",
+        "grounded_in": ["A7"]
+      },
+      {
+        "id": "INV3",
+        "invariant": "Currency is set at the project level. Each Client Project carries a single currency; all of its time entries and the resulting invoice inherit that currency. No per-entry currency field and no currency conversion are performed.",
+        "applies_to": "Every slice that handles monetary amounts (project creation, time logging, invoice export) must apply the project-level currency model and must not introduce per-entry currency fields or exchange-rate logic.",
+        "grounded_in": ["A4", "A5", "E5"]
+      },
+      {
+        "id": "INV4",
+        "invariant": "The billable rate is set at the project level. All time entries in a project share the same rate; no per-entry rate variation is supported.",
+        "applies_to": "Every slice that records or displays billable amounts must derive the rate from the project record. No slice may attach a rate to an individual time entry.",
+        "grounded_in": ["A8", "E7"]
+      },
+      {
+        "id": "INV5",
+        "invariant": "PDF invoices are generated server-side and streamed to the browser as a file download. No client-side print-to-PDF flow is used.",
+        "applies_to": "The invoice export slice (S3) and any future invoice-related capability must generate the PDF on the backend. The delivery model is fixed — a browser file download, not a print dialog.",
+        "grounded_in": ["A1", "E4"]
+      },
+      {
+        "id": "INV6",
+        "invariant": "The system is built for small personal-tool scale (tens of users, low concurrency). A single-server deployment with a synchronous request cycle is sufficient; no background job queues, horizontal scaling, or caching layer is required.",
+        "applies_to": "Every slice's implementation approach must stay within single-server synchronous assumptions. No slice may introduce a design that requires background job queues, horizontal scaling, or a caching layer.",
+        "grounded_in": ["A13"]
+      },
+      {
+        "id": "INV7",
+        "invariant": "No specific compliance requirements apply. Standard data practices are used; no mandated audit logs, right-to-erasure data model, or data-residency hosting constraint.",
+        "applies_to": "No slice needs to implement audit-log tables, soft-delete/erasure capability, or data-residency controls. Compliance-driven data model complexity is out of scope for every slice.",
+        "grounded_in": ["A9"]
+      },
+      {
+        "id": "INV8",
+        "invariant": "A client is a data record only — storing name, contact details, and billing address visible to the freelancer. Clients cannot log in or access any part of the system.",
+        "applies_to": "Every slice that references or displays client data must treat the client as a passive data record. No slice may introduce a client authentication flow, client-facing UI, or client portal.",
+        "grounded_in": ["A3", "E6"]
+      }
+    ]
+  },
+  "deferred": [
+    {
+      "item": "Client Project entity schema — field layout, column names, and storage model for project name, associated client reference, currency designation, and billable rate",
+      "defer_to": "S4",
+      "reason": "Only S4 creates and manages client projects (R4, R6, AC4, AC6). The skeleton (S1) writes only a Freelancer identity record; no project data is created or read until S4. The project schema is safe to defer because no earlier slice depends on it.",
+      "grounded_in": ["R4", "R6", "AC4", "AC6"]
+    },
+    {
+      "item": "Client record data shape — storage model for client name, contact details, and billing address",
+      "defer_to": "S4",
+      "reason": "Client records are created and displayed only within S4's project management flow (A3, E6, R6, AC6). The skeleton does not read or write client data. Deferring is safe because no slice before S4 depends on the client record shape.",
+      "grounded_in": ["A3", "E6", "R6", "AC6"]
+    },
+    {
+      "item": "Multi-currency project selection UI design — how the freelancer selects a currency when creating or editing a project",
+      "defer_to": "S4",
+      "reason": "Currency selection is part of project creation/editing (R4, A4, AC4), which belongs entirely to S4. The skeleton exercises no currency UI. Safe to defer because the invariant (currency fixed at project level) is already named; only the UI interaction shape is open.",
+      "grounded_in": ["R4", "A4", "AC4"]
+    },
+    {
+      "item": "Time-entry data shape — field layout and storage model for date, description, hours, project association, and freelancer association",
+      "defer_to": "S2",
+      "reason": "Time entries are first created and persisted in S2 (R2, R7, AC2, AC7). The skeleton and S4 do not write time-entry records. Safe to defer because no earlier slice depends on the time-entry schema.",
+      "grounded_in": ["R2", "R7", "AC2", "AC7"]
+    },
+    {
+      "item": "Time-entry logging UI design — form fields, interaction flow, and list display for submitting and viewing time entries",
+      "defer_to": "S2",
+      "reason": "The time-entry logging UI is the core deliverable of S2 (R2, AC2). No earlier slice renders or interacts with time entries. Deferring is safe; the UI shape has no cross-slice dependency before S2.",
+      "grounded_in": ["R2", "AC2"]
+    },
+    {
+      "item": "PDF generation library/tool selection — which server-side backend library or tool generates the PDF file",
+      "defer_to": "S3",
+      "reason": "PDF generation is needed only by S3 (A1, R3, AC3). The invariant (server-side generation, browser download) is already named; the specific library choice is an internal HOW for S3. Deferring is safe because no earlier slice generates or streams a PDF.",
+      "grounded_in": ["A1", "R3", "AC3"]
+    },
+    {
+      "item": "Invoice PDF template layout — line-item columns, total placement, and minimal format implementation",
+      "defer_to": "S3",
+      "reason": "The invoice PDF template is the rendering concern of S3 (R8, A12, AC8). The aPRD fixes the minimal format (line items + invoice total, no logo or legal fields) as an invariant boundary; the layout implementation belongs to S3 alone.",
+      "grounded_in": ["R8", "A12", "AC8"]
+    },
+    {
+      "item": "Billing-period month-picker UI design — how the freelancer selects the calendar month when triggering invoice export",
+      "defer_to": "S3",
+      "reason": "The month-picker is part of the invoice export flow (A10, R3, AC3), which is entirely S3's concern. No earlier slice presents a month-selection UI. Safe to defer because the billing-period model (fixed calendar month) is already named as an invariant.",
+      "grounded_in": ["A10", "R3", "AC3"]
+    },
+    {
+      "item": "Invoice line-item aggregation logic design — how time entries for a given project and calendar month are queried, grouped, and totalled for PDF generation",
+      "defer_to": "S3",
+      "reason": "Aggregation logic is an internal HOW specific to S3's PDF export capability (R8, R9, R10, AC8, AC9, AC10). The skeleton and S2 do not aggregate time entries for invoicing. Safe to defer because S3 is the only consumer of this logic.",
+      "grounded_in": ["R8", "R9", "R10", "AC8", "AC9", "AC10"]
+    }
+  ],
+  "coverage": {
+    "skeleton_seams_carried": ["ingress", "domain", "persistence", "primary_external_integration"],
+    "post_skeleton_slices": ["S4", "S2", "S3"],
+    "deferred_slices": ["S4", "S2", "S3"]
+  },
+  "cut_counts": {
+    "foundational_decisions": 4,
+    "skeleton_seams": 4,
+    "cross_slice_invariants": 8,
+    "deferred": 9
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "adr_log_ref": ".adr/log/",
+  "base_nfr_ref": ".hld/skeleton/nfr-mechanisms.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "slice_components_ref": ".hld/slices/S4/components.json",
+  "slice_contracts_ref": ".hld/slices/S4/contracts.json",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "skeleton_frozen_verified": true,
+  "class": "greenfield",
+  "mode": "increment",
+  "slice_id": "S4",
+  "slice_name": "Create and manage client projects with currency and billable rate",
+  "introduced_components": ["C3"],
+  "touched_components": ["C3", "C1", "C2", "C6"],
+  "inherited_nfrs": [
+    {
+      "nfr_ref": "A13",
+      "category": "scale",
+      "disposition": "satisfied-by-frame",
+      "mechanism_ref": null,
+      "frame_basis": ["ADR-0001", "ADR-0006", "INV6"],
+      "realized_by": [],
+      "scope_role": "inherited-governing",
+      "governs_basis": "Topology-wide frame property — every slice. C3 (Project Management) operates under the single-server synchronous monolith (ADR-0001/ADR-0006/INV6) at A13 personal-tool scale; no scale mechanism is permitted or needed."
+    },
+    {
+      "nfr_ref": "A2",
+      "category": "security",
+      "disposition": "satisfied-by-frame",
+      "mechanism_ref": null,
+      "frame_basis": ["ADR-0005", "INV1"],
+      "realized_by": ["C2"],
+      "scope_role": "inherited-governing",
+      "governs_basis": "C2 (Identity & Auth) is touched; C3 calls C2 in-process via CT3 (sync_api seam) to resolve the authenticated session and scope all project reads/writes to the owning freelancer — A2/INV1 security frame governs this seam."
+    },
+    {
+      "nfr_ref": "C1",
+      "category": "delivery-medium",
+      "disposition": "satisfied-by-frame",
+      "mechanism_ref": null,
+      "frame_basis": ["ADR-0001", "ADR-0004", "ADR-0006"],
+      "realized_by": ["C6"],
+      "scope_role": "inherited-governing",
+      "governs_basis": "C6 (Web Ingress) is touched; C6 routes authenticated HTTP requests to C3 via CT9 (sync_api seam) and returns server-rendered HTML — the MPA/SSR web-delivery frame (ADR-0004/ADR-0006) governs this seam."
+    },
+    {
+      "nfr_ref": "C2",
+      "category": "timeline",
+      "disposition": "satisfied-by-frame",
+      "mechanism_ref": null,
+      "frame_basis": ["ADR-0001", "ADR-0006"],
+      "realized_by": [],
+      "scope_role": "inherited-governing",
+      "governs_basis": "Topology-wide frame property — every slice. C3 is a plain monolith module requiring no additional scaffolding; flat monolith (ADR-0001) + PaaS (ADR-0006) keep delivery cost minimal, upholding the two-month timeline constraint."
+    }
+  ],
+  "slice_nfr_queue": [],
+  "resolutions": [],
+  "new_mechanisms": [],
+  "slice_coverage": {
+    "slice_requirements": ["R4", "R6", "R9", "R10"],
+    "requirements_with_nfr": ["R6"],
+    "requirements_no_nfr_footprint": ["R4", "R9", "R10"],
+    "requirement_orphans": []
+  },
+  "frame_fidelity": {
+    "re_disposed_nfrs": [],
+    "re_realized_nfrs": [],
+    "verdict": "extends-not-re-disposes"
+  },
+  "unmet": [],
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "increment_counts": {
+    "inherited_nfrs": 4,
+    "slice_nfr_queue": 0,
+    "new_mechanisms": 0,
+    "unmet": 0
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "aprd_version": "v2",
+  "baseline_map_ref": ".aprd/baseline-map.json",
+  "adr_lock_ref": ".adr/adr.lock",
+  "base_skeleton_ref": ".hld/skeleton/components.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "rerank_ref": ".roadmap/08-rerank.json",
+  "slices_ref": ".roadmap/02-slices.json",
+  "skeleton_frozen_verified": true,
+  "class": "feature-add",
+  "mode": "increment",
+  "slice_id": "S5",
+  "slice_name": "Tag a client project with a label",
+  "introduced_components": [],
+  "extended_components": ["C3"],
+  "touched_components": [
+    {
+      "id": "C3",
+      "name": "Project Management",
+      "role": "extended",
+      "built_in": "S4",
+      "realizes_slice_requirements": ["R11", "R13"],
+      "owns_entities": ["E2", "E5", "E6", "E7", "E8"],
+      "fleshed_this_slice": false,
+      "extension": "Additive label capability on the existing project record (E8 free-text tag, A14). New additive file project_management/project_label.py; existing C3 internals untouched (BF5/BF6)."
+    },
+    {
+      "id": "C1",
+      "name": "Data Store",
+      "role": "reused",
+      "built_in": "S1",
+      "why_on_path": "C3 persists the additive label field on the existing project record via the C1 data store (CT2 extension, A14).",
+      "realizes_slice_requirements": [],
+      "fleshed_this_slice": false
+    },
+    {
+      "id": "C2",
+      "name": "Identity & Auth",
+      "role": "reused",
+      "built_in": "S1",
+      "why_on_path": "C3 resolves the authenticated freelancer session from C2 (CT3) to scope the label write to the owning freelancer's project.",
+      "realizes_slice_requirements": [],
+      "fleshed_this_slice": false
+    },
+    {
+      "id": "C6",
+      "name": "Web Ingress",
+      "role": "reused",
+      "built_in": "S1",
+      "why_on_path": "C6 dispatches the new authenticated set-label request (additive route) into C3 (CT9).",
+      "realizes_slice_requirements": [],
+      "fleshed_this_slice": false
+    }
+  ],
+  "new_components": [],
+  "new_edges": [],
+  "new_entities_owned": ["E8"],
+  "slice_coverage": {
+    "slice_requirements": ["R11", "R13"],
+    "requirements_landed": ["R11", "R13"],
+    "requirement_orphans": []
+  },
+  "skeleton_fidelity": {
+    "redrawn_components": [],
+    "modified_edges": [],
+    "verdict": "extends-not-redraws"
+  },
+  "baseline_fidelity": {
+    "baseline_components_redrawn": [],
+    "baseline_edges_modified": [],
+    "verdict": "additive-extension-at-declared-seam"
+  },
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "increment_counts": { "touched": 4, "introduced": 0, "extended": 1, "new_components": 0, "new_edges": 0, "new_entities_owned": 1 }
+}

@@ -1,0 +1,62 @@
+{
+  "id": "DP1",
+  "decision": "Which architectural style should the system adopt: single-deployment monolith, modular monolith with enforced internal module boundaries, or some other single-server style?",
+  "category": "Architectural style",
+  "forced_by": ["R1", "C1", "AC1"],
+  "cut_ref": "FD1",
+  "grounding": {
+    "existing_system": "n/a — greenfield (C3): no existing system to conform to",
+    "canon_status": "absent",
+    "source": "reasoned",
+    "note": "arch-canon.json absent; option set reasoned from established architecture first principles; currency self-verified; multi-service and distributed options excluded as non-compliant with INV6/A13"
+  },
+  "options": [
+    {
+      "option": "Single-deployment monolith (flat structure)",
+      "summary": "All application code lives in a single deployable unit with no enforced internal module boundaries beyond language-level conventions.",
+      "source": "reasoned",
+      "reason_to_consider": "Simplest possible structure for a personal-tool-scale web app; eliminates all cross-module coordination overhead and is the least build complexity under C2's two-month timeline.",
+      "tradeoffs": {
+        "strengths": [
+          "Minimal project scaffolding and build configuration — fastest to a working skeleton under C2 (two-month timeline).",
+          "No inter-module contract overhead; all code in one place simplifies early debugging and feature iteration.",
+          "Adequate for A13 scale (tens of users, low concurrency) — no performance benefit from structure at this scale.",
+          "Deployment pipeline is straightforward: one artifact, one process, one target (FD4)."
+        ],
+        "costs": [
+          "No enforced boundary between functional domains (auth, projects, time logging, invoicing); coupling grows organically as features are added.",
+          "Refactoring cost rises as the codebase grows — boundaries become harder to draw retroactively.",
+          "No mechanical guarantee that, e.g., the invoice module cannot directly call the auth module's internal state; discipline is the only guardrail.",
+          "If a modular structure is desired later, the extraction effort is non-trivial."
+        ]
+      },
+      "bears_on": ["C2", "A13", "INV6", "R1", "AC1"]
+    },
+    {
+      "option": "Modular monolith with enforced internal module boundaries",
+      "summary": "Single deployable unit whose internal code is divided into explicit modules (e.g. auth, projects, time, invoices) with defined public interfaces and enforced cross-module access rules.",
+      "source": "reasoned",
+      "reason_to_consider": "Preserves single-deployment simplicity (stays compliant with INV6/A13) while providing internal structure that matches the aPRD's distinct functional domains (R2, R3, R5, R6, R7), making the codebase easier to navigate and extend slice by slice.",
+      "tradeoffs": {
+        "strengths": [
+          "Maintains single-server deployment — fully compliant with INV6 and A13; no distributed-systems complexity.",
+          "Internal module boundaries map naturally onto the aPRD's functional domains (auth, projects, time logging, invoices), supporting clean slice development.",
+          "Enforced public interfaces prevent unintended cross-domain coupling, reducing the risk of entanglement as slices accumulate.",
+          "Refactoring to a different service topology later (if scale ever changes) is cheaper with explicit boundaries than with a flat monolith.",
+          "One deployable artifact — deployment pipeline is as simple as the flat monolith variant."
+        ],
+        "costs": [
+          "Higher initial setup cost than a flat monolith: module boundaries, public-API conventions, and enforcement mechanisms must be established up front.",
+          "Enforcement tooling varies by language/framework; some ecosystems make boundary rules easy (e.g. Java packages), others require linting plugins or structural conventions.",
+          "Risk of over-engineering boundaries for a personal-tool-scale project (A13) where the added structure may never pay off if the codebase stays small.",
+          "More scaffolding decisions to make before the skeleton is buildable, which consumes some of C2's two-month window."
+        ]
+      },
+      "bears_on": ["C2", "A13", "INV6", "R1", "R2", "R3", "R5", "R6", "R7", "AC1"]
+    }
+  ],
+  "option_count": 2,
+  "degenerate": false,
+  "degenerate_reason": null,
+  "no_pick_note": "Live, unranked alternatives. EVALUATE-DECIDE scores against CONSTRAINTS / ACCEPTANCE / NFRs and picks (role 4); OPTION-GEN does not recommend."
+}

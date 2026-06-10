@@ -1,0 +1,73 @@
+{
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "adr_log_ref": ".adr/log/",
+  "base_flows_ref": ".hld/skeleton/flows.json",
+  "base_contracts_ref": ".hld/skeleton/contracts.json",
+  "baseline_map_ref": ".aprd/baseline-map.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "slice_components_ref": ".hld/slices/S5/components.json",
+  "slice_contracts_ref": ".hld/slices/S5/contracts.json",
+  "skeleton_frozen_verified": true,
+  "class": "feature-add",
+  "mode": "increment",
+  "slice_id": "S5",
+  "slice_name": "Tag a client project with a label",
+  "extended_components": ["C3"],
+  "touched_components": ["C6", "C3", "C2", "C1"],
+  "flows": [
+    {
+      "id": "F5",
+      "slice": "S5",
+      "name": "Freelancer sets a label on a client project; the label persists and renders",
+      "trigger": "Authenticated freelancer submits a set-label request for an existing project via the web application",
+      "path": ["C6", "C3", "C2", "C1"],
+      "steps": [
+        {
+          "from": "C6",
+          "to": "C3",
+          "via": "CT9",
+          "seam": "ingress->domain",
+          "external": false,
+          "action": "Web Ingress receives the HTTP set-label request (POST projects/<id>/label) and dispatches it in-process to Project Management via the new additive route"
+        },
+        {
+          "from": "C3",
+          "to": "C2",
+          "via": "CT3",
+          "seam": "in-domain session scope",
+          "external": false,
+          "action": "Project Management calls Identity & Auth in-process to resolve the current authenticated session and scope the label write to the owning freelancer's project (reused CT3, unchanged)"
+        },
+        {
+          "from": "C3",
+          "to": "C1",
+          "via": "CT2",
+          "seam": "domain->persistence",
+          "external": false,
+          "action": "Project Management persists the additive label field on the existing project record via the Data Store (CT2 extension, A14); reads it back so the label renders on the project in the list"
+        }
+      ],
+      "via": ["CT9", "CT3", "CT2"],
+      "failure_path": {
+        "trigger": "Freelancer submits a set-label request but the data store is unreachable",
+        "exercises": "CT2:store-unavailable",
+        "arrives_at": "Data Store raises StoreUnavailableError on the label write; Project Management propagates it unmodified; Web Ingress surfaces the persistence error as an HTTP error (503); the label is not persisted"
+      },
+      "traces": ["R11", "R13", "AC11", "AC13"],
+      "honors_inv": ["INV1", "INV2", "INV3", "INV4", "INV6"]
+    }
+  ],
+  "composes_against_frozen_contracts": true,
+  "skeleton_fidelity": {
+    "reused_contracts_walked": ["CT9", "CT3"],
+    "extended_contracts_walked": ["CT2"],
+    "reshaped_contracts": [],
+    "redrawn_flows": [],
+    "verdict": "composes-against-frozen"
+  },
+  "structural_defects": [],
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "flow_counts": { "flows": 1, "hops": 3, "hops_contracted": 3, "external_boundaries": 0, "structural_defects": 0 }
+}

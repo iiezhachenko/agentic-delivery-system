@@ -7,37 +7,35 @@
   "verdict": "sequenced",
   "completed": [
     { "position": 1, "id": "S1", "name": "Sign in via OAuth on the web application", "status": "accepted", "demo_ref": ".build/skeleton/demo/demo.json" },
-    { "position": 2, "id": "S4", "name": "Create and manage client projects with currency and billable rate", "status": "accepted", "demo_ref": ".build/slices/S4/demo/demo.json" },
-    { "position": 3, "id": "S2", "name": "Log and persist billable time entries against a project", "status": "accepted", "demo_ref": ".build/slices/S2/demo/demo.json" },
-    { "position": 4, "id": "S3", "name": "Export a monthly PDF invoice with line items and monetary totals", "status": "accepted", "demo_ref": ".build/slices/S3/demo/demo.json" }
+    { "position": 2, "id": "S4", "name": "Create and manage client projects with currency and billable rate", "status": "accepted", "demo_ref": ".build/slices/S4/demo/demo.json" }
   ],
   "remaining_sequence": [
     {
-      "position": 5,
+      "position": 3,
       "id": "S5",
-      "name": "Tag a time entry with a label",
+      "name": "Tag a client project with a label",
       "value": "high",
-      "retires_risk": "Tag persistence by EXTENDING contract CT2 (A14): first exercise of additive label field on existing time-entry record at the C1 seam; proves extend-existing-contract approach before filtering depends on stored tags.",
-      "depends_on": ["S2"],
+      "retires_risk": "Tag persistence by EXTENDING contract CT2 (A14): first exercise of additive label field on existing project record at the C1 seam; proves extend-existing-contract approach before filtering depends on stored tags.",
+      "depends_on": ["S4"],
       "cost_proxy": 4,
       "moved": null,
       "value_risk_change": null,
-      "rationale": "Leads new frontier: dep S2 completed+pinned (pre-satisfied), high value + retires extend-existing-contract risk before filtering builds on stored tags."
+      "rationale": "Leads new frontier: dep S4 completed+pinned (pre-satisfied), high value + retires extend-existing-contract risk before filtering builds on stored tags."
     },
     {
-      "position": 6,
+      "position": 4,
       "id": "S6",
-      "name": "Filter the time-entry list by tag",
+      "name": "Filter the project list by tag",
       "value": "med",
       "retires_risk": null,
-      "depends_on": ["S2", "S5"],
+      "depends_on": ["S4", "S5"],
       "cost_proxy": 2,
       "moved": null,
       "value_risk_change": null,
-      "rationale": "Waits behind S5: needs stored tags (S5) to filter; S2 completed. Med value, peripheral to core log/persist path."
+      "rationale": "Waits behind S5: needs stored tags (S5) to filter; S4 completed. Med value, peripheral to core create/manage path."
     }
   ],
-  "ordering_basis": "Feature-add: no NEW skeleton (foundation built, baseline pinned in completed[] — BF1); order starts from new slices' ready frontier. Dependency legality hard constraint — dep on a completed[] baseline slice (S2) pre-satisfied, lists for legality but doesn't gate frontier. Within frontier: value (high>med>low, from 02, never re-scored) then risk-retiring (retires_risk != null first) then lower cost-proxy (requirements+acceptance count) then lowest S* index. SEQUENCE emits initial order only; RE-RANK owns subsequent living-roadmap re-ranking with completed[] pinned + learnings ingested.",
+  "ordering_basis": "Feature-add: no NEW skeleton (foundation built, baseline pinned in completed[] — BF1); order starts from new slices' ready frontier. Dependency legality hard constraint — dep on a completed[] baseline slice (S4) pre-satisfied, lists for legality but doesn't gate frontier. Within frontier: value (high>med>low, from 02, never re-scored) then risk-retiring (retires_risk != null first) then lower cost-proxy (requirements+acceptance count) then lowest S* index. SEQUENCE emits initial order only; RE-RANK owns subsequent living-roadmap re-ranking with completed[] pinned + learnings ingested.",
   "dependency_check": {
     "acyclic": true,
     "legal": true,
@@ -46,8 +44,8 @@
     "dangling_depends_on": []
   },
   "coverage": {
-    "base_slices": ["S1", "S4", "S2", "S3"],
-    "completed": ["S1", "S4", "S2", "S3"],
+    "base_slices": ["S1", "S4"],
+    "completed": ["S1", "S4"],
     "remaining_ranked": ["S5", "S6"],
     "missing": [],
     "duplicated": []
@@ -55,5 +53,5 @@
   "structural_defects": [],
   "aprd_defects": [],
   "foundation_gaps": [],
-  "rerank_counts": { "completed": 4, "remaining": 2, "reordered": 0, "deps_removed": 0, "deps_added": 0 }
+  "rerank_counts": { "completed": 2, "remaining": 2, "reordered": 0, "deps_removed": 0, "deps_added": 0 }
 }

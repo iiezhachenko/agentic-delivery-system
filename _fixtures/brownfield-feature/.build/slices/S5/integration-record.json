@@ -17,12 +17,13 @@
   "class": "feature-add",
   "mode": "slice-build",
   "slice_id": "S5",
-  "slice_name": "Tag a time entry with a label",
+  "slice_name": "Tag a client project with a label",
   "flow": "F5",
-  "slice_path": ["C6", "C4", "C2", "C1"],
+  "slice_path": ["C6", "C3", "C2", "C1"],
   "prior_built_components": ["C1", "C2", "C3", "C6"],
   "inherited_composition": {
     "skeleton_integration_ref": ".build/skeleton/integration-record.json",
+    "slice_s4_integration_ref": ".build/slices/S4/integration-record.json",
     "skeleton_flow": "F1",
     "wsgi_entry": "freelancer_app.wsgi.application",
     "frozen_verified": true
@@ -30,10 +31,10 @@
   "composition": {
     "wsgi_entry": "freelancer_app.wsgi.application",
     "files": [
-      "src/freelancer_app/web_ingress/time_logging_dispatch.py"
+      "src/freelancer_app/web_ingress/project_label_dispatch.py"
     ],
     "framework": "Django",
-    "lld_notes": "Framework: Django (carried from slice build-record lld_notes — not re-picked). Skeleton F1 routes + F4 project routes inherited by reference — not edited (H14/B4). Feature-add wires the new C4 (Time Logging) into the EXISTING system at the declared INTEGRATION_SEAMS only (BF6): additive composition file web_ingress/time_logging_dispatch.py (1) adds path('time-entries/<id>/label') urlpattern + _view_set_label Django view (MPA/SSR, ADR-0004) routing into C6 ingress at the CT9 seam — a NEW additive route, no existing web_ingress code edited; (2) composes SessionResolver(CT3, existing C2) to gate the request (reuses the baseline session pattern); (3) calls C4.set_label which persists the label field on the time-entry record via existing C1 at the CT2 seam (the aPRD INTEGRATION_SEAMS primary seam — CT2 EXTENSION, no new contract, C1 internals untouched). existing_internals_modified=false — additive wiring only; no C1/C2/C6 internal logic edited. Same routing/session/error patterns the baseline uses (BF5). Synchronous, no async/queue (INV6)."
+    "lld_notes": "Framework: Django (carried from slice build-record lld_notes — not re-picked). Skeleton F1 routes + S4 F4 project routes inherited by reference — not edited (H14/B4/BF1). Feature-add wires the label capability into the EXISTING system at the declared INTEGRATION_SEAMS only (BF6): additive composition file web_ingress/project_label_dispatch.py (1) adds path('projects/<slug>/label') urlpattern + _view_set_project_label Django view (MPA/SSR, ADR-0004) routing into C6 ingress at the CT9 seam — a NEW additive route, no existing web_ingress code edited; (2) composes a NEW _ProjectLabelAdapter (does NOT edit the S4 _ProjectManagementAdapter) that reuses SessionResolver(CT3, existing C2) to gate the request + the SAME _PROJECT_DATA_STORE singleton; (3) calls C3 ProjectLabeler.set_label which persists the label field on the EXISTING project record via existing C1 at the CT2 seam (the aPRD INTEGRATION_SEAMS primary seam — CT2 EXTENSION, A14, no new contract, C1 internals untouched). existing_internals_modified=false — additive wiring only; the WSGI composition root grows additively (S5 route appended) exactly as it did for S4; no C1/C2/C3/C6 component internal logic edited. Synchronous, no async/queue (INV6)."
   },
   "wired_seams": [
     { "at": "C6", "contract_ref": "CT9", "kind": "ingress" },
@@ -42,35 +43,23 @@
   ],
   "existing_internals_modified": false,
   "new_composition_files": [
-    "src/freelancer_app/web_ingress/time_logging_dispatch.py"
+    "src/freelancer_app/web_ingress/project_label_dispatch.py"
   ],
   "mock_swaps": [
     {
-      "via": "CT9",
-      "from": "C6",
-      "to": "C4",
-      "seam": "ingress->domain",
-      "status": "swapped-real",
-      "seam_basis": "declared (INTEGRATION_SEAMS)",
-      "detail": "C6 ingress dispatch to the new C4 added via additive time_logging_dispatch.py (_view_set_label + path('time-entries/<id>/label')). No existing web_ingress component file edited (additive route only). Both C6 (prior-built, status:green) and C4 (this-slice, status:green) on path."
+      "via": "CT9", "from": "C6", "to": "C3", "seam": "ingress->domain",
+      "status": "swapped-real", "seam_basis": "declared (INTEGRATION_SEAMS)",
+      "detail": "C6 ingress dispatch to the label feature added via additive project_label_dispatch.py (_view_set_project_label + path('projects/<slug>/label')). No existing web_ingress component file edited (additive route only). Both C6 (prior-built, status:green) and C3 (extended, status:green) on path."
     },
     {
-      "via": "CT3",
-      "from": "C4",
-      "to": "C2",
-      "seam": "in-domain session scope",
-      "status": "swapped-real",
-      "seam_basis": "declared (INTEGRATION_SEAMS)",
-      "detail": "New C4 resolves the freelancer session via existing C2 at the CT3 seam (reuses the baseline session pattern, BF5). mock_identity_auth in the frozen slice conftest provides resolve_session; real wiring composes existing C2 SessionResolver — C2 internals untouched. Both C4 (status:green) and C2 (prior-built, status:green) on path."
+      "via": "CT3", "from": "C3", "to": "C2", "seam": "in-domain session scope",
+      "status": "swapped-real", "seam_basis": "declared (INTEGRATION_SEAMS)",
+      "detail": "C3 resolves the freelancer session via existing C2 at the CT3 seam (reuses the baseline session pattern, BF5). real wiring composes existing C2 SessionResolver — C2 internals untouched. Both C3 (status:green) and C2 (prior-built, status:green) on path."
     },
     {
-      "via": "CT2",
-      "from": "C4",
-      "to": "C1",
-      "seam": "domain->persistence",
-      "status": "swapped-real",
-      "seam_basis": "declared (INTEGRATION_SEAMS)",
-      "detail": "C4 set_label persists the label field on the time-entry record via existing C1 at the CT2 seam — the aPRD INTEGRATION_SEAMS primary seam (CT2 EXTENSION, A14: new label field on the existing record, no new contract). mock_data_store in the frozen slice conftest provides the CT2 surface; real wiring delegates to existing C1 data store — C1 internals untouched. Both C4 (status:green) and C1 (prior-built, status:green) on path."
+      "via": "CT2", "from": "C3", "to": "C1", "seam": "domain->persistence",
+      "status": "swapped-real", "seam_basis": "declared (INTEGRATION_SEAMS)",
+      "detail": "C3 set_label persists the label field on the EXISTING project record via existing C1 at the CT2 seam — the aPRD INTEGRATION_SEAMS primary seam (CT2 EXTENSION, A14: new label field on the existing project record, reuses the existing update surface, no new contract). real wiring delegates to existing C1 data store — C1 internals untouched. Both C3 (status:green) and C1 (prior-built, status:green) on path."
     }
   ],
   "mocks_retained": [],
@@ -84,19 +73,19 @@
           "id": "F5/AC11-set-label-status",
           "assert": "set_response['status'] in (200, 201, 302)",
           "result": "pass",
-          "trace": "_view_set_label routes time-entries/<id>/label POST -> resolves session via mock_identity_auth.resolve_session({session_token:'sess-f5-valid'}) -> {'freelancer_id':'freelancer-42'}; calls C4.set_label(entry_id, label='client-acme') -> delegates to mock_data_store CT2 label surface -> returns persisted record {'id':'te-1','label':'client-acme'}; view returns {'status':200,'entry':record}; set_response['status']=200 in (200,201,302) = True"
+          "trace": "_view_set_project_label routes projects/acme-website/label POST -> resolves session via mock_identity_auth.resolve_session({session_token:'sess-f5-valid'}) -> {'freelancer_id':'freelancer-42'}; calls ProjectLabeler.set_label('proj-1','freelancer-42',label='client-acme') -> delegates to mock_data_store.update_project with {'label':'client-acme'} -> returns labeled record; view returns {'status':200,...}; set_response['status']=200 in (200,201,302) = True"
         },
         {
           "id": "F5/AC11-label-renders",
-          "assert": "any(e['id'] == 'te-1' and e['label'] == 'client-acme' for e in list_response.get('entries', []))",
+          "assert": "any(p['id'] == 'proj-1' and p['label'] == 'client-acme' for p in list_response.get('projects', []))",
           "result": "pass",
-          "trace": "list view return_value entries=[{'id':'te-1','label':'client-acme'}]; the persisted label field renders on the entry in the list; any(...) = True"
+          "trace": "list view return_value projects=[{'id':'proj-1','label':'client-acme',...}]; the persisted label field renders on the project in the list; any(...) = True"
         },
         {
           "id": "F5/AC13-label-persists-across-navigation",
-          "assert": "reload_entry['label'] == 'client-acme' and reload_entry['id'] == 'te-1'",
+          "assert": "reload_project['label'] == 'client-acme' and reload_project['id'] == 'proj-1'",
           "result": "pass",
-          "trace": "second read after navigate-away: mock_data_store returns the same record {'id':'te-1','label':'client-acme'}; label field still holds the value and stays linked to the same time entry (AC13); both equalities hold = True"
+          "trace": "second read after navigate-away: mock_data_store returns the same record {'id':'proj-1','label':'client-acme'}; label field still holds the value and stays linked to the same project (AC13); both equalities hold = True"
         }
       ],
       "result": "pass"
@@ -104,19 +93,19 @@
     "failure": {
       "test": "test_f5_failure_ct2_store_unavailable",
       "exercises": "CT2:store-unavailable",
-      "arrives_at": "C1 raises StoreUnavailableError on label persist; C4 propagates it unmodified (does not swallow); Web Ingress surfaces the persistence error as an HTTP error; the label is not persisted",
+      "arrives_at": "C1 raises StoreUnavailableError on label persist; C3 propagates unmodified (does not swallow); Web Ingress surfaces the persistence error as 503; the label is not persisted",
       "assertions": [
         {
           "id": "F5-failure-status",
           "assert": "response['status'] in (500, 503)",
           "result": "pass",
-          "trace": "mock_data_store label-persist side_effect=StoreUnavailableError; C4.set_label propagates it unmodified (baseline propagate-not-catch idiom); _view_set_label surfaces it as {'status':503}; response['status']=503 in (500,503) = True"
+          "trace": "mock_data_store.update_project side_effect=StoreUnavailableError; ProjectLabeler.set_label propagates it unmodified (baseline propagate-not-catch idiom); dispatch_project_label_request except StoreUnavailableError -> {'status':503}; response['status']=503 in (500,503) = True"
         },
         {
           "id": "F5-failure-label-not-persisted",
-          "assert": "not any(e.get('label') == 'client-acme' for e in list_after_failure.get('entries', []))",
+          "assert": "not any(p.get('label') == 'client-acme' for p in list_after_failure)",
           "result": "pass",
-          "trace": "StoreUnavailableError raised before the record is written; subsequent list contains no entry with label 'client-acme'; any(...) = False; not False = True"
+          "trace": "StoreUnavailableError raised before the record is written; subsequent list contains no project with label 'client-acme'; any(...) = False; not False = True"
         }
       ],
       "result": "pass"
@@ -125,7 +114,7 @@
   "verification": {
     "flow": "pass",
     "method": "static-trace",
-    "static_trace_notes": "No pytest runtime in build harness (Rule 6, §5.7). Static trace of all flow assertions: Happy path — _view_set_label resolves session via existing C2 (CT3), calls C4.set_label which persists the label field via existing C1 (CT2 extension); set_response['status']=200 holds; label renders in the list (AC11) holds; label still holds the value on reload, linked to the same entry (AC13) holds. Failure path — mock_data_store label persist raises StoreUnavailableError; C4 propagates unmodified; _view_set_label surfaces {status:503}; response['status']=503 in (500,503) holds; label-not-persisted holds. All 5 assertions pass by construction against the wired path; new component wired into existing C6/C2/C1 at the declared INTEGRATION_SEAMS via additive time_logging_dispatch.py only — existing_internals_modified=false. Authoritative execution owed to VERIFY-OUTPUT (which also runs the scoped regression layer).",
+    "static_trace_notes": "No pytest runtime in build harness (Rule 6, §5.7). Static trace of all flow assertions: Happy path — _view_set_project_label resolves session via existing C2 (CT3), calls C3 ProjectLabeler.set_label which persists the label field via existing C1 (CT2 extension); set_response['status']=200 holds; label renders in the list (AC11) holds; label still holds the value on reload, linked to the same project (AC13) holds. Failure path — mock_data_store.update_project raises StoreUnavailableError; C3 propagates unmodified; dispatch surfaces {status:503}; response['status']=503 in (500,503) holds; label-not-persisted holds. All 5 assertions pass by construction against the wired path; the label feature wired into existing C6/C2/C1/C3 at the declared INTEGRATION_SEAMS via additive project_label_dispatch.py + a new adapter only — existing_internals_modified=false. Authoritative execution owed to VERIFY-OUTPUT (which also runs the scoped regression layer).",
     "contract": "pass-inherited",
     "acceptance": "not-run"
   },
@@ -136,6 +125,7 @@
     "built_against": {
       "slice_oracle_lock": ".build/slices/S5/oracle/oracle.lock",
       "skeleton_integration": ".build/skeleton/integration-record.json",
+      "slice_s4_integration": ".build/slices/S4/integration-record.json",
       "skeleton_lock": ".hld/skeleton.lock",
       "adr_lock": ".adr/adr.lock",
       "aprd_lock": ".aprd/aprd.lock",
@@ -147,7 +137,7 @@
   },
   "commits": [
     {
-      "message": "INTEGRATE F5: wire C4 Time Logging into existing system at declared seams CT9/CT3/CT2 (additive label dispatch + session-gated persistence; existing internals untouched)",
+      "message": "INTEGRATE F5: wire project label into existing system at declared seams CT9/CT3/CT2 (additive label dispatch + session-gated persistence; existing internals untouched)",
       "traces": ["R11", "R13", "AC11", "AC13"]
     }
   ],

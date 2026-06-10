@@ -1,0 +1,151 @@
+{
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "adr_lock_ref": ".adr/adr.lock",
+  "adr_log_ref": ".adr/log/",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "lock_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton",
+  "skeleton_id": "S1",
+  "boundary_strategy": {
+    "adr_refs": ["ADR-0001"],
+    "style": "Single-deployment monolith (flat structure)",
+    "cut_basis": "Cluster by responsibility within one deployable; logical responsibility units only — no enforced internal module boundaries, no distributed components (INV6 single-server synchronous mandate)"
+  },
+  "components": [
+    {
+      "id": "C1",
+      "name": "Data Store",
+      "responsibility": "Provide durable relational persistence (PostgreSQL) for all application state — freelancer identity, projects, time entries, invoices, and related monetary entities.",
+      "owns_entities": [],
+      "traces": ["R7", "R8", "R9", "R10"],
+      "realizes_seam": ["persistence"],
+      "honors_adr": ["ADR-0003", "ADR-0001"]
+    },
+    {
+      "id": "C2",
+      "name": "Identity & Auth",
+      "responsibility": "Manage freelancer account creation and authentication by delegating to Google OAuth 2.0, storing only the provider token and user profile reference, and establishing an authenticated session.",
+      "owns_entities": ["E1"],
+      "traces": ["R5"],
+      "realizes_seam": ["domain", "primary_external_integration"],
+      "honors_adr": ["ADR-0005", "ADR-0001"]
+    },
+    {
+      "id": "C3",
+      "name": "Project Management",
+      "responsibility": "Create, display, edit, and delete the authenticated freelancer's client projects, including the associated client record, project-level currency designation, and project-level billable rate.",
+      "owns_entities": ["E2", "E5", "E6", "E7"],
+      "traces": ["R4", "R6", "R9", "R10"],
+      "realizes_seam": [],
+      "honors_adr": ["ADR-0001", "ADR-0003"]
+    },
+    {
+      "id": "C4",
+      "name": "Time Logging",
+      "responsibility": "Accept, persist, and display billable time entries (date, description, hours) against a client project, scoped to the authenticated freelancer.",
+      "owns_entities": ["E3"],
+      "traces": ["R2", "R7"],
+      "realizes_seam": [],
+      "honors_adr": ["ADR-0001", "ADR-0003"]
+    },
+    {
+      "id": "C5",
+      "name": "Invoice Export",
+      "responsibility": "Aggregate a project's time entries for a selected calendar month into PDF invoice line items, compute monetary totals using the project rate and currency, and stream the PDF to the browser as a file download.",
+      "owns_entities": ["E4"],
+      "traces": ["R3", "R8", "R9", "R10"],
+      "realizes_seam": [],
+      "honors_adr": ["ADR-0001", "ADR-0003"]
+    },
+    {
+      "id": "C6",
+      "name": "Web Ingress",
+      "responsibility": "Accept HTTP/HTTPS requests, route them to the appropriate domain component, and serve server-rendered HTML pages to the browser (MPA/SSR entry surface).",
+      "owns_entities": [],
+      "traces": ["R1"],
+      "realizes_seam": ["ingress"],
+      "honors_adr": ["ADR-0001", "ADR-0004"]
+    }
+  ],
+  "edges": [
+    {
+      "from": "C2",
+      "to": "C1",
+      "reason": "Identity & Auth reads and writes the freelancer identity record (E1 — provider token and user profile reference) to the data store."
+    },
+    {
+      "from": "C3",
+      "to": "C1",
+      "reason": "Project Management persists and retrieves client project records (E2, E5, E6, E7) from the data store."
+    },
+    {
+      "from": "C3",
+      "to": "C2",
+      "reason": "Project Management scopes all project data to the authenticated freelancer identity — reads the current session to enforce ownership."
+    },
+    {
+      "from": "C4",
+      "to": "C1",
+      "reason": "Time Logging persists and retrieves time entry records (E3) to the data store, satisfying the durable association with project and freelancer."
+    },
+    {
+      "from": "C4",
+      "to": "C3",
+      "reason": "Time Logging references a client project to associate each time entry with its owning project (and inherits project-level currency and rate)."
+    },
+    {
+      "from": "C5",
+      "to": "C1",
+      "reason": "Invoice Export queries time entries for a given project and calendar month directly from the data store to aggregate line items."
+    },
+    {
+      "from": "C5",
+      "to": "C3",
+      "reason": "Invoice Export reads the project's currency designation (E5) and billable rate (E7) and the client record (E6) to populate invoice line items and header."
+    },
+    {
+      "from": "C6",
+      "to": "C2",
+      "reason": "Web Ingress gates authenticated routes through the identity component — session presence is checked before dispatching to domain views."
+    },
+    {
+      "from": "C6",
+      "to": "C3",
+      "reason": "Web Ingress dispatches project management page requests to the Project Management component."
+    },
+    {
+      "from": "C6",
+      "to": "C4",
+      "reason": "Web Ingress dispatches time-logging page requests to the Time Logging component."
+    },
+    {
+      "from": "C6",
+      "to": "C5",
+      "reason": "Web Ingress dispatches invoice export requests to the Invoice Export component."
+    }
+  ],
+  "coverage": {
+    "requirements_in_scope": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10"],
+    "requirements_landed": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10"],
+    "requirement_orphans": [],
+    "entities_in_scope": ["E1", "E2", "E3", "E4", "E5", "E6", "E7"],
+    "entities_owned": ["E1", "E2", "E3", "E4", "E5", "E6", "E7"],
+    "entity_orphans": [],
+    "components_without_requirement": [],
+    "seam_realization": [
+      { "seam": "ingress", "present": true, "realized_by": ["C6"] },
+      { "seam": "domain", "present": true, "realized_by": ["C2"] },
+      { "seam": "persistence", "present": true, "realized_by": ["C1"] },
+      { "seam": "primary_external_integration", "present": true, "realized_by": ["C2"] }
+    ]
+  },
+  "structural_defects": [],
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "component_counts": {
+    "components": 6,
+    "edges": 11,
+    "entities_owned": 7
+  }
+}

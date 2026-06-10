@@ -1,0 +1,96 @@
+{
+  "components_ref": ".hld/skeleton/components.json",
+  "contracts_ref": ".hld/skeleton/contracts.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "adr_lock_ref": ".adr/adr.lock",
+  "adr_log_ref": ".adr/log/",
+  "lock_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton",
+  "skeleton_id": "S1",
+  "flows": [
+    {
+      "id": "F1",
+      "slice": "S1",
+      "name": "Freelancer signs in via Google OAuth on the web application",
+      "trigger": "Freelancer opens the application in a browser and initiates OAuth sign-in",
+      "path": ["C6", "C2", "C1"],
+      "steps": [
+        {
+          "from": "C6",
+          "to": "C2",
+          "via": "CT8",
+          "seam": "ingress->domain",
+          "external": false,
+          "action": "Web Ingress receives the OAuth callback request and dispatches it to Identity & Auth for session resolution; CT8 session-presence check gates the authenticated route"
+        },
+        {
+          "from": "C2",
+          "to": "C2",
+          "via": null,
+          "seam": "primary_external_integration",
+          "external": true,
+          "action": "Identity & Auth completes the Google OAuth 2.0 handshake — initiates redirect, receives callback, exchanges code for token; external boundary crossed inside C2, no CT* (external system not a modeled component)"
+        },
+        {
+          "from": "C2",
+          "to": "C1",
+          "via": "CT1",
+          "seam": "domain->persistence",
+          "external": false,
+          "action": "Identity & Auth writes the Freelancer identity record (provider token and user profile reference, E1) to Data Store and reads it back on session resolution"
+        }
+      ],
+      "via": ["CT8", "CT1"],
+      "failure_path": {
+        "trigger": "PostgreSQL instance unreachable when Identity & Auth attempts to persist the Freelancer identity record after OAuth callback",
+        "exercises": "CT1:store-unavailable",
+        "arrives_at": "OAuth callback cannot persist the identity record; no authenticated session is established; Web Ingress redirects the browser to the login entry point with an error"
+      },
+      "traces": ["R1", "R5", "AC1", "AC5"],
+      "honors_inv": ["INV1", "INV6"]
+    }
+  ],
+  "seam_coverage": [
+    {
+      "seam": "ingress",
+      "crossed": true,
+      "by_component": "C6",
+      "in_flow": "F1",
+      "via": null
+    },
+    {
+      "seam": "domain",
+      "crossed": true,
+      "by_component": "C2",
+      "in_flow": "F1",
+      "via": "CT8"
+    },
+    {
+      "seam": "persistence",
+      "crossed": true,
+      "by_component": "C1",
+      "in_flow": "F1",
+      "via": "CT1"
+    },
+    {
+      "seam": "primary_external_integration",
+      "crossed": true,
+      "by_component": "C2",
+      "in_flow": "F1",
+      "via": null
+    }
+  ],
+  "composes_against_contracts": true,
+  "structural_defects": [],
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "flow_counts": {
+    "flows": 1,
+    "foundational_seams": 4,
+    "seams_crossed": 4,
+    "seams_uncovered": 0,
+    "structural_defects": 0
+  }
+}

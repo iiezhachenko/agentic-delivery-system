@@ -1,0 +1,80 @@
+{
+  "components_ref": ".hld/skeleton/components.json",
+  "lock_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton",
+  "skeleton_id": "S1",
+  "edge_semantics": "edge {from,to} from components.json = `from` depends on `to`'s contract; `to` builds before `from`. A slice is a vertical PATH through this DAG (Phase 4 activates one; the DAG is emitted once).",
+  "nodes": [
+    {
+      "id": "C1",
+      "name": "Data Store",
+      "depends_on": []
+    },
+    {
+      "id": "C2",
+      "name": "Identity & Auth",
+      "depends_on": ["C1"]
+    },
+    {
+      "id": "C3",
+      "name": "Project Management",
+      "depends_on": ["C1", "C2"]
+    },
+    {
+      "id": "C4",
+      "name": "Time Logging",
+      "depends_on": ["C1", "C3"]
+    },
+    {
+      "id": "C5",
+      "name": "Invoice Export",
+      "depends_on": ["C1", "C3"]
+    },
+    {
+      "id": "C6",
+      "name": "Web Ingress",
+      "depends_on": ["C2", "C3", "C4", "C5"]
+    }
+  ],
+  "build_waves": [
+    {
+      "wave": 0,
+      "components": ["C1"],
+      "rationale": "no dependencies — builds first"
+    },
+    {
+      "wave": 1,
+      "components": ["C2"],
+      "rationale": "depends on C1 only; C1 at wave 0, so wave = 1"
+    },
+    {
+      "wave": 2,
+      "components": ["C3"],
+      "rationale": "depends on C1 (wave 0) and C2 (wave 1); max = 1, so wave = 2"
+    },
+    {
+      "wave": 3,
+      "components": ["C4", "C5"],
+      "rationale": "both depend on C1 (wave 0) and C3 (wave 2); max = 2, so wave = 3; build in parallel, ascending C* index"
+    },
+    {
+      "wave": 4,
+      "components": ["C6"],
+      "rationale": "depends on C2 (wave 1), C3 (wave 2), C4 (wave 3), C5 (wave 3); max = 3, so wave = 4"
+    }
+  ],
+  "build_order": ["C1", "C2", "C3", "C4", "C5", "C6"],
+  "cycles": [],
+  "coverage": {
+    "nodes": 6,
+    "edges": 11,
+    "nodes_ordered": 6,
+    "all_nodes_ordered": true
+  },
+  "dag_counts": {
+    "nodes": 6,
+    "edges": 11,
+    "waves": 5
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_defect": "convention-drift / BF5 — overlay → .build/slices/S5/critique.json. New code diverges from the captured CONVENTION_BASELINE; CRITIQUE flags + BLOCKS.",
+  "class": "feature-add",
+  "mode": "slice-build",
+  "slice_id": "S5",
+  "components_reviewed": ["C3"],
+  "convention_baseline_ref": ".aprd/aprd.v2.frozen.md#CLASS_EXTENSION/CONVENTION_BASELINE",
+  "files_reviewed": ["src/freelancer_app/tags/tagService.py"],
+  "convention_drift_check": {
+    "drift_detected": true,
+    "checked": {
+      "layout": "FAIL — invents new top-level package freelancer_app/tags/ instead of extending project_management (CONVENTION_BASELINE: one package per component, label extends C3).",
+      "naming": "FAIL — camelCase module file tagService.py + camelCase methods (setLabel); captured idiom is snake_case (project_store.py / set_label).",
+      "lint": "FAIL — diverges from existing hand-style; introduces canon-default structure not present in the baseline.",
+      "error_handling": "FAIL — swallows the CT2 store-unavailable failure (try/except → return None) instead of propagating unmodified (baseline propagate-not-catch idiom)."
+    },
+    "verdict": "convention-drift (BF5)"
+  },
+  "verdict": "blocked",
+  "issues": [
+    { "category": "convention-drift", "severity": "block", "file": "src/freelancer_app/tags/tagService.py", "detail": "New top-level package + camelCase naming contradict CONVENTION_BASELINE (one package per component, snake_case). New code used canon defaults instead of the captured baseline conventions (BF5)." },
+    { "category": "swallowed-failure", "severity": "block", "file": "src/freelancer_app/tags/tagService.py", "detail": "setLabel catches all exceptions and returns None — swallows CT2 store-unavailable/constraint-violation; baseline idiom propagates unmodified." }
+  ],
+  "issue_count": 2,
+  "critique_counts": { "components_reviewed": 1, "files_reviewed": 1, "issues": 2, "by_category": { "convention-drift": 1, "swallowed-failure": 1, "baseline-overwrite": 0, "hardcoded-fixture": 0, "stub-branch": 0, "under-complexity": 0, "gold-plating": 0 } }
+}

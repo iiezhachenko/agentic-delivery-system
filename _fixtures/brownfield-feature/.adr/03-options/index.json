@@ -1,0 +1,25 @@
+{
+  "triage_ref": ".adr/02-triage.json",
+  "decision_points_ref": ".adr/01-decision-points.json",
+  "aprd_ref": ".aprd/aprd.frozen.md",
+  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
+  "class": "greenfield",
+  "skeleton_id": "S1",
+  "canon_status": "absent",
+  "resolution_queue": ["DP1", "DP2", "DP4", "DP6", "DP7", "DP10"],
+  "option_files": [
+    { "id": "DP1",  "path": "03-options/DP1.json",  "option_count": 2 },
+    { "id": "DP2",  "path": "03-options/DP2.json",  "option_count": 3 },
+    { "id": "DP4",  "path": "03-options/DP4.json",  "option_count": 3 },
+    { "id": "DP6",  "path": "03-options/DP6.json",  "option_count": 3 },
+    { "id": "DP7",  "path": "03-options/DP7.json",  "option_count": 3 },
+    { "id": "DP10", "path": "03-options/DP10.json", "option_count": 3 }
+  ],
+  "degenerate": [],
+  "skipped": [],
+  "option_set_counts": {
+    "decisions_grounded": 6,
+    "total_options": 17,
+    "min_options_per_decision": 2
+  }
+}

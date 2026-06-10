@@ -1,0 +1,86 @@
+{
+  "id": "DP10",
+  "decision": "Which hosting and deployment target category should be used to serve the application: a PaaS platform, a VPS, a container platform, or another managed runtime?",
+  "category": "Deployment topology",
+  "forced_by": ["C1", "C2", "A6", "A13"],
+  "cut_ref": "FD4",
+  "grounding": {
+    "existing_system": "n/a — greenfield (C3): no existing system to conform to",
+    "canon_status": "absent",
+    "source": "reasoned",
+    "note": "arch-canon.json absent; option set reasoned from established architecture first principles; currency self-verified against current platform offerings (2025); options must satisfy A6 (no single large-cloud-vendor lock-in), A13 (single-server), C2 (two-month timeline), C1 (browser-reachable); Kubernetes / auto-scaling container orchestration excluded as non-compliant with INV6"
+  },
+  "options": [
+    {
+      "option": "PaaS platform (e.g., Render, Fly.io, Railway)",
+      "summary": "Managed platform-as-a-service that abstracts server provisioning, OS management, and TLS termination; the team pushes code or a container image and the platform manages the runtime.",
+      "source": "reasoned",
+      "reason_to_consider": "PaaS platforms (Render, Fly.io, Railway) provide the fastest path from code to a browser-reachable HTTPS URL, directly supporting AC1 and C2; they are available from multiple providers (satisfying A6) and have free or very low-cost tiers suitable for A13 personal-tool scale.",
+      "tradeoffs": {
+        "strengths": [
+          "Fastest deployment path: automated TLS, HTTP routing, and environment-variable injection are provided; no server configuration required — strong alignment with C2 (two-month timeline) and AC1 (browser-reachable over HTTPS).",
+          "Multiple competing providers (Render, Fly.io, Railway, Heroku) are available; switching between them is feasible without code changes — satisfies A6 (no single-vendor lock-in).",
+          "Low operational overhead: no OS patching, no nginx configuration, no server provisioning — team focuses entirely on application code.",
+          "Managed add-on databases (Postgres) are available on all named platforms at low cost, compatible with DP4 relational options.",
+          "Suitable for A13 scale (single instance, synchronous requests, no horizontal scaling needed — INV6)."
+        ],
+        "costs": [
+          "PaaS pricing models change (Heroku's free tier removal is a historical example); migration away from a specific PaaS requires build-pipeline reconfiguration.",
+          "Some PaaS platforms (notably Render and Railway) do not support persistent-volume filesystem mounts on their basic tiers — relevant if SQLite (DP4 embedded option) is chosen; requires either a managed database add-on or a platform with volume support.",
+          "Less control over the runtime environment; if a specific system library is needed (e.g., for a PDF library dependency), the build image must be customizable.",
+          "Cold-start latency on platforms with sleep-on-idle behavior (Render free tier) can cause slow first-request responses; a paid plan eliminates this."
+        ]
+      },
+      "bears_on": ["C1", "C2", "A6", "A13", "AC1", "INV6"]
+    },
+    {
+      "option": "VPS with manual server setup (e.g., DigitalOcean Droplet, Hetzner Cloud, Linode/Akamai)",
+      "summary": "A virtual private server where the team installs the runtime, configures a reverse proxy (nginx/Caddy), manages TLS, and deploys the application; full control over the OS and environment.",
+      "source": "reasoned",
+      "reason_to_consider": "VPS hosting is the most portable, vendor-neutral option (A6) with no platform-specific deployment conventions; at A13 scale a small VPS (1–2 vCPU, 1–2 GB RAM) is sufficient and the monthly cost is predictable and low.",
+      "tradeoffs": {
+        "strengths": [
+          "Maximum portability: VPS offerings are available from dozens of providers (DigitalOcean, Hetzner, Linode, OVH, Vultr) — no PaaS-specific build conventions, deepest A6 compliance.",
+          "Full OS-level control: any system library or runtime dependency can be installed; no PaaS build-image constraints.",
+          "Predictable, fixed monthly cost ($5–10/month for a small Hetzner or DigitalOcean droplet) — lowest cost option at A13 scale if the team is comfortable with server administration.",
+          "SQLite (if chosen in DP4) is fully compatible: the filesystem is persistent and directly under team control.",
+          "Single-server deployment model is a natural fit for INV6 (no horizontal scaling required)."
+        ],
+        "costs": [
+          "Highest operational overhead: the team must configure and maintain nginx/Caddy, TLS certificates (Let's Encrypt renewal), OS security updates, and process management (systemd, PM2, etc.) — consuming time from C2's two-month window.",
+          "No managed database included: a separate Postgres install on the same VPS or a managed database add-on (external) is required if relational DB is chosen.",
+          "Deployment automation (CI/CD pipeline, deploy scripts) must be built by the team; no platform-provided deploy hooks.",
+          "Server provisioning and initial configuration is a non-trivial setup step that does not exist with PaaS; mistakes can leave the server misconfigured for days."
+        ]
+      },
+      "bears_on": ["C1", "C2", "A6", "A13", "AC1", "INV6"]
+    },
+    {
+      "option": "Container platform — single-container deployment (e.g., Fly.io Machines, Render Docker, DigitalOcean App Platform with Docker)",
+      "summary": "Application is packaged as a Docker container image and deployed to a single-container managed runtime; the container platform handles scheduling, TLS, and HTTP routing; no orchestration layer.",
+      "source": "reasoned",
+      "reason_to_consider": "Containerizing the application decouples the runtime from the host OS (improving portability beyond a VPS without the PaaS constraint of a fixed buildpack), while keeping a single-instance deployment model consistent with INV6; multiple platforms support single-container Docker deployments at low cost.",
+      "tradeoffs": {
+        "strengths": [
+          "Container image is portable across any Docker-compatible host — stronger portability than a PaaS-buildpack deployment; satisfies A6.",
+          "Deterministic runtime: the Dockerfile pins exact OS, runtime version, and system libraries, eliminating 'it works on my machine' build environment differences.",
+          "Single-container deployment remains compliant with INV6 (no orchestration, no horizontal scaling); the container is the single server process.",
+          "Platform-managed TLS and HTTP routing (Fly.io, Render Docker) provides the same operational simplicity as a PaaS for network-facing concerns.",
+          "Lower operational burden than a VPS: no OS-level maintenance, no nginx configuration."
+        ],
+        "costs": [
+          "Dockerfile authoring and container build pipeline add an initial setup step not present in a pure PaaS buildpack deployment — consumes some C2 time.",
+          "Container image build times add to CI/CD latency; image caching must be configured to keep pipelines fast.",
+          "Persistent volume management for SQLite (if DP4 chooses embedded DB) requires explicit volume attachment in the container deployment configuration.",
+          "Container platform pricing varies; some platforms charge per compute-second (Fly.io Machines) vs. flat monthly (Render); cost unpredictability at low traffic is minor but real.",
+          "Team needs Docker familiarity; if the team is unfamiliar with containerization, this adds a learning curve under C2."
+        ]
+      },
+      "bears_on": ["C1", "C2", "A6", "A13", "AC1", "INV6"]
+    }
+  ],
+  "option_count": 3,
+  "degenerate": false,
+  "degenerate_reason": null,
+  "no_pick_note": "Live, unranked alternatives. EVALUATE-DECIDE scores against CONSTRAINTS / ACCEPTANCE / NFRs and picks (role 4); OPTION-GEN does not recommend."
+}

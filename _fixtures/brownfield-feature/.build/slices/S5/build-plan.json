@@ -1,0 +1,63 @@
+{
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "build_dag_ref": ".hld/skeleton/build-dag.json",
+  "slice_components_ref": ".hld/slices/S5/components.json",
+  "slice_contracts_ref": ".hld/slices/S5/contracts.json",
+  "slice_flows_ref": ".hld/slices/S5/flows.json",
+  "skeleton_build_plan_ref": ".build/skeleton/build-plan.json",
+  "baseline_map_ref": ".aprd/baseline-map.json",
+  "rerank_ref": ".roadmap/08-rerank.json",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "aprd_version": "v2",
+  "locks_verified": true,
+  "class": "feature-add",
+  "mode": "slice-build",
+  "slice_id": "S5",
+  "slice_name": "Tag a client project with a label",
+  "slice_flow": "F5",
+  "build_set": ["C3"],
+  "prior_built_components": ["C1", "C2", "C3", "C6"],
+  "later_slice_components": [],
+  "build_order": ["C3"],
+  "parallel_groups": [ { "wave": 1, "components": ["C3"] } ],
+  "build_units": [
+    {
+      "component": "C3",
+      "name": "Project Management",
+      "role": "extended",
+      "wave": 1,
+      "traces": ["R11", "R13"],
+      "extends_contracts": ["CT2"],
+      "provides_contracts": ["CT9"],
+      "consumes_seams": [
+        { "via": "CT2", "dep": "C1", "status": "real" },
+        { "via": "CT3", "dep": "C2", "status": "real" }
+      ],
+      "mocked_deps": [],
+      "additive_files": ["src/freelancer_app/project_management/project_label.py"],
+      "baseline_files_edited": false,
+      "status": "planned"
+    }
+  ],
+  "mock_map": {},
+  "lock_set": [],
+  "coverage": {
+    "slice_flow": "F5",
+    "slice_path_components": ["C6", "C3", "C2", "C1"],
+    "build_set_components": ["C3"],
+    "prior_built_on_path": ["C6", "C2", "C1"],
+    "components_planned": ["C3"],
+    "unplanned_build_set_components": [],
+    "consumed_seams_total": 2,
+    "consumed_seams_classified": 2,
+    "real_seams": ["CT2", "CT3"],
+    "mocked_seams": [],
+    "provided_seams": ["CT9"],
+    "extended_seams": ["CT2"]
+  },
+  "regression_guard": { "asserts": ["AC6"], "suites": [".build/skeleton/oracle/", ".build/slices/S4/oracle/"] },
+  "structural_defects": [],
+  "build_plan_counts": { "build_units": 1, "real_seams": 2, "mocked_seams": 0, "active_waves": 1, "locks": 0 }
+}

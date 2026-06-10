@@ -1,0 +1,82 @@
+{
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "build_dag_ref": ".hld/skeleton/build-dag.json",
+  "flows_ref": ".hld/skeleton/flows.json",
+  "components_ref": ".hld/skeleton/components.json",
+  "contracts_ref": ".hld/skeleton/contracts.json",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "greenfield",
+  "mode": "skeleton-build",
+  "skeleton_id": "S1",
+  "walking_skeleton_flow": "F1",
+  "build_set": ["C1", "C2", "C6"],
+  "later_slice_components": ["C3", "C4", "C5"],
+  "build_order": ["C1", "C2", "C6"],
+  "parallel_groups": [
+    { "wave": 0, "components": ["C1"] },
+    { "wave": 1, "components": ["C2"] },
+    { "wave": 4, "components": ["C6"] }
+  ],
+  "build_units": [
+    {
+      "component": "C1",
+      "name": "Data Store",
+      "wave": 0,
+      "traces": ["R7", "R8", "R9", "R10"],
+      "provides_contracts": ["CT1"],
+      "consumes_seams": [],
+      "mocked_deps": [],
+      "status": "planned"
+    },
+    {
+      "component": "C2",
+      "name": "Identity & Auth",
+      "wave": 1,
+      "traces": ["R5"],
+      "provides_contracts": ["CT8"],
+      "consumes_seams": [
+        { "via": "CT1", "dep": "C1", "status": "real" }
+      ],
+      "mocked_deps": [],
+      "status": "planned"
+    },
+    {
+      "component": "C6",
+      "name": "Web Ingress",
+      "wave": 4,
+      "traces": ["R1"],
+      "provides_contracts": [],
+      "consumes_seams": [
+        { "via": "CT8", "dep": "C2", "status": "real" },
+        { "via": "CT9", "dep": "C3", "status": "mocked" },
+        { "via": "CT10", "dep": "C4", "status": "mocked" },
+        { "via": "CT11", "dep": "C5", "status": "mocked" }
+      ],
+      "mocked_deps": ["C3", "C4", "C5"],
+      "status": "planned"
+    }
+  ],
+  "mock_map": {
+    "C6": ["C3", "C4", "C5"]
+  },
+  "lock_set": [],
+  "coverage": {
+    "path_components": ["C6", "C2", "C1"],
+    "components_planned": ["C1", "C2", "C6"],
+    "unplanned_path_components": [],
+    "consumed_seams_total": 5,
+    "consumed_seams_classified": 5,
+    "real_seams": ["CT1", "CT8"],
+    "mocked_seams": ["CT9", "CT10", "CT11"]
+  },
+  "structural_defects": [],
+  "build_plan_counts": {
+    "build_units": 3,
+    "real_seams": 2,
+    "mocked_seams": 3,
+    "active_waves": 3,
+    "locks": 0
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "defect": "convention-drift",
+  "invariant": "BF5 — new code must conform to the captured CONVENTION_BASELINE, not canon defaults; CRITIQUE flags drift",
+  "seed": [
+    "overlay defects/convention-drift/tagService.py → src/freelancer_app/tags/tagService.py (new canon-default file)",
+    "(result of running CRITIQUE) = defects/convention-drift/critique.flagged.json → .build/slices/S5/critique.json"
+  ],
+  "load_bearing_assertion": "CRITIQUE verdict == 'blocked' with a convention-drift issue (layout/naming/error-handling diverge from CONVENTION_BASELINE). Golden critique verdict == 'clean', drift_detected == false.",
+  "expected_verdict": "blocked",
+  "expected_signal": { "convention_drift_check.drift_detected": true, "verdict": "blocked", "issues[].category": ["convention-drift", "swallowed-failure"] },
+  "separates_from_golden_by": "convention_drift_check.drift_detected (false in golden / true here) + critique verdict — the BF5 invariant."
+}

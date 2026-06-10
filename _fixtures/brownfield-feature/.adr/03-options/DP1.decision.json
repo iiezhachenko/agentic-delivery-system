@@ -1,0 +1,50 @@
+{
+  "id": "DP1",
+  "decision": "Which architectural style should the system adopt: single-deployment monolith, modular monolith with enforced internal module boundaries, or some other single-server style?",
+  "category": "Architectural style",
+  "forced_by": ["R1", "C1", "AC1"],
+  "cut_ref": "FD1",
+  "options_ref": "03-options/DP1.json",
+  "grounding_source": "reasoned",
+  "evaluation": [
+    {
+      "option": "Single-deployment monolith (flat structure)",
+      "assessment": "Fully compliant with INV6 (single-server, synchronous) and A13 (personal-tool scale, tens of users). Minimal scaffolding and build configuration means the skeleton is reachable under C2's two-month window with no module-boundary setup cost. R1/C1/AC1 are satisfied — one deployable artifact, one HTTP process. The cost is organic coupling: the aPRD's four functional domains (auth, projects, time logging, invoices) share no enforced boundary, so cross-domain entanglement grows as slices accumulate. At A13 scale the codebase stays small enough that discipline alone may suffice, but there is no mechanical guardrail. Refactoring cost rises if the project outgrows the assumption.",
+      "decisive_factors": ["C2", "A13", "INV6", "R1", "AC1"]
+    },
+    {
+      "option": "Modular monolith with enforced internal module boundaries",
+      "summary": "Single deployable unit — fully compliant with INV6 and A13. Internal module boundaries map onto the aPRD's functional domains (R2, R3, R5, R6, R7), providing mechanical prevention of unintended cross-domain coupling. The deployment pipeline is as simple as the flat variant (one artifact). The concrete cost relative to the flat monolith is upfront setup: boundary conventions, public-API declarations, and enforcement tooling must be established before the skeleton is buildable — consuming some of C2's timeline before a single feature exists. At A13 scale there is a real risk that the structure never pays off if the codebase stays small and the project ends after S3.",
+      "assessment": "Single deployable unit — fully compliant with INV6 and A13. Internal module boundaries map onto the aPRD's functional domains (R2, R3, R5, R6, R7), providing mechanical prevention of unintended cross-domain coupling. The deployment pipeline is as simple as the flat variant (one artifact). The concrete cost relative to the flat monolith is upfront setup: boundary conventions, public-API declarations, and enforcement tooling must be established before the skeleton is buildable — consuming some of C2's timeline before a single feature exists. At A13 scale there is a real risk that the structure never pays off if the codebase stays small and the project ends after S3.",
+      "decisive_factors": ["C2", "A13", "INV6", "R1", "AC1"]
+    }
+  ],
+  "decision_made": "Single-deployment monolith (flat structure)",
+  "rationale": "Both options are compliant with INV6 and A13; neither breaches any hard constraint. The deciding force is C2 (two-month timeline) weighted against A13 (personal-tool scale). The modular monolith's concrete build cost — boundary conventions, enforcement tooling, public-API scaffolding established before any feature exists — directly consumes C2 time in exchange for structural protection that pays off at scale. A13 states the scale assumption plainly: tens of users, low concurrency, a project that may end after three slices. The protection the modular structure provides grows in value with codebase size and team turnover; at A13 scale and C2's timeline, that payoff is speculative, not certain. The flat monolith delivers the skeleton faster under C2, satisfies R1/C1/AC1, and costs nothing extra at A13 scale where disciplined naming conventions provide adequate (if mechanical-boundary-free) separation. The modular structure's strengths are real but forward-looking beyond the aPRD's stated scale; C2 + A13 together outweigh them for this scope.",
+  "rejected": [
+    {
+      "option": "Modular monolith with enforced internal module boundaries",
+      "why_rejected": "The upfront cost of establishing module-boundary conventions, enforcement tooling, and public-API declarations before the skeleton is buildable consumes C2's two-month timeline for structural protection that only pays off at scale A13 rules out. At tens of users and low concurrency, the codebase stays small enough that flat-monolith discipline is adequate; the added scaffolding overhead is concrete build cost with speculative payoff — ruled out by C2 weighted against A13."
+    }
+  ],
+  "consequences": {
+    "positive": [
+      "Minimal project scaffolding means the skeleton reaches the FD1 seam (ingress, HTTP/HTTPS, AC1) faster under C2.",
+      "Single deployable artifact keeps the deployment pipeline straightforward for all slices (FD4 / DP10).",
+      "No inter-module coordination overhead; A13 scale makes flat structure operationally adequate for the entire project lifetime."
+    ],
+    "accepted_cost": [
+      "No enforced boundary between auth, projects, time logging, and invoicing domains; coupling will grow organically as slices accumulate — mitigated only by code discipline.",
+      "Retroactive boundary extraction is non-trivial if the project grows beyond A13 scale assumptions after delivery."
+    ],
+    "follow_on": [
+      "DP2 (tech stack): chosen framework should have lightweight scaffolding consistent with a flat structure; heavy convention-over-configuration frameworks that impose their own module layout are compatible but may add overhead.",
+      "DP6 (API style): a flat monolith is equally compatible with MPA and SPA patterns; no constraint imposed, but MPA server-rendering has the most natural fit with a single flat codebase.",
+      "INV6: the single-deployment flat monolith is the most direct architectural expression of INV6's single-server synchronous mandate; slices must not introduce a structure that implies distributed components."
+    ]
+  },
+  "traces": ["R1", "C1", "AC1", "C2", "A13", "INV6"],
+  "degenerate_forced": false,
+  "degenerate_reason": null,
+  "lane_note": "Decision content for SYNTHESIZE-ADR (role 6) to render + RECONCILE (role 5) to coherence-check. EVALUATE-DECIDE picks; it does not assign an ADR id, reconcile cross-decision conflicts, or check coverage."
+}

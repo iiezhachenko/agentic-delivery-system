@@ -1,0 +1,69 @@
+{
+  "sequence_ref": ".roadmap/05-sequence.json",
+  "class": "greenfield",
+  "verdict": "confirmed",
+  "review": {
+    "presented_order": ["S1", "S4", "S2", "S3"],
+    "client_response": "confirmed",
+    "skeleton_pinned": "S1",
+    "electable_slices": [],
+    "overrides": [],
+    "blocked_overrides": [],
+    "needs_followup": false,
+    "signoff": "A — build it in this order. Looks right, let's go."
+  },
+  "sequence": [
+    {
+      "position": 1,
+      "id": "S1",
+      "name": "Sign in via OAuth on the web application",
+      "skeleton": true,
+      "value": "high",
+      "retires_risk": "OAuth provider integration (A2): first exercise of the external OAuth delegation; proves the provider round-trip works before any other slice depends on an authenticated session.",
+      "depends_on": [],
+      "cost_proxy": 4,
+      "rationale": "Pinned to position 1 by RM4: walking skeleton crosses all four foundational seams (ingress, domain, persistence, primary_external_integration) in a single end-to-end path, retires the OAuth provider integration risk (A2) first, and is the dependency root — every other slice depends on it directly or transitively."
+    },
+    {
+      "position": 2,
+      "id": "S4",
+      "name": "Create and manage client projects with currency and billable rate",
+      "skeleton": false,
+      "value": "high",
+      "retires_risk": null,
+      "depends_on": ["S1"],
+      "cost_proxy": 6,
+      "rationale": "S1 placed; S4 is the only dependency-legal slice at this position (S2 and S3 both require S4, which is not yet placed). Value high; establishes the project container that S2 and S3 depend on, unblocking both downstream slices."
+    },
+    {
+      "position": 3,
+      "id": "S2",
+      "name": "Log and persist billable time entries against a project",
+      "skeleton": false,
+      "value": "high",
+      "retires_risk": null,
+      "depends_on": ["S1", "S4"],
+      "cost_proxy": 4,
+      "rationale": "S1 and S4 placed; S2 is the only dependency-legal slice at this position (S3 requires S2, not yet placed). Value high; delivers the core daily-use capability — logging billable hours — and unblocks S3 (invoice export)."
+    },
+    {
+      "position": 4,
+      "id": "S3",
+      "name": "Export a monthly PDF invoice with line items and monetary totals",
+      "skeleton": false,
+      "value": "high",
+      "retires_risk": "Server-side PDF generation (A1): first exercise of the backend PDF library (e.g. Puppeteer or WeasyPrint); proves file generation and browser-stream delivery work before the feature is considered done.",
+      "depends_on": ["S1", "S2", "S4"],
+      "cost_proxy": 8,
+      "rationale": "S1, S2, and S4 all placed; S3 is now dependency-legal. Value high; delivers the terminal product deliverable (PDF invoice export) and retires server-side PDF generation risk (A1). Placed last because its full depends_on chain (S1, S2, S4) required all prior slices to be built first."
+    }
+  ],
+  "dependency_check": { "acyclic": true, "legal": true, "skeleton_first": true },
+  "coverage": {
+    "presented": ["S1", "S2", "S3", "S4"],
+    "confirmed": ["S1", "S4", "S2", "S3"],
+    "missing": [],
+    "added": []
+  },
+  "sequence_counts": { "total": 4, "positions": 4 }
+}

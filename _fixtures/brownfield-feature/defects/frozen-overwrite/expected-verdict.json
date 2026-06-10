@@ -1,0 +1,16 @@
+{
+  "defect": "frozen-overwrite",
+  "invariant": "BF1 — never overwrite a frozen artifact; a change is a new version + change request",
+  "seed": [
+    "overlay defects/frozen-overwrite/aprd.frozen.mutated.md → .aprd/aprd.frozen.md",
+    "run VERIFY (baseline immutability check) against .aprd/aprd.lock (status frozen; v2 lock supersedes.v1.content_sha256 f3a1c0...)"
+  ],
+  "load_bearing_assertion": "Verifier detects the frozen baseline aprd.frozen.md was modified (the tag feature jammed into v1 instead of aprd.v2). Verdict 'rejected'/'immutability-breach'. Golden keeps aprd.frozen.md byte-unchanged and puts all new IDs in aprd.v2.frozen.md.",
+  "expected_verdict": "rejected",
+  "expected_signal": {
+    "baseline_immutability.frozen_artifacts_modified": [".aprd/aprd.frozen.md"],
+    "baseline_immutability.verdict": "breach",
+    "basis": ".aprd/aprd.lock status:frozen + v2 supersedes.v1 sha — baseline body must not change; change requires a new version"
+  },
+  "separates_from_golden_by": "baseline_immutability.frozen_artifacts_modified (empty in golden / [aprd.frozen.md] here) — the BF1 invariant."
+}

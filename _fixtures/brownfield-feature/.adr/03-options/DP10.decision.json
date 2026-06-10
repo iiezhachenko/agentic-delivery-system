@@ -1,0 +1,60 @@
+{
+  "id": "DP10",
+  "decision": "Which hosting and deployment target category should be used to serve the application: a PaaS platform, a VPS, a container platform, or another managed runtime?",
+  "category": "Deployment topology",
+  "forced_by": ["C1", "C2", "A6", "A13"],
+  "cut_ref": "FD4",
+  "options_ref": "03-options/DP10.json",
+  "grounding_source": "reasoned",
+  "evaluation": [
+    {
+      "option": "PaaS platform (e.g., Render, Fly.io, Railway)",
+      "assessment": "Automated TLS, HTTP routing, and HTTPS endpoint provisioning are the platform's responsibility — the skeleton is browser-reachable (AC1) and C1-compliant with no server configuration by the team. This is the most direct path to the FD4 seam under C2: no OS provisioning, no nginx setup, no TLS certificate management. Multiple competing providers (Render, Fly.io, Railway) satisfy A6 — switching between them requires only build-pipeline reconfiguration, not code changes. Single-instance deployment is the default model, consistent with INV6 and A13. Managed Postgres add-ons are available on all named platforms — a clean fit with the DP4 PostgreSQL pick (no volume-mount concern). The cost: PaaS pricing models can change and some platforms have sleep-on-idle behaviour on free tiers (Render); both are real operational characteristics but minor at A13 scale where a low-cost paid plan eliminates cold-start. Build-image customisability is constrained relative to VPS; a PDF library requiring an unusual system dependency (e.g., Puppeteer's Chromium) may need a custom buildpack or Docker layer, but Django/WeasyPrint (DP2 pick) is well-supported on standard Python PaaS buildpacks.",
+      "decisive_factors": ["C1", "C2", "A6", "A13", "AC1", "INV6"]
+    },
+    {
+      "option": "VPS with manual server setup (e.g., DigitalOcean Droplet, Hetzner Cloud, Linode/Akamai)",
+      "assessment": "Maximum A6 portability: VPS offerings are available from dozens of providers with no platform-specific build conventions. Full OS-level control allows any system library to be installed — no buildpack constraints. SQLite (had DP4 chosen it) would be trivially compatible as the filesystem is persistent. Fixed monthly cost ($5–10/month) is the lowest at A13 scale. The critical cost under C2: the team must configure nginx or Caddy, manage TLS certificates (Let's Encrypt renewal automation), set up process management (systemd, PM2, or Gunicorn supervisor), provision the server, and write deployment automation (CI/CD scripts or deploy hooks) — none of this is required with PaaS. These are concrete build-time costs that consume C2's two-month window for infrastructure work rather than feature delivery. At A13 scale, a single Gunicorn process is all that is needed operationally, but reaching that state from a bare VPS takes meaningfully more C2 time than a PaaS push-to-deploy. A6 is already satisfied by PaaS multi-provider availability; the VPS's deeper A6 compliance (no build-convention lock-in) exceeds what the aPRD requires.",
+      "decisive_factors": ["C1", "C2", "A6", "A13", "AC1", "INV6"]
+    },
+    {
+      "option": "Container platform — single-container deployment (e.g., Fly.io Machines, Render Docker, DigitalOcean App Platform with Docker)",
+      "assessment": "Container image portability satisfies A6 with deterministic runtime pinning (Dockerfile locks OS, Python version, system libraries). Single-container deployment is INV6-compliant; platform-managed TLS and HTTP routing (Fly.io, Render Docker) provide the same network-facing operational simplicity as PaaS. Lower OS maintenance burden than VPS. The cost over PaaS: Dockerfile authoring and a container build pipeline are an additional initial setup step. Image build times add to CI/CD latency. For WeasyPrint (the DP2 PDF library), a container with the correct system-level dependencies (Cairo, Pango) is more reliably portable than a PaaS buildpack — a concrete portability advantage for A1's PDF generation requirement. However, this advantage is conditional: standard Python PaaS buildpacks support WeasyPrint dependencies on Render and Railway, making the container's portability benefit marginal for this specific stack. The Docker learning curve under C2 is a real cost if the team is unfamiliar with containerisation.",
+      "decisive_factors": ["C1", "C2", "A6", "A13", "AC1", "INV6", "A1"]
+    }
+  ],
+  "decision_made": "PaaS platform (e.g., Render, Fly.io, Railway)",
+  "rationale": "All three options satisfy C1/AC1 (browser-reachable HTTPS), A6 (no single-vendor lock-in), A13/INV6 (single-server, no horizontal scaling), and are compatible with the DP2 Python/Django + DP4 PostgreSQL picks. The deciding force is C2 (two-month timeline). PaaS is the only option that makes the skeleton browser-reachable (FD4 seam, AC1) with zero server-configuration cost: automated TLS, HTTP routing, and environment-variable injection are provided by the platform; the team pushes code and the endpoint is live. The VPS option requires the team to spend C2 time on nginx, TLS, process management, and deployment automation — concrete infrastructure work that does not advance any AC* feature. This is the clearest C2 differentiator: the VPS costs the same final state but at a higher setup overhead. The container option reduces OS maintenance vs VPS and provides deterministic runtime, but adds Dockerfile authoring and container build pipeline setup over PaaS — a smaller C2 overhead than VPS, but still overhead with no corresponding contract-grounded benefit over PaaS for the Python/Django/WeasyPrint stack where standard buildpacks are adequate. A6 is satisfied by PaaS multi-provider availability (Render, Fly.io, Railway, Railway — switching is pipeline reconfiguration, not code change); PaaS does not over-comply with A6 the way VPS does, but the aPRD does not require maximum A6 compliance beyond avoiding single-vendor lock-in. The DP4 PostgreSQL pick aligns cleanly with PaaS managed Postgres add-ons, eliminating the SQLite volume-mount concern entirely. At A13 scale a low-cost PaaS paid plan ($7–15/month) is operationally adequate; free-tier cold-start behaviour is a known tradeoff, mitigated by a paid plan within the project's cost envelope.",
+  "rejected": [
+    {
+      "option": "VPS with manual server setup (e.g., DigitalOcean Droplet, Hetzner Cloud, Linode/Akamai)",
+      "why_rejected": "nginx/Caddy configuration, TLS certificate management, OS security updates, process manager setup (systemd/Gunicorn supervisor), and deployment automation must all be built by the team before the skeleton is browser-reachable (AC1). This is concrete C2 infrastructure overhead — time spent on server provisioning rather than feature delivery — with no aPRD force requiring the deeper A6 portability or OS-level control a VPS provides over PaaS. Ruled out by C2: the setup cost is real and the benefit exceeds what the contract requires."
+    },
+    {
+      "option": "Container platform — single-container deployment (e.g., Fly.io Machines, Render Docker, DigitalOcean App Platform with Docker)",
+      "why_rejected": "Dockerfile authoring and container build pipeline are initial setup steps absent from PaaS buildpack deployment — concrete C2 overhead. The container's portability advantage (deterministic runtime, system-library pinning) is marginal for the Python/Django/WeasyPrint stack where standard PaaS Python buildpacks support the required system dependencies (A1's PDF generation via WeasyPrint). No contract force (R*, AC*, A*, INV*) requires the stronger portability guarantee containers provide over PaaS for this specific stack and scale; the overhead is real and the incremental benefit is below the contract's resolution at A13 scale."
+    }
+  ],
+  "consequences": {
+    "positive": [
+      "Automated TLS and HTTPS endpoint provisioning closes the FD4 seam (AC1: browser-reachable over HTTPS) with zero server-configuration cost under C2.",
+      "Managed Postgres add-on (Render Postgres, Railway Postgres) integrates with DP4 PostgreSQL pick — persistence seam (FD3) and deployment seam (FD4) close together on one platform.",
+      "Multiple PaaS providers (Render, Fly.io, Railway) satisfy A6 — no single-vendor lock-in; switching requires build-pipeline reconfiguration, not code changes.",
+      "Environment-variable injection (for Django SECRET_KEY, DATABASE_URL, Google OAuth client ID/secret) is platform-managed — no manual secret-file handling."
+    ],
+    "accepted_cost": [
+      "PaaS pricing models can change; free-tier sleep-on-idle behaviour on Render means slow first-request responses — a paid plan ($7–15/month) eliminates cold-start but adds cost.",
+      "Build-image customisability is constrained by the platform's Python buildpack; unusual system libraries outside standard buildpack support require a Docker layer or custom buildpack configuration.",
+      "Less control over the runtime environment than VPS or container deployment; OS-level debugging or direct process inspection is not available."
+    ],
+    "follow_on": [
+      "DP4 (persistence): PostgreSQL pick aligns with PaaS managed Postgres add-ons — provision the add-on at skeleton time to exercise the FD3 persistence seam end-to-end.",
+      "DP7 (OAuth provider): Google OAuth 2.0 requires the redirect URI to be registered in Google Cloud Console pointing to the PaaS-provisioned HTTPS domain; this domain must be known before OAuth client registration.",
+      "INV6: PaaS single-instance deployment is the direct expression of INV6 — no horizontal scaling, no orchestration; the pick constrains all future slices to single-instance assumptions already encoded in INV6."
+    ]
+  },
+  "traces": ["C1", "C2", "A6", "A13", "AC1", "INV6", "A1"],
+  "degenerate_forced": false,
+  "degenerate_reason": null,
+  "lane_note": "Decision content for SYNTHESIZE-ADR (role 6) to render + RECONCILE (role 5) to coherence-check. EVALUATE-DECIDE picks; it does not assign an ADR id, reconcile cross-decision conflicts, or check coverage."
+}

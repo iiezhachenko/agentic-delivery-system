@@ -7,9 +7,9 @@
     {
       "id": "E8",
       "name": "Tag",
-      "note": "Label attachable to a time entry; new classifier the CR introduces.",
+      "note": "Label attachable to a client project; new classifier the CR introduces.",
       "inferred": false,
-      "source": "tag each time entry with a label",
+      "source": "tag each client project with a label",
       "sr_ref": "SR1",
       "baseline_ref": null
     }
@@ -17,50 +17,50 @@
   "explicit_requirements": [
     {
       "id": "R11",
-      "text": "A freelancer must be able to tag a time entry with a label.",
+      "text": "A freelancer must be able to tag a client project with a label.",
       "inferred": false,
-      "source": "add the ability to tag each time entry with a label",
+      "source": "add the ability to tag each client project with a label",
       "sr_ref": "SR1",
-      "baseline_ref": "R2"
+      "baseline_ref": "R6"
     },
     {
       "id": "R12",
-      "text": "A freelancer must be able to filter the time-entry list by tag.",
+      "text": "A freelancer must be able to filter the project list by tag.",
       "inferred": false,
-      "source": "let us filter the time-entry list by tag",
+      "source": "let us filter the project list by tag",
       "sr_ref": "SR1",
-      "baseline_ref": "R2"
+      "baseline_ref": "R6"
     }
   ],
   "implied_requirements": [
     {
       "id": "R13",
-      "text": "A tag applied to a time entry must be persisted and associated with that entry.",
+      "text": "A tag applied to a client project must be persisted and associated with that project.",
       "inferred": true,
-      "source": "tag each time entry with a label … filter the time-entry list by tag",
-      "rationale": "Filtering the list by tag presupposes the tag survives across sessions and is queryable; an unpersisted label cannot drive a filter. Extends baseline time-entry persistence (R7).",
+      "source": "tag each client project with a label … filter the project list by tag",
+      "rationale": "Filtering the list by tag presupposes the tag survives across sessions and is queryable; an unpersisted label cannot drive a filter. Extends baseline project persistence (R6).",
       "sr_ref": "SR1",
-      "baseline_ref": "R7"
+      "baseline_ref": "R6"
     }
   ],
   "stated_constraints": [],
   "unknowns": [
     {
       "id": "U1",
-      "text": "Can a time entry carry multiple tags, or exactly one label? CR says 'a label' (singular) but does not bound multiplicity.",
-      "source": "tag each time entry with a label",
+      "text": "Can a project carry multiple tags, or exactly one label? CR says 'a label' (singular) but does not bound multiplicity.",
+      "source": "tag each client project with a label",
       "sr_ref": "SR1"
     },
     {
       "id": "U2",
       "text": "Is the tag free-text or drawn from a controlled vocabulary the freelancer manages?",
-      "source": "tag each time entry with a label",
+      "source": "tag each client project with a label",
       "sr_ref": "SR1"
     },
     {
       "id": "U3",
       "text": "Does filtering accept a single tag only, or multiple tags combined (AND/OR)?",
-      "source": "filter the time-entry list by tag",
+      "source": "filter the project list by tag",
       "sr_ref": "SR1"
     }
   ]

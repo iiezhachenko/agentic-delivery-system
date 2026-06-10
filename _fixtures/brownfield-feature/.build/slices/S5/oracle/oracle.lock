@@ -1,7 +1,7 @@
 {
   "artifact": ".build/slices/S5/oracle/",
   "version": "v1",
-  "content_sha256": "<64-hex freeze signature — mechanical; consumers check status+manifest, do NOT recompute>",
+  "content_sha256": "5e1c9a7b3d2f08461728e6d5c4b3a2918f0e7d6c5b4a39281706f5e4d3c2b1a0",
   "signer": "test-author:freelancer-time-tracking",
   "signed_at": "2026-06-10T00:00:00Z",
   "status": "frozen",
@@ -13,6 +13,7 @@
   "regression_guard_ref": ".aprd/aprd.v2.frozen.md#CLASS_EXTENSION/REGRESSION_GUARD",
   "built_against": {
     "skeleton_oracle_lock": ".build/skeleton/oracle/oracle.lock",
+    "slice_s4_oracle_lock": ".build/slices/S4/oracle/oracle.lock",
     "skeleton_lock": ".hld/skeleton.lock",
     "adr_lock": ".adr/adr.lock",
     "aprd_lock": ".aprd/aprd.lock",
