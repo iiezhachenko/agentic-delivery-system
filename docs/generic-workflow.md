@@ -155,7 +155,7 @@ Why this way: working software early + often, problems surface in small pieces (
 
 - **Finish line = accepted demo on staging.** That verified staging build = final deliverable.
 - **Production release, deployment to your own environment, post-launch ops out of scope** — deliberate boundary. System delivers proven software ready for that step; doesn't perform live release itself.
-- **For changes to existing products**, system reads + conforms to current code + conventions, guards against breaking what works (regression checks).
+- **For changes to existing products**, system reads + conforms to current code + conventions, guards against breaking what works (regression checks). Adding a feature to a product *this system delivered* runs the dedicated **feature-add** path — see **§12**.
 
 ---
 
@@ -180,12 +180,47 @@ Technology = **decision made for your project** (at "Decide" phase), based on re
 - **"My request is several things at once"** (e.g. "fix upload bug, make it faster, add PDF support"). System detects this, splits into atomic pieces, classifies each (bug fix / performance / feature), confirms breakdown with you before proceeding.
 - **"Changed my mind about a requirement."** Raise at next checkpoint. Change updates agreed requirements + re-plans affected slices — paper trail keeps everything consistent.
 - **"How do I know it works, isn't faked?"** Every slice ships with tests authored by role separate from builder, run against live build, plus anti-cheat review flagging hollow/hard-coded implementations. "Done" requires passing, not claiming.
-- **"This is change to existing system, not new build."** Supported. System reads codebase first, conforms to conventions, adds regression guards so existing behavior stays green.
+- **"This is change to existing system, not new build."** Supported. System reads codebase first, conforms to conventions, adds regression guards so existing behavior stays green. For adding a feature to a product this system already delivered, the **feature-add** path is detailed in **§12**.
 - **"Don't know answer to clarifying question."** Say so. Becomes explicit recorded assumption you can change later — never silent guess.
 
 ---
 
-## 12. Glossary (light)
+## 12. Adding a feature to an already-delivered product (feature-add)
+
+When you bring a **change to a product this system already delivered** — not a fresh build — it runs a **feature-add** path: re-enter the same project, add **one** feature end-to-end, leave everything already accepted intact. You don't restart; you submit the change as a request and the system recognizes it as new behavior into an existing codebase.
+
+```mermaid
+flowchart TD
+    CR([Your change request])
+    BM[Read what exists first<br/>requirements · decisions · design · code]
+    GAP[Ask only the NEW gaps<br/>the feature opens]
+    VER[Version the requirements<br/>new version — original untouched]
+    PLAN[Plan only the new slices<br/>accepted slices stay pinned-done]
+    BUILD[Build the new slice<br/>plugs into existing seams]
+    GUARD{Regression guard<br/>+ matches conventions?}
+    DEMO[Deploy to staging + demo]
+
+    CR --> BM --> GAP --> VER --> PLAN --> BUILD --> GUARD
+    GUARD -->|existing behavior still green| DEMO
+    GUARD -->|something broke| BUILD
+    DEMO --> ACC([Accept the new feature])
+
+    classDef you fill:#fde68a,stroke:#b45309,color:#000;
+    class CR,ACC you;
+```
+
+**What's different from a fresh build:**
+- **Reads existing first, asks less.** Requirements, decisions, design, and code are read *before* you're asked anything — so questions cover only genuinely new gaps, never what's already settled.
+- **Original requirements never change.** The feature lands as a *new version* of the agreed requirements; the frozen original stays byte-for-byte identical. Every new requirement gets a fresh identifier above the existing ones — no reuse, no renumbering.
+- **Only the new feature is planned + built.** Already-accepted increments stay done (pinned); the roadmap shows just the new slice(s).
+- **Existing behavior is guarded.** The new slice plugs into existing components at defined seams (existing internals untouched), new code matches the project's established conventions, and a **regression guard** re-runs the existing acceptance tests the feature touches — the slice can't be "done" if anything previously green goes red.
+- **Same demo gate.** You accept the new feature on staging exactly as for any other slice.
+
+**Boundary:** one atomic feature per change request. Several asks at once → system splits + confirms the breakdown first (§11). Bringing this to the harness: see `generic-usage-guide.md` **PART D**; a complete worked example lives in `_fixtures/brownfield-feature/`.
+
+---
+
+## 13. Glossary (light)
 
 - **Requirements (frozen):** agreed stable statement of what's built + what "done" means.
 - **Slice:** small complete demoable piece of functionality delivered end-to-end.
@@ -194,6 +229,8 @@ Technology = **decision made for your project** (at "Decide" phase), based on re
 - **Design:** structure — components, how they connect, data, cross-cutting concerns.
 - **Staging:** production-like environment where you see + accept working software; delivery finish line.
 - **Acceptance criteria:** concrete testable conditions defining "done" for requirement or slice.
+- **Feature-add:** adding one new feature to a product the system already delivered — reads existing artifacts first, versions the requirements (original untouched), builds only the new slice(s). See §12.
+- **Regression guard:** the check on a feature-add slice that re-runs the existing acceptance tests the feature touches, so a new feature can't break already-accepted behavior.
 
 ---
 

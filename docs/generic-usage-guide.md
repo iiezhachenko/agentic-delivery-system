@@ -218,6 +218,49 @@ Give **concrete observable** feedback tied to demo ("job list should default to 
 
 ---
 
+# PART D — Adding a feature to an already-delivered project (feature-add)
+
+Already shipped a project with this system? To add ONE new feature you don't start over — you **re-enter the SAME project**. System detects it's a change to an existing build (class **feature-add**), reads what's already there, adds the feature **without disturbing what works**. Same harness, same launcher — no new install, no flag.
+
+## D1. Prerequisites
+- The project already carries its ADP artifact tree (`.aprd/ .adr/ .hld/ .build/`) from the original delivery — frozen requirements + ≥1 accepted slice. (If this system delivered it, that's there. Run from the project root + branch where those artifacts live.)
+- Engine installed (PART A/B). Nothing to re-deploy.
+
+## D2. Run it — same launcher, phrased as a change
+**Claude Code:**
+```
+cd your-project
+claude
+/deliver "Add the ability to tag each client project with a label, and let us filter the project list by tag."
+```
+**Kiro:**
+```bash
+kiro-cli chat --agent delivery "Add the ability to tag each client project with a label, and let us filter the project list by tag."
+```
+Phrase it as the **change** you want ("add …", "let users also …", "everything else stays as-is"). System recognizes *new-behavior-into-an-existing-codebase* and routes the feature-add path **automatically** — no flag to set. Keep it to **one atomic feature** per request (several asks → system splits + confirms the breakdown first, §5).
+
+## D3. What's different from a fresh build
+- **Reads first, asks less.** System reads the existing requirements, decisions, design, and code *before* asking you anything — so it asks only about genuinely new gaps the feature opens ("one tag per project, or many?"). It won't re-litigate what's already settled.
+- **Requirements get a NEW version; the old one is untouched.** Your original frozen requirements stay byte-for-byte identical. The feature lands as a new version (`aprd.v2`) carrying only the new requirements + how they plug into the existing system. Nothing already agreed is rewritten.
+- **Only the new feature is planned + built.** Already-accepted slices stay done — pinned, not rebuilt. The roadmap shows just the new slice(s).
+- **Existing behavior is guarded.** Every new slice carries a **regression guard** — the system re-runs the existing acceptance tests the feature touches and **blocks** if any previously-green behavior breaks. New code must also match the project's existing conventions (naming, layout, error handling), not generic defaults.
+- **Same demo gate.** You accept the new feature on staging exactly as before.
+
+## D4. Your checkpoints (only what's new)
+- **Clarifying questions** — only the new feature's gaps (often none; sensible defaults applied, which you can override). Same as §C2.
+- **Roadmap** — confirm the new slice order; existing accepted slices show as already-done/pinned. Same as §C3.
+- **Demo** — accept the new feature or give concrete feedback (§C4). Because of the regression guard, accepting also confirms nothing existing broke.
+
+## D5. Where the outputs land
+- **New requirements version:** `.aprd/aprd.v2.frozen.md` (original `.aprd/aprd.frozen.md` left unchanged). Your written change request is filed at `.aprd/change-requests/CR-<n>.md`; a `.aprd/baseline-map.json` records what already existed.
+- **New slice:** `.build/slices/S<new>/` — its `verify-output.json` shows the full test ladder **plus** the regression layer green.
+- **Roadmap:** `.roadmap/08-rerank.json` lists the new slice(s) in sequence with the baseline slices pinned under `completed`.
+
+## D6. Worked example you can read
+`_fixtures/brownfield-feature/` is a complete feature-add end-to-end: a delivered freelancer time-tracking app + the change request *"tag + filter client projects"* + the correctly-extended trees (new requirements R11/R13, new slice S5, regression guard on the existing project acceptance), **plus four planted mistakes** — breaking an existing feature, reusing an ID, editing frozen requirements, off-convention code — each shown FAILING while the correct version passes. Read it to see exactly what good feature-add output looks like and what the guards reject.
+
+---
+
 ## 3. Stopping + resuming — system is idempotent
 
 Stop at **any** time — clean pause after slice, or abrupt interruption: lost internet, closed laptop, killed agent mid-step. System built to **pick up exactly where left off**. No run depends on state living only in agent's memory.
@@ -250,6 +293,7 @@ Stop at **any** time — clean pause after slice, or abrupt interruption: lost i
 ## 5. Special situations
 
 - **Several things in one request** ("fix upload bug, make it faster, *and* add PDF support") — submit as-is; system splits, classifies each piece, confirms breakdown before proceeding.
+- **Add a feature to an already-delivered project** — re-enter the same project and submit the change as a request; system runs the **feature-add** path (versions requirements, builds only the new slice, guards existing behavior). Full how-to in **PART D**.
 - **Bug in already-accepted slice** — report like new request (broken behavior + how to reproduce); system reproduces, fixes, guards against regressions.
 - **Change technology** — raise as constraint/decision change; recorded decision, so can be revisited (late changes may trigger flagged rework).
 - **Pause or get interrupted** — stop deliberately, or lose connection / close laptop / kill agent mid-step. Either way system resumes cleanly from on-disk artifact tree; see **§3 (idempotency)**. Short version: restart + re-run orchestrator — continues from frontier, redoing at most one step in flight.
@@ -271,7 +315,7 @@ Stop at **any** time — clean pause after slice, or abrupt interruption: lost i
 
 ## 8. Shortest version
 
-> **Deploy:** install harness, then run the shipped tarball's installer (`npx --package=./adp-<version>.tgz adp init --harness=claude|kiro`) in your project (lays runtime under `.claude/adp/` or `.kiro/adp/`, wires launcher, sets permissions, smoke-checks). **Use:** start delivery (Claude Code `/deliver "…"`; Kiro `kiro-cli chat --agent delivery "…"`), then at each gate — answer questions, confirm plan, accept each demo or give concrete feedback. In **both** harnesses system runs *exclusively*: same role prompts, same artifacts, same gates. Repeat until done.
+> **Deploy:** install harness, then run the shipped tarball's installer (`npx --package=./adp-<version>.tgz adp init --harness=claude|kiro`) in your project (lays runtime under `.claude/adp/` or `.kiro/adp/`, wires launcher, sets permissions, smoke-checks). **Use:** start delivery (Claude Code `/deliver "…"`; Kiro `kiro-cli chat --agent delivery "…"`), then at each gate — answer questions, confirm plan, accept each demo or give concrete feedback. In **both** harnesses system runs *exclusively*: same role prompts, same artifacts, same gates. Repeat until done. **Adding a feature to a project already delivered this way?** Re-enter it with the same launcher + your change request — system auto-runs the feature-add path (versions requirements, builds only the new slice, guards what works). See **PART D**.
 
 ---
 

@@ -234,11 +234,48 @@ Canonical trees = frozen artifacts — never hand-edited. Change to self-project
 - **Decision changes** (e.g. new `D*`) → add new ADR version to `.adr/log/` + `adr-index.json` + raise change request; re-triggers affected downstream stages. Frozen bodies + `adr.lock` never mutated in place.
 - **Requirement or design rule changes** → new version of `.aprd/` or `.hld/` artifact + change request, never edit to signed frozen file.
 - Keeps on-disk trees + live decision record consistent without hand-maintained duplicate to drift.
+- **Adding a whole new capability** (not just tweaking a decision) → that's a feature against ADP itself: see **§4A** (feature-add on the self-project).
+
+---
+
+## 4A. Adding a NEW capability to ADP — feature-add on the self-project
+
+§A2/§B2 drain prompts the roadmap **already lists**. To add a capability the plan doesn't yet have — a new **class** (bugfix/refactor/…), a new **role**, a new **playbook** — bring a **change request to the self-project**. ADP runs its own **feature-add** path on its OWN repo: versions its requirements, plans only the new prompt-authoring slices, authors them, and **guards every prompt already shipped**. This is the system using its own feature-add capability on itself.
+
+> ADP just gained this capability. The brownfield-feature spine (`prompts/_playbooks/feature-add.md` + ten role overlays + the new `BASELINE-MAP` role) **is** the feature-add path. It was bootstrapped via the planned self-slice loop (§A2/§B2) — you can't feature-add a capability before it exists — but now that it's shipped, **future** capabilities get added to ADP via the path below. Plan: `_brownfield-feature/`; both-directions oracle: `_fixtures/brownfield-feature/`.
+
+**Run it — same launcher, phrased as a change to ADP:**
+```
+# Claude Code
+/self-host "Add a `bugfix` class to the pipeline: classifier route + playbook + the role overlays it needs."
+# Kiro
+kiro-cli chat --agent selfhost "Add a `bugfix` class: classifier route + playbook + role overlays."
+```
+Bare `/self-host` (no argument) still drains the planned roadmap. Hand it a **change request** and it runs the feature-add path instead — the classifier recognizes new-behavior-into-the-existing-prompt-library and routes `class=feature-add`.
+
+**Meta-mapping — feature-add concepts (generic PART D) on the self-project:**
+
+| feature-add concept | …on ADP itself |
+|---|---|
+| baseline product | the shipped `prompts/` + frozen `.aprd/.adr/.hld` + `_fixtures/` |
+| change request | "add capability X to the pipeline" |
+| reads existing first | reads shipped `prompts/`, the DRY skeleton, the canon, conventions |
+| new requirements version | `.aprd/aprd.v2.frozen.md` — new pipeline requirements above high-water (original untouched) |
+| new slices, old pinned | new prompt-authoring self-slices; every shipped prompt stays pinned-done |
+| integration seams | where the new role/class plugs into the spine (classifier route, playbook field, shared `## Rules` + delta block) |
+| convention baseline | the prompt-domain canon — DRY skeleton, AB1–AB6, PR1–PR4, caveman register |
+| **regression guard** | **every already-shipped prompt must still pass its both-directions fixture oracle; the new prompt conforms to the skeleton/canon, never invents structure** |
+| value gate | the new prompt(s) deliver correct value clean-room against `_fixtures/` (incl. a new fixture for the new capability) |
+
+**The meta regression guard is the load-bearing part.** A new capability ships only when (1) its own clean-room fixture run is correct, (2) every existing prompt's fixture oracle stays green, and (3) the new prompt is an overlay carrying ONLY what differs from the shared `## Rules` (AB1 — never a fork). Same disk-is-truth + idempotency rules (§3) apply; the version bump never hand-edits a frozen tree (§4).
+
+**Where outputs land:** new/overlaid prompts at `prompts/<phase>/<ROLE>.md` (+ any new `prompts/_playbooks/<class>.md`); new requirements at `.aprd/aprd.v2.frozen.md`; the new capability's oracle at `_fixtures/<name>/`. Existing shipped prompts + frozen trees unchanged.
 
 ---
 
 ## 5. Special situations
 
+- **Adding a new capability to ADP (new class/role/playbook)** — bring it as a change request to the self-project; ADP runs **feature-add on itself** (versions its requirements, authors only the new prompts, regression-guards every shipped prompt). Full how-to in **§4A**.
 - **Self-built prompt fails own clean-room test** — does **not** ship; IMPLEMENT re-runs. Oracle = safety net for one genuinely generative step (workflow §6). Repeated failure → contract or canon wrong; fix + re-author.
 - **Wiring target forced spine edit** — deliverable-agnostic abstraction leaked (P3). Fix **spine once** so verify-method/build-idiom read from target, then re-run. Don't patch target to dodge it.
 - **Prove agnosticism** — once agentic-delivery-pipeline loop drains, author **second** canon profile (`code-canon/terraform.md` or `code-canon/typescript.md`) + run tiny greenfield through **unchanged** spine. Passes own verify with zero engine edits → system genuinely deliverable-agnostic, not agentic-delivery-pipeline-special.
@@ -255,12 +292,13 @@ Canonical trees = frozen artifacts — never hand-edited. Change to self-project
 - **Do I re-run aPRD / Roadmap / ADR / HLD?** No — those four phases already **frozen at repo root**. Only Build phase runs live. Re-running settled phases buys nothing + risks churn (workflow §4).
 - **Why can self-host start before generic Build phase finished?** Self-hosting needs only controller, oracle, synthesizer — all available now — and agentic-delivery-pipeline profile brings own build+verify mechanism (workflow §8).
 - **When am I "done"?** RE-RANK picks next prompt (not human), at least one prompt authored+shipped by pipeline because delivered correct fixture value (value gate cleared once), loop drained rest (workflow §9). Fully validated when **second** deliverable profile also runs through unchanged spine.
+- **How do I add a NEW capability (class/role/playbook) to ADP?** Bring it as a change request to the self-project (`/self-host "add …"` / `--agent selfhost "add …"`). ADP runs **feature-add on itself**: versions its own requirements, authors only the new prompts, and a regression guard keeps every shipped prompt's fixture oracle green. Full how-to: **§4A**. (Newly possible now that the feature-add capability is shipped — it was itself bootstrapped via the planned self-slice loop, since a capability can't feature-add itself into existence.)
 - **Claude Code or Kiro — does self-build differ?** No. Same target, same trees, same value gate, same authored prompts; only surface (terminal vs IDE) + launcher differ.
 - **Status or run-loop file to maintain?** No — no hand-maintained tracker, changelog, run-loop file. State **derived from disk** (workflow §5): "what's done" scanned from `prompts/` + `_fixtures/` + locks, "what's next" = RE-RANK over roadmap.
 
 ## 8. Shortest version
 
-> **Deploy:** on top of generic deploy, point orchestrator at (1) **workspace root = repo root** (where four frozen trees already live) + (2) agentic-delivery-pipeline **coding-canon profile** `code-canon/agentic-delivery-pipeline.md` (selected by stack ADR), via launcher (Claude Code `/self-host`; Kiro `--agent selfhost`). **Use:** run launcher — RE-RANK picks next unshipped prompt, IMPLEMENT writes it, clean-room runner verifies against `_fixtures/`. **Judge:** at one gate, confirm prompt **delivers correct fixture value**; accept → promoted to `prompts/`. Clear that gate once (the proof), then **step back** + let loop drain rest. System builds system.
+> **Deploy:** on top of generic deploy, point orchestrator at (1) **workspace root = repo root** (where four frozen trees already live) + (2) agentic-delivery-pipeline **coding-canon profile** `code-canon/agentic-delivery-pipeline.md` (selected by stack ADR), via launcher (Claude Code `/self-host`; Kiro `--agent selfhost`). **Use:** run launcher — RE-RANK picks next unshipped prompt, IMPLEMENT writes it, clean-room runner verifies against `_fixtures/`. **Judge:** at one gate, confirm prompt **delivers correct fixture value**; accept → promoted to `prompts/`. Clear that gate once (the proof), then **step back** + let loop drain rest. System builds system. **Adding a NEW capability to ADP** (a class/role/playbook the roadmap doesn't list)? Hand the launcher a change request — ADP runs feature-add on itself: versions its own requirements, authors only the new prompts, regression-guards every shipped prompt (**§4A**).
 
 ---
 

@@ -194,7 +194,34 @@ When all holds, delivery pipeline authors delivery pipeline through same engine 
 
 ---
 
-## 10. Resilience — interrupting + resuming a self-build
+## 10. Adding a new capability to ADP — reflexive feature-add
+
+The self-slice loop (§5) drains prompts the roadmap **already lists**. Going beyond that initial plan — a new **class** (bugfix/refactor/…), a new **role**, a new **playbook** the system doesn't yet have — is a **change to ADP the product**, handled by the very change-request mechanism §4 names, fired as **feature-add**, reflexively, on the self-project.
+
+Two product levels again (§2): the change lands at **Level B** (the prompt library *gains* a capability), proven through **Level A** (fixture products still deliver correct value — plus a new fixture exercising the new capability).
+
+```mermaid
+flowchart TD
+    CR([Change request: &quot;add capability X to the pipeline&quot;])
+    RD[Read ADP's own shipped prompts<br/>+ skeleton + canon FIRST]
+    VER[Version ADP's own requirements<br/>.aprd/aprd.v2 — original untouched, new IDs above high-water]
+    PL[Plan only the new prompt-authoring slices<br/>every shipped prompt stays pinned-done]
+    WR[Author the new prompt&#40;s&#41;<br/>conform to skeleton + AB1–6 + PR1–4 &#40;overlay = shared Rules + delta&#41;]
+    RG{Regression guard:<br/>every shipped prompt's fixture oracle still green?}
+    SHIP([Ship — new capability + its fixture])
+
+    CR --> RD --> VER --> PL --> WR --> RG
+    RG -->|yes + new capability delivers correct value clean-room| SHIP
+    RG -->|a shipped prompt broke| WR
+```
+
+**The meta regression guard is load-bearing:** adding a capability must not break a prompt that already works. The new feature ships only when (1) its own clean-room fixture run is correct, (2) every already-shipped prompt's both-directions fixture oracle stays green, and (3) the new prompt conforms to the DRY skeleton + canon (an overlay carries ONLY what differs from the shared `## Rules` — AB1, never a fork).
+
+Not a special mode — it's the generic feature-add path (`generic-workflow.md` §12) pointed at the self-project. The capability that *enables* this — **feature-add** — is itself now shipped (the brownfield-feature spine: `prompts/_playbooks/feature-add.md` + role overlays + `BASELINE-MAP`; plan in `_brownfield-feature/`, both-directions oracle in `_fixtures/brownfield-feature/`). It was bootstrapped via the planned self-slice loop (§5) — you can't feature-add a capability before it exists — but now that it's in tree, **future** capabilities (a bugfix class, new roles) are added to ADP this way.
+
+---
+
+## 11. Resilience — interrupting + resuming a self-build
 
 Self-build runs on same crash-safe guarantees as any delivery (decision **D20**). Because state derived from disk + never cached, you can lose connection or kill running agent mid-prompt + lose nothing committed:
 
@@ -206,9 +233,10 @@ So interrupted self-build resumed exactly way fresh one started: point orchestra
 
 ---
 
-## 11. Glossary (self-host specifics)
+## 12. Glossary (self-host specifics)
 
 - **Frozen tree:** already-decided upstream phase (Understand/Plan/Decide/Design) living on disk as canonical artifact prompts read, instead of re-run live. Four trees = `.aprd/ .roadmap/ .adr/ .hld/` at repo root.
+- **Reflexive feature-add:** adding a NEW capability (class/role/playbook) to ADP by running ADP's own feature-add path on the self-project — versions ADP's requirements, authors new prompts, regression-guards every shipped prompt (§10).
 - **Level A / Level B:** delivered fixture product (A) + system that delivers it (B); B validated *through* A.
 - **Deliverable target (stack target):** pluggable adapter for one kind of deliverable, realized as **stack ADR** (pins which deliverable/stack) + **coding-canon profile** (scaffold, conventions, build idiom, **verify mechanism**) in `code-canon/` store. "Prompt library" (`code-canon/agentic-delivery-pipeline.md`) = active one; Python, Terraform, TypeScript = others.
 - **Clean-room run:** giving freshly authored prompt to fresh runner with no prior context, judging it by artifact it produces against fixtures.
