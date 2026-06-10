@@ -63,6 +63,29 @@ Feature-add grounds read-first (BF2). The baseline already resolved most archite
 
 ## DONE WHEN
 
-- `GAP-DETECT.md` carries a feature-add delta (shared Rules substance untouched; delta = only differences).
-- Golden feature-add `04-gaps.json` measures gaps vs baseline, raises seam forks, omits settled decisions.
-- Both-directions check holds.
+- [x] `GAP-DETECT.md` carries a feature-add delta (shared Rules substance untouched; delta = only differences).
+- [x] Golden feature-add `04-gaps.json` measures gaps vs baseline, raises seam forks, omits settled decisions.
+- [x] Both-directions check holds.
+
+## STATUS — DONE (2026-06-10)
+
+Edits to `prompts/00-aprd/GAP-DETECT.md`:
+- **Frontmatter inputs:** grouped `# — shared (both classes) —` / `# — feature-add —`; added `baseline-map.json` (settled decisions/seams, BF2) + `aprd.frozen.md` (settled REQUIREMENTS/OUT_OF_SCOPE).
+- **Escapes:** added feature-add guard — baseline-map missing/unparseable → BASELINE-MAP (cannot measure gaps vs baseline read-first, BF2).
+- **Shared Rule 1 generalized (one home, AB1):** "re-litigate word client chose" → "re-litigate already-settled fact"; settled-source set declared class-dependent — greenfield = explicit client words, feature-add **also** = baseline decisions on disk. Delta names the baseline corpus; greenfield substance untouched.
+- **New `## Rules (feature-add delta …)`:** (1) gaps measured vs baseline — settled fork NOT a gap, hunt only new `R*/E*` + seams (BF2); (2) seam-fork first-class hunt site w/ `seam_ref` (BF6 precursor); (3) convention-conformance settled, not a gap (BF5). Only differences carried (AB1) — discriminator/Rules 2–8 not restated.
+- **Output schema:** added `class:"feature-add"`, `baseline_map_ref`, `baseline_aprd_ref`; per-gap optional `seam_ref {at, contract_ref}`; `refs` note narrowed for feature-add (only new-feature IDs, never settled baseline ID). Greenfield path = null/omit.
+- **Task steps:** added feature-add branch (read baseline-map + frozen aPRD FIRST → catalog settled, exclude → hunt new `R*/E*` + touched seams → seam-fork test → rank/default/reconcile → write w/ refs). Greenfield steps + guards intact (no re-list, AB1/AB2).
+- **Stop condition:** "Valid greenfield" → "Valid (greenfield OR feature-add)".
+
+Golden (`_fixtures/brownfield-feature/.aprd/04-gaps.json`): gaps for CR-001 (tag + filter time entries).
+- **G1 architecture** (free-text string field vs first-class Tag entity/table) — carries `seam_ref {at:C1, contract_ref:CT2}` (persistence seam: extend CT2 vs new contract). refs E8/U2/R13.
+- **G2 scope** (one label vs multi-tag — optional-additional-capability fork on CR's singular "a label"). refs U1/R11.
+- **G3 scope** (single-tag filter vs multi-tag AND/OR). refs U3/R12.
+- `class=feature-add`, `baseline_map_ref` + `baseline_aprd_ref` set. `dismissed_unknowns:[]` (U1/U2/U3 all fed gaps). `gap_counts {architecture:1, scope:2, cosmetic:0, total:3}`.
+- **Settled-baseline absent:** no gap re-asks stack/DB/auth/web-framework (frozen ADRs) or tag-module naming (convention BF5). All `refs` = new-feature IDs strictly above high-water (R>10, E>7, fresh U); never a settled baseline ID.
+
+Both-directions (validated by script — JSON parses; refs⊆new-feature IDs; all R/E above high-water; disposition deterministic from tier; recommended_default verbatim ∈ interpretations; every U* fed-or-dismissed; seam_ref ∈ baseline seam catalog):
+- **Known-good** golden → gaps cover only new feature + its persistence seam; settled decisions absent → PASS.
+- **Planted re-litigation** (gap re-asking a frozen ADR/scope decision, e.g. "which DB?") → cites a settled baseline ID / non-new ID → violates delta Rule 1 + refs∉new-IDs → FAIL ✓.
+- **Planted missed-seam-fork** (drop G1's `seam_ref`, frame Tag persistence as blank-slate ignoring CT2 at C1) → seam fork unraised → violates delta Rule 2 → FAIL ✓.
