@@ -82,6 +82,26 @@ escapes:
 
 ## DONE WHEN
 
-- `EXTRACT.md` carries a feature-add delta block (shared Rules untouched in substance; delta carries only the differences).
-- Golden feature-add `02-extraction.json` grounds from baseline-map, mints above high-water, tags `baseline_ref`.
-- Both-directions check holds.
+- [x] `EXTRACT.md` carries a feature-add delta block (shared Rules untouched in substance; delta carries only the differences).
+- [x] Golden feature-add `02-extraction.json` grounds from baseline-map, mints above high-water, tags `baseline_ref`.
+- [x] Both-directions check holds.
+
+## STATUS — DONE (2026-06-10)
+
+Edits to `prompts/00-aprd/EXTRACT.md`:
+- **Frontmatter inputs:** grouped `# — shared —` / `# — feature-add —`; added `baseline-map.json` + `change-requests/CR-<id>.md` (BF2 read-first source, BF3 high-water).
+- **Escapes:** added feature-add guard — baseline-map missing/unparseable → BASELINE-MAP (cannot ground read-first).
+- **Shared Rule 6 generalized:** source set per class (greenfield = request text; feature-add = baseline FIRST then CR). No dup — delta names corpus (AB1).
+- **New `## Rules (feature-add delta …)`:** read-first grounding (BF2), extract DELTA only + `baseline_ref` (BF3 mint above high-water), unknowns measured vs baseline. Only differences carried (AB1).
+- **Output schema:** added `class:"feature-add"`, `baseline_map_ref`, per-item `baseline_ref` (inline-comment docs, AB5). Greenfield path = null/omit.
+- **Task steps:** added feature-add branch (read baseline+aPRD+conventions → CR → DELTA → write). Greenfield steps intact; no guard re-list (AB1/AB2).
+
+Golden (`_fixtures/brownfield-feature/.aprd/`): added `change-requests/CR-001.md` + `02-extraction.json`.
+- New IDs all strictly above baseline high-water (E:7→E8, R:10→R11/R12/R13). `baseline_ref` R11/R12→R2, R13→R7. `class=feature-add`, `baseline_map_ref` set.
+- "Everything else stays as-is" NOT typed as stated_constraint (no matching kind in enum) — it is the regression guard, homed downstream at REGRESSION_GUARD (BF4) per playbook (AB1 one home). `stated_constraints: []`.
+- Validated: JSON parses; every minted ID > high-water for its space.
+
+Both-directions (by construction):
+- Known-good golden → PASS (cites baseline IDs via `baseline_ref`, new R* above high-water).
+- Planted ID-collision (reuse baseline R*) → fails high-water check → FAIL ✓.
+- Planted blank-slate (ignore baseline-map, re-extract baseline reqs, no `baseline_ref`) → violates BF2 grounding → FAIL ✓.

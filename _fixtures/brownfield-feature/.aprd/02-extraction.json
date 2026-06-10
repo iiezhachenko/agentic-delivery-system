@@ -1,0 +1,67 @@
+{
+  "request_ref": ".aprd/change-requests/CR-001.md",
+  "classification_ref": ".aprd/01-classification.json",
+  "class": "feature-add",
+  "baseline_map_ref": ".aprd/baseline-map.json",
+  "entities": [
+    {
+      "id": "E8",
+      "name": "Tag",
+      "note": "Label attachable to a time entry; new classifier the CR introduces.",
+      "inferred": false,
+      "source": "tag each time entry with a label",
+      "sr_ref": "SR1",
+      "baseline_ref": null
+    }
+  ],
+  "explicit_requirements": [
+    {
+      "id": "R11",
+      "text": "A freelancer must be able to tag a time entry with a label.",
+      "inferred": false,
+      "source": "add the ability to tag each time entry with a label",
+      "sr_ref": "SR1",
+      "baseline_ref": "R2"
+    },
+    {
+      "id": "R12",
+      "text": "A freelancer must be able to filter the time-entry list by tag.",
+      "inferred": false,
+      "source": "let us filter the time-entry list by tag",
+      "sr_ref": "SR1",
+      "baseline_ref": "R2"
+    }
+  ],
+  "implied_requirements": [
+    {
+      "id": "R13",
+      "text": "A tag applied to a time entry must be persisted and associated with that entry.",
+      "inferred": true,
+      "source": "tag each time entry with a label … filter the time-entry list by tag",
+      "rationale": "Filtering the list by tag presupposes the tag survives across sessions and is queryable; an unpersisted label cannot drive a filter. Extends baseline time-entry persistence (R7).",
+      "sr_ref": "SR1",
+      "baseline_ref": "R7"
+    }
+  ],
+  "stated_constraints": [],
+  "unknowns": [
+    {
+      "id": "U1",
+      "text": "Can a time entry carry multiple tags, or exactly one label? CR says 'a label' (singular) but does not bound multiplicity.",
+      "source": "tag each time entry with a label",
+      "sr_ref": "SR1"
+    },
+    {
+      "id": "U2",
+      "text": "Is the tag free-text or drawn from a controlled vocabulary the freelancer manages?",
+      "source": "tag each time entry with a label",
+      "sr_ref": "SR1"
+    },
+    {
+      "id": "U3",
+      "text": "Does filtering accept a single tag only, or multiple tags combined (AND/OR)?",
+      "source": "filter the time-entry list by tag",
+      "sr_ref": "SR1"
+    }
+  ]
+}
