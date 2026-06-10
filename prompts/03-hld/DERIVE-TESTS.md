@@ -6,7 +6,7 @@ pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → 
 interactive: false          # internal structural sweep; client signed the WHAT, team owns the HOW (PR1, §9)
 inputs:
   # — shared (both passes) —
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — AC* the flow test asserts arrival at (the arrival oracle, referenced by id NOT re-authored — Phase 0 owns the AC text)" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). AC* the flow test asserts arrival at (the arrival oracle, referenced by id NOT re-authored — Phase 0 owns the AC text)" }
   - { path: ".adr/adr.lock", format: "json — frozen gate (status==frozen); frame the design sits inside" }
   - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — frame ADRs (read-only context; tests reference, never re-decide)" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — INV* the frame holds; skeleton_id" }
@@ -95,7 +95,7 @@ Read `.hld/skeleton.lock`. **Absent → SKELETON PASS (Part A):** no frozen base
   "contracts_ref": ".hld/skeleton/contracts.json",
   "flows_ref": ".hld/skeleton/flows.json",
   "components_ref": ".hld/skeleton/components.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
   "adr_lock_ref": ".adr/adr.lock",
   "lock_verified": true,                 // lock present + status==frozen + names frozen artifact (don't recompute hash)
@@ -231,7 +231,7 @@ Build ONE `flow_tests[]` spec for slice flow F* exactly as Part A (happy `assert
 
 ```json
 {
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "base_test_specs_ref": ".hld/skeleton/test-specs.json",   // frozen per-CT* specs slice inherits by reference; never re-authored
   "base_contracts_ref": ".hld/skeleton/contracts.json",     // frozen CT* set

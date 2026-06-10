@@ -6,7 +6,7 @@ pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → 
 interactive: false          # internal validation sweep; client signed the WHAT, team owns the HOW (PR1, §9)
 inputs:
   # — shared (both passes) —
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — R*/AC* the flow arrives at; AC = the flow's arrival oracle" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). R*/AC* the flow arrives at; AC = the flow's arrival oracle" }
   - { path: ".adr/adr.lock", format: "json — frozen gate (status==frozen); frame the flow runs inside" }
   - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — frame ADRs; a flow that can't compose may reveal a bad decision → cite the ADR-* it breaks" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — cross_slice_invariants INV* the flow must honor; skeleton_seams[] + skeleton_id (skeleton pass only)" }
@@ -101,7 +101,7 @@ Construct ONE flow, walking skeleton (`skeleton_id` from cut, S1):
 {
   "components_ref": ".hld/skeleton/components.json",
   "contracts_ref": ".hld/skeleton/contracts.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
   "adr_lock_ref": ".adr/adr.lock",
   "adr_log_ref": ".adr/log/",
@@ -212,7 +212,7 @@ Slice flow walks ONLY slice's `touched_components` + `touched_contracts`. Frozen
 
 ```json
 {
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "adr_log_ref": ".adr/log/",
   "base_flows_ref": ".hld/skeleton/flows.json",            // frozen skeleton flow (F1) this extends; never re-walked

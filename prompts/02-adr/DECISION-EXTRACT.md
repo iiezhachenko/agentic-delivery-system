@@ -4,13 +4,13 @@ phase: 02-adr
 class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal sweep — reads disk, writes disk, stops. Decisions are the delivery team's domain; client signed the WHAT, no client touch (PR1, §9)
 inputs:
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — Phase 0 FROZEN aPRD; the contract walked for forks (PROJECT, ENTITIES E*, REQUIREMENTS R*, CONSTRAINTS C*, ASSUMPTIONS A*, OUT_OF_SCOPE, ACCEPTANCE AC*)" }
-  - { path: ".aprd/aprd.lock", format: "json — freeze signature; the freeze gate Phase 2 dispatches against (present + names frozen artifact; do not recompute hash)" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). The contract walked for forks (PROJECT, ENTITIES E*, REQUIREMENTS R*, CONSTRAINTS C*, ASSUMPTIONS A*, OUT_OF_SCOPE, ACCEPTANCE AC*); CLASS read from THIS resolved body (dispatches playbook)" }
+  - { path: ".aprd/aprd.lock", format: "json — freeze signature AND version resolver: `artifact` field names CURRENT frozen WHAT (read FIRST → resolves entry above); freeze gate Phase 2 dispatches against (present + status==frozen + named artifact exists on disk = file walked; do not recompute hash)" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — Phase 1 cut; names which foundational decision CATEGORIES are in play now (FD*, skeleton_seams[], cross_slice_invariants INV*, deferred[]). Seeds recognition, scopes the foundation pass" }
 outputs:
   - { path: ".adr/01-decision-points.json", format: "json (schema below) — extracted decision points DP*, checklist coverage, accounting" }
 escapes:
-  - { when: ".aprd/aprd.frozen.md missing/unparseable, OR .aprd/aprd.lock missing / status != frozen", target: "self / HALT — nothing frozen to decide against; Phase 2 consumes only the FROZEN WHAT (P8/D9), never a draft" }
+  - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — nothing frozen to decide against; Phase 2 consumes only the lock-named CURRENT FROZEN WHAT (P8/D9), never a draft, never a stale prior version" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no cut to scope the foundation pass; cannot extract against an absent cut" }
   - { when: "frozen aPRD/cut CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — decision-category depth + brownfield conformance not authored (D10). Report the class, HALT" }
   - { when: "a force is internally contradictory or so underspecified NO decision point can be framed (cannot name the fork — aPRD never says enough to make it a fork)", target: "Phase 0 (change request) — record in aprd_defects[], NOT silently resolved; Phase 2 never patches the WHAT (D9, §5.10)" }
@@ -71,10 +71,10 @@ Pass all three → emit. Fail any → record in `checklist_coverage` (closed/not
 
 ```json
 {
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "lock_verified": true,                 // lock present + names frozen artifact (do not recompute hash)
-  "class": "greenfield",
+  "lock_verified": true,                 // lock present + status==frozen + named artifact exists on disk = the file walked (resolved, not hardcoded; do not recompute hash)
+  "class": "greenfield",                 // read from resolved aPRD body (feature-add body carries CLASS: feature-add)
   "skeleton_id": "S1",
   "decision_points": [                    // emission order: checklist order, ties by lowest forced_by id position
     {

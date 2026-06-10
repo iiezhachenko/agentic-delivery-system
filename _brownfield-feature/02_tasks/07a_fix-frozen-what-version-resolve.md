@@ -1,5 +1,7 @@
 # Task 07a — SPINE-FIX: resolve frozen-WHAT via lock, not hardcoded path
 
+> **STATUS: DONE** (2026-06-10). Binding rewritten across 13 consumers; both-directions binding oracle PASSes. Full DECISION-EXTRACT semantic golden recorded under Task 07 (§Then unblock Task 07). See §COMPLETION at bottom.
+
 > Self-contained. Everything needed embedded below — do NOT hunt other files.
 
 ## TL;DR
@@ -68,3 +70,30 @@ After this fix PASSes both benches: re-run Task 07 end-to-end — P2 (clean skip
 - Both planted defects (stale-version walk, missing named artifact) FAIL/HALT.
 - No feature-add overlay added; no new input/rule; frozen artifacts byte-unchanged.
 - Task 07 re-runnable to PASS (golden recordable) — noted, executed under Task 07.
+
+## COMPLETION (2026-06-10)
+
+### What changed — REWRITE, no new input/rule (AB9/P1)
+All 13 frozen-WHAT consumers: input `path` `.aprd/aprd.frozen.md` → `.aprd/<aprd.lock.artifact>` (resolver in same input-binding note: read `.aprd/aprd.lock`, open `.aprd/` + its `artifact` value = CURRENT version; greenfield→`aprd.frozen.md`, feature-add→`aprd.v<N>.frozen.md`). One home per fact (AB1) — resolver lives only in that note, restated nowhere.
+
+- `prompts/02-adr/`: DECISION-EXTRACT, OPTION-GEN, EVALUATE-DECIDE, RECONCILE, CRITIQUE.
+- `prompts/03-hld/`: MODEL-DATA, DERIVE-COMPONENTS, DEFINE-CONTRACTS, MODEL-FLOWS, MAP-NFR, DERIVE-TESTS, RESOLVE-LOCAL, RECONCILE-CRITIQUE.
+- Inheritors TRIAGE + SYNTHESIZE-ADR: NO direct aPRD read confirmed — fix by upstream correctness, untouched (as scoped).
+
+Per-element:
+- **Schema echo** — every `aprd_ref` records RESOLVED path (placeholder `<resolved .aprd/<aprd.lock.artifact> — …>`); agent writes real resolved value at run (greenfield → `.aprd/aprd.frozen.md` = byte-equal to existing golden).
+- **Guard (rewritten, not added)** — consumers with an explicit frozen-WHAT guard (DECISION-EXTRACT, OPTION-GEN, EVALUATE-DECIDE, RECONCILE, CRITIQUE, DERIVE-COMPONENTS, DEFINE-CONTRACTS, RESOLVE-LOCAL, RECONCILE-CRITIQUE): now `lock missing/status!=frozen OR named artifact (.aprd/<aprd.lock.artifact>) missing/unparseable → HALT`. Version-mismatch impossible by construction (only the lock-named file is ever opened). 4 HLD shared-guard consumers (MODEL-DATA, MODEL-FLOWS, MAP-NFR, DERIVE-TESTS) already HALT on "any shared input missing/unparseable" → resolved input being absent trips it; no new guard added.
+- **lock_verified** (DECISION-EXTRACT, aprd.lock-based): now real — "named artifact exists on disk = the file walked". HLD `lock_verified` = `adr.lock`/`skeleton.lock` (different lock) — left untouched.
+- **CLASS source** — read from RESOLVED body; v2 body carries `## CLASS\nfeature-add`. No separate class input.
+
+### Verify — both-directions binding oracle (deterministic)
+Resolver = read lock → open `.aprd/<lock.artifact>` → read CLASS. Run across benches:
+- **Feature-add known-good** (`_fixtures/brownfield-feature`, lock→v2): opens `aprd.v2.frozen.md`, `CLASS=feature-add`, feature ids (R11–13/E8/A14–16) VISIBLE. **PASS.**
+- **Greenfield no-regression** (`_fixtures/greenfield-clean`, lock→v1): opens `aprd.frozen.md`, `CLASS=greenfield`, zero feature ids = identical baseline. `aprd_ref` resolves to `.aprd/aprd.frozen.md` = existing golden. **PASS.**
+- **Planted defect — stale-walk** (ignore lock, hardcode `aprd.frozen.md` on feature bench): reads v1 → `CLASS=greenfield`, feature invisible = exact pre-fix leak. **FAIL** (oracle rejects).
+- **Planted defect — missing named artifact** (lock.artifact → file not on disk): **HALT** (guard), no silent fallback.
+
+Class-agnostic, single shared rewrite, P2/P3 posture stays REUSE; frozen artifacts byte-unchanged.
+
+### Carried to Task 07
+Full DECISION-EXTRACT semantic golden (DP scoping: tag feature closed by A14–A16 → clean skip / fresh-numbered forks; byte-equal greenfield artifact) + P2/P3 e2e + planted-defect arming = recorded under Task 07 (this task unblocks it). Bench `_fixtures/brownfield-feature` currently `.aprd`-only; full bench assembly = Task 14 BF-FIXTURE-ORACLE.

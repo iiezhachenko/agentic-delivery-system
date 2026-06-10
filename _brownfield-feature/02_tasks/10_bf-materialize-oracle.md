@@ -12,6 +12,7 @@ Feature-add must guarantee nothing previously green goes red (BF4). The oracle i
 
 ### Invariants served
 - **BF4 — regression-gated.** Regression layer materialized; existing suites that cover the touched surface + seams must stay green.
+- **BF7 / P8 — lock = single source of current frozen WHAT.** The aPRD carrying `CLASS_EXTENSION`/`REGRESSION_GUARD` is RESOLVED via `aprd.lock.artifact` (read lock → open named file), NOT a hardcoded `aprd.v<N>.frozen.md`. Same canon as Task 07a; `v2` below is the bench EXAMPLE, never the binding (a literal version path walks stale WHAT one bump later).
 
 ## DAG position
 
@@ -37,7 +38,7 @@ Feature-add must guarantee nothing previously green goes red (BF4). The oracle i
 
 ## THE WORK — add the feature-add delta to the slice-build part of `MATERIALIZE-ORACLE.md`
 
-1. **Frontmatter:** add feature-add inputs — `.aprd/aprd.v2.frozen.md` (the version with the `CLASS_EXTENSION` block: `REGRESSION_GUARD` names which existing ACs/suites the feature touches), `.aprd/baseline-map.json` (`existing_oracle` inventory + `integration_seams`). Class dispatched by playbook.
+1. **Frontmatter:** add feature-add inputs — frozen-WHAT RESOLVED via lock: `.aprd/<aprd.lock.artifact>` (read `.aprd/aprd.lock`, open `.aprd/` + its `artifact` value = CURRENT frozen version carrying the `CLASS_EXTENSION` block: `REGRESSION_GUARD` names which existing ACs/suites the feature touches; feature-add → `aprd.v<N>.frozen.md`, here `aprd.v2.frozen.md` — example, NOT hardcoded path; BF7/P8 + 07a canon), `.aprd/baseline-map.json` (`existing_oracle` inventory + `integration_seams`). Guard (rewrite existing freeze-gate, don't add — AB9): lock missing / `status != frozen`, OR named artifact missing/unparseable → HALT. Class dispatched by playbook.
 2. **Shared `## Rules`:** keep verbatim. The `class_ext` field already exists in the schema — the delta fills it for feature-add (one home, AB1).
 3. **Add a `### feature-add delta (slice-build)` block under Part B:**
    - **Materialize a regression layer (BF4).** `class_ext += regression`. The regression layer = executable tests proving the existing ACs/suites named in `REGRESSION_GUARD` still pass after the feature lands. Materialize from the EXISTING oracle inventory (`baseline-map.json` `existing_oracle.suites`) by REFERENCE — the regression layer asserts the prior-green tests stay green; never re-author or weaken them (H14 analog).
@@ -60,9 +61,11 @@ Feature-add must guarantee nothing previously green goes red (BF4). The oracle i
 - **Planted defect — missing regression layer:** slice oracle with `class_ext: []` for feature-add → MUST FAIL (BF4).
 - **Planted defect — baseline test edited:** regression layer mutates an existing frozen test → MUST FAIL (BF1).
 - **Planted defect — full-suite regression:** regression layer pulls the entire inherited suite unscoped → flag (Risk R4 — scope violation).
+- **Planted defect — stale-version walk:** a copy that ignores `aprd.lock.artifact` and hardcodes a fixed `aprd.v<N>.frozen.md` → reads the wrong version's `CLASS_EXTENSION` → MUST FAIL (BF7/P8; the 07a defect).
 
 ## DONE WHEN
 
 - `MATERIALIZE-ORACLE.md` slice-build part carries a feature-add regression delta (shared/slice-build Rules substance untouched).
+- Frozen-WHAT RESOLVED via `aprd.lock.artifact` (no hardcoded version path); freeze-gate guard verifies the named artifact exists (BF7/P8 + 07a canon).
 - Golden feature-add slice `oracle.json` carries a scoped `regression` layer; no baseline test mutated.
-- Both-directions check holds.
+- Both-directions check holds (incl. stale-version-walk FAIL).

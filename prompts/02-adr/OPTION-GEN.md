@@ -6,7 +6,7 @@ interactive: false          # internal option sourcing — reads disk, writes di
 inputs:
   - { path: ".adr/02-triage.json", format: "json — TRIAGE output; resolution_queue[] = work list (in-cut foundational DP ids to ground), also triage[] per-point verdicts" }
   - { path: ".adr/01-decision-points.json", format: "json — DECISION-EXTRACT output; point BODIES per DP id (decision, category, forced_by[], blast_rationale, fork_evidence, cut_ref) — open question + what forces it" }
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — Phase 0 FROZEN aPRD; forces each option's trade-offs characterized against (R*, C*, A*, E*, AC*). Read for context, not re-opened" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). Forces each option's trade-offs characterized against (R*, C*, A*, E*, AC*). Read for context, not re-opened" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — Phase 1 cut; cross_slice_invariants INV* = HARD properties aPRD fixed. Option violating INV = dead-on-arrival, not real alternative; keeps option space honest" }
   - { path: ".adr/arch-canon.json", format: "json (OPTIONAL) — versioned architecture canon: cached option-sets + trade-off profiles per category (§7.1). Present: cheapest-first, verify currency. Absent: first-principles reasoning, flag canon-absent." }
 outputs:
@@ -15,7 +15,7 @@ outputs:
 escapes:
   - { when: ".adr/02-triage.json missing/unparseable", target: "self / HALT — no resolution_queue; nothing to ground" }
   - { when: ".adr/01-decision-points.json missing/unparseable", target: "self / HALT — no decision bodies (open question + forces); cannot ground a point whose body is absent" }
-  - { when: ".aprd/aprd.frozen.md missing/unparseable", target: "self / HALT — no forces to characterize option trade-offs against; Phase 2 grounds against frozen WHAT" }
+  - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no forces to characterize option trade-offs against; Phase 2 grounds against lock-named CURRENT frozen WHAT, never a stale prior version" }
   - { when: "02/01/cut class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — existing-system grounding + brownfield conformance source order not authored (D7, D10). Report class, HALT" }
   - { when: "resolution_queue[] empty", target: "report + write empty manifest — no in-cut foundational decision this pass. Write index.json with empty option_files[] + note, write no per-DP files, stop. EVALUATE-DECIDE reads zero" }
 ---
@@ -103,7 +103,7 @@ Need **≥2** passing all three per decision. aPRD + cut leave only **one** comp
 {
   "triage_ref": ".adr/02-triage.json",
   "decision_points_ref": ".adr/01-decision-points.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
   "class": "greenfield",
   "skeleton_id": "S1",

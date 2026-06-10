@@ -4,7 +4,7 @@
 
 ## TL;DR
 
-Add a `feature-add` DELTA block to `prompts/01-roadmap/SLICE-EXTRACT.md`. Greenfield SLICE-EXTRACT clusters the frozen aPRD's requirements into candidate vertical slices. Feature-add slices ONLY the NEW feature's `R*/AC*` (those above the baseline high-water-mark, from `aprd.v2.frozen.md`); existing slices are pinned baseline (`completed[]`), never re-sliced. `SKELETON-IDENTIFY` + `FOUNDATION-CUT` stay OFF (the playbook's `active_stages` — foundation already built). Dual-mode overlay: ONE shared `## Rules` + a feature-add delta carrying ONLY what differs (AB1). Satisfies **BF1** (baseline slices untouched) + **BF3**.
+Add a `feature-add` DELTA block to `prompts/01-roadmap/SLICE-EXTRACT.md`. Greenfield SLICE-EXTRACT clusters the frozen aPRD's requirements into candidate vertical slices. Feature-add slices ONLY the NEW feature's `R*/AC*` (those above the baseline high-water-mark), read from the **lock-resolved CURRENT frozen version** (`.aprd/<aprd.lock.artifact>` — here `aprd.v2.frozen.md`, NEVER a hardcoded version path); existing slices are pinned baseline (`completed[]`), never re-sliced. `SKELETON-IDENTIFY` + `FOUNDATION-CUT` stay OFF (the playbook's `active_stages` — foundation already built). Dual-mode overlay: ONE shared `## Rules` + a feature-add delta carrying ONLY what differs (AB1). Satisfies **BF1** (baseline slices untouched) + **BF3**.
 
 ## Why this exists
 
@@ -13,6 +13,7 @@ The feature adds new requirements above the baseline. Roadmap must slice only th
 ### Invariants served
 - **BF1 — baseline immutable + additive.** Existing slices pinned; only new `R*/AC*` sliced.
 - **BF3 — ID continuation.** New slices mint `S*` above the baseline `S*` high-water-mark.
+- **BF7 / P8 — lock = single source of current frozen WHAT.** Frozen-WHAT input RESOLVED via `aprd.lock.artifact` (read lock → open the file it names), NOT a hardcoded `aprd.v<N>.frozen.md`. Same canon Task 07a established for the 13 Phase-2/3 consumers; a literal version path re-introduces that defect one bump later (v3 feature walks stale v2). `v2` below is the bench EXAMPLE, never the binding.
 
 ## DAG position
 
@@ -38,7 +39,7 @@ The feature adds new requirements above the baseline. Roadmap must slice only th
 
 ## THE WORK — add the feature-add delta to `SLICE-EXTRACT.md`
 
-1. **Frontmatter:** add feature-add inputs — `.aprd/aprd.v2.frozen.md` (the new version with new `R*/AC*` + class-extension block), `.aprd/baseline-map.json` (`S*` high-water + completed slices), and the baseline `.roadmap/08-rerank.json` (`completed[]` = pinned baseline slices). Class gate routes feature-add here.
+1. **Frontmatter:** add feature-add inputs — frozen-WHAT RESOLVED via lock: `.aprd/<aprd.lock.artifact>` (read `.aprd/aprd.lock`, open `.aprd/` + its `artifact` value = CURRENT frozen version carrying the new `R*/AC*` + class-extension block; feature-add → `aprd.v<N>.frozen.md`, here `aprd.v2.frozen.md` — example, NOT hardcoded path; BF7/P8 + 07a canon), `.aprd/baseline-map.json` (`S*` high-water + completed slices), and the baseline `.roadmap/08-rerank.json` (`completed[]` = pinned baseline slices). The existing `.aprd/aprd.lock` freeze-gate input gains the resolver role on the SAME line (rewrite the note, don't add a second input — AB9/P1). Class gate routes feature-add here.
 2. **Shared `## Rules`:** keep greenfield rules. Coverage Rule 3 ("cover every `R*`/`AC*`") generalizes — for feature-add the cover set is the NEW `R*/AC*` only (above high-water); state the corpus in the delta (one home, AB1).
 3. **Add `## Rules (feature-add delta — shared Rules above also bind):`**
    - **Slice only the new feature's IDs (BF1).** Cover set = `R*/AC*` above the baseline high-water-mark (the new version's net-new requirements). Baseline `R*/AC*` belong to pinned `completed[]` slices — NEVER re-slice them, never put a baseline `R*` in a new slice's `requirements`.
@@ -46,7 +47,8 @@ The feature adds new requirements above the baseline. Roadmap must slice only th
    - **`depends_on` may cite baseline slices.** A new slice can depend on an accepted baseline slice (it plugs into existing capability). Those baseline `S*` are already satisfied (`completed[]`) — list them for legality, they don't gate the frontier.
    - **No new skeleton, no foundation cut (playbook `active_stages`).** Foundation + walking skeleton already exist. Don't name a skeleton or cut foundation — those stages are OFF for feature-add. A new feature needing NEW foundation → widen-cut escape (Phase-4→Phase-1 target), not a fresh skeleton here.
 4. **Output schema:** `02-slices.json` adds `class: "feature-add"`, `aprd_version`, `baseline_completed_slices[S*]` (pinned, carried for reference), and the candidate `slices[]` cover only new IDs. `coverage.requirements_total`/`acceptance_total` = the NEW ID set, not the whole aPRD.
-5. **Task steps:** add a feature-add branch: read new version + baseline-map + baseline rerank → inventory ONLY new `R*/AC*` (above high-water) → cluster into candidate vertical slices minting `S*` above high-water → derive `depends_on` (may cite baseline `S*`) → coverage over the new ID set → write. Keep greenfield steps intact.
+5. **Task steps:** add a feature-add branch: read lock → open the lock-named CURRENT frozen version (`.aprd/<aprd.lock.artifact>`) + baseline-map + baseline rerank → inventory ONLY new `R*/AC*` (above high-water) → cluster into candidate vertical slices minting `S*` above high-water → derive `depends_on` (may cite baseline `S*`) → coverage over the new ID set → write. Keep greenfield steps intact.
+6. **Guard (rewrite existing freeze-gate, don't add — AB9):** lock missing / `status != frozen`, OR the artifact it names (`.aprd/<aprd.lock.artifact>`) missing/unparseable → HALT. Version-mismatch impossible by construction (only the lock-named file is opened).
 
 ## Lane / what NOT to do
 
@@ -57,12 +59,14 @@ The feature adds new requirements above the baseline. Roadmap must slice only th
 
 ## Verify (both-directions)
 
-- **Known-good:** feature-add `aprd.v2.frozen.md` → candidate slices cover only new `R*/AC*`, `S*` above high-water, baseline slices pinned in `baseline_completed_slices`. PASS.
+- **Known-good:** feature-add bench (lock→`aprd.v2.frozen.md`) → role resolves the lock-named version, candidate slices cover only new `R*/AC*`, `S*` above high-water, baseline slices pinned in `baseline_completed_slices`. PASS.
 - **Planted defect — baseline re-slice:** a candidate slice containing a baseline `R*` → MUST FAIL (BF1).
 - **Planted defect — S* collision:** new slice reuses a baseline `S*` → MUST FAIL (BF3).
+- **Planted defect — stale-version walk:** a copy that ignores `aprd.lock.artifact` and hardcodes `aprd.frozen.md` (or any fixed `v<N>`) → slices the wrong version's IDs → MUST FAIL (BF7/P8; the 07a defect, now guarded here too).
 
 ## DONE WHEN
 
 - `SLICE-EXTRACT.md` carries a feature-add delta (shared Rules substance untouched).
+- Frozen-WHAT input RESOLVED via `aprd.lock.artifact` (no hardcoded `aprd.v<N>.frozen.md` as the WHAT path); freeze-gate guard rewritten to verify the named artifact exists (BF7/P8 + 07a canon).
 - Golden feature-add `02-slices.json` slices only new IDs, mints `S*` above high-water, pins baseline slices.
-- Both-directions check holds.
+- Both-directions check holds (incl. stale-version-walk planted defect FAILs).

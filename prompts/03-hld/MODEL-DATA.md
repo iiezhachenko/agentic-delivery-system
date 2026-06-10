@@ -6,7 +6,7 @@ pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → 
 interactive: false          # internal structural sweep; client signed the WHAT, team owns the HOW (PR1, §9)
 inputs:
   # — shared (both passes) —
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — ENTITIES E* = things to model (durable-vs-derived + relationships); R* = trace oracle" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). ENTITIES E* = things to model (durable-vs-derived + relationships); R* = trace oracle" }
   - { path: ".adr/adr.lock", format: "json — frozen ADR baseline + manifest; locates Persistence-category ADR + freeze gate Phase 3 dispatches against" }
   - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — Persistence ADR = storage frame (store tech + logical entity/FK chain). Reference what it fixed; never invent field schema" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — INV* = hard floor; deferred[] = per-slice field schemas MODEL-DATA must NOT invent" }
@@ -92,7 +92,7 @@ Each `E*` owned by **exactly one** component. Determine + verify:
 
 ```json
 {
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "adr_log_ref": ".adr/log/",
   "components_ref": ".hld/skeleton/components.json",
@@ -201,7 +201,7 @@ Skeleton deferred each entity's field schema to owning slice (`field_schema_defe
 
 ```json
 {
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "adr_log_ref": ".adr/log/",
   "base_data_model_ref": ".hld/skeleton/data-model.json",   // frozen model this extends; entities carried by reference from here

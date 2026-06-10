@@ -12,6 +12,7 @@ Feature-add's defining guarantee is that the existing accepted behavior keeps wo
 
 ### Invariants served
 - **BF4 — regression-gated.** Regression layer run; nothing previously green goes red, or the slice fails.
+- **BF7 / P8 — lock = single source of current frozen WHAT.** The aPRD carrying `REGRESSION_GUARD` is RESOLVED via `aprd.lock.artifact` (read lock → open named file), NOT a hardcoded `aprd.v<N>.frozen.md`. Same canon as Task 07a; `v2` below is the bench EXAMPLE, never the binding.
 
 ## DAG position
 
@@ -33,7 +34,7 @@ Feature-add's defining guarantee is that the existing accepted behavior keeps wo
 
 ## THE WORK — add the feature-add delta to the slice-build part of `VERIFY-OUTPUT.md`
 
-1. **Frontmatter:** add feature-add inputs — the slice `oracle.json` `class_ext` regression layer (from Task 10), `.aprd/baseline-map.json` `existing_oracle` (the suites that must stay green), `.aprd/aprd.v2.frozen.md` `REGRESSION_GUARD` (the scoped guard). Class dispatched by playbook.
+1. **Frontmatter:** add feature-add inputs — the slice `oracle.json` `class_ext` regression layer (from Task 10), `.aprd/baseline-map.json` `existing_oracle` (the suites that must stay green), the lock-resolved CURRENT frozen version `.aprd/<aprd.lock.artifact>` (read `.aprd/aprd.lock`, open `.aprd/` + its `artifact` value; feature-add → `aprd.v<N>.frozen.md`, here `aprd.v2.frozen.md` — example, NOT hardcoded path; BF7/P8 + 07a canon) for its `REGRESSION_GUARD` (the scoped guard). Guard (rewrite freeze-gate, don't add — AB9): lock missing / `status != frozen`, OR named artifact missing/unparseable → HALT. Class dispatched by playbook.
 2. **Shared `## Rules`:** keep verbatim. The "run the full ladder, oracle is frozen" rule stays; the delta adds the regression layer to the ladder for feature-add (one home, AB1).
 3. **Add a `### feature-add delta (slice-build)` block:**
    - **Run the regression layer; must stay green (BF4).** After the contract/flow/acceptance ladder passes, run the regression layer (the scoped existing suites named in `REGRESSION_GUARD` / `class_ext`). EVERY previously-green test in scope must still pass. Any regression red = the slice FAILS — route to DIAGNOSE (the feature broke existing behavior).
@@ -56,9 +57,11 @@ Feature-add's defining guarantee is that the existing accepted behavior keeps wo
 - **Planted defect — regression (the headline BF4 test):** the feature breaks an existing AC → a previously-green regression test goes red → slice MUST FAIL (not certify).
 - **Planted defect — regression skipped:** feature-add slice certified without running the regression layer → MUST FAIL.
 - **Planted defect — weakened regression test:** a regression test edited to pass → MUST FAIL (B4 breach).
+- **Planted defect — stale-version walk:** a copy that ignores `aprd.lock.artifact` and hardcodes a fixed `aprd.v<N>.frozen.md` → reads the wrong version's `REGRESSION_GUARD` → MUST FAIL (BF7/P8; the 07a defect).
 
 ## DONE WHEN
 
 - `VERIFY-OUTPUT.md` slice-build part carries a feature-add regression delta (shared/slice-build Rules substance untouched).
+- Frozen-WHAT RESOLVED via `aprd.lock.artifact` (no hardcoded version path); freeze-gate guard verifies the named artifact exists (BF7/P8 + 07a canon).
 - Golden feature-add slice `verify-output.json` runs the scoped regression layer green alongside the full ladder.
-- Both-directions check holds (esp. the planted-regression FAIL — the headline BF4 guarantee).
+- Both-directions check holds (incl. stale-version-walk FAIL + the headline planted-regression FAIL).

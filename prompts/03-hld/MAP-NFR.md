@@ -6,7 +6,7 @@ pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → 
 interactive: false          # internal structural sweep; client signed WHAT, team owns HOW (PR1, §9)
 inputs:
   # — shared (both passes) —
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — CONSTRAINTS C* + assumptions A* carrying non-functional force (scale A13, compliance/residency A9, security A2) = NFR set; R* = trace oracle" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). CONSTRAINTS C* + assumptions A* carrying non-functional force (scale A13, compliance/residency A9, security A2) = NFR set; R* = trace oracle" }
   - { path: ".adr/adr.lock", format: "json — frozen gate (status==frozen) + ADR manifest; locates frame ADRs satisfying NFRs (monolith/MPA/OAuth/PaaS)" }
   - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — frame ADRs; NFR satisfied-by-frame cites ADR-* that decided it. Reference what it fixed; never re-decide" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — INV* = hard mechanism floor (INV6 forbids cache/queue/scale); cross_slice_invariants ground frame-satisfaction" }
@@ -92,7 +92,7 @@ Walk category checklist (scale, latency, availability, security, compliance, dat
 
 ```json
 {
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "adr_log_ref": ".adr/log/",
   "components_ref": ".hld/skeleton/components.json",
@@ -193,7 +193,7 @@ Inherited frame NFRs **frozen-in-substance** — frame already satisfied them. S
 
 ```json
 {
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "adr_log_ref": ".adr/log/",
   "base_nfr_ref": ".hld/skeleton/nfr-mechanisms.json",      // frozen NFR map this extends; NFRs carried by reference from here

@@ -6,13 +6,13 @@ interactive: false          # internal coherence + coverage check — reads disk
 inputs:
   - { path: ".adr/03-options/decisions-index.json", format: "json — EVALUATE-DECIDE manifest; the work list (decisions[] + undecided[]). Tells which decisions were made + where each file lives" }
   - { path: ".adr/03-options/<DP-id>.decision.json", format: "json — per-DP decision; read decision_made, traces[], cut_ref, consequences.follow_on[] (the NOTED cross-decision deps — primary conflict-detection grounding)" }
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — frozen aPRD; in-scope CONSTRAINTS C* = the coverage target (D5), full id-space (R*/AC*/A*/E*) = trace-validity oracle (D4). Read-only, never re-opened (D9)" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). In-scope CONSTRAINTS C* = the coverage target (D5), full id-space (R*/AC*/A*/E*) = trace-validity oracle (D4). Read-only, never re-opened (D9)" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — FOUNDATION-CUT; cross_slice_invariants INV* (hard floor for violation check, NOT a coverage target), foundational_decisions FD*, deferred[] (explicit-deferral evidence)" }
 outputs:
   - { path: ".adr/04-conflicts.json", format: "json (§10 reserved slot, schema below) — conflicts + violations + coverage + verdict; SYNTHESIZE-ADR gates on it, blocked loops back to re-decide" }
 escapes:
   - { when: ".adr/03-options/decisions-index.json missing or unparseable — no manifest to enumerate", target: "self / HALT" }
-  - { when: ".aprd/aprd.frozen.md missing or unparseable — no CONSTRAINTS to coverage-check, no id-space to validate traces (D4/D5)", target: "self / HALT" }
+  - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable — no CONSTRAINTS to coverage-check, no id-space to validate traces (D4/D5)", target: "self / HALT" }
   - { when: ".roadmap/06-foundation-cut.json missing or unparseable — no INV* floor, no FD intent / deferred[] evidence", target: "self / HALT" }
   - { when: "manifest/aPRD/cut class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — brownfield inheritance/conformance reconciliation not authored (D7, D10)", target: "that playbook / HALT, report class" }
   - { when: "decisions[] empty (EVALUATE-DECIDE decided nothing this pass)", target: "self — write 04-conflicts.json with empty conflicts/violations/coverage + verdict coherent + note, stop. SYNTHESIZE-ADR renders zero" }
@@ -63,7 +63,7 @@ Coherence + coverage gate, role 5 of ADR (Phase 2) pipeline. EVALUATE-DECIDE dec
 ```json
 {
   "decisions_index_ref": "03-options/decisions-index.json",   // manifest enumerated
-  "aprd_ref": ".aprd/aprd.frozen.md",                          // trace/coverage oracle read
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",  // trace/coverage oracle read (lock-resolved CURRENT version)
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",     // INV/deferred oracle read
   "class": "greenfield",
   "skeleton_id": "S1",

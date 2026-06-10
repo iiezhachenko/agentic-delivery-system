@@ -12,6 +12,7 @@ The new feature plugs into the existing system at specific seams (declared in th
 
 ### Invariants served
 - **BF6 — seam-bounded.** Feature wired into existing components at declared seams; existing internals untouched.
+- **BF7 / P8 — lock = single source of current frozen WHAT.** The aPRD carrying `INTEGRATION_SEAMS` is RESOLVED via `aprd.lock.artifact` (read lock → open named file), NOT a hardcoded `aprd.v<N>.frozen.md`. Same canon as Task 07a; `v2` below is the bench EXAMPLE, never the binding.
 
 ## DAG position
 
@@ -33,7 +34,7 @@ The new feature plugs into the existing system at specific seams (declared in th
 
 ## THE WORK — add the feature-add delta to the slice-build part of `INTEGRATE.md`
 
-1. **Frontmatter:** add feature-add inputs — `.aprd/baseline-map.json` (`integration_seams` catalog: `{at: C*, kind, contract_ref: CT*}`), `.aprd/aprd.v2.frozen.md` `INTEGRATION_SEAMS` block (which seams the feature plugs into), the existing prior-built `src/**` components (read-only, real callables to compose). Class dispatched by playbook.
+1. **Frontmatter:** add feature-add inputs — `.aprd/baseline-map.json` (`integration_seams` catalog: `{at: C*, kind, contract_ref: CT*}`), the lock-resolved CURRENT frozen version `.aprd/<aprd.lock.artifact>` (read `.aprd/aprd.lock`, open `.aprd/` + its `artifact` value; feature-add → `aprd.v<N>.frozen.md`, here `aprd.v2.frozen.md` — example, NOT hardcoded path; BF7/P8 + 07a canon) for its `INTEGRATION_SEAMS` block (which seams the feature plugs into), the existing prior-built `src/**` components (read-only, real callables to compose). Guard (rewrite freeze-gate, don't add — AB9): lock missing / `status != frozen`, OR named artifact missing/unparseable → HALT. Class dispatched by playbook.
 2. **Shared `## Rules`:** keep verbatim. The "wire real components, never rewrite internals" rule already exists — generalize its source set so for feature-add the wiring targets are the declared `INTEGRATION_SEAMS` (state in delta, AB1).
 3. **Add a `### feature-add delta (slice-build)` block:**
    - **Wire at declared seams only (BF6).** Compose the new component into the existing system ONLY at the seams declared in `INTEGRATION_SEAMS` (`at: C*`, `contract_ref: CT*`). The seam contract is the wall — wire against it, never reach inside an existing component.
@@ -54,9 +55,11 @@ The new feature plugs into the existing system at specific seams (declared in th
 - **Known-good:** feature-add slice → flow wired at declared seams via additive files; `existing_internals_modified: false`; flow layer green. PASS.
 - **Planted defect — internals edit:** wiring edits an existing component's internal logic → MUST FAIL (BF6).
 - **Planted defect — undeclared seam:** wiring reaches into a component at a seam not in `INTEGRATION_SEAMS` → MUST FAIL (BF6).
+- **Planted defect — stale-version walk:** a copy that ignores `aprd.lock.artifact` and hardcodes a fixed `aprd.v<N>.frozen.md` → reads the wrong version's `INTEGRATION_SEAMS` → MUST FAIL (BF7/P8; the 07a defect).
 
 ## DONE WHEN
 
 - `INTEGRATE.md` slice-build part carries a feature-add seam delta (shared/slice-build Rules substance untouched).
+- Frozen-WHAT RESOLVED via `aprd.lock.artifact` (no hardcoded version path); freeze-gate guard verifies the named artifact exists (BF7/P8 + 07a canon).
 - Golden feature-add slice `integration-record.json` cites `wired_seams`, asserts `existing_internals_modified: false`, flow layer green.
-- Both-directions check holds.
+- Both-directions check holds (incl. stale-version-walk FAIL).

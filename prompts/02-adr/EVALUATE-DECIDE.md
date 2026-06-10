@@ -6,14 +6,14 @@ interactive: false          # internal evaluation + decision — reads disk, wri
 inputs:
   - { path: ".adr/03-options/index.json", format: "json — OPTION-GEN manifest; enumeration entry point: which DPs have option sets + where each file lives (option_files[] + degenerate[]/skipped[])" }
   - { path: ".adr/03-options/<DP-id>.json", format: "json — OPTION-GEN per-DP option set; live unranked alternatives to score + pick among (decision/category/forced_by/cut_ref + options[] + degenerate flag). bears_on[] = eval hooks" }
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — Phase 0 FROZEN aPRD; scoring dimensions (CONSTRAINTS C*, ACCEPTANCE AC*, assumptions as cross-cutting NFRs: A6/A13/A9/C2). Scored against, never re-opened (D9)" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). Scoring dimensions (CONSTRAINTS C*, ACCEPTANCE AC*, assumptions as cross-cutting NFRs: A6/A13/A9/C2). Scored against, never re-opened (D9)" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — Phase 1 cut; cross_slice_invariants INV* = HARD floor (pick breaching an INV* invalid regardless of merit). Source of INV ids for traces/follow_on" }
 outputs:
   - { path: ".adr/03-options/decisions-index.json", format: "json (manifest, schema below) — one entry per decided DP: pick + traces + decision-file path, plus undecided[]. Entry point RECONCILE + SYNTHESIZE-ADR read" }
   - { path: ".adr/03-options/<DP-id>.decision.json", format: "json (one file per decided in-cut foundational DP, schema below) — per-option evaluation (live, before the pick), the chosen option, traced rejections, consequences, traces" }
 escapes:
   - { when: ".adr/03-options/index.json missing/unparseable", target: "self / HALT — no manifest to enumerate; cannot know which option sets to decide" }
-  - { when: ".aprd/aprd.frozen.md missing/unparseable", target: "self / HALT — no CONSTRAINTS/ACCEPTANCE/NFR forces to score against; Phase 2 decides against the frozen WHAT" }
+  - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no CONSTRAINTS/ACCEPTANCE/NFR forces to score against; Phase 2 decides against the lock-named CURRENT frozen WHAT, never a stale prior version" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no cross_slice_invariants INV* to validate the pick against the hard floor (§5.5/§5.6)" }
   - { when: "index/aPRD/cut class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — existing-system conformance weighting + brownfield ADR inheritance not authored (D7, D10). Report the class, HALT" }
   - { when: "option_files[] empty (OPTION-GEN grounded nothing — empty resolution_queue this pass)", target: "report + write empty manifest — write decisions-index.json with empty decisions[] + a note, write no per-DP decision files, stop. RECONCILE reads zero" }
@@ -60,7 +60,7 @@ Per decision, score **every** option against forces — only forces contract rai
 10. **Full accounting — every grounded decision decided exactly once (P9), robust to variable manifest.** Every id in `option_files[]` gets exactly one decision file; manifest's `decisions[]` lists exactly those ids (minus any in `undecided[]`), once each. Verify `len(decisions) + len(undecided) == len(option_files)`. Id lands in `undecided[]` only for real blocker: its option file missing/unparseable (broken contract), every option non-compliant (leaked gate), or genuinely blocked by aPRD defect (§5.10) — record `{id, reason}` + route reason, never fabricate decision to hide gap. Queue (6–8 in-cut foundationals) + each set's size (2–4 options, sometimes 1 if degenerate) vary run to run — never assume golden's exact ids/counts/membership. Full accounting holds for any N.
 
 ## Task steps
-1. Read `.adr/03-options/index.json`, `.aprd/aprd.frozen.md`, `.roadmap/06-foundation-cut.json`. Check guards (frontmatter `escapes:`) — any tripped → HALT/report (empty `option_files[]` → write `decisions-index.json` with empty `decisions[]` + note, write no per-DP files, stop). Else continue.
+1. Read `.adr/03-options/index.json`, the lock-resolved frozen aPRD (`.aprd/aprd.lock` → `.aprd/<aprd.lock.artifact>`), `.roadmap/06-foundation-cut.json`. Check guards (frontmatter `escapes:`) — any tripped → HALT/report (empty `option_files[]` → write `decisions-index.json` with empty `decisions[]` + note, write no per-DP files, stop). Else continue.
 2. Inventory scoring forces: aPRD's hard CONSTRAINTS (C*), ACCEPTANCE (AC*), assumptions as cross-cutting NFRs (A6, A13, A9, C2, …); cut's `cross_slice_invariants[]` (INV*) = hard floor.
 3. For each `{id, path, option_count}` in `option_files[]`, in manifest order:
    - Open option file at its `path`. Missing/unparseable → add `{id, reason}` to `undecided[]`, continue.
@@ -116,7 +116,7 @@ Per decision, score **every** option against forces — only forces contract rai
 ```json
 {
   "options_index_ref": "03-options/index.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
   "class": "greenfield",
   "skeleton_id": "S1",

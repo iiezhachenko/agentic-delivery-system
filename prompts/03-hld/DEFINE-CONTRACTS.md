@@ -6,7 +6,7 @@ pass: skeleton|increment    # DISPATCHED on disk state: no frozen skeleton → S
 interactive: false          # internal structural sweep; client signed the WHAT, team owns the HOW (PR1, §9)
 inputs:
   # — shared (both passes) —
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — R* = trace oracle; E* = logical payloads crossing seams (shape references entities, never invents field layout)" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). R* = trace oracle; E* = logical payloads crossing seams (shape references entities, never invents field layout)" }
   - { path: ".adr/adr.lock", format: "json — FROZEN ADR baseline + manifest; freeze gate + frame deciding contract KIND" }
   - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — baselined bodies; Architectural-style + API-style + Persistence ADRs shape KIND (flat-monolith single-server-synchronous skews to sync_api/shared_data; async needs frame-permitted forcing reason)" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — cross_slice_invariants INV* = hard floor (INV6 single-server synchronous forbids queue/worker async unless frame permits); deferred[] = per-slice schema details NOT to invent now" }
@@ -22,7 +22,7 @@ outputs:
   - { path: ".hld/slices/<slice_id>/contracts.json", format: "INCREMENT: json (Part B schema) — slice contract surface: introduced component's seams (carried verbatim if established, minted if new), new-contract delta (typically []), slice contract coverage, skeleton-fidelity verdict" }
 escapes:
   # — shared —
-  - { when: ".aprd/aprd.frozen.md missing/unparseable", target: "self / HALT — no R* trace oracle / no E* payload reference; Phase 3 consumes only FROZEN WHAT (P8/H9)" }
+  - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no R* trace oracle / no E* payload reference; Phase 3 consumes only the lock-named CURRENT FROZEN WHAT (P8/H9), never a stale prior version" }
   - { when: ".adr/adr.lock missing OR status != frozen, OR .adr/log/ missing/empty", target: "self / HALT — no baselined frame to decide KIND (H2)" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no INV* floor (esp. INV6) + no deferred[] list of schemas not to invent" }
   - { when: "frozen/lock CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — depth/brownfield-existing-seam-conformance not authored (H11/D10). Report class" }
@@ -91,7 +91,7 @@ Derive kind from what actually crosses (edge `reason`), constrained by frame. Ne
 ```json
 {
   "components_ref": ".hld/skeleton/components.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "adr_log_ref": ".adr/log/",
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
@@ -178,7 +178,7 @@ Net: touched edge has BOTH endpoints in `touched_components` AND at least one en
   "slice_components_ref": ".hld/slices/<slice_id>/components.json",
   "base_skeleton_contracts_ref": ".hld/skeleton/contracts.json",   // frozen contracts this extends
   "skeleton_lock_ref": ".hld/skeleton.lock",
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
   "skeleton_frozen_verified": true,        // skeleton.lock present + status==frozen (don't recompute hash)

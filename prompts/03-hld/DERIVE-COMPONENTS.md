@@ -8,7 +8,7 @@ inputs:
   # — shared (both passes) —
   - { path: ".adr/adr.lock", format: "json — FROZEN ADR baseline + manifest (adrs[]{id,dp_id,title,status,mode,scope,category,traces,log_ref}); the freeze gate Phase 3 dispatches against" }
   - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — baselined ADR bodies; the Architectural-style and/or Boundary-strategy ADR is the CUT DRIVER, rest of frame constrains" }
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — the WHAT to cluster: R* = responsibilities, E* = owned entities; trace oracle" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). The WHAT to cluster: R* = responsibilities, E* = owned entities; trace oracle" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — skeleton_seams[] = component-graph recognition seed; INV* = aPRD-fixed properties the structure must honor (frame floor)" }
   # — increment pass only —
   - { path: ".hld/skeleton.lock", format: "json — DISPATCH signal + freeze gate: status==frozen → INCREMENT PASS extends this baseline (H14)" }
@@ -20,7 +20,7 @@ outputs:
   - { path: ".hld/slices/<slice_id>/components.json", format: "INCREMENT: json (Part B schema) — slice-scoped component delta: touched subgraph (introduced + reused), new-capability boxes/edges (typically []), slice coverage, skeleton-fidelity verdict" }
 escapes:
   # — shared —
-  - { when: ".aprd/aprd.frozen.md missing/unparseable", target: "self / HALT — no WHAT to cluster; Phase 3 consumes only the FROZEN WHAT (P8/H9)" }
+  - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no WHAT to cluster; Phase 3 consumes only the lock-named CURRENT FROZEN WHAT (P8/H9), never a stale prior version" }
   - { when: ".adr/adr.lock missing OR status != frozen, OR .adr/log/ missing/empty", target: "self / HALT — no baselined frame to draw inside (H2)" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no cut to seed seams + read invariants" }
   - { when: "frozen/lock CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — depth/brownfield-conformance not authored (H11/D10). Report class" }
@@ -88,7 +88,7 @@ Pass all three → draw. Fail 1 → drop (gold-plating). Fail 2 with genuine nee
 
 ```json
 {
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "adr_log_ref": ".adr/log/",
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
@@ -178,7 +178,7 @@ Slice needs **new component box iff** slice requirement (`R*`) has **no home in 
 
 ```json
 {
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "base_skeleton_ref": ".hld/skeleton/components.json",   // frozen graph this extends
   "skeleton_lock_ref": ".hld/skeleton.lock",

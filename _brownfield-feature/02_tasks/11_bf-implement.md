@@ -12,6 +12,7 @@ New feature code must look like the existing codebase, not like greenfield canon
 
 ### Invariants served
 - **BF5 — convention-conformant.** New code matches existing conventions (from `baseline-map.json` `conventions` + the aPRD `CONVENTION_BASELINE`), not canon defaults.
+- **BF7 / P8 — lock = single source of current frozen WHAT.** The aPRD carrying `CONVENTION_BASELINE` is RESOLVED via `aprd.lock.artifact` (read lock → open named file), NOT a hardcoded `aprd.v<N>.frozen.md`. Same canon as Task 07a; `v2` below is the bench EXAMPLE, never the binding.
 
 ## DAG position
 
@@ -37,7 +38,7 @@ New feature code must look like the existing codebase, not like greenfield canon
 
 ## THE WORK — add the feature-add delta to the slice-build part of `IMPLEMENT.md`
 
-1. **Frontmatter:** add feature-add inputs — `.aprd/baseline-map.json` (`conventions` = lang/layout/lint/naming; the convention ground truth), `.aprd/aprd.v2.frozen.md` `CONVENTION_BASELINE` block, and the existing `src/**` (read-only — the convention exemplar). Class dispatched by playbook.
+1. **Frontmatter:** add feature-add inputs — `.aprd/baseline-map.json` (`conventions` = lang/layout/lint/naming; the convention ground truth), the lock-resolved CURRENT frozen version `.aprd/<aprd.lock.artifact>` (read `.aprd/aprd.lock`, open `.aprd/` + its `artifact` value; feature-add → `aprd.v<N>.frozen.md`, here `aprd.v2.frozen.md` — example, NOT hardcoded path; BF7/P8 + 07a canon) for its `CONVENTION_BASELINE` block, and the existing `src/**` (read-only — the convention exemplar). Guard (rewrite freeze-gate, don't add — AB9): lock missing / `status != frozen`, OR named artifact missing/unparseable → HALT. Class dispatched by playbook.
 2. **Shared `## Rules`:** keep verbatim. Rule 4 ("code grounded from frame + canon, cheapest-source-first") already names cheapest-source-first — generalize the SHARED source order so for feature-add the cheapest source is EXISTING code + `CONVENTION_BASELINE` BEFORE canon (state the corpus in the delta, AB1).
 3. **Add a `### feature-add delta (slice-build)` block under Part B:**
    - **Ground from existing code FIRST (BF5, cheapest-source-first).** Before writing, read the existing `src/` modules the new component sits beside + the `baseline-map.json` `conventions` + the aPRD `CONVENTION_BASELINE`. New code matches THOSE (naming, layout, idioms, error handling, framework usage) — NOT greenfield canon defaults. A canon default that contradicts a captured convention → the convention wins (it's the baseline truth).
@@ -59,9 +60,11 @@ New feature code must look like the existing codebase, not like greenfield canon
 - **Known-good:** feature-add slice → new component code conforms to baseline `conventions`, contract layer green, `conforms_to_conventions: true`. PASS.
 - **Planted defect — convention drift:** new code using canon-default naming/layout that contradicts the captured convention → CRITIQUE flags → MUST FAIL (BF5).
 - **Planted defect — baseline reformat:** an existing baseline file restyled → MUST FAIL (BF1).
+- **Planted defect — stale-version walk:** a copy that ignores `aprd.lock.artifact` and hardcodes a fixed `aprd.v<N>.frozen.md` → reads the wrong version's `CONVENTION_BASELINE` → MUST FAIL (BF7/P8; the 07a defect).
 
 ## DONE WHEN
 
 - `IMPLEMENT.md` slice-build part carries a feature-add convention delta (shared/slice-build Rules substance untouched).
+- Frozen-WHAT RESOLVED via `aprd.lock.artifact` (no hardcoded version path); freeze-gate guard verifies the named artifact exists (BF7/P8 + 07a canon).
 - Golden feature-add slice `build-record.json` shows convention-conformant new code, contract layer green.
-- Both-directions check holds.
+- Both-directions check holds (incl. stale-version-walk FAIL).

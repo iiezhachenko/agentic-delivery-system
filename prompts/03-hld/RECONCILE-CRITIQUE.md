@@ -6,7 +6,7 @@ pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → 
 interactive: false          # hostile review — reads disk, writes issues list to disk, stops. Does NOT redraw, re-decide, re-render, or freeze (PR1, §5.10/§5.12, §9)
 inputs:
   # — shared (both passes) —
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — frozen contract, coverage + trace ORACLE: real id-space (R*/AC*/C*/E*/A*) every component/contract/flow/entity resolves into; in-scope CONSTRAINTS C* + NFR-bearing A* NFR check measures against" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). Coverage + trace ORACLE: real id-space (R*/AC*/C*/E*/A*) every component/contract/flow/entity resolves into; in-scope CONSTRAINTS C* + NFR-bearing A* NFR check measures against" }
   - { path: ".adr/adr.lock", format: "json — frozen frame gate (status==frozen): foundational decisions structure must HONOR (H2). Frame-fidelity oracle" }
   - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — frame ADR bodies (read-only context for honor/violation judgement; never re-decided)" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — cut: cross_slice_invariants[INV*] = hard VIOLATION FLOOR (NOT coverage target), foundational_decisions[FD*], deferred[], skeleton_seams[] flow must cross, skeleton_id" }
@@ -34,7 +34,7 @@ outputs:
   - { path: ".hld/slices/<slice_id>/reconcile.json", format: "INCREMENT json (Part B) — verdict clean|blocked + issues[] + skeleton-fidelity verdict (H14); clean → slice freeze, blocked → loops to slice's DERIVE-COMPONENTS increment" }
 escapes:
   # — shared —
-  - { when: ".aprd/aprd.frozen.md missing — no coverage/trace oracle", target: "self / HALT" }
+  - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable — no coverage/trace oracle", target: "self / HALT" }
   - { when: ".adr/adr.lock missing/unparseable or status != frozen — no frame-fidelity oracle (unfrozen frame means Phase 2 didn't gate; not Phase-3 input)", target: "self / HALT" }
   - { when: ".roadmap/06-foundation-cut.json or .adr/02-triage.json missing/unparseable — no INV floor / deferred-queue oracle (would manufacture false positives)", target: "self / HALT" }
   - { when: "class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) (in any artifact / lock) — brownfield skeleton-fidelity review not authored (§11, D10)", target: "that playbook / HALT, report class" }
@@ -116,7 +116,7 @@ Run the **seven shared blocking categories** (1–7 above; category 8 N/A — no
   "nfr_mechanisms_ref": ".hld/skeleton/nfr-mechanisms.json",
   "flows_ref": ".hld/skeleton/flows.json",
   "test_specs_ref": ".hld/skeleton/test-specs.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
   "deferred_decisions_ref": ".adr/deferred-decisions.json",
@@ -195,7 +195,7 @@ Run **all eight shared blocking categories** (1–7 re-scoped to slice + categor
   "slice_flows_ref": ".hld/slices/S4/flows.json",
   "slice_test_specs_ref": ".hld/slices/S4/test-specs.json",
   "slice_deferred_decisions_ref": ".hld/slices/S4/deferred-decisions.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
   "skeleton_lock_ref": ".hld/skeleton.lock",

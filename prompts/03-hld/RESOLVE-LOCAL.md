@@ -7,7 +7,7 @@ interactive: false          # internal structural sweep; client signed the WHAT,
 inputs:
   # — shared (both passes) —
   - { path: ".adr/01-decision-points.json", format: "json — DP BODIES: decision text + category + forced_by + fork_evidence + cut_ref per DP" }
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — trace oracle + forces each local fork resolved against" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). Trace oracle + forces each local fork resolved against" }
   - { path: ".adr/adr.lock", format: "json — frozen baseline + manifest; freeze gate + id-continuation point (local ADR ids continue monotonically after current max). NEVER mutate this lock" }
   - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — baselined foundational ADR bodies (mode:foundation, Accepted); frozen frame local resolution may NOT re-decide (re-deciding one = escalation signal → Phase 2)" }
   - { path: ".roadmap/06-foundation-cut.json", format: "json — deferred[] = per-slice HOW-items (grounding for re-deferring slice-owned local); cross_slice_invariants INV* = hard floor" }
@@ -29,7 +29,7 @@ outputs:
 escapes:
   # — shared —
   - { when: ".adr/01-decision-points.json missing/unparseable", target: "self / HALT — no DP bodies (decision text / forced_by / fork_evidence) to resolve against" }
-  - { when: ".aprd/aprd.frozen.md missing/unparseable", target: "self / HALT — no trace oracle / no forces; Phase 3 consumes only FROZEN WHAT (P8/H9)" }
+  - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no trace oracle / no forces; Phase 3 consumes only the lock-named CURRENT FROZEN WHAT (P8/H9), never a stale prior version" }
   - { when: ".adr/adr.lock missing OR status != frozen, OR .adr/log/ missing/empty", target: "self / HALT — no baselined frame + no id-continuation point; Phase 3 draws inside frozen frame (H2)" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no deferred[] grounding for re-deferral + no INV* floor" }
   - { when: "frozen/lock CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — local-decision depth not authored (H11/D10). Report class" }
@@ -111,7 +111,7 @@ Each DP in `deferred_queue[]` gets exactly one of three dispositions:
   "decision_points_ref": ".adr/01-decision-points.json",
   "components_ref": ".hld/skeleton/components.json",
   "contracts_ref": ".hld/skeleton/contracts.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "adr_log_ref": ".adr/log/",
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
@@ -229,7 +229,7 @@ Drain only local forks ONE slice touches (§5.4). Frozen frame + skeleton-pass l
   "skeleton_ledger_ref": ".adr/deferred-decisions.json",   // skeleton-pass ledger this extends
   "skeleton_lock_ref": ".hld/skeleton.lock",
   "slice_components_ref": ".hld/slices/<slice_id>/components.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
   "adr_lock_ref": ".adr/adr.lock",
   "adr_log_ref": ".adr/log/",
   "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
