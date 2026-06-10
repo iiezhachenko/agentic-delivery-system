@@ -1,163 +1,117 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 2,
+  "roadmap_version": 3,
   "verdict": "re_ranked",
-  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each 'slice' = one remaining PROMPT-BUILD, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). Order = the declared frontier (base_ref 07-sequence-reviewed); position is derived from disk, never from a tracker.",
+  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each 'slice' = one remaining PROMPT-BUILD, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). roadmap_version 3 = CR-001 re-rank (aprd v3→v4): greenfield 10 builds reconciled to completed[] (all shipped on disk); bugfix-spine builds appended as the new remaining_sequence. Bugfix sentinels live in _fixtures/brownfield-bugfix/ (the build loop produces each golden + the both-directions oracle; head-start prompt edits already committed — re-run harmless, D20). Slice pathing under brownfield-bugfix finalized at P-BUGFIX-FIXTURE-BASELINE.",
   "completed": [
-    {
-      "position": 1,
-      "id": "P-DERIVE-TESTS-INC",
-      "name": "DERIVE-TESTS increment mode",
-      "status": "shipped",
-      "unit": "prompts/03-hld/DERIVE-TESTS.md (increment)",
-      "done_sentinel": "_fixtures/greenfield-clean/.hld/slices/S4/test-specs.json"
-    }
+    { "position": 1, "id": "P-DERIVE-TESTS-INC", "name": "DERIVE-TESTS increment mode", "status": "shipped", "unit": "prompts/03-hld/DERIVE-TESTS.md (increment)", "done_sentinel": "_fixtures/greenfield-clean/.hld/slices/S4/test-specs.json" },
+    { "position": 2, "id": "P-RECONCILE-CRITIQUE-INC", "name": "RECONCILE/CRITIQUE increment mode", "status": "shipped", "unit": "prompts/03-hld/RECONCILE-CRITIQUE.md (increment)", "done_sentinel": "_fixtures/greenfield-clean/.hld/slices/S4/reconcile.json" },
+    { "position": 3, "id": "P-BUILD-PLAN-SLICE", "name": "BUILD-PLAN slice-build mode", "status": "shipped", "unit": "prompts/04-build/BUILD-PLAN.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/build-plan.json" },
+    { "position": 4, "id": "P-MATERIALIZE-ORACLE-SLICE", "name": "MATERIALIZE-ORACLE slice-build mode", "status": "shipped", "unit": "prompts/04-build/MATERIALIZE-ORACLE.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/oracle/oracle.json" },
+    { "position": 5, "id": "P-IMPLEMENT-SLICE", "name": "IMPLEMENT slice-build mode", "status": "shipped", "unit": "prompts/04-build/IMPLEMENT.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/build-record.json" },
+    { "position": 6, "id": "P-INTEGRATE-SLICE", "name": "INTEGRATE slice-build mode", "status": "shipped", "unit": "prompts/04-build/INTEGRATE.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/integration-record.json" },
+    { "position": 7, "id": "P-DIAGNOSE-SLICE", "name": "DIAGNOSE slice-build mode", "status": "shipped", "unit": "prompts/04-build/DIAGNOSE.md (slice-build)", "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/diagnosis.json" },
+    { "position": 8, "id": "P-VERIFY-OUTPUT-SLICE", "name": "VERIFY-OUTPUT slice-build mode", "status": "shipped", "unit": "prompts/04-build/VERIFY-OUTPUT.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/verify-output.json" },
+    { "position": 9, "id": "P-CRITIQUE-SLICE", "name": "CRITIQUE slice-build mode", "status": "shipped", "unit": "prompts/04-build/CRITIQUE.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/critique.json" },
+    { "position": 10, "id": "P-DEMO-GEN-SLICE", "name": "DEMO-GEN slice-build mode", "status": "shipped", "unit": "prompts/04-build/DEMO-GEN.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/demo/demo.json" }
   ],
   "remaining_sequence": [
     {
-      "position": 2,
-      "id": "P-RECONCILE-CRITIQUE-INC",
-      "name": "RECONCILE/CRITIQUE increment mode",
+      "position": 11,
+      "id": "P-BUGFIX-FIXTURE-BASELINE",
+      "name": "brownfield-bugfix fixture baseline + CR",
       "value": "high",
-      "retires_risk": "phase-3-increment-chain-incomplete",
-      "unit": "prompts/03-hld/RECONCILE-CRITIQUE.md (increment)",
-      "done_sentinel": "_fixtures/greenfield-clean/.hld/slices/S4/reconcile.json",
-      "rationale": "Phase-3 role 8/8, last Phase-3 increment (D9/D14); unblocks the Phase-4 SLICE-BUILD modes. First net-new self-build.",
-      "coarse_depends_on": [
-        "P-DERIVE-TESTS-INC"
-      ],
-      "real_depends_on": [
-        "P-DERIVE-TESTS-INC"
-      ]
+      "retires_risk": "bugfix-spine-untracked",
+      "unit": "_fixtures/brownfield-bugfix/ (immutable baseline = greenfield-clean demo-accepted + the defect report CR)",
+      "done_sentinel": "_fixtures/brownfield-bugfix/README.md",
+      "rationale": "Establishes the both-directions oracle root: buggy baseline (null billable-rate crashes project-list, S4 surface) + defect report. Prereq for every bugfix-overlay golden. Mirrors brownfield-feature fixture.",
+      "coarse_depends_on": [],
+      "real_depends_on": []
     },
     {
-      "position": 3,
-      "id": "P-BUILD-PLAN-SLICE",
-      "name": "BUILD-PLAN slice-build mode",
+      "position": 12,
+      "id": "P-BUGFIX-DIAGNOSE",
+      "name": "DIAGNOSE bugfix defect-localize mode",
       "value": "high",
-      "retires_risk": null,
-      "unit": "prompts/04-build/BUILD-PLAN.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/build-plan.json",
-      "rationale": "Phase-4 slice-build (D11); blocked on the Phase-3 increment chain finishing.",
-      "coarse_depends_on": [
-        "P-RECONCILE-CRITIQUE-INC"
-      ],
-      "real_depends_on": [
-        "P-RECONCILE-CRITIQUE-INC"
-      ]
+      "retires_risk": "diagnose-bugfix-mode-missing",
+      "unit": "prompts/04-build/DIAGNOSE.md (bugfix defect-localize) + golden",
+      "done_sentinel": "_fixtures/brownfield-bugfix/.aprd/diagnosis.json",
+      "rationale": "Headline bugfix role. New intake mode: reproduce+localize a reported defect → root-cause verdict written to .aprd/diagnosis.json (ROOT_CAUSE source for SYNTHESIZE — forward contract from intake overlay 2a).",
+      "coarse_depends_on": ["P-BUGFIX-FIXTURE-BASELINE"],
+      "real_depends_on": ["P-BUGFIX-FIXTURE-BASELINE"]
     },
     {
-      "position": 4,
-      "id": "P-MATERIALIZE-ORACLE-SLICE",
-      "name": "MATERIALIZE-ORACLE slice-build mode",
+      "position": 13,
+      "id": "P-BUGFIX-SYNTHESIZE-CR",
+      "name": "SYNTHESIZE bugfix CR aPRD golden (CLASS_EXTENSION)",
       "value": "high",
       "retires_risk": null,
-      "unit": "prompts/04-build/MATERIALIZE-ORACLE.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/oracle/oracle.json",
-      "rationale": "Phase-4 slice-build (D11).",
-      "coarse_depends_on": [
-        "P-BUILD-PLAN-SLICE"
-      ],
-      "real_depends_on": [
-        "P-BUILD-PLAN-SLICE"
-      ]
+      "unit": "prompts/00-aprd/SYNTHESIZE.md (bugfix delta — authored 2a) + golden",
+      "done_sentinel": "_fixtures/brownfield-bugfix/.aprd/aprd.v2.frozen.md",
+      "rationale": "Intake overlay head-start (committed 60e8b99); golden owed. Version-bump aPRD with CLASS_EXTENSION (bugfix) = REPRO_STEPS/ROOT_CAUSE(from diagnosis.json)/BLAST_RADIUS/REGRESSION_GUARD.",
+      "coarse_depends_on": ["P-BUGFIX-DIAGNOSE"],
+      "real_depends_on": ["P-BUGFIX-DIAGNOSE"]
     },
     {
-      "position": 5,
-      "id": "P-IMPLEMENT-SLICE",
-      "name": "IMPLEMENT slice-build mode",
+      "position": 14,
+      "id": "P-BUGFIX-DERIVE-TESTS",
+      "name": "DERIVE-TESTS bugfix reproduction-test mode",
       "value": "high",
       "retires_risk": null,
-      "unit": "prompts/04-build/IMPLEMENT.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/build-record.json",
-      "rationale": "Phase-4 slice-build (D11).",
-      "coarse_depends_on": [
-        "P-MATERIALIZE-ORACLE-SLICE"
-      ],
-      "real_depends_on": [
-        "P-MATERIALIZE-ORACLE-SLICE"
-      ]
+      "unit": "prompts/03-hld/DERIVE-TESTS.md (bugfix delta) + golden",
+      "done_sentinel": "_fixtures/brownfield-bugfix/.hld/slices/S4/test-specs.json",
+      "rationale": "Author the reproduction test spec (the red→green assertion of the correct behavior the defect violates).",
+      "coarse_depends_on": ["P-BUGFIX-SYNTHESIZE-CR"],
+      "real_depends_on": ["P-BUGFIX-SYNTHESIZE-CR"]
     },
     {
-      "position": 6,
-      "id": "P-INTEGRATE-SLICE",
-      "name": "INTEGRATE slice-build mode",
-      "value": "med",
-      "retires_risk": null,
-      "unit": "prompts/04-build/INTEGRATE.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/integration-record.json",
-      "rationale": "Phase-4 slice-build (D11).",
-      "coarse_depends_on": [
-        "P-IMPLEMENT-SLICE"
-      ],
-      "real_depends_on": [
-        "P-IMPLEMENT-SLICE"
-      ]
-    },
-    {
-      "position": 7,
-      "id": "P-DIAGNOSE-SLICE",
-      "name": "DIAGNOSE slice-build mode",
-      "value": "med",
-      "retires_risk": null,
-      "unit": "prompts/04-build/DIAGNOSE.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/diagnosis.json",
-      "rationale": "Phase-4 slice-build (D11).",
-      "coarse_depends_on": [
-        "P-INTEGRATE-SLICE"
-      ],
-      "real_depends_on": [
-        "P-INTEGRATE-SLICE"
-      ]
-    },
-    {
-      "position": 8,
-      "id": "P-VERIFY-OUTPUT-SLICE",
-      "name": "VERIFY-OUTPUT slice-build mode",
+      "position": 15,
+      "id": "P-BUGFIX-MATERIALIZE-ORACLE",
+      "name": "MATERIALIZE-ORACLE bugfix repro+regression mode",
       "value": "high",
       "retires_risk": null,
-      "unit": "prompts/04-build/VERIFY-OUTPUT.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/verify-output.json",
-      "rationale": "Phase-4 slice-build (D11).",
-      "coarse_depends_on": [
-        "P-DIAGNOSE-SLICE"
-      ],
-      "real_depends_on": [
-        "P-DIAGNOSE-SLICE"
-      ]
+      "unit": "prompts/04-build/MATERIALIZE-ORACLE.md (bugfix delta) + golden",
+      "done_sentinel": "_fixtures/brownfield-bugfix/.build/slices/S4/oracle/oracle.json",
+      "rationale": "Materialize the reproduction layer (red) + the scoped regression layer (BF4, baseline AC stays green). oracle_layers: [reproduction, regression].",
+      "coarse_depends_on": ["P-BUGFIX-DERIVE-TESTS"],
+      "real_depends_on": ["P-BUGFIX-DERIVE-TESTS"]
     },
     {
-      "position": 9,
-      "id": "P-CRITIQUE-SLICE",
-      "name": "CRITIQUE slice-build mode",
-      "value": "med",
-      "retires_risk": null,
-      "unit": "prompts/04-build/CRITIQUE.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/critique.json",
-      "rationale": "Phase-4 slice-build (D11).",
-      "coarse_depends_on": [
-        "P-VERIFY-OUTPUT-SLICE"
-      ],
-      "real_depends_on": [
-        "P-VERIFY-OUTPUT-SLICE"
-      ]
-    },
-    {
-      "position": 10,
-      "id": "P-DEMO-GEN-SLICE",
-      "name": "DEMO-GEN slice-build mode",
+      "position": 16,
+      "id": "P-BUGFIX-IMPLEMENT",
+      "name": "IMPLEMENT bugfix minimal-fix mode",
       "value": "high",
       "retires_risk": null,
-      "unit": "prompts/04-build/DEMO-GEN.md (slice-build)",
-      "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/demo/demo.json",
-      "rationale": "Phase-4 slice-build (D11), interactive demo+accept gate.",
-      "coarse_depends_on": [
-        "P-CRITIQUE-SLICE"
-      ],
-      "real_depends_on": [
-        "P-CRITIQUE-SLICE"
-      ]
+      "unit": "prompts/04-build/IMPLEMENT.md (bugfix delta) + golden",
+      "done_sentinel": "_fixtures/brownfield-bugfix/.build/slices/S4/build-record.json",
+      "rationale": "Minimal fix at the root cause; edits existing src scoped to BLAST_RADIUS (BF4); flips reproduction red→green.",
+      "coarse_depends_on": ["P-BUGFIX-MATERIALIZE-ORACLE"],
+      "real_depends_on": ["P-BUGFIX-MATERIALIZE-ORACLE"]
+    },
+    {
+      "position": 17,
+      "id": "P-BUGFIX-VERIFY-OUTPUT",
+      "name": "VERIFY-OUTPUT bugfix repro+regression-green mode",
+      "value": "high",
+      "retires_risk": null,
+      "unit": "prompts/04-build/VERIFY-OUTPUT.md (bugfix delta) + golden",
+      "done_sentinel": "_fixtures/brownfield-bugfix/.build/slices/S4/verify-output.json",
+      "rationale": "Assert reproduction flipped red→green AND regression stayed green (verify_method: inherited ladder + reproduction-must-flip + regression-must-stay-green).",
+      "coarse_depends_on": ["P-BUGFIX-IMPLEMENT"],
+      "real_depends_on": ["P-BUGFIX-IMPLEMENT"]
+    },
+    {
+      "position": 18,
+      "id": "P-BUGFIX-DEFECTS-E2E",
+      "name": "brownfield-bugfix planted defects + both-directions e2e",
+      "value": "high",
+      "retires_risk": "bugfix-oracle-one-direction-only",
+      "unit": "_fixtures/brownfield-bugfix/defects/ + README e2e-validated note",
+      "done_sentinel": "_fixtures/brownfield-bugfix/defects/regression/expected-verdict.json",
+      "rationale": "Plant defects (regression breaks baseline AC; fix-does-not-flip-red; off-blast-radius edit) so each rejecting role FAILs while the golden PASSes. Both-directions oracle complete (BF4). e2e clean-room validated.",
+      "coarse_depends_on": ["P-BUGFIX-VERIFY-OUTPUT"],
+      "real_depends_on": ["P-BUGFIX-VERIFY-OUTPUT"]
     }
   ],
   "dependency_check": {
@@ -169,27 +123,19 @@
   },
   "coverage": {
     "completed": [
-      "P-DERIVE-TESTS-INC"
+      "P-DERIVE-TESTS-INC", "P-RECONCILE-CRITIQUE-INC", "P-BUILD-PLAN-SLICE", "P-MATERIALIZE-ORACLE-SLICE", "P-IMPLEMENT-SLICE", "P-INTEGRATE-SLICE", "P-DIAGNOSE-SLICE", "P-VERIFY-OUTPUT-SLICE", "P-CRITIQUE-SLICE", "P-DEMO-GEN-SLICE"
     ],
     "remaining_ranked": [
-      "P-RECONCILE-CRITIQUE-INC",
-      "P-BUILD-PLAN-SLICE",
-      "P-MATERIALIZE-ORACLE-SLICE",
-      "P-IMPLEMENT-SLICE",
-      "P-INTEGRATE-SLICE",
-      "P-DIAGNOSE-SLICE",
-      "P-VERIFY-OUTPUT-SLICE",
-      "P-CRITIQUE-SLICE",
-      "P-DEMO-GEN-SLICE"
+      "P-BUGFIX-FIXTURE-BASELINE", "P-BUGFIX-DIAGNOSE", "P-BUGFIX-SYNTHESIZE-CR", "P-BUGFIX-DERIVE-TESTS", "P-BUGFIX-MATERIALIZE-ORACLE", "P-BUGFIX-IMPLEMENT", "P-BUGFIX-VERIFY-OUTPUT", "P-BUGFIX-DEFECTS-E2E"
     ],
     "missing": [],
     "duplicated": []
   },
   "rerank_counts": {
-    "completed": 1,
-    "remaining": 9,
+    "completed": 10,
+    "remaining": 8,
     "reordered": 0,
     "deps_removed": 0,
-    "deps_added": 0
+    "deps_added": 8
   }
 }

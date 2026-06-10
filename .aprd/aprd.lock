@@ -1,8 +1,9 @@
 {
-  "artifact": "aprd.frozen.md",
-  "version": "v3",
-  "content_sha256": "678590f98a2665058e9927cb901a106b6141f366233f02aa19be965a12a0e09c",
+  "artifact": "aprd.v4.frozen.md",
+  "version": "v4",
+  "content_sha256": "438061eca012ecbf44767dcffbfe564d8f0e581fbcd598f78a3483887d117c85",
   "signer": "self-host:agentic-delivery-pipeline",
-  "signed_at": "2026-06-08T12:00:00Z",
-  "status": "frozen"
+  "signed_at": "2026-06-10T12:00:00Z",
+  "status": "frozen",
+  "supersedes": { "version": "v3", "content_sha256": "678590f98a2665058e9927cb901a106b6141f366233f02aa19be965a12a0e09c" }
 }
