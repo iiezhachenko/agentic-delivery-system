@@ -80,3 +80,24 @@ aPRD version bump re-triggers WHICH slices? **Touch-set = slices whose `R*/AC*` 
 - `SYNTHESIZE.md` carries a feature-add delta (shared Rules substance untouched).
 - Golden `aprd.v2.frozen.md` validates (new IDs above high-water, class-extension block present); baseline `aprd.frozen.md` byte-unchanged; `aprd.lock` re-signed; `07-assumptions.json` carries touch-set.
 - Both-directions check holds.
+
+## STATUS — DONE
+
+**`prompts/00-aprd/SYNTHESIZE.md` overlay added:**
+- Frontmatter: feature-add `inputs` (`baseline-map.json`, `aprd.frozen.md` read-only) + `outputs` (`aprd.v<N+1>.frozen.md`, re-signed `aprd.lock`) + the baseline-not-frozen escape.
+- `## Rules (feature-add delta — shared Rules above also bind)` — 5 rules: version-bump-never-rewrite (BF1), new-ids-above-high-water (BF3), CLASS_EXTENSION reserved slot (BF4/5/6), touch-set + re-trigger (BF7/R1), re-freeze lock (BF7). Shared Rule 6 left true (scopes itself to greenfield).
+- Feature-add branch in `## Task steps`; `aprd.v<N+1>.frozen.md` + `aprd.lock` output schemas; `07` gains `class`/`baseline_aprd_ref`/`aprd_version`/`touch_set[]`; feature-add stop condition.
+
+**Golden fixtures — `_fixtures/brownfield-feature/.aprd/`:**
+- `aprd.frozen.md` + (pre-bump) `aprd.lock` seeded from greenfield-clean baseline (byte-identical — BF1 byte-equality target).
+- `aprd.v2.frozen.md` — BASELINE pointer + new `E8`/`R11–R13`/`A14–A16`/`AC11–AC13` (all above high-water R10/AC10/E7/A13) + `CLASS_EXTENSION` (INTEGRATION_SEAMS C1·CT2 / REGRESSION_GUARD AC2·AC7 + oracle suites / CONVENTION_BASELINE).
+- `07-assumptions.json` — class `feature-add`, `aprd_version: v2`, 3 assumptions (all `default-applied` — no `05`/`06` answers in fixture), `touch_set[]` (net-new R11–R13 + seam-extended C1·CT2).
+- `aprd.lock` re-signed v2 (sha of new file) with `supersedes` pinning v1.
+
+Gaps resolved by `recommended_default` (deferred path) since fixture carries no questions/answers.
+
+**Verify (both-directions):**
+- Known-good golden: new IDs above high-water, CLASS_EXTENSION complete, baseline byte-unchanged (`diff` clean), lock re-signed → PASS.
+- frozen-overwrite (mutate `aprd.frozen.md`) → byte-equality breaks → FAIL.
+- ID-collision (new `R*` at/below high-water) → FAIL.
+- missing CLASS_EXTENSION sub-block → FAIL.

@@ -1,0 +1,9 @@
+{
+  "artifact": "aprd.v2.frozen.md",
+  "version": "v2",
+  "content_sha256": "539b29380357371faa14a33f20249dacd398d115575b51729cdf8a6d4d33b4f7",
+  "signer": "client:freelancer-time-tracking",
+  "signed_at": "2026-06-10T00:00:00Z",
+  "status": "frozen",
+  "supersedes": { "version": "v1", "content_sha256": "f3a1c0d9b8e7461525d4c3b2a1908f7e6d5c4b3a2918f0e7d6c5b4a39281706f" }
+}
