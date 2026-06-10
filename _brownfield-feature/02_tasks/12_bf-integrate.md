@@ -63,3 +63,54 @@ The new feature plugs into the existing system at specific seams (declared in th
 - Frozen-WHAT RESOLVED via `aprd.lock.artifact` (no hardcoded version path); freeze-gate guard verifies the named artifact exists (BF7/P8 + 07a canon).
 - Golden feature-add slice `integration-record.json` cites `wired_seams`, asserts `existing_internals_modified: false`, flow layer green.
 - Both-directions check holds (incl. stale-version-walk FAIL).
+
+---
+
+## STATUS — DONE (2026-06-10)
+
+Feature-add seam delta added to SLICE-BUILD part of `prompts/04-build/INTEGRATE.md`. Greenfield substance untouched (AB1 — delta carries ONLY differences).
+
+### What changed in `INTEGRATE.md`
+
+| Edit | Where | Substance |
+|---|---|---|
+| Frontmatter inputs | feature-add slice-build block | `.aprd/<aprd.lock.artifact>` (lock-resolved `INTEGRATION_SEAMS`, NEVER hardcoded `v<N>`) + `.aprd/baseline-map.json` `integration_seams` catalog = the declared seam wall |
+| Freeze-gate guard | shared escape (rewrite, not add — AB9) | extended with `(feature-add) the artifact aprd.lock names missing/unparseable → HALT` |
+| feature-add escapes | slice-build feature-add block | (a) no baseline-map catalog / no `INTEGRATION_SEAMS` → HALT; (b) internals-edit-need OR off-catalog reach-around → ESCAPE (Phase 2/3) |
+| `### feature-add delta (slice-build)` | PART B, after slice-build Rules | 4 delta rules: lock-resolve WHAT · wire at declared catalog seams ONLY (BF6) · existing internals untouched, additive only (BF6/BF1) · honor frozen frame (BF5) |
+| Task-steps feature-add branch | slice-build steps | 0a resolve frozen-WHAT · 4 classify hops vs catalog · 5 additive composition file only · 7 emit `wired_seams` + `existing_internals_modified:false` + `new_composition_files[]` |
+| Schema delta | after slice-build schema | `class:"feature-add"` + `aprd_ref`/`aprd_version` + `baseline_map_ref`/`integration_seams_ref` + `wired_seams[]` (⊆ catalog) + `existing_internals_modified:false` + `new_composition_files[]` + per-swap `seam_basis` |
+| Stop condition | slice-build stop | feature-add blocked (internals/off-catalog) + feature-add clean lines |
+
+Shared Rule 4 ("compose real callables, never rewrite internals") kept VERBATIM — feature-add only NARROWS its target set to the declared `INTEGRATION_SEAMS` (stated in delta, AB1).
+
+### Golden fixture
+
+`_fixtures/brownfield-feature/.build/slices/S5/integration-record.json` — feature-add slice (Tag a time entry with a label). New C4 wired into existing C6/C2/C1 at declared seams via ONE additive file. Validated: JSON well-formed; `wired_seams ⊆ baseline-map integration_seams` catalog (C6/CT9, C2/CT3, C1/CT2 — C2/CT8 external correctly excluded, off F5 path); `existing_internals_modified:false`; flow F5 green (5 assertions incl. CT2:store-unavailable failure variant).
+
+### Seam-bounded wiring (BF6)
+
+```mermaid
+flowchart LR
+  subgraph existing["EXISTING baseline (internals untouched, BF6/BF1)"]
+    C6[C6 Web Ingress]
+    C2[C2 Identity/Auth]
+    C1[C1 Data Store]
+  end
+  C4["C4 Time Logging<br/>(new this slice)"]
+  C6 -->|"CT9 ingress<br/>(declared seam)"| C4
+  C4 -->|"CT3 domain<br/>(declared seam)"| C2
+  C4 -->|"CT2 persistence<br/>(declared seam — CT2 label extension)"| C1
+  C4 -.->|"additive composition file<br/>web_ingress/time_logging_dispatch.py"| existing
+```
+
+Wiring lands ONLY at declared `INTEGRATION_SEAMS`; new component plugs in via an additive composition file; zero existing-internal edits.
+
+### Both-directions verify
+
+- **Known-good** (golden S5): additive wiring at declared seams, `existing_internals_modified:false`, flow green → **PASS**.
+- **Internals-edit defect**: caught by delta Rule 3 + escape (EDITING internals → ESCAPE) + schema `existing_internals_modified` MUST be false → **FAIL**.
+- **Undeclared-seam defect**: caught by delta Rule 2 + escape (off-catalog reach-around → ESCAPE) + `wired_seams ⊆ catalog` → **FAIL**.
+- **Stale-version-walk defect** (07a): hardcoded `aprd.v<N>.frozen.md` ignoring `aprd.lock.artifact` reads wrong version's `INTEGRATION_SEAMS`; caught by delta Rule 1 + input binding + freeze-gate guard → **FAIL**.
+
+Downstream: BF-VERIFY-OUTPUT (13) runs the full ladder + scoped regression.

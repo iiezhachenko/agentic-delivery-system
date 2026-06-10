@@ -33,7 +33,9 @@ inputs:
   - { path: ".build/skeleton/integration-record.json", format: "json — FROZEN skeleton composition root, inherited BY REFERENCE (H14): wsgi.py + F1 already integrated" }
   - { path: "src/freelancer_app/**/*.py", format: "python (prior-built + this-slice components, read-only) — real callables IMPLEMENT wrote. Compose them; never rewrite internals (Rule 4/9)" }
   - { path: ".build/slices/<slice_id>/integration-record.json", format: "json (OPTIONAL — prior INTEGRATE run) — present on re-run after blocked route resolved; absent on first run" }
-outputs:
+  # — slice-build feature-add (class dispatched by playbook) —
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — CURRENT frozen WHAT RESOLVED via lock (read .aprd/aprd.lock, open .aprd/ + its artifact value; feature-add → aprd.v<N>.frozen.md, e.g. aprd.v2 — NEVER a hardcoded version path; BF7/P8 + 07a canon). Carries CLASS_EXTENSION → INTEGRATION_SEAMS: which existing seams (at:C*, contract_ref:CT*) the feature plugs into (BF6)" }
+  - { path: ".aprd/baseline-map.json", format: "json — baseline inventory: integration_seams catalog [{at:C*, kind, contract_ref:CT*}] = the declared seam wall (the universe of seams the feature may wire at). Wire ONLY at a catalog seam; a hop into an existing component at an off-catalog seam = breach (BF6)" }
   # — shared —
   - { path: "src/freelancer_app/wsgi.py + src/freelancer_app/<composition modules>", format: "python — composition root: WSGI entry + routing/adapters wiring real on-path components into the flow. External/later-slice seams stay mocked. Honors frame + INV6" }
   # — skeleton-build —
@@ -43,7 +45,7 @@ outputs:
 escapes:
   # — shared (both modes) —
   - { when: "the active build-record.json missing/unparseable OR any build_set unit status != green (unit still blocked/un-built)", target: "self / HALT — nothing real to compose; contract layer must be green first (§5.6). Report which unit" }
-  - { when: "the active oracle.lock missing OR status != frozen OR builder_may_not_edit != true, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate not clean", target: "self / HALT — no frozen oracle/frame to integrate against (§5.1, B4). Report which" }
+  - { when: "the active oracle.lock missing OR status != frozen OR builder_may_not_edit != true, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate not clean, OR (feature-add) the artifact aprd.lock names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no frozen oracle/frame to integrate against (§5.1, B4; BF7/P8 — walk the lock-named version, never a hardcoded aprd.frozen.md). Report which" }
   - { when: "the active oracle.json has no flow_test whose slice==target (no flow test), OR the active flows.json composes_against_(frozen_)contracts != true / non-empty structural_defects", target: "self / HALT — upstream HLD routed unresolved escape, or nothing to integrate; don't compose on defective flow. Report which" }
   - { when: "frozen CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — integrate depth not authored (B13/§11). Report class" }
   - { when: "flow will not compose because COMPONENT's contract-layer code wrong (real impl violates own frozen contract — not a wiring gap)", target: "back to IMPLEMENT / §5.5 (my-code-component) — record escape{classification:my-code-component, route:IMPLEMENT} + status:blocked; do NOT rewrite the sibling component's internals here (lane), do NOT edit a frozen test" }
@@ -56,6 +58,9 @@ escapes:
   - { when: "SLICE-BUILD: no remaining_sequence slice has a green .build/slices/<id>/build-record.json (every build_set unit status:green) + frozen .build/slices/<id>/oracle/oracle.lock WITHOUT a sibling .build/slices/<id>/integration-record.json status:integrated", target: "self / STOP clean — every ready slice integrated (or none ready: the slice's contract layer must build green first). Not an error" }
   - { when: "SLICE-BUILD: target slice's build-record.json carries a blocked/un-green build_unit, OR slice build-plan/oracle/flows.json carries non-empty structural_defects / materialization_gaps / frame_conflicts", target: "self / HALT — upstream slice routed an unresolved escape; don't compose on a defective slice. Report which block in which file" }
   - { when: "SLICE-BUILD: composing the slice flow would require re-running / re-greening / editing a frozen SKELETON flow test, OR rewriting a frozen skeleton composition route (skeleton-fidelity breach)", target: "ESCAPE (B4/H14) — record skeleton_fidelity breach + route Phase 2; inherit the frozen skeleton composition root by reference, never touch it" }
+  # — slice-build feature-add (class dispatched by playbook) —
+  - { when: "SLICE-BUILD feature-add: .aprd/baseline-map.json missing/unparseable OR carries no integration_seams catalog, OR the resolved .aprd/<aprd.lock.artifact> carries no CLASS_EXTENSION/INTEGRATION_SEAMS block", target: "self / HALT — no declared-seam wall to wire the feature against (BF6). Report which" }
+  - { when: "SLICE-BUILD feature-add: composing the slice flow would require EDITING an EXISTING component's internal logic to wire (the seam is wrong, not the wiring), OR wiring would reach into an existing component at a seam NOT in the integration_seams catalog (reach-around breach)", target: "ESCAPE (BF6/BF1) — never patch existing internals, never wire off-catalog. Record escape{} + status:blocked; a needed internals edit = the seam is wrong → route Phase 2/3 (change request). Additive wiring at declared seams ONLY" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.
@@ -214,6 +219,13 @@ The active build-record = the auto-selected `.build/slices/<id>/build-record.jso
 3. **Inherit the frozen skeleton composition root by reference; ADD only the slice's routes (H14, load-bearing).** `wsgi.py` + the skeleton routes + the skeleton flow F1 are already integrated + frozen. Compose the slice flow by ADDING its NEW HTTP entry points / dispatch routes (a new urlpattern, or a new additive composition module) — additive ONLY, never editing a frozen skeleton route, never re-running / re-greening the frozen skeleton flow test. Re-integrating the skeleton flow = a skeleton-fidelity breach → ESCAPE (guard), never patch.
 4. **Slice-flow mocks retained = the build-plan's `later_slice_components` + any external boundary (shared item 3 / Rule 3).** `mocks_retained` = `[]` when the slice path has neither — every on-path component built, no external/later-slice hop (e.g. F4).
 
+### feature-add delta (slice-build — class dispatched by playbook; shared + slice-build Rules above also bind)
+> Fires only when the playbook sets `class: feature-add` (`build_depth: per-slice-no-scaffold`, `aprd_extension` includes `INTEGRATION_SEAMS`). Greenfield slice-build leaves these untouched (`class:"greenfield"`, no `wired_seams`). Carries ONLY what differs (AB1). Shared Rule 4 ("compose real callables, never rewrite internals") binds here verbatim — feature-add only NARROWS its target set: the wiring targets are the declared `INTEGRATION_SEAMS`.
+1. **Resolve frozen-WHAT via lock, never a hardcoded version (BF7/P8, 07a canon).** Read `.aprd/aprd.lock` → open `.aprd/<aprd.lock.artifact>` (CURRENT frozen version carrying `CLASS_EXTENSION` → `INTEGRATION_SEAMS`). NEVER hardcode `aprd.v<N>.frozen.md` — a literal version path walks STALE WHAT one bump later (`v2` in the bench is an EXAMPLE, never the binding). Lock missing / `status != frozen` / named artifact absent → HALT (guard).
+2. **Wire at declared seams ONLY (BF6).** Compose the new component into the existing system ONLY at seams in the `baseline-map.json` `integration_seams` catalog (`at:C*`, `contract_ref:CT*`) that the resolved aPRD `INTEGRATION_SEAMS` + slice flow path designate. The seam contract is the wall — wire against it, never reach inside an existing component. A hop into an existing component at an off-catalog seam = reach-around breach → ESCAPE (guard).
+3. **Existing internals untouched — additive wiring only (BF6/BF1).** Wiring may ADD a new composition file / additive seam adapter (mirrors the greenfield slice pattern of adding a new dispatcher file in a prior-built namespace — slice-build Rule 3), but NEVER edits an existing component's internal logic. Needing to edit existing internals to wire = the seam is wrong → ESCAPE (Phase 2/3 change request), never patch. `existing_internals_modified` MUST be `false`.
+4. **Honor the frozen frame (BF5 carries).** Wiring conforms to the existing ADR stack + conventions — same routing/session/error patterns the baseline already uses (shared Rule 5). No new frame, no re-decide.
+
 ## Task steps (slice-build)
 1. Read inputs (shared + slice-build). Check guards (frontmatter `escapes:`) — any tripped → HALT (or STOP clean for "no ready slice"), report which + detail, write nothing. Else continue.
 2. Auto-select the target slice (delta Rule 1). None ready → STOP clean.
@@ -222,6 +234,12 @@ The active build-record = the auto-selected `.build/slices/<id>/build-record.jso
 5. Extend the composition root (product 4 + discriminator item 4 + delta Rule 3): inherit the frozen skeleton `wsgi.py` by reference; ADD the slice flow's routes/adapters (a new urlpattern / additive module) onto the real on-path callables. Carry the framework from the slice `build-record.json` `lld_notes` (Rule 4/5). Honor frame + INV6. Record the carried framework + your routing LLD in `lld_notes`. Do NOT edit a skeleton route or a component's internals.
 6. Run the slice flow test — happy path + failure variant (pytest, or static trace if no runtime, Rule 6). Iterate red→green under the self-heal budget. On a genuine stall / edit-need / component bug / skeleton-fidelity breach → route per guard (record `escape{}` + `status:blocked`, state the route, stop).
 7. Green → write `.build/slices/<id>/integration-record.json`: mock_swaps + mocks_retained + composition files + inherited skeleton-composition ref + flow_test result (happy + failure, per-assertion) + VERIFICATION{flow:pass, method} + PROVENANCE (built_against frozen slice oracle + skeleton integration + locks + slice build-plan + build-record) + COMMITS (cite R/AC). Stop.
+
+**Feature-add branch** (class == feature-add, playbook-dispatched — steps 1–7 run as above with these changes):
+- **0a (before step 4, after auto-selecting the slice).** Resolve frozen-WHAT: read `.aprd/aprd.lock` → open `.aprd/<aprd.lock.artifact>` (feature-add delta Rule 1, NEVER a hardcoded `v<N>`). Read its `CLASS_EXTENSION` → `INTEGRATION_SEAMS` + `baseline-map.json` `integration_seams` catalog (the declared seam wall). No `INTEGRATION_SEAMS`/catalog → HALT (guard).
+- **4 (feature-add).** Classify each on-path hop: a hop wiring the new component INTO an existing component MUST land on a catalog seam the aPRD `INTEGRATION_SEAMS` designates (delta Rule 2); an off-catalog reach-around or an internals-edit need → ESCAPE (delta Rule 3, guard), never patch.
+- **5 (feature-add).** Extend the composition root ADDITIVELY (delta Rule 3): add a new composition file / seam adapter that wires the new component at the declared seams; conform to the existing frame + conventions (delta Rule 4). NEVER edit an existing component's internal logic.
+- **7 (feature-add).** Write slice integration-record.json as above PLUS `class:"feature-add"` + `aprd_ref` (resolved) + `aprd_version` + `wired_seams: [{at,contract_ref}]` (the baseline seams composed) + `existing_internals_modified:false` (MUST be false) + `new_composition_files[]` (additive adapter files). Stop.
 
 ## Output schema — `.build/slices/<slice_id>/integration-record.json`
 Same shape as Part A; the slice deltas (everything else carried verbatim):
@@ -312,8 +330,29 @@ Same shape as Part A; the slice deltas (everything else carried verbatim):
 }
 ```
 
+### Feature-add schema delta (slice-build, class == feature-add — only what differs, AB1)
+Same shape as above; the feature-add slice adds (everything else carried verbatim):
+- `"class": "feature-add"` (was `"greenfield"`).
+- `"aprd_ref": ".aprd/<aprd.lock.artifact>"` (lock-resolved, NEVER a hardcoded `aprd.v<N>.frozen.md`) + `"aprd_version": "<version from .aprd/aprd.lock>"`.
+- `"baseline_map_ref": ".aprd/baseline-map.json"` + `"integration_seams_ref": ".aprd/<aprd.lock.artifact>#CLASS_EXTENSION/INTEGRATION_SEAMS"` (the declared seam wall).
+- `"wired_seams"`: the baseline seams the feature composed at — every entry MUST be in the `integration_seams` catalog (BF6):
+```json
+"wired_seams": [                          // baseline seams the new component wired into, in flow path order; ⊆ baseline-map integration_seams catalog
+  { "at": "C6", "contract_ref": "CT9", "kind": "ingress" },        // existing C6 dispatch → new C4 (additive route, no C6 internals edited)
+  { "at": "C2", "contract_ref": "CT3", "kind": "domain" },         // new C4 resolves session via existing C2
+  { "at": "C1", "contract_ref": "CT2", "kind": "persistence" }     // label field persisted via existing C1 (the aPRD INTEGRATION_SEAMS primary seam — CT2 extension)
+],
+"existing_internals_modified": false,     // MUST be false (BF6/BF1) — additive wiring only; a needed internals edit = the seam is wrong → escape, never patch
+"new_composition_files": [                // additive seam adapter/composition files this run wrote (no existing component file edited)
+  "src/freelancer_app/web_ingress/time_logging_dispatch.py"
+]
+```
+- `mock_swaps[]` carry an extra `"seam_basis": "declared (INTEGRATION_SEAMS)"` on a hop wiring into an existing component (vs greenfield's path membership).
+
 ## Stop condition (slice-build)
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which fired + detail; HALT.
 - No ready slice → write nothing; STOP clean.
 - Blocked / edit-need / skeleton-fidelity breach (Rule 6 / delta Rule 3, guard) → flag per the guard, name the target (IMPLEMENT / Phase 3/2/0/1), stop. Defects flagged, never patched.
+- Blocked (feature-add: internals-edit-need / off-catalog reach-around — feature-add delta Rules 2–3, guard) → flag per the guard, name the target (Phase 2/3 change request), stop. Never patch existing internals, never wire off-catalog.
 - Clean → composition route(s) added under `src/freelancer_app/`, slice flow green (skeleton composition inherited), record written. State "Integrated <F*> for slice <id> — wires <path> end-to-end, <N> assertion(s) pass incl. failure variant; VERIFY-OUTPUT runs the full ladder next", stop.
+- Clean (feature-add) → as above PLUS the new component wired at the declared `INTEGRATION_SEAMS` via additive files only (`existing_internals_modified:false`, no off-catalog seam) + `class:"feature-add"` + `wired_seams`. State "Integrated <F*> for feature-add slice <id> — wires <C*> into the existing system at declared seams <CT*…> (additive, existing internals untouched), <N> assertion(s) pass incl. failure variant; VERIFY-OUTPUT runs the full ladder + regression next", stop.
