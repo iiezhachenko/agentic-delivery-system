@@ -1,7 +1,7 @@
 ---
 role: MODEL-DATA
 phase: 03-hld
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A: full logical data model, single-owner map, drawn once); frozen skeleton present → INCREMENT PASS (Part B: slice data scope = entities its introduced box owns/reads, carried by reference; new-entity delta typically []). One role, two modes (H13/D9/D14)
 interactive: false          # internal structural sweep; client signed the WHAT, team owns the HOW (PR1, §9)
 inputs:
@@ -26,7 +26,7 @@ outputs:
 escapes:
   # — shared —
   - { when: "any shared input missing/unparseable, OR adr.lock status != frozen, OR no Persistence-category ADR in manifest", target: "self / HALT (no frame to model on)" }
-  - { when: "frozen/lock CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — depth/brownfield-conformance not authored (H11/D10). Report class" }
+  - { when: "frozen/lock CLASS lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — depth/brownfield-conformance not authored (H11/D10). Report class" }
   - { when: "entity has ambiguous ownership (two owners / orphan / non-owner write)", target: "DERIVE-COMPONENTS §5.2 (two-owner/orphan) or DEFINE-CONTRACTS §5.3 (shared-write) — record in ownership_defects[], flag never re-cut (§5.5)" }
   - { when: "slice requirement needs entity with NO aPRD E* (frozen E-set has no home)", target: "Phase 0 (change request) — record in aprd_defects[]; never mint E* / invent entity (shared Rule 2)" }
   # — skeleton pass —

@@ -1,7 +1,7 @@
 ---
 role: FOUNDATION-CUT
 phase: 01-roadmap
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal contract — reads disk, writes cut, stops. Feeds Phase 2 (foundational ADRs) + Phase 3 (skeleton HLD), not client; order/sign-off gate is SEQUENCE-REVIEW (role 7/7). PR1
 inputs:
   - { path: ".roadmap/04-skeleton.json", format: "json — skeleton + foundational_seams[] + skeleton_seams[]. Skeleton THE driver of cut (§5.7); carry/refine its skeleton_seams[] named-not-designed" }
@@ -11,7 +11,7 @@ outputs:
   - { path: ".roadmap/06-foundation-cut.json", format: "json (schema below) — MINIMUM to decide+build once: foundational_decisions [→Phase 2] + skeleton_seams [→Phase 3] + cross_slice_invariants + deferred[] thinness evidence" }
 escapes:
   - { when: "any input missing/unparseable, OR 05 verdict != sequenced (dependency_defect → SEQUENCE already routed re-cut; nothing legal to cut against), OR 04 skeleton == null (no skeleton drives cut; SKELETON-IDENTIFY already routed re-cut)", target: "self / HALT — report which guard, write nothing" }
-  - { when: "04 / 05 class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — foundation-cut depth not authored; HALT, report class" }
+  - { when: "04 / 05 class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — foundation-cut depth not authored; HALT, report class" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.

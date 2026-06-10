@@ -1,7 +1,7 @@
 ---
 role: QUESTION-GEN
 phase: 00-aprd
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # authors the question document — reads disk, writes disk, stops. Does NOT run the interview; the clarify-loop gate presents 05-questions.md to the client and collects 06-answers.md later (PR1/PR3)
 inputs:
   - { path: ".aprd/04-gaps.json", format: "json — ranked gaps[] with id G*, interpretations[], recommended_default, blast_radius, disposition, refs; inherit the ordering, do not re-rank" }
@@ -9,7 +9,7 @@ outputs:
   - { path: ".aprd/05-questions.md", format: "markdown (template below) — client-facing ≤6 MCQ + deferred-assumptions block, IDs thread to G*" }
 escapes:
   - { when: "04-gaps.json missing or unreadable", target: "self / HALT — nothing to turn into questions; cannot run" }
-  - { when: "04-gaps.json class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — not authored yet; HALT and report rather than author questions under the wrong grounding model" }
+  - { when: "04-gaps.json class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — not authored yet; HALT and report rather than author questions under the wrong grounding model" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.

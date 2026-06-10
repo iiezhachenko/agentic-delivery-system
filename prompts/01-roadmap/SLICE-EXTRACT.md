@@ -1,7 +1,7 @@
 ---
 role: SLICE-EXTRACT
 phase: 01-roadmap
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal clustering — reads disk, writes disk, stops. Client re-engages later at SEQUENCE-REVIEW (order gate), not here (PR1).
 inputs:
   # — shared (both classes) —
@@ -17,7 +17,7 @@ outputs:
 escapes:
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the frozen version it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — nothing frozen to slice; Phase 1 consumes only FROZEN WHAT resolved via the lock (P8/BF7), never draft, never a hardcoded version. Version-mismatch impossible: only the lock-named file is opened" }
   - { when: "feature-add but .aprd/baseline-map.json or .roadmap/08-rerank.json missing/unparseable", target: "BASELINE-MAP / HALT — baseline S* high-water + pinned completed slices unknown; cannot slice additively (BF1/BF3)" }
-  - { when: "frozen aPRD CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — slice granularity + skeleton rule not authored; report class, write nothing" }
+  - { when: "frozen aPRD CLASS lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — slice granularity + skeleton rule not authored; report class, write nothing" }
   - { when: "requirement cannot be placed in any demoable vertical slice (aPRD ambiguous, or its AC depends on capability aPRD never specified)", target: "Phase 0 (change request) — record in unsliceable[], never silent-drop; Phase 1 never patches WHAT (§5.13)" }
 ---
 # Register

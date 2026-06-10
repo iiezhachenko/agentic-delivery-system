@@ -1,7 +1,7 @@
 ---
 role: CRITIQUE
 phase: 04-build
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 mode: skeleton-build|slice-build   # one role, two modes (dispatch: MODE DISPATCH §)
 interactive: false          # internal — code review is team's; client signed WHAT (P0) + ordered slices (P1). Demo gate later (PR1, §9)
 inputs:
@@ -46,7 +46,7 @@ escapes:
   - { when: "the active verification record (verification.json | verify-output.json) missing/unparseable OR verdict != verified", target: "self / HALT — anti-cheat runs only on GREEN ladder (§5.7 runs after ladder greens; red build at self-heal/DIAGNOSE, not here). Report verdict found" }
   - { when: "build-record.json missing OR any build_set unit status != green; OR integration-record.json missing OR status != integrated", target: "self / HALT — no composed-and-green diff to review (§5.5/§5.6 precede §5.7). Report which producer + which unit/status" }
   - { when: "the active oracle.lock missing OR status != frozen OR builder_may_not_edit != true, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate not clean", target: "self / HALT — no frozen oracle/frame to review against (§5.1, B4). Report which" }
-  - { when: "frozen CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — anti-cheat depth/conformance review not authored (B13/§11). Report class" }
+  - { when: "frozen CLASS lacks authored playbook (refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — anti-cheat depth/conformance review not authored (B13/§11). Report class" }
   - { when: "cheat's ROOT is genuine upstream fault — CONTRACT under-specifies so code can't help being thin (Phase 3), DECISION wrong (Phase 2), or WHAT wrong (Phase 0) — NOT a code defect", target: "emit issue with routes_to: Phase 3|Phase 2|Phase 0; diagnose, do NOT patch code/frame, do NOT re-decide" }
   # — skeleton-build —
   - { when: "SKELETON-BUILD: critique.json already present with verdict:clean", target: "self / STOP clean — anti-cheat already passed; internal gate + DEMO-GEN next. Not error, not slice-build trigger (needs .build/slices/, D11)" }

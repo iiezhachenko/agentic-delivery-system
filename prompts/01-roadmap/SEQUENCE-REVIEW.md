@@ -1,7 +1,7 @@
 ---
 role: SEQUENCE-REVIEW
 phase: 01-roadmap
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: true           # THE one Phase-1 client gate (§9, §5.8). { when: after agent renders recognition-over-recall presentation (roadmap.md) and shows it in chat, then PAUSES; what: client confirms proposed order or picks dependency-legal reorder / states priority override — one selection, no other back-and-forth (PR3) }
 interaction:
   when: "after Phase A renders roadmap.md + presents it in chat; agent pauses, waits for client's single selection, then applies it and writes confirmed roadmap"
@@ -13,7 +13,7 @@ outputs:
   - { path: ".roadmap/07-sequence-reviewed.json", format: "json (schema below, Phase B) — CLIENT-CONFIRMED living baseline order + captured overrides. Written ONLY after client responds; downstream reads this, not 05" }
 escapes:
   - { when: ".roadmap/05-sequence.json missing or unparseable", target: "self / HALT — no order to review; cannot run" }
-  - { when: "05 class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — review depth not authored; HALT, report class" }
+  - { when: "05 class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — review depth not authored; HALT, report class" }
   - { when: "05 verdict == dependency_defect (cycle / dangling prerequisite unresolved — no order to put in front of client)", target: "SLICE-EXTRACT / re-cut (upstream) — HALT, report recorded defect, route back; do NOT present broken order" }
 ---
 # Register

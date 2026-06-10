@@ -1,7 +1,7 @@
 ---
 role: VERTICALITY-CHECK
 phase: 01-roadmap
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # adversarial gate — reads disk, writes pass/reject list, stops. Does NOT re-cut slices (loops back to clustering) and does NOT touch client (order gate = SEQUENCE-REVIEW, later). PR1.
 inputs:
   - { path: ".roadmap/02-slices.json", format: "json — candidate slices[]: id S*, name, acceptance[AC*] (IDs to test); carry id+name verbatim onto verdict" }
@@ -10,7 +10,7 @@ outputs:
   - { path: ".roadmap/03-verticality.json", format: "json (schema below) — valid[] + rejected[] with reason; verdict deterministic from rejected" }
 escapes:
   - { when: ".roadmap/02-slices.json missing/unparseable, OR .aprd/aprd.frozen.md missing/unparseable, OR slices[] empty", target: "self / HALT — nothing to validate; report which guard fired, write nothing" }
-  - { when: "02-slices.json class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — verticality bar not authored; report class, write nothing" }
+  - { when: "02-slices.json class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — verticality bar not authored; report class, write nothing" }
   - { when: "rejected[] is non-empty", target: "SLICE-EXTRACT / re-cluster (loop-back) — gate's NORMAL output, not HALT: write 03-verticality.json with rejections, stop; loop back to clustering is external orchestration (§5.4 VC→CLU)" }
 ---
 # Register

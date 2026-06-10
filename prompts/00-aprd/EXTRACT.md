@@ -1,7 +1,7 @@
 ---
 role: EXTRACT
 phase: 00-aprd
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # pure structural extraction — reads disk, writes disk, stops. No client touch (PR1)
 inputs:
   # — shared (both classes) —

@@ -1,7 +1,7 @@
 ---
 role: SYNTHESIZE
 phase: 00-aprd
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # authors the aPRD DRAFT — reads disk, writes disk, stops. Does NOT run the sign-off gate (client approve/redline) or CRITIQUE; those are separate downstream steps (§5.4/§5.6). PR1.
 inputs:
   # — shared (both classes) —
@@ -20,7 +20,7 @@ outputs:
   - { path: ".aprd/aprd.lock", format: "json — RE-SIGNED against the new version (version: v<N+1>, status: frozen); the change-request re-freeze (BF7). Baseline lock content replaced by new-version lock — old version pinned by its own content_sha256 in history" }
 escapes:
   - { when: "any required input (02-extraction.json, 04-gaps.json, 05-questions.md, 06-answers.md) missing/unreadable", target: "self / HALT — cannot synthesize a contract without all four; write nothing" }
-  - { when: "class in 02/04 lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — only greenfield + feature-add contract forms authored (class-extension blocks for other classes unauthored); HALT and report" }
+  - { when: "class in 02/04 lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — only greenfield + feature-add contract forms authored (class-extension blocks for other classes unauthored); HALT and report" }
   - { when: "feature-add but baseline .aprd/aprd.frozen.md / .aprd/aprd.lock not present+frozen", target: "BASELINE-MAP / HALT — nothing to version-bump; cannot extend a baseline that was never frozen" }
 ---
 # Register

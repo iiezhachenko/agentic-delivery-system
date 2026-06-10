@@ -1,7 +1,7 @@
 ---
 role: SEQUENCE
 phase: 01-roadmap
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal ordering — reads disk, writes proposed running order, stops. Client order gate is SEQUENCE-REVIEW (role 7/7), later. PR1
 inputs:
   # — greenfield —
@@ -16,7 +16,7 @@ outputs:
 escapes:
   # — greenfield —
   - { when: "greenfield + (any input missing/unparseable, OR 03 verdict != all_vertical, OR 04 skeleton == null, OR eligible_slices empty)", target: "self / HALT — re-cut already routed upstream / nothing to order; report which guard, write nothing (§5.14: Sequenced follows SkeletonNamed follows Verticalized). NOTE 04 skeleton==null is EXPECTED for feature-add (no NEW skeleton), NOT a HALT there — delta Rule 1" }
-  - { when: "02 / 03 / 04 class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — sequencing depth not authored; HALT, report class" }
+  - { when: "02 / 03 / 04 class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — sequencing depth not authored; HALT, report class" }
   - { when: "depends_on contains CYCLE, OR depends_on references slice in neither the eligible/new set NOR (feature-add) completed[] (dangling), OR (greenfield) skeleton carries non-empty depends_on on eligible slice (cannot both lead and depend)", target: "SLICE-EXTRACT / re-cut — slicing defect (§8, RM5, §5.13). NOT HALT: write verdict:dependency_defect + cycle/dangling refs + empty order, stop; re-cut is external orchestration" }
   # — feature-add —
   - { when: "feature-add but .roadmap/08-rerank.json missing/unparseable, OR 02 lacks baseline_completed_slices, OR 08 has no completed[]", target: "BASELINE-MAP / HALT — baseline completed frontier unknown; cannot pin baseline (BF1), write nothing" }

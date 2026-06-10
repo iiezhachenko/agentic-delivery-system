@@ -1,7 +1,7 @@
 ---
 role: CRITIQUE
 phase: 00-aprd
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # adversarial review — reads disk, writes the issues list to disk, stops. Does NOT re-run SYNTHESIZE and does NOT touch the client; the loop-back and sign-off gate are separate orchestration steps (§5.6/§5.4, PR1).
 inputs:
   - { path: ".aprd/drafts/aprd.v1.md", format: "markdown — the aPRD draft under review: PROJECT, CLASS, ENTITIES E*, REQUIREMENTS R*, CONSTRAINTS C*, ASSUMPTIONS A* (gap_ref), OUT_OF_SCOPE, ACCEPTANCE AC* (req_ref)" }
@@ -11,7 +11,7 @@ outputs:
   - { path: ".aprd/08-critique.json", format: "json (schema below) — verdict + blocking issues[]; blocking-grade only" }
 escapes:
   - { when: "any required input (drafts/aprd.v1.md, 07-assumptions.json, 04-gaps.json) missing/unreadable", target: "self / HALT — cannot review a contract not on disk; write nothing" }
-  - { when: "class in aprd.v1.md / 07 / 04 lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — only the greenfield contract form is reviewed (class-extension blocks for other classes unauthored); HALT and report" }
+  - { when: "class in aprd.v1.md / 07 / 04 lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — only the greenfield contract form is reviewed (class-extension blocks for other classes unauthored); HALT and report" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.

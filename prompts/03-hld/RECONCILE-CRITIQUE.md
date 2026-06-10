@@ -1,7 +1,7 @@
 ---
 role: RECONCILE-CRITIQUE
 phase: 03-hld
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A: adversarial gate on assembled SKELETON HLD before its mechanical freeze); frozen skeleton present → INCREMENT PASS (Part B: per-slice adversarial gate on slice's increment incl. skeleton-fidelity H14, before slice freeze §5.12). One role, two modes (H13/D9/D14)
 interactive: false          # hostile review — reads disk, writes issues list to disk, stops. Does NOT redraw, re-decide, re-render, or freeze (PR1, §5.10/§5.12, §9)
 inputs:
@@ -37,7 +37,7 @@ escapes:
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable — no coverage/trace oracle", target: "self / HALT" }
   - { when: ".adr/adr.lock missing/unparseable or status != frozen — no frame-fidelity oracle (unfrozen frame means Phase 2 didn't gate; not Phase-3 input)", target: "self / HALT" }
   - { when: ".roadmap/06-foundation-cut.json or .adr/02-triage.json missing/unparseable — no INV floor / deferred-queue oracle (would manufacture false positives)", target: "self / HALT" }
-  - { when: "class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) (in any artifact / lock) — brownfield skeleton-fidelity review not authored (§11, D10)", target: "that playbook / HALT, report class" }
+  - { when: "class lacks authored playbook (refactor|migration|perf|integration|investigation) (in any artifact / lock) — brownfield skeleton-fidelity review not authored (§11, D10)", target: "that playbook / HALT, report class" }
   - { when: "defect is real foundational-DECISION fault (ADR unbuildable/wrong) — not structural fault chain can fix", target: "emit issue with routes_to: Phase 2 (§5.11); diagnose, do NOT block by patching frame, do NOT re-decide" }
   - { when: "defect is real WHAT fault (aPRD ambiguous/wrong, can't structure what isn't specified)", target: "emit issue with routes_to: Phase 0 (§5.11); never patch aPRD" }
   # — skeleton pass —

@@ -1,7 +1,7 @@
 ---
 role: SYNTHESIZE-ADR
 phase: 02-adr
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal render — reads disk, writes disk, stops. No client touch (PR1, §9)
 inputs:
   - { path: ".adr/04-conflicts.json", format: "json — RECONCILE output, THE GATE. Render ONLY when verdict == coherent; blocked routes back to re-decide first, render nothing. Carries decisions_checked, undecided_carried, skeleton_id, class" }
@@ -15,7 +15,7 @@ escapes:
   - { when: ".adr/04-conflicts.json verdict != coherent (blocked) — unresolved conflicts/violations/gaps", target: "EVALUATE-DECIDE re-decide / HALT — render nothing; report blocking_count + the blocking issue ids (§5.8, §5.11). The loop-back already routed; you don't perform it" }
   - { when: ".adr/03-options/decisions-index.json missing or unparseable — no manifest to enumerate / no id order", target: "self / HALT" }
   - { when: "a manifest decision's decision_ref file missing/unparseable — render content does not exist", target: "self / HALT — report the broken upstream contract (RECONCILE should have caught it); never fabricate an ADR body" }
-  - { when: "class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) (in 04-conflicts / decisions-index) — brownfield inheritance/supersession rendering not authored (D7, D10)", target: "that playbook / HALT, report class" }
+  - { when: "class lacks authored playbook (refactor|migration|perf|integration|investigation) (in 04-conflicts / decisions-index) — brownfield inheritance/supersession rendering not authored (D7, D10)", target: "that playbook / HALT, report class" }
   - { when: "decisions[] empty (nothing decided this pass)", target: "self — write .adr/adr-index.json with empty adrs[] + a note, render zero drafts, stop" }
 ---
 # Register

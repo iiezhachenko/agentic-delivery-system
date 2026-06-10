@@ -1,7 +1,7 @@
 ---
 role: GAP-DETECT
 phase: 00-aprd
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # adversarial analysis — reads disk, writes disk, stops. Questions are authored later by QUESTION-GEN (PR1)
 inputs:
   # — shared (both classes) —
@@ -14,7 +14,7 @@ outputs:
   - { path: ".aprd/04-gaps.json", format: "json (schema below) — blast-ranked gaps[] with interpretations + recommended_default + disposition" }
 escapes:
   - { when: "02-extraction.json missing or unreadable", target: "self / HALT — nothing to detect gaps in; cannot run" }
-  - { when: "02-extraction.json class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — not authored yet; HALT and report the class rather than rank gaps under the wrong grounding model" }
+  - { when: "02-extraction.json class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — not authored yet; HALT and report the class rather than rank gaps under the wrong grounding model" }
   - { when: "feature-add but .aprd/baseline-map.json missing/unparseable", target: "BASELINE-MAP — baseline not mapped; cannot measure gaps vs baseline read-first (BF2)" }
 ---
 # Register

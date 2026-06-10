@@ -1,7 +1,7 @@
 ---
 role: DERIVE-COMPONENTS
 phase: 03-hld
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment    # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A); frozen skeleton present → INCREMENT PASS (Part B). One role, two modes (H13/D9)
 interactive: false          # internal structural sweep; client signed the WHAT, team owns the HOW (PR1, §9)
 inputs:
@@ -23,7 +23,7 @@ escapes:
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no WHAT to cluster; Phase 3 consumes only the lock-named CURRENT FROZEN WHAT (P8/H9), never a stale prior version" }
   - { when: ".adr/adr.lock missing OR status != frozen, OR .adr/log/ missing/empty", target: "self / HALT — no baselined frame to draw inside (H2)" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no cut to seed seams + read invariants" }
-  - { when: "frozen/lock CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — depth/brownfield-conformance not authored (H11/D10). Report class" }
+  - { when: "frozen/lock CLASS lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — depth/brownfield-conformance not authored (H11/D10). Report class" }
   - { when: "a foundational ADR cannot be honored by ANY component structure (frame internally unbuildable)", target: "Phase 2 (change request) — record in frame_conflicts[], never silently re-decide (H2/H10)" }
   - { when: "a requirement so underspecified/contradictory no structural home is framable", target: "Phase 0 (change request) — record in aprd_defects[], never drop or invent (H10)" }
   # — increment pass —

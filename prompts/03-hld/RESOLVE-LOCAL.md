@@ -1,7 +1,7 @@
 ---
 role: RESOLVE-LOCAL
 phase: 03-hld
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment    # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A: drain TRIAGE's whole local queue, resolve forks skeleton structure forces, re-defer slice-owned locals); frozen skeleton present → INCREMENT PASS (Part B: drain only local forks THIS slice touches, inherit skeleton-resolved locals on its boxes). One role, two modes (H13/D9/D14)
 interactive: false          # internal structural sweep; client signed the WHAT, team owns the HOW (PR1, §9)
 inputs:
@@ -32,7 +32,7 @@ escapes:
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no trace oracle / no forces; Phase 3 consumes only the lock-named CURRENT FROZEN WHAT (P8/H9), never a stale prior version" }
   - { when: ".adr/adr.lock missing OR status != frozen, OR .adr/log/ missing/empty", target: "self / HALT — no baselined frame + no id-continuation point; Phase 3 draws inside frozen frame (H2)" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no deferred[] grounding for re-deferral + no INV* floor" }
-  - { when: "frozen/lock CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — local-decision depth not authored (H11/D10). Report class" }
+  - { when: "frozen/lock CLASS lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — local-decision depth not authored (H11/D10). Report class" }
   - { when: "queued 'local' DP actually FOUNDATIONAL — resolving it would force cross-box change (new/re-cut component, changed contract KIND) or violate INV*", target: "Phase 2 (change request) — thin-cut signal (§5.4/§5.11); record in escalations[], emit NO local ADR (H10)" }
   # — skeleton pass —
   - { when: "SKELETON: .adr/02-triage.json missing/unparseable", target: "self / HALT — no local-decision queue to drain" }

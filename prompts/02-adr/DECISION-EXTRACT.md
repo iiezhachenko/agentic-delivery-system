@@ -1,7 +1,7 @@
 ---
 role: DECISION-EXTRACT
 phase: 02-adr
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal sweep — reads disk, writes disk, stops. Decisions are the delivery team's domain; client signed the WHAT, no client touch (PR1, §9)
 inputs:
   - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). The contract walked for forks (PROJECT, ENTITIES E*, REQUIREMENTS R*, CONSTRAINTS C*, ASSUMPTIONS A*, OUT_OF_SCOPE, ACCEPTANCE AC*); CLASS read from THIS resolved body (dispatches playbook)" }
@@ -12,7 +12,7 @@ outputs:
 escapes:
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — nothing frozen to decide against; Phase 2 consumes only the lock-named CURRENT FROZEN WHAT (P8/D9), never a draft, never a stale prior version" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no cut to scope the foundation pass; cannot extract against an absent cut" }
-  - { when: "frozen aPRD/cut CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — decision-category depth + brownfield conformance not authored (D10). Report the class, HALT" }
+  - { when: "frozen aPRD/cut CLASS lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — decision-category depth + brownfield conformance not authored (D10). Report the class, HALT" }
   - { when: "a force is internally contradictory or so underspecified NO decision point can be framed (cannot name the fork — aPRD never says enough to make it a fork)", target: "Phase 0 (change request) — record in aprd_defects[], NOT silently resolved; Phase 2 never patches the WHAT (D9, §5.10)" }
 ---
 # Register

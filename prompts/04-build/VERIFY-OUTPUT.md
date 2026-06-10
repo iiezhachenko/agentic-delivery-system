@@ -1,7 +1,7 @@
 ---
 role: VERIFY-OUTPUT
 phase: 04-build
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 mode: skeleton-build|slice-build   # one role, two modes (dispatch: MODE DISPATCH §)
 interactive: false          # internal — verification team's; client signed WHAT (P0) + ordered slices (P1). Demo gate later (PR1, §9)
 inputs:
@@ -42,7 +42,7 @@ outputs:
 escapes:
   # — shared (both modes) —
   - { when: "the active oracle.lock missing OR status != frozen OR builder_may_not_edit != true, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate not clean, OR (feature-add) the artifact aprd.lock names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no frozen oracle/frame to verify against (§5.1, B4; BF7/P8 — walk the lock-named version, never a hardcoded aprd.frozen.md). Report which" }
-  - { when: "frozen CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — verify depth/layers not authored (B13/§11). Report class" }
+  - { when: "frozen CLASS lacks authored playbook (refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — verify depth/layers not authored (B13/§11). Report class" }
   - { when: "the authoritative ladder run finds ANY red — a contract/flow/acceptance(visible|held_out)/class-ext layer fails, OR an M* designed-but-not-wired", target: "self-heal loop → DIAGNOSE — write the record with verdict:blocked + escape{failing[], failure_signature, classification (PROVISIONAL hint), route}; DIAGNOSE adjudicates self-heal-vs-escape independently. FLAG never fix; NEVER edit a frozen test or the code (B1/B4/B5)" }
   # — skeleton-build —
   - { when: "SKELETON-BUILD: integration-record.json missing/unparseable OR status != integrated OR flow != pass; OR build-record.json missing OR any build_set unit status != green", target: "self / HALT — build not composed-and-green; ladder runs only on a green contract layer + integrated flow (§5.7 after §5.5/§5.6). Report which producer + unit/status" }

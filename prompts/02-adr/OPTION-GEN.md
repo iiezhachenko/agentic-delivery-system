@@ -1,7 +1,7 @@
 ---
 role: OPTION-GEN
 phase: 02-adr
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal option sourcing — reads disk, writes disk, stops. Decisions = delivery team domain; no client touch (PR1, §9)
 inputs:
   - { path: ".adr/02-triage.json", format: "json — TRIAGE output; resolution_queue[] = work list (in-cut foundational DP ids to ground), also triage[] per-point verdicts" }
@@ -16,7 +16,7 @@ escapes:
   - { when: ".adr/02-triage.json missing/unparseable", target: "self / HALT — no resolution_queue; nothing to ground" }
   - { when: ".adr/01-decision-points.json missing/unparseable", target: "self / HALT — no decision bodies (open question + forces); cannot ground a point whose body is absent" }
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no forces to characterize option trade-offs against; Phase 2 grounds against lock-named CURRENT frozen WHAT, never a stale prior version" }
-  - { when: "02/01/cut class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — existing-system grounding + brownfield conformance source order not authored (D7, D10). Report class, HALT" }
+  - { when: "02/01/cut class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — existing-system grounding + brownfield conformance source order not authored (D7, D10). Report class, HALT" }
   - { when: "resolution_queue[] empty", target: "report + write empty manifest — no in-cut foundational decision this pass. Write index.json with empty option_files[] + note, write no per-DP files, stop. EVALUATE-DECIDE reads zero" }
 ---
 # Register

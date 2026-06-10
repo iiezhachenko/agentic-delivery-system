@@ -1,7 +1,7 @@
 ---
 role: TRIAGE
 phase: 02-adr
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal classifier/router — reads disk, writes disk, stops. Decisions are the delivery team's domain; no client touch (PR1, §9)
 inputs:
   - { path: ".adr/01-decision-points.json", format: "json — DECISION-EXTRACT output; raw fork list to triage (decision_points DP* + checklist_coverage + aprd_defects[])" }
@@ -11,7 +11,7 @@ outputs:
 escapes:
   - { when: ".adr/01-decision-points.json missing/unparseable", target: "self / HALT — nothing to triage; cannot route an absent fork list" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no cut to split foundational points against (in-cut|not-yet); the cut is the authoritative scope gate (§5.3)" }
-  - { when: "01/cut class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — decision depth + brownfield conformance routing not authored (D10). Report the class, HALT" }
+  - { when: "01/cut class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — decision depth + brownfield conformance routing not authored (D10). Report the class, HALT" }
   - { when: "decision_points[] empty", target: "report + stop (no write) — nothing to triage. If 01's aprd_defects[] non-empty, note DECISION-EXTRACT already routed those to Phase 0; TRIAGE does not re-route defects" }
 ---
 # Register

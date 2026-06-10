@@ -1,7 +1,7 @@
 ---
 role: MAP-NFR
 phase: 03-hld
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A: map every cross-cutting NFR to mechanism/frame-basis, drawn once); frozen skeleton present → INCREMENT PASS (Part B: slice NFR scope = frame NFRs governing its boxes (inherited by reference) + per-slice hardening skeleton deferred to it; new-mechanism delta typically []). One role, two modes (H13/D9/D14)
 interactive: false          # internal structural sweep; client signed WHAT, team owns HOW (PR1, §9)
 inputs:
@@ -25,7 +25,7 @@ outputs:
 escapes:
   # — shared —
   - { when: "any shared input missing/unparseable, OR adr.lock status != frozen", target: "self / HALT (no frame to map on)" }
-  - { when: "frozen/lock CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — not authored (H11/D10). Report class" }
+  - { when: "frozen/lock CLASS lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — not authored (H11/D10). Report class" }
   - { when: "in-scope NFR genuinely REQUIRES frame-forbidden mechanism (aPRD demand contradicts INV6/A13)", target: "Phase 2 — record in frame_conflicts[], flag never resolve by inventing forbidden mechanism (§5.6)" }
   # — skeleton pass —
   - { when: "SKELETON: components.json missing/unparseable, OR carries non-empty structural_defects / frame_conflicts / aprd_defects", target: "self / HALT — upstream HLD routed unresolved escape; don't map on defective graph. Report which block" }

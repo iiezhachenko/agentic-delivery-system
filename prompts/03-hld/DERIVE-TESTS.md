@@ -1,7 +1,7 @@
 ---
 role: DERIVE-TESTS
 phase: 03-hld
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A: per-CT shape+failure specs for the whole frozen seam set + per-F1 AC-arrival spec + the build DAG, drawn once); frozen skeleton present → INCREMENT PASS (Part B: THE slice's design-layer oracle — its flow test (new) + the frozen contract tests its seams inherit, by reference; §5.9 increment). One role, two modes (H13/D9/D14)
 interactive: false          # internal structural sweep; client signed the WHAT, team owns the HOW (PR1, §9)
 inputs:
@@ -27,7 +27,7 @@ outputs:
 escapes:
   # — shared —
   - { when: "any shared input missing/unparseable, OR adr.lock status != frozen", target: "self / HALT (no frame to derive tests on)" }
-  - { when: "frozen/lock CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — not authored (H11/D10). Report class" }
+  - { when: "frozen/lock CLASS lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — not authored (H11/D10). Report class" }
   - { when: "a flow F* traces NO AC* → no arrival oracle to assert against", target: "record aprd_defects[] (name the F*) → Phase 0; never fabricate the AC" }
   # — skeleton pass —
   - { when: "SKELETON: contracts.json / flows.json / components.json carries non-empty structural_defects / frame_conflicts / aprd_defects, OR flows.json composes_against_contracts != true", target: "self / HALT — upstream HLD routed an unresolved escape; don't author tests on a defective graph. Report which block in which file" }

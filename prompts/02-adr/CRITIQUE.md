@@ -1,7 +1,7 @@
 ---
 role: CRITIQUE
 phase: 02-adr
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # adversarial review — reads disk, writes issues list to disk, stops. Does NOT re-render drafts, freeze, or touch client (§5.8, §5.7, PR1)
 inputs:
   - { path: ".adr/adr-index.json", format: "json — SYNTHESIZE-ADR output; enumerates rendered set via adrs[] (each entry → draft_ref); review exactly these drafts" }
@@ -16,7 +16,7 @@ escapes:
   - { when: "draft named in adr-index's draft_ref missing or unparseable — cannot review an ADR not on disk", target: "self / HALT — report broken upstream contract" }
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable — no trace/coverage oracle", target: "self / HALT" }
   - { when: ".adr/04-conflicts.json or .roadmap/06-foundation-cut.json missing/unparseable — no in-scope-constraint / premise-deferred buckets / cut+INV oracle (would manufacture false positives)", target: "self / HALT" }
-  - { when: "class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) (in adr-index / 04-conflicts / a draft) — brownfield conformance-ADR review not authored (§4, D10)", target: "that playbook / HALT, report class" }
+  - { when: "class lacks authored playbook (refactor|migration|perf|integration|investigation) (in adr-index / 04-conflicts / a draft) — brownfield conformance-ADR review not authored (§4, D10)", target: "that playbook / HALT, report class" }
   - { when: "ADR unbuildable because aPRD itself ambiguous/wrong (real WHAT defect, not render defect)", target: "Phase 0 change request — note for routing (§5.10, D9); do NOT block draft for faithfully resolving upstream framing, do NOT patch aPRD" }
   - { when: "adrs[] empty (SYNTHESIZE-ADR rendered nothing — nothing decided this pass)", target: "self — write .adr/05-critique.json with verdict clean + empty issues + note, stop. Nothing rendered = nothing to attack" }
 ---

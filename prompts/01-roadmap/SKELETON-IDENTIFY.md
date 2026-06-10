@@ -1,7 +1,7 @@
 ---
 role: SKELETON-IDENTIFY
 phase: 01-roadmap
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal designation — reads disk, writes skeleton + seams, stops. Does NOT sequence other slices (SEQUENCE), define foundation cut (FOUNDATION-CUT), or touch client (order gate = SEQUENCE-REVIEW, later). PR1.
 inputs:
   - { path: ".roadmap/03-verticality.json", format: "json — verdict (must be all_vertical) + valid[] = ELIGIBILITY set; only validated-vertical slice can be skeleton" }
@@ -11,7 +11,7 @@ outputs:
   - { path: ".roadmap/04-skeleton.json", format: "json (schema below) — walking-skeleton designation S* + foundational seams it must establish" }
 escapes:
   - { when: "any of three inputs missing/unparseable, OR 03-verticality.json verdict != all_vertical, OR valid[] empty", target: "self / HALT — slice set not clean validated-vertical set; rejected/horizontal candidate must re-cut before skeleton named (§5.14 SkeletonNamed follows Verticalized); report which guard fired, write nothing" }
-  - { when: "02-slices.json or 03-verticality.json class lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation)", target: "that playbook — skeleton rule + seam set not authored; report class, write nothing" }
+  - { when: "02-slices.json or 03-verticality.json class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — skeleton rule + seam set not authored; report class, write nothing" }
   - { when: "no single eligible slice crosses every present foundational seam once (seams scattered across slices, or thinnest seam-crossing path never cut)", target: "SLICE-EXTRACT / re-cut (loop-back) — recorded diagnosis, NOT HALT: write 04-skeleton.json with skeleton:null + reason + uncovered_seams, stop; re-cut is external orchestration (§5.13)" }
 ---
 # Register

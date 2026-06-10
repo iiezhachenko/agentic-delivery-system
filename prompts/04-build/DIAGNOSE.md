@@ -1,7 +1,7 @@
 ---
 role: DIAGNOSE
 phase: 04-build
-class: <dispatched by playbook>   # was greenfield-only; feature-add playbook now authored (prompts/_playbooks/feature-add.md). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 mode: skeleton-build|slice-build   # one role, two modes (dispatch: MODE DISPATCH §)
 interactive: false          # internal — build self-heal/escape decision is team's; client signed WHAT (P0) + ordered slices (P1). Demo gate later (PR1, §9)
 inputs:
@@ -37,7 +37,7 @@ outputs:
 escapes:
   # — shared (both modes) —
   - { when: "skeleton.lock | adr.lock | aprd.lock status != frozen, OR skeleton.lock gate not clean, OR oracle.lock status != frozen", target: "self / HALT — cannot adjudicate against an unfrozen frame; report which" }
-  - { when: "frozen CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — diagnose depth not authored (B13/§11). Report class" }
+  - { when: "frozen CLASS lacks authored playbook (refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — diagnose depth not authored (B13/§11). Report class" }
   # — skeleton-build —
   - { when: "SKELETON-BUILD: the PRIMARY record missing/unparseable, OR status != blocked / escape == null (status:green|integrated|partial = no red)", target: "self / STOP — no red to diagnose; DIAGNOSE runs only on a verification red (§5.8). Report status found, write no diagnosis" }
   # — slice-build —
