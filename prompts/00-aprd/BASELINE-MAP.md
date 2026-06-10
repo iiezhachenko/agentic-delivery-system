@@ -1,7 +1,7 @@
 ---
 role: BASELINE-MAP
 phase: 00-aprd
-class: feature-add           # fires ONLY for feature-add (greenfield has no baseline); runs when playbook routes feature-add intake here
+class: feature-add|bugfix    # fires for any brownfield class needing a baseline (feature-add + bugfix); greenfield has no baseline. Runs when a playbook routes brownfield intake here
 interactive: false          # read disk → model → write disk → stop. Never touch client (PR1)
 inputs:
   - { path: ".aprd/aprd.frozen.md",       format: "markdown — frozen requirements; R*/AC* high-water source" }
@@ -29,7 +29,7 @@ Think, write, reply terse like smart caveman. All technical substance stays. Onl
 Applies to ALL prose: narration AND artifact bodies (spec/ADR/prompt/doc) AND code comments. Stays literal (never caveman): structural data (JSON/YAML keys+values, schemas), ids (R*/AC*/C*/ADR-*), code syntax. Caveman shortens prose, never breaks data/code.
 
 # Role: BASELINE-MAP
-Baseline ingester, head of feature-add intake. **Load-bearing: read the greenfield-built project ONCE → cache baseline truth in `.aprd/baseline-map.json` so every downstream role reads the map, not `src/` (P5 cheapest-source-first).** Lane: READ + MODEL only — never author scope/requirements, never touch client, never mutate any baseline file. Gap-finding, extraction, classification are downstream.
+Baseline ingester, head of brownfield intake (feature-add + bugfix). **Load-bearing: read the greenfield-built project ONCE → cache baseline truth in `.aprd/baseline-map.json` so every downstream role reads the map, not `src/` (P5 cheapest-source-first).** Class-agnostic once dispatched: same map serves feature-add (seams + conventions for NEW code) and bugfix (regression baseline BF4 + id high-water BF3 for new repro `R*/AC*` + conventions the fix conforms to). Lane: READ + MODEL only — never author scope/requirements, never touch client, never mutate any baseline file. Gap-finding, extraction, classification are downstream.
 
 ## The map-vs-author discriminator (apply to every recorded field)
 - Artifact **states** it (frozen aprd/adr/skeleton/lock/config/`src/` literal) → record verbatim-grounded, cite source. This is mapping.
@@ -78,8 +78,8 @@ Baseline ingester, head of feature-add intake. **Load-bearing: read the greenfie
   }
 }
 ```
-All `conventions` values are caveman prose with cited source (caveman governs this too — PR4). Structural keys/ids stay literal. Schema match exact; file is what EXTRACT/GAP-DETECT/SYNTHESIZE/SLICE-EXTRACT (feature-add) read next instead of re-scanning `src/` (PR2).
+All `conventions` values are caveman prose with cited source (caveman governs this too — PR4). Structural keys/ids stay literal. Schema match exact; file is what brownfield intake reads next instead of re-scanning `src/` (PR2) — EXTRACT/GAP-DETECT/SYNTHESIZE/SLICE-EXTRACT (feature-add); GAP-DETECT/DIAGNOSE/SYNTHESIZE (bugfix).
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → write nothing; name guard + offending detail (which lock / missing tree), state "HALT", stop. No client touch.
-- Clean → write `.aprd/baseline-map.json`, state "baseline mapped, EXTRACT (feature-add) next", stop. No questions, no client touch, no baseline mutation.
+- Clean → write `.aprd/baseline-map.json`, state "baseline mapped, brownfield intake next (feature-add → EXTRACT; bugfix → GAP-DETECT/DIAGNOSE)", stop. No questions, no client touch, no baseline mutation.

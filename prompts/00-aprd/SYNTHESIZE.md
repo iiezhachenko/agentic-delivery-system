@@ -9,19 +9,22 @@ inputs:
   - { path: ".aprd/04-gaps.json", format: "json — ranked gaps[] G* with interpretations[], recommended_default, disposition; one assumption authored per gap" }
   - { path: ".aprd/05-questions.md", format: "markdown — which gaps became questions Q* (gap_ref comments) vs deferred assumptions, + option lettering; maps a client answer letter back to gap + interpretation" }
   - { path: ".aprd/06-answers.md", format: "markdown — client answers; lines 'Q<n>: <letter>' or 'Q<n>: Something else — <free text>'; missing/blank line = skipped" }
-  # — feature-add —
-  - { path: ".aprd/baseline-map.json", format: "json — baseline id_high_water (new R*/AC*/A* continue strictly above it, BF3) + conventions (feed CONVENTION_BASELINE, BF5) + integration_seams (feed INTEGRATION_SEAMS, BF6) + existing_oracle (feed REGRESSION_GUARD, BF4)" }
+  # — brownfield (feature-add + bugfix) —
+  - { path: ".aprd/baseline-map.json", format: "json — baseline id_high_water (new R*/AC*/A* continue strictly above it, BF3) + conventions (feature-add: feed CONVENTION_BASELINE, BF5) + integration_seams (feature-add: feed INTEGRATION_SEAMS, BF6) + existing_oracle (feed REGRESSION_GUARD, BF4 — both classes)" }
   - { path: ".aprd/aprd.frozen.md", format: "markdown — frozen BASELINE version, READ-ONLY (BF1). Its R*/AC*/E*/C* carried forward by REFERENCE not re-emit; its max A* sets the A high-water for new assumptions. NEVER mutated — verifier checks byte-equality" }
+  # — bugfix —
+  - { path: ".aprd/diagnosis.json", format: "json — DIAGNOSE intake root-cause verdict (bugfix); the ROOT_CAUSE block is carried VERBATIM from it (SYNTHESIZE records, never re-diagnoses — lane)" }
 outputs:
   - { path: ".aprd/drafts/aprd.v1.md", format: "markdown — dual-audience aPRD draft (schema below): PROJECT, CLASS, ENTITIES, REQUIREMENTS R*, CONSTRAINTS C*, ASSUMPTIONS A*, OUT_OF_SCOPE, ACCEPTANCE AC*; greenfield = no class-extension block" }
   - { path: ".aprd/07-assumptions.json", format: "json — machine-readable assumptions log, one entry per gap, traceable gap_ref → G* (schema below); feature-add adds class/baseline_aprd_ref/aprd_version/touch_set[]" }
-  # — feature-add —
-  - { path: ".aprd/aprd.v<N+1>.frozen.md", format: "markdown — the VERSION BUMP (suffix = baseline version + 1; baseline v1 → v2, v2 → v3). Carries CLASS:feature-add + BASELINE pointer + NEW R*/AC*/E*/C*/A* above high-water + CLASS_EXTENSION block. Baseline aprd.frozen.md stays byte-identical (BF1)" }
+  # — brownfield (feature-add + bugfix) —
+  - { path: ".aprd/aprd.v<N+1>.frozen.md", format: "markdown — the VERSION BUMP (suffix = baseline version + 1; baseline v1 → v2, v2 → v3). Carries CLASS:feature-add|bugfix + BASELINE pointer + NEW R*/AC*/E*/C*/A* above high-water + a class-specific CLASS_EXTENSION block (feature-add | bugfix variant). Baseline aprd.frozen.md stays byte-identical (BF1)" }
   - { path: ".aprd/aprd.lock", format: "json — RE-SIGNED against the new version (version: v<N+1>, status: frozen); the change-request re-freeze (BF7). Baseline lock content replaced by new-version lock — old version pinned by its own content_sha256 in history" }
 escapes:
   - { when: "any required input (02-extraction.json, 04-gaps.json, 05-questions.md, 06-answers.md) missing/unreadable", target: "self / HALT — cannot synthesize a contract without all four; write nothing" }
-  - { when: "class in 02/04 lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — only greenfield + feature-add contract forms authored (class-extension blocks for other classes unauthored); HALT and report" }
-  - { when: "feature-add but baseline .aprd/aprd.frozen.md / .aprd/aprd.lock not present+frozen", target: "BASELINE-MAP / HALT — nothing to version-bump; cannot extend a baseline that was never frozen" }
+  - { when: "class in 02/04 lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — only greenfield + feature-add + bugfix contract forms authored (class-extension blocks for other classes unauthored); HALT and report" }
+  - { when: "feature-add or bugfix but baseline .aprd/aprd.frozen.md / .aprd/aprd.lock not present+frozen", target: "BASELINE-MAP / HALT — nothing to version-bump; cannot extend a baseline that was never frozen" }
+  - { when: "bugfix but .aprd/diagnosis.json missing/unparseable", target: "DIAGNOSE / HALT — no root-cause verdict to fold into ROOT_CAUSE; bugfix localizes before synthesizing (BF2)" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.
@@ -67,6 +70,16 @@ For each gap `G*` in `04-gaps.json`, determine chosen interpretation by exactly 
 4. **Touch-set + re-trigger (BF7, Risk R1).** Record the touch-set = slices the version bump invalidates: a slice whose `R*/AC*` the feature ALTERS, or whose seam the feature EXTENDS. Net-new requirements (`R*` above high-water with no baseline `R*` strengthened) introduce net-new slices — no existing slice touched by them. A new `AC*` that strengthens an existing baseline `R*` touches that requirement's slice. Extending a seam touches the slice owning that seam's contract. Record touch-set in `07.touch_set[]`; the new version invalidates downstream sentinels for the touch-set ONLY — untouched slices stay `completed[]`. SYNTHESIZE records the touch-set; RE-RANK rebuilds — this stage does not rebuild.
 5. **Re-freeze the lock (BF7).** After writing the new version, re-sign `aprd.lock` against it (`version: v<N+1>`, `content_sha256` of the new file, `status: frozen`). This is the change-request re-freeze. Do NOT run the client sign-off gate or CRITIQUE — author the version, re-sign, stop (lane unchanged, PR1).
 
+## Rules (bugfix delta — shared + feature-add-delta Rules above also bind)
+> Dispatched here by the bugfix playbook (`prompts/_playbooks/bugfix.md`). Only what differs from the feature-add delta (AB1). Class set when `02`/`04` `class == bugfix`. **Version-bump machinery is IDENTICAL to feature-add** — feature-add delta Rules 1 (version-bump, baseline byte-unchanged), 2 (new IDs above high-water), 5 (re-freeze lock) bind unchanged; bugfix is a change-request version bump too (P8). Only the reserved CLASS_EXTENSION slot (delta Rule 3) carries different sub-blocks, and the touch-set is the blast-radius surface.
+1. **New IDs assert CORRECT behavior, never new behavior (BF binding).** The new `R*`/`AC*` (above high-water, BF3) state the already-specified-or-gap-resolved behavior the defect VIOLATES — the assertion the reproduction test will check (red→green). No new capability, no new `C*`, no new tech/dependency. One repro requirement + its binary AC is the typical shape; new `E*` rare.
+2. **CLASS_EXTENSION (bugfix) — the reserved slot (REPRO_STEPS/ROOT_CAUSE/BLAST_RADIUS/REGRESSION_GUARD).** Emit a `## CLASS_EXTENSION (bugfix)` section (replaces feature-add's three sub-blocks), four sub-blocks:
+   - **`REPRO_STEPS`** — how to trip the defect (from the defect report); the steps the reproduction test encodes. The red the fix must flip green.
+   - **`ROOT_CAUSE`** — carried VERBATIM from the DIAGNOSE intake verdict (`.aprd/diagnosis.json`): the localized cause the fix targets. RECORD it; never re-diagnose (lane — DIAGNOSE owns root-cause, H10).
+   - **`BLAST_RADIUS`** — the touched surface the fix may edit (existing modules/components `C*`), scoping IMPLEMENT's edit + the regression guard. Bounds the repair; off-surface edit = scope breach.
+   - **`REGRESSION_GUARD` (BF4)** — existing `AC*`/oracle suites that must stay green, scoped to BLAST_RADIUS + touched seams, NOT the whole inherited suite (Risk R4). From `baseline-map.existing_oracle` + the baseline `AC*` on the touched surface.
+3. **Touch-set = the blast-radius slice(s) (BF7).** Record `touch_set` = slices whose code the fix edits (the slice(s) owning the BLAST_RADIUS surface). RE-RANK rebuilds those; untouched slices stay `completed[]`. Net-new repro `R*` strengthens the baseline `R*` the defect breaks → touches that requirement's slice.
+
 ## Task steps
 1. Read all four inputs. Check guards (frontmatter `escapes:`) — any tripped → HALT, name offending detail, write nothing. Else continue.
 2. From `05` build map: which gap each `Q<n>` came from (`gap_ref` comment), which gaps deferred (assumptions block). From `06` read each `Q<n>` answer.
@@ -81,6 +94,14 @@ For each gap `G*` in `04-gaps.json`, determine chosen interpretation by exactly 
 4. Emit `## CLASS_EXTENSION (feature-add)` — INTEGRATION_SEAMS + REGRESSION_GUARD + CONVENTION_BASELINE (delta Rule 3), each traced to `baseline-map.json` + gap `seam_ref`s.
 5. Compute touch-set (delta Rule 4) → `07.touch_set[]`.
 6. Write `aprd.v<N+1>.frozen.md` (NOT a draft — feature-add emits the frozen version directly); write `07-assumptions.json` (class/baseline_aprd_ref/aprd_version/touch_set added); re-sign `aprd.lock` against the new version (delta Rule 5). **Baseline `aprd.frozen.md` untouched.** Verify: new ids all above high-water, CLASS_EXTENSION present + complete, baseline byte-unchanged, lock re-signed. Stop.
+
+**Bugfix branch** (class == bugfix — version-bump steps identical to the feature-add branch; only the inputs read + the CLASS_EXTENSION emitted differ, bugfix delta):
+1. Read baseline `aprd.frozen.md` + `aprd.lock` + `baseline-map.json` + the DIAGNOSE intake verdict `.aprd/diagnosis.json` FIRST, then `02`/`04`/`05`/`06`. Guard tripped (baseline file/lock absent, `diagnosis.json` absent, or class lacks playbook) → HALT, write nothing.
+2. Resolve each gap `G*` by the discriminator (same five paths, same provenance). Note baseline max `A*` → A high-water (feature-add delta Rule 2).
+3. Assemble the NEW version body: `BASELINE` pointer; CLASS `bugfix`; NEW `R*`/`AC*` above high-water asserting the CORRECT behavior the defect violates (bugfix delta Rule 1 — no new capability, no new `C*`); ASSUMPTIONS one `A*` per gap; OUT_OF_SCOPE from declined interpretations. Do NOT re-emit baseline items.
+4. Emit `## CLASS_EXTENSION (bugfix)` — REPRO_STEPS + ROOT_CAUSE (verbatim from `diagnosis.json`) + BLAST_RADIUS + REGRESSION_GUARD (bugfix delta Rule 2).
+5. Compute touch-set = blast-radius slice(s) (bugfix delta Rule 3) → `07.touch_set[]`.
+6. Write `aprd.v<N+1>.frozen.md` + `07-assumptions.json` (class `bugfix`) + re-sign `aprd.lock`. **Baseline untouched.** Verify: new ids above high-water, CLASS_EXTENSION (bugfix) present + complete (4 sub-blocks), ROOT_CAUSE matches `diagnosis.json`, baseline byte-unchanged, lock re-signed. Stop.
 
 ## Output schema
 
@@ -175,6 +196,26 @@ feature-add
 - **naming**: <…>   <!-- BF5; carried verbatim from baseline-map.conventions; new code conforms -->
 ```
 
+### `## CLASS_EXTENSION (bugfix)` — bugfix variant of the reserved slot (BUGFIX ONLY)
+Replaces the feature-add three-block extension; everything else in the version-bump body is identical (BASELINE pointer, NEW R*/AC*/A* above high-water, ASSUMPTIONS, OUT_OF_SCOPE, ACCEPTANCE). Four sub-blocks (bugfix delta Rule 2):
+
+```markdown
+## CLASS_EXTENSION (bugfix)
+### REPRO_STEPS
+- <ordered step to trip the defect — the red the reproduction test encodes (red→green)>   <!-- from the defect report; observable failure -->
+
+### ROOT_CAUSE
+- **cause**: <localized cause, VERBATIM from .aprd/diagnosis.json>   <!-- DIAGNOSE owns this; SYNTHESIZE records, never re-diagnoses (H10) -->
+- **diagnosis_ref**: `.aprd/diagnosis.json` (`<verdict/classification carried>`)
+
+### BLAST_RADIUS
+- **touched surface**: C<k> (module `<src path>`)   <!-- existing component(s) the fix may edit; bounds IMPLEMENT + scopes REGRESSION_GUARD; off-surface edit = scope breach -->
+
+### REGRESSION_GUARD
+- **suites must stay green**: <baseline-map.existing_oracle.suites>   <!-- BF4; scoped to BLAST_RADIUS + touched seams, NOT whole inherited suite (Risk R4) -->
+- **baseline AC* must stay green**: AC<k>, AC<k>   <!-- baseline ACs on the touched surface -->
+```
+
 ### `.aprd/aprd.lock` — re-signed against the new version (FEATURE-ADD ONLY)
 ```json
 {
@@ -196,9 +237,9 @@ feature-add
   "extraction_ref": ".aprd/02-extraction.json",
   "gaps_ref": ".aprd/04-gaps.json",
   "answers_ref": ".aprd/06-answers.md",
-  "class": "greenfield",                     // "feature-add" when playbook-dispatched
-  "baseline_aprd_ref": null,                 // feature-add ONLY: ".aprd/aprd.frozen.md" (the version extended); null for greenfield
-  "aprd_version": "v1",                      // feature-add: "v<N+1>" (the emitted version); greenfield: "v1"
+  "class": "greenfield",                     // "feature-add" | "bugfix" when playbook-dispatched
+  "baseline_aprd_ref": null,                 // brownfield (feature-add + bugfix) ONLY: ".aprd/aprd.frozen.md" (the version extended); null for greenfield
+  "aprd_version": "v1",                      // brownfield: "v<N+1>" (the emitted version); greenfield: "v1"
   "assumptions": [                          // one per gap in 04; draft ASSUMPTIONS section must agree (ids, gap_refs, count)
     {
       "id": "A1",
@@ -213,7 +254,7 @@ feature-add
     { "req_ref": "R<k>", "reason": "<why no binary AC could be written>" }
   ],
   "assumption_count": 0,                     // integer == number of gaps in 04 == length of assumptions[]
-  "touch_set": [                             // feature-add ONLY (omit/[] for greenfield) — slices the version bump invalidates (delta Rule 4); RE-RANK rebuilds these, untouched slices stay completed[]
+  "touch_set": [                             // brownfield (feature-add + bugfix) ONLY (omit/[] for greenfield) — slices the version bump invalidates (feature-add delta Rule 4 / bugfix delta Rule 3); RE-RANK rebuilds these, untouched slices stay completed[]
     { "kind": "net-new", "requirements": ["R<k>"], "note": "<net-new feature requirements → net-new slice(s); no existing slice's R*/AC* altered>" },
     { "kind": "seam-extended", "seam": { "at": "C<k>", "contract_ref": "CT<k>" }, "note": "<feature extends this seam → the slice owning the contract re-enters remaining_sequence>" }
   ]
@@ -231,3 +272,4 @@ aPRD body uses signable client language; no internal jargon beyond labelled id t
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which guard fired + offending detail; "HALT".
 - Clean greenfield → write `.aprd/drafts/aprd.v1.md` and `.aprd/07-assumptions.json` (create `.aprd/` + `.aprd/drafts/` if absent; these two are only outputs); report counts (entities, requirements, assumptions=gaps, ACs, flagged); state "aPRD draft authored, CRITIQUE next"; stop. No client interaction, no sign-off, no freeze.
 - Clean feature-add → write `.aprd/aprd.v<N+1>.frozen.md` + `.aprd/07-assumptions.json` + re-signed `.aprd/aprd.lock`; baseline `aprd.frozen.md` left byte-unchanged; report counts (new entities/requirements/assumptions/ACs, touch-set size, version bumped v<N>→v<N+1>); state "aPRD version v<N+1> frozen, affected downstream re-triggered (RE-RANK next)"; stop. No client sign-off, no CRITIQUE.
+- Clean bugfix → write `.aprd/aprd.v<N+1>.frozen.md` (CLASS_EXTENSION = REPRO_STEPS/ROOT_CAUSE/BLAST_RADIUS/REGRESSION_GUARD) + `.aprd/07-assumptions.json` (class `bugfix`) + re-signed `.aprd/aprd.lock`; baseline byte-unchanged; report counts (new repro requirements/ACs, root-cause folded, blast-radius surface, touch-set size, v<N>→v<N+1>); state "aPRD version v<N+1> frozen, affected downstream re-triggered (RE-RANK next)"; stop. No client sign-off, no CRITIQUE.

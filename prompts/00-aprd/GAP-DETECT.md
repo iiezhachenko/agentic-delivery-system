@@ -7,15 +7,15 @@ inputs:
   # — shared (both classes) —
   - { path: ".aprd/02-extraction.json", format: "json — entities E*, requirements R* (explicit+implied), constraints C*, unknowns U*; the items each gap traces to via refs" }
   - { path: ".aprd/03-grounding/", format: "directory (OPTIONAL) — greenfield grounding output; present only if that stage ran. Any gap it already closed from a cheaper source is not a gap" }
-  # — feature-add —
-  - { path: ".aprd/baseline-map.json", format: "json — baseline decisions/conventions/seams already settled; NOT re-litigated as gaps (BF2). Seam catalog = the seam-fork hunt sites" }
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — baseline REQUIREMENTS/ASSUMPTIONS/OUT_OF_SCOPE already decided; a settled fork is not a gap" }
+  # — brownfield (feature-add + bugfix) —
+  - { path: ".aprd/baseline-map.json", format: "json — baseline decisions/conventions/seams already settled; NOT re-litigated as gaps (BF2). feature-add: seam catalog = the seam-fork hunt sites; bugfix: settled expected-behavior baseline" }
+  - { path: ".aprd/aprd.frozen.md", format: "markdown — baseline REQUIREMENTS/ASSUMPTIONS/OUT_OF_SCOPE already decided; a settled fork is not a gap (feature-add: settled scope; bugfix: settled expected behavior)" }
 outputs:
   - { path: ".aprd/04-gaps.json", format: "json (schema below) — blast-ranked gaps[] with interpretations + recommended_default + disposition" }
 escapes:
   - { when: "02-extraction.json missing or unreadable", target: "self / HALT — nothing to detect gaps in; cannot run" }
   - { when: "02-extraction.json class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — not authored yet; HALT and report the class rather than rank gaps under the wrong grounding model" }
-  - { when: "feature-add but .aprd/baseline-map.json missing/unparseable", target: "BASELINE-MAP — baseline not mapped; cannot measure gaps vs baseline read-first (BF2)" }
+  - { when: "feature-add or bugfix but .aprd/baseline-map.json missing/unparseable", target: "BASELINE-MAP — baseline not mapped; cannot measure gaps vs baseline read-first (BF2)" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.
@@ -60,6 +60,12 @@ Classify each gap into exactly one tier:
 2. **Seam-fork is a first-class hunt site (BF6 precursor).** For each place the feature plugs into an existing seam, ask: plugs in two materially different ways (e.g. extend existing contract vs new contract)? Yes → architecture or scope gap citing the seam (`seam_ref:{at:C*, contract_ref:CT*}`).
 3. **Convention-conformance is settled, not a gap (BF5).** New code matching existing conventions is a baseline fact, not a fork. Never manufacture a "which style?" gap the baseline convention already answers.
 
+## Rules (bugfix delta — shared Rules above also bind)
+> Dispatched here by the bugfix playbook (`prompts/_playbooks/bugfix.md`). Only what differs from shared + feature-add-delta Rules (AB1). Class set when extraction `class == bugfix`. Adversarial posture unchanged — scope narrows to the defect, rigor does not.
+1. **Gaps measured vs baseline + defect report (BF2).** Settled baseline behavior (frozen aPRD/AC, existing ADR/convention) is NOT a gap. The known-wrong ACTUAL behavior is the defect, not a fork. Hunt forks ONLY where the CORRECT behavior the defect exposes is genuinely under-specified — the baseline is SILENT on the case the bug trips (null/empty/boundary input the spec never pinned).
+2. **Under-specified-correct-behavior is the hunt site.** Baseline pins expected behavior for the case → settled, repair to it, no gap. Baseline silent on the bug-exposed case (e.g. "render a project whose rate is null — blank, zero, or omit the field?") → genuine scope gap, ≥2 concrete interpretations of the correct behavior.
+3. **No new behavior, no new tech (bugfix adds neither).** Never raise a gap whose interpretations would ADD a capability or a stack/dependency choice — that is feature-add, off-class. A fork implying new capability → drop (route a CR, not this repair). Bugfix forks only over which EXISTING-spec-consistent behavior is correct for the exposed case.
+
 ## Task steps
 2. If `.aprd/03-grounding/` exists, read it. Any gap grounding already closed (fact now answered from cheaper source than client) is **not** gap — drop or fold resolved value into `recommended_default`. Absent (first-pass greenfield, grounding stage not authored) → proceed on extraction alone; expected, not error.
 3. Sweep all five gap sources (Rule 1) across **every** subrequest (`sr_ref`). For each candidate divergence write one-line `gap`, ≥2 concrete `interpretations`, `recommended_default`, `refs`, and `reason` stating *why two builds diverge* and *why this blast tier*.
@@ -75,14 +81,21 @@ Classify each gap into exactly one tier:
 4. Rank + default + reconcile unknowns as shared steps 4–6. Convention-conformance never becomes a gap (delta Rule 3).
 5. Write `.aprd/04-gaps.json` with `class:"feature-add"` + `baseline_map_ref` + `baseline_aprd_ref`; gaps reference only new-feature IDs + seams. Stop.
 
+**Bugfix branch** (class == bugfix — supersedes the grounding/source order above; blast-radius discriminator + Rule 2/3/4/6 typing unchanged):
+1. Read `.aprd/baseline-map.json` + `.aprd/aprd.frozen.md` + the defect report (`02-extraction.json` repro + expected) FIRST → catalog the settled expected behavior. Excluded from the hunt (delta Rule 1 / shared Rule 1).
+2. Hunt forks ONLY where the baseline is SILENT on the bug-exposed case (delta Rule 2). Known-wrong actual behavior = the defect, not a gap; baseline-pinned behavior → drop.
+3. Rank: under-specified-correct-behavior = scope (typical); a repair that must move an existing contract/boundary = architecture (rare); cosmetic = assume. No new-behavior / new-tech gap (delta Rule 3).
+4. Rank + default + reconcile unknowns as shared steps 4–6.
+5. Write `.aprd/04-gaps.json` with `class:"bugfix"` + `baseline_map_ref` + `baseline_aprd_ref`; gaps reference only the repro IDs + the under-specified case (never a settled baseline ID, never a seam). Stop.
+
 ## Output schema — `.aprd/04-gaps.json`
 ```json
 {
   "extraction_ref": ".aprd/02-extraction.json",
   "grounding_ref": null,                 // path string if 03-grounding/ was read, else null
-  "class": "greenfield",                 // "feature-add" when playbook-dispatched
-  "baseline_map_ref": null,              // feature-add ONLY: ".aprd/baseline-map.json" (gaps measured vs it, BF2); null for greenfield
-  "baseline_aprd_ref": null,             // feature-add ONLY: ".aprd/aprd.frozen.md" (settled decisions excluded from hunt); null for greenfield
+  "class": "greenfield",                 // "feature-add" | "bugfix" when playbook-dispatched
+  "baseline_map_ref": null,              // brownfield (feature-add + bugfix) ONLY: ".aprd/baseline-map.json" (gaps measured vs it, BF2); null for greenfield
+  "baseline_aprd_ref": null,             // brownfield (feature-add + bugfix) ONLY: ".aprd/aprd.frozen.md" (settled decisions excluded from hunt); null for greenfield
   "gaps": [                              // sorted architecture → scope → cosmetic, extraction order within a tier
     {
       "id": "G1",                        // stable G* space, contiguous from G1, never renumbered on re-run (P9)
@@ -109,4 +122,4 @@ Caveman governs this too. Schema match exact; QUESTION-GEN reads architecture/sc
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which guard fired + offending detail, state "HALT", stop.
-- Valid (greenfield OR feature-add) → write `.aprd/04-gaps.json` (create `.aprd/` if absent), state "gaps ranked, QUESTION-GEN next", stop. No questions, no client touch.
+- Valid (greenfield OR feature-add OR bugfix) → write `.aprd/04-gaps.json` (create `.aprd/` if absent), state "gaps ranked, QUESTION-GEN next", stop. No questions, no client touch.
