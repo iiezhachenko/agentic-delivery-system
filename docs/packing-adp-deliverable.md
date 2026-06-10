@@ -6,7 +6,7 @@
 ## What gets built
 
 `make pack` → three artifacts in `dist/`:
-- `adp-v<version>.tgz` — the deliverable (`manifest.json` + `payload/` tree).
+- `adp-v<version>.tgz` — the deliverable, **npm-installable**: contents nested under `package/` = installer wrapper (`package.json` + `bin/init.mjs`) + `manifest.json` + gated `payload/` tree. So `npx --package=./adp-v<version>.tgz adp init` (or `npm i -g <tgz>`) runs the bin offline — no registry. (Plain `manifest.json`+`payload/` with no `package.json`/`bin` is NOT a package: npm install errors, npx can't resolve `adp`.)
 - `adp-v<version>.tgz.sha256` — integrity digest beside artifact.
 - `adp-v<version>.tgz.sig` — cosign signature (only if `cosign` present; skip-if-absent).
 
@@ -41,7 +41,7 @@ flowchart TD
 3. **confirm re-skin** — P0 generic siblings present. Absence = un-re-skinned build (would ship ADP's own self-host design as user's). HALT.
 4. **allowlist copy** — for each manifest row, read `src`, verify `sha256(src) == row.sha256` (copy must match what manifest signed), write to `payload/<path>`. Path-mapping applied here (generic sibling → canonical name). NON-DESTRUCTIVE: originals NEVER edited; only `payload/` + `dist/` written.
 5. **GATE** — `economy-lint/selftest.mjs` both-directions: linter must discriminate (clean golden PASSes, planted-defect FAILs). exit≠0 → HALT. Two further substeps DISABLED (see below).
-6. **tarball** — `tar -czf dist/adp-v<ver>.tgz -C ROOT manifest.json payload`. Self-verifies: extracted entry list == `manifest.json` + every `payload/<path>` (no extra scaffold, no missing). Mismatch → HALT.
+6. **tarball** — stage npm pkg root `package/{package.json, bin/init.mjs, manifest.json, payload/**}`, `tar -czf dist/adp-v<ver>.tgz -C dist/.pkgstage package`. Installer wrapper (`package.json`+`bin/init.mjs`) ships verbatim from repo so the artifact is npm-installable; payload = gated allowlist copy. Self-verifies: extracted entry list == `package/package.json`+`package/bin/init.mjs`+`package/manifest.json`+every `package/payload/<path>` (no extra scaffold, no missing). Mismatch → HALT.
 7. **sign** — sha256 written to `<tgz>.sha256`. If `cosign` on PATH, also `sign-blob` → `<tgz>.sig`. Absent → skip (optional hook).
 
 ## Manifest (allowlist)
@@ -80,7 +80,7 @@ Active gate = `selftest` both-directions (passes; discriminates). RE-ENABLE both
 
 ## Install side (how deliverable is consumed)
 
-Tarball is installed by `bin/init.mjs` (`npx adp init --harness=claude|kiro`). Manifest drives install:
+Tarball ships its own installer `bin/init.mjs` (under `package/bin/`) → `npx --package=./adp-v<ver>.tgz adp init --harness=claude|kiro` (or `npm i -g <tgz>` then `adp init`). Manifest drives install:
 1. detect harness → read `manifest.json` → lay rows where `harness ∈ {all, chosen}`.
 2. re-hash each laid file vs `sha256` → tamper/partial-download HALT before first run.
 3. smoke = run laid `economy-lint/selftest.mjs` both-directions → RED HALTs.

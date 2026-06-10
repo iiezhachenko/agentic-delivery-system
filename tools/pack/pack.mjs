@@ -100,23 +100,43 @@ try {
 //   log('gate: self-host token grep EMPTY');
 // }
 
-// ── 6. tarball — pack payload/ + manifest.json → dist/adp-v<ver>.tgz ─────────────
+// ── 6. tarball — npm-format pkg → dist/adp-v<ver>.tgz ────────────────────────────
+// MUST be npm-installable: everything nested under package/, with package/package.json +
+// package/bin/init.mjs (the installer itself) beside package/manifest.json + package/payload/.
+// → `npx --package=./adp-v<ver>.tgz adp init` (or `npm i -g <tgz>`) runs the bin. init.mjs's
+// PKG_ROOT (bin/..) then resolves manifest+payload as siblings. Plain `manifest.json+payload`
+// (no package.json/bin, no package/ wrap) is NOT a package → npm install errors, npx can't run.
 fs.mkdirSync(DIST, { recursive: true });
 const tgzName = `adp-v${manifest.version}.tgz`;
 const tgz = path.join(DIST, tgzName);
 fs.rmSync(tgz, { force: true });
-execFileSync('tar', ['-czf', tgz, '-C', ROOT, 'manifest.json', 'payload'], { stdio: 'inherit' });
 
-// verify tarball holds EXACTLY manifest files (+ manifest.json) — extract list, diff
+// stage npm pkg root: package/{package.json, bin/init.mjs, manifest.json, payload/**}.
+// installer wrapper (package.json+bin) ships verbatim from repo; payload = gated allowlist copy.
+const STAGE = path.join(DIST, '.pkgstage');
+const PKG = path.join(STAGE, 'package');
+fs.rmSync(STAGE, { recursive: true, force: true });
+fs.mkdirSync(path.join(PKG, 'bin'), { recursive: true });
+fs.copyFileSync(r('package.json'), path.join(PKG, 'package.json'));
+fs.copyFileSync(r('bin/init.mjs'), path.join(PKG, 'bin', 'init.mjs'));
+fs.copyFileSync(r('manifest.json'), path.join(PKG, 'manifest.json'));
+fs.cpSync(PAYLOAD, path.join(PKG, 'payload'), { recursive: true });
+execFileSync('tar', ['-czf', tgz, '-C', STAGE, 'package'], { stdio: 'inherit' });
+fs.rmSync(STAGE, { recursive: true, force: true });
+
+// verify tarball holds EXACTLY pkg wrapper (package.json+bin) + manifest.json + manifest payload — diff
 {
   const listed = execFileSync('tar', ['-tzf', tgz]).toString().split('\n')
     .filter((l) => l && !l.endsWith('/')).map((l) => l.replace(/^\.\//, '')).sort();
-  const expected = ['manifest.json', ...manifest.files.map((f) => `payload/${f.path}`)].sort();
+  const expected = [
+    'package/package.json', 'package/bin/init.mjs', 'package/manifest.json',
+    ...manifest.files.map((f) => `package/payload/${f.path}`),
+  ].sort();
   const extra = listed.filter((x) => !expected.includes(x));
   const missing = expected.filter((x) => !listed.includes(x));
   if (extra.length || missing.length)
     HALT(`tarball != manifest. extra=[${extra.join(', ')}] missing=[${missing.join(', ')}]`);
-  log(`tarball: ${tgzName} — ${listed.length} entries == manifest (no scaffold/leak)`);
+  log(`tarball: ${tgzName} — ${listed.length} entries == pkg wrapper + manifest (no scaffold/leak)`);
 }
 
 // ── 7. sign (P4.3) — sha256 beside artifact + optional cosign (skip-if-absent) ───

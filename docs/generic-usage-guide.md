@@ -9,7 +9,7 @@
 
 ## 1. What you're setting up
 
-Delivery system = **library of role prompts** (under `prompts/<phase>/<ROLE>.md`) plus small set of **rules** agents always follow + **on-disk artifacts** they produce (`.aprd/ .roadmap/ .adr/ .hld/ .build/`). Deploying = one installer command (`npx adp init`) lays those files into your project + wires the harness so a single command (or button) runs the pipeline.
+Delivery system = **library of role prompts** (under `prompts/<phase>/<ROLE>.md`) plus small set of **rules** agents always follow + **on-disk artifacts** they produce (`.aprd/ .roadmap/ .adr/ .hld/ .build/`). Deploying = one installer command (`adp init`, run from the shipped tarball) lays those files into your project + wires the harness so a single command (or button) runs the pipeline.
 
 Both harnesses already think in **specs → design → tasks**, exactly this pipeline's shape — so deployment = mostly mapping system onto each harness's native constructs.
 
@@ -26,7 +26,7 @@ Both harnesses already think in **specs → design → tasks**, exactly this pip
 | Form | Terminal CLI (works in any editor/repo) | Full IDE (VS Code–based) with chat panel |
 | Best when | you live in terminal, want scripted/automatable runs | you want visual spec/task board + click-to-run tasks |
 | How it runs | subagents + skills + `.claude/rules/` canon | **CLI custom agent** runs pipeline exclusively (Kiro's built-in spec flow **not** used) + steering for canon |
-| Setup effort | low (`npx adp init --harness=claude`) | low (`npx adp init --harness=kiro`) |
+| Setup effort | low (`adp init --harness=claude`) | low (`adp init --harness=kiro`) |
 
 Pick one; **per-gate interactions identical** (Part C). Deploy/use steps differ — Part A for Claude Code, Part B for Kiro.
 
@@ -44,12 +44,13 @@ curl -fsSL https://claude.ai/install.sh | bash
 # Windows PowerShell: irm https://claude.ai/install.ps1 | iex
 ```
 
-**Step 2 — Install ADP into your project — one command:**
+**Step 2 — Install ADP into your project from the shipped tarball — one command (offline, no registry):**
 ```bash
 cd your-project
-npx adp init --harness=claude
+npx --package=/path/to/adp-<version>.tgz adp init --harness=claude
+# one-time global alt: npm install -g /path/to/adp-<version>.tgz  →  then `adp init --harness=claude` anywhere
 ```
-Installer lays the runtime, wires the `/deliver` launcher, re-hashes every file vs manifest (integrity), runs a smoke self-test, prints launch command. Needs node ≥ 18. Re-run = no-op (idempotent: skips files already present + valid). Reinstall a new version over an existing one: add `--force`.
+`adp-<version>.tgz` = artifact you were handed (`make pack` output). Installer lays the runtime, wires the `/deliver` launcher, re-hashes every file vs manifest (integrity), runs a smoke self-test, prints launch command. Needs node ≥ 18. Re-run = no-op (idempotent: skips files already present + valid). Reinstall a new version over an existing one: add `--force`.
 
 Project gains (all machinery under one harness dir — **zero root pollution**):
 ```
@@ -108,10 +109,11 @@ Kiro ships own built-in spec workflow (`requirements.md` / `design.md` / `tasks.
 
 **Step 1 — Install Kiro CLI** (`kiro-cli`), open terminal in your project. (Kiro IDE optional — useful for *viewing/editing* agent + artifact files; **driver = custom agent**, run from CLI, not IDE's Spec button.)
 
-**Step 2 — Install ADP into your project — one command:**
+**Step 2 — Install ADP into your project from the shipped tarball — one command (offline, no registry):**
 ```bash
 cd your-project
-npx adp init --harness=kiro
+npx --package=/path/to/adp-<version>.tgz adp init --harness=kiro
+# one-time global alt: npm install -g /path/to/adp-<version>.tgz  →  then `adp init --harness=kiro` anywhere
 ```
 Installer lays the runtime, wires the `delivery` custom agent, re-hashes every file vs manifest (integrity), runs a smoke self-test, prints launch command. Needs node ≥ 18. Re-run = no-op (idempotent); reinstall a new version with `--force`.
 
@@ -269,7 +271,7 @@ Stop at **any** time — clean pause after slice, or abrupt interruption: lost i
 
 ## 8. Shortest version
 
-> **Deploy:** install harness, then `npx adp init --harness=claude|kiro` in your project (lays runtime under `.claude/adp/` or `.kiro/adp/`, wires launcher, sets permissions, smoke-checks). **Use:** start delivery (Claude Code `/deliver "…"`; Kiro `kiro-cli chat --agent delivery "…"`), then at each gate — answer questions, confirm plan, accept each demo or give concrete feedback. In **both** harnesses system runs *exclusively*: same role prompts, same artifacts, same gates. Repeat until done.
+> **Deploy:** install harness, then run the shipped tarball's installer (`npx --package=./adp-<version>.tgz adp init --harness=claude|kiro`) in your project (lays runtime under `.claude/adp/` or `.kiro/adp/`, wires launcher, sets permissions, smoke-checks). **Use:** start delivery (Claude Code `/deliver "…"`; Kiro `kiro-cli chat --agent delivery "…"`), then at each gate — answer questions, confirm plan, accept each demo or give concrete feedback. In **both** harnesses system runs *exclusively*: same role prompts, same artifacts, same gates. Repeat until done.
 
 ---
 
