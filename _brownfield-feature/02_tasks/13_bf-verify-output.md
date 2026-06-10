@@ -65,3 +65,51 @@ Feature-add's defining guarantee is that the existing accepted behavior keeps wo
 - Frozen-WHAT RESOLVED via `aprd.lock.artifact` (no hardcoded version path); freeze-gate guard verifies the named artifact exists (BF7/P8 + 07a canon).
 - Golden feature-add slice `verify-output.json` runs the scoped regression layer green alongside the full ladder.
 - Both-directions check holds (incl. stale-version-walk FAIL + the headline planted-regression FAIL).
+
+---
+
+## STATUS — DONE (2026-06-10)
+
+Feature-add regression delta added to SLICE-BUILD part of `prompts/04-build/VERIFY-OUTPUT.md`. Greenfield + shared substance untouched (AB1 — delta carries ONLY differences).
+
+### What changed in `VERIFY-OUTPUT.md`
+
+| Edit | Where | Substance |
+|---|---|---|
+| Frontmatter inputs | feature-add slice-build block | `.aprd/<aprd.lock.artifact>` (lock-resolved `REGRESSION_GUARD`, NEVER hardcoded `v<N>`) + `.aprd/baseline-map.json` `existing_oracle.suites` = the prior-green suites the scoped regression runs against by reference |
+| Freeze-gate guard | shared escape (rewrite, not add — AB9) | extended with `(feature-add) the artifact aprd.lock names missing/unparseable → HALT` (BF7/P8) |
+| feature-add escapes | slice-build feature-add block | (a) no baseline-map `existing_oracle` / no `REGRESSION_GUARD` / no regression layer in oracle.json → HALT (a regression-skip is a BF4 breach); (b) edit/weaken/skip a regression-or-frozen test to pass → blocked + DIAGNOSE, never patch (B4) |
+| `### feature-add delta (slice-build)` | PART B, after slice-build Rules | 5 delta rules: lock-resolve WHAT (BF7) · run regression, nothing previously green goes red (BF4) · regression red = hard fail, never weaken (B4) · scope = touched surface + seams (R4) · held_out + regression together = the bar (B7) |
+| Task-steps feature-add branch | slice-build steps | 0a resolve frozen-WHAT + read `REGRESSION_GUARD`/`existing_oracle`/regression layer · 4 run full ladder THEN scoped regression · 6 certify iff ladder green AND `regression.verdict==green` · 7 emit `regression{}` block |
+| Schema delta + blocked example | after slice-build schema | `class:"feature-add"` + `aprd_ref`/`aprd_version` + `baseline_map_ref` + `regression_guard_ref` + `ladder.class_ext` fires (regression) + top-level `regression{ran,scope,suites_run,asserts,results,verdict,reds,baseline_tests_edited}` + counts; headline REGRESSION-red blocked example (slice MUST FAIL) |
+| Stop condition | slice-build stop | feature-add regression-red blocked (route DIAGNOSE) + feature-add clean lines |
+
+Shared `## Rules` + the 5-rung verification ladder kept VERBATIM — discriminator-4 (class-ext) already runs "only what the oracle materialized"; feature-add NARROWS it so the materialized layer IS the MANDATORY scoped regression (stated in delta, AB1).
+
+### Golden fixture (sentinel)
+
+`_fixtures/brownfield-feature/.build/slices/S5/verify-output.json` — feature-add slice (Tag a time entry with a label). Full ladder (contract CT2-LABEL + flow F5 + acceptance AC11/AC13 visible+held_out) green; scoped regression layer (AC2/AC7 from `REGRESSION_GUARD`, suites `.build/skeleton/oracle/` + `.build/slices/S4/oracle/` by reference) green → `verdict:"verified"`. Validated: JSON well-formed; `regression.ran:true` + `verdict:"green"` + `baseline_tests_edited:false`; `class_ext_layers:1`; skeleton-fidelity untouched (H14/BF1).
+
+### Regression-gated certification (BF4)
+
+```mermaid
+flowchart TD
+  L1[Contract layer] --> L2[Flow layer]
+  L2 --> L3["Acceptance layer<br/>(visible + held_out, B7)"]
+  L3 --> R{"Scoped regression layer<br/>(REGRESSION_GUARD AC2,AC7 — touched surface + seams, R4)"}
+  R -->|"every previously-green test stays green"| V["verdict: verified<br/>(slice certifies)"]
+  R -->|"any previously-green test goes red"| B["verdict: blocked<br/>route DIAGNOSE (BF4)"]
+  B -.->|"NEVER weaken/skip the regression test (B4)"| B
+```
+
+Held-out anti-cheat AND scoped regression BOTH green = the bar; regression red fails the slice, never patched.
+
+### Both-directions verify
+
+- **Known-good** (golden S5): full ladder + scoped regression both green, held_out green → `verdict:"verified"` → **PASS**.
+- **Planted regression-red** (headline BF4): feature breaks an existing AC → previously-green regression test goes red → `regression.verdict:"red"` + `verdict:"blocked"` → caught by delta Rule 2 + schema `regression.verdict` gate → **FAIL** (slice MUST NOT certify).
+- **Regression-skipped defect**: feature-add slice certified without running regression → caught by feature-add guard (no regression layer → HALT) + schema `regression.ran` MUST be true → **FAIL**.
+- **Weakened-regression-test defect**: a regression test edited to pass → caught by delta Rule 3 + escape (edit/weaken → blocked, never patch) + `baseline_tests_edited` MUST be false (B4) → **FAIL**.
+- **Stale-version-walk defect** (07a): hardcoded `aprd.v<N>.frozen.md` ignoring `aprd.lock.artifact` reads wrong version's `REGRESSION_GUARD`; caught by delta Rule 1 + input binding + freeze-gate guard → **FAIL**.
+
+Downstream: BF-FIXTURE-ORACLE (14) freezes the regression-green sentinel.

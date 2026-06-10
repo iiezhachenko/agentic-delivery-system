@@ -31,6 +31,9 @@ inputs:
   - { path: ".hld/slices/<id>/components.json", format: "json — slice components + name→module map + each M* realizing component" }
   - { path: ".build/skeleton/oracle/oracle.json + .build/skeleton/integration-record.json", format: "json — FROZEN skeleton oracle + composition root, INHERITED BY REFERENCE (H14): skeleton greens NOT re-run; skeleton-fidelity baseline" }
   - { path: ".build/slices/<id>/verify-output.json", format: "json (OPTIONAL — prior VERIFY-OUTPUT run) — present on re-run after routed red healed; absent on first run" }
+  # — slice-build feature-add (class dispatched by playbook) —
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — CURRENT frozen WHAT RESOLVED via lock (read .aprd/aprd.lock, open .aprd/ + its artifact value; feature-add → aprd.v<N>.frozen.md, e.g. aprd.v2 — NEVER a hardcoded version path; BF7/P8 + 07a canon). Carries CLASS_EXTENSION → REGRESSION_GUARD: which existing AC*/suites must stay green (BF4)" }
+  - { path: ".aprd/baseline-map.json", format: "json — baseline inventory: existing_oracle.suites = the prior-green suites the scoped regression layer references. Run the regression layer the slice oracle.json class_ext materialized (Task 10) against these BY REFERENCE; never re-run-author/edit a baseline test (BF4/H14 analog)" }
 outputs:
   # — skeleton-build —
   - { path: ".build/skeleton/verification.json", format: "json (schema below) — authoritative ladder verdict: per-layer + per-AC + overall (verified|blocked); blocked carries escape→DIAGNOSE. FLAG only. CRITIQUE/GATE/DEMO consume" }
@@ -38,7 +41,7 @@ outputs:
   - { path: ".build/slices/<id>/verify-output.json", format: "json (schema below) — slice ladder verdict: per-layer + per-AC + inherited_oracle + skeleton_fidelity + verdict (verified|blocked). Roadmap done-sentinel. CRITIQUE/GATE/DEMO consume" }
 escapes:
   # — shared (both modes) —
-  - { when: "the active oracle.lock missing OR status != frozen OR builder_may_not_edit != true, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate not clean", target: "self / HALT — no frozen oracle/frame to verify against (§5.1, B4). Report which" }
+  - { when: "the active oracle.lock missing OR status != frozen OR builder_may_not_edit != true, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate not clean, OR (feature-add) the artifact aprd.lock names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no frozen oracle/frame to verify against (§5.1, B4; BF7/P8 — walk the lock-named version, never a hardcoded aprd.frozen.md). Report which" }
   - { when: "frozen CLASS lacks authored playbook (bugfix|refactor|migration|perf|integration|investigation) — skeleton.lock / adr.lock class", target: "that playbook — verify depth/layers not authored (B13/§11). Report class" }
   - { when: "the authoritative ladder run finds ANY red — a contract/flow/acceptance(visible|held_out)/class-ext layer fails, OR an M* designed-but-not-wired", target: "self-heal loop → DIAGNOSE — write the record with verdict:blocked + escape{failing[], failure_signature, classification (PROVISIONAL hint), route}; DIAGNOSE adjudicates self-heal-vs-escape independently. FLAG never fix; NEVER edit a frozen test or the code (B1/B4/B5)" }
   # — skeleton-build —
@@ -49,6 +52,9 @@ escapes:
   - { when: "SLICE-BUILD: no ready slice (every remaining_sequence slice either not green+integrated, or already has .build/slices/<id>/verify-output.json verdict:verified)", target: "self / STOP clean — every ready slice verified, or none ready. Not an error" }
   - { when: "SLICE-BUILD: target slice's build-record carries a non-green build_unit OR integration-record status != integrated / verification.flow != pass", target: "self / HALT — build not composed-and-green; ladder runs only on green contract + integrated flow. Report which" }
   - { when: "SLICE-BUILD: verifying the slice would require re-running / re-greening / editing a FROZEN SKELETON test or composition root (skeleton-fidelity breach)", target: "NOT a normal red → record skeleton_fidelity.breached:true + route Phase 2 (H14). Inherit the frozen skeleton by reference, never touch it" }
+  # — slice-build feature-add (class dispatched by playbook) —
+  - { when: "SLICE-BUILD feature-add: .aprd/baseline-map.json missing/unparseable OR carries no existing_oracle suites, OR the resolved .aprd/<aprd.lock.artifact> carries no CLASS_EXTENSION/REGRESSION_GUARD block, OR the slice oracle.json class_ext carries no regression layer", target: "self / HALT — no regression-guard scope to run the MANDATORY regression layer against; a feature-add slice that skips regression is a BF4 breach. Report which" }
+  - { when: "SLICE-BUILD feature-add: greening the slice would require EDITING / WEAKENING / SKIPPING a regression (or any frozen baseline) test to pass", target: "NOT a way to pass → a previously-green test going red is a real regression (BF4); record verdict:blocked + escape route DIAGNOSE. NEVER weaken a frozen test (B4); escape, never patch" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.
@@ -236,6 +242,14 @@ The active oracle = the auto-selected `.build/slices/<id>/oracle/`, active recor
 3. **Skeleton-fidelity dimension (H14).** Confirm verifying the slice did NOT require editing / re-running / re-greening any frozen skeleton artifact. Record a `skeleton_fidelity` block {breached:false, inherited_tests[], note}. A breach (the slice ladder can only pass by touching the frozen skeleton) = NOT a normal red → escape Phase 2 (guard).
 4. **Prior-built components frozen-green from their own oracle.** A `prior_built_components` component already passed its own (skeleton/earlier-slice) oracle; the slice ladder exercises it ONLY as the slice oracle's tests require — never re-verify its internals beyond the slice oracle surface.
 
+### feature-add delta (slice-build — class dispatched by playbook; shared verification ladder + Rules + slice-build delta Rules above also bind)
+> Fires only when the playbook sets `class: feature-add` (`oracle_layers: [contract, flow, acceptance, regression]`, `verify_method: inherited ladder + regression-must-stay-green`). Greenfield slice-build leaves these untouched (`class:"greenfield"`, `class_ext:[]` → discriminator-4 `n/a`, no `regression` block). Carries ONLY what differs (AB1). The shared ladder's discriminator-4 already runs "only what the oracle materialized"; feature-add NARROWS it — the materialized layer IS the scoped regression layer, and running it is MANDATORY (BF4).
+1. **Resolve frozen-WHAT via lock, never a hardcoded version (BF7/P8, 07a canon).** Read `.aprd/aprd.lock` → open `.aprd/<aprd.lock.artifact>` (CURRENT frozen version carrying `CLASS_EXTENSION` → `REGRESSION_GUARD`, the scoped guard). NEVER hardcode `aprd.v<N>.frozen.md` — a literal version path reads STALE WHAT one bump later (`v2` in the bench is an EXAMPLE, never the binding). Lock missing / `status != frozen` / named artifact absent → HALT (guard).
+2. **Run the regression layer; nothing previously green goes red (BF4 — THE feature-add lane line).** After the contract/flow/acceptance ladder passes, run the SCOPED regression layer the slice `oracle.json` `class_ext` materialized (Task 10) — the existing `AC*`/suites named in `REGRESSION_GUARD` / `class_ext.asserts` + `source_suites`. EVERY previously-green test in scope MUST still pass. Any regression red = the slice FAILS (`verdict:blocked`) → route DIAGNOSE: the feature broke existing behavior.
+3. **Regression red is a hard fail, not a flake.** A previously-green test going red after the feature lands is a real regression (BF4) unless DIAGNOSE proves it flaky. NEVER weaken/skip/edit a regression test to pass — that is a frozen-test edit (B4) → escape, never patch (guard).
+4. **Scope = touched surface + seams (Risk R4).** Run ONLY the scoped regression layer the oracle materialized (`class_ext.scope`/`source_suites`), NOT the whole inherited suite — same scope basis Task 10 set, kept fast.
+5. **Held-out + regression together = the bar.** The acceptance `held_out` (anti-cheat, B7) AND the scoped regression layer must BOTH be green for the slice to certify.
+
 ## Task steps (slice-build)
 1. Read inputs (shared + slice-build). Check guards (frontmatter `escapes:`) — any tripped → HALT (or STOP clean for "no ready slice"), report which + detail, write nothing. Else continue.
 2. Auto-select the target slice (delta Rule 1). None ready → STOP clean.
@@ -244,6 +258,12 @@ The active oracle = the auto-selected `.build/slices/<id>/oracle/`, active recor
 5. Skeleton-fidelity check (delta Rule 3): confirm no frozen skeleton test / composition root was edited / re-run / re-greened. Breach → record `skeleton_fidelity.breached:true` + route Phase 2 (guard), stop.
 6. Aggregate per the overall-verdict rule above, AND no skeleton-fidelity breach → `verdict:verified`. Any red → `verdict:blocked`.
 7. Write `.build/slices/<id>/verify-output.json` (schema below): slice refs + per-layer + per-AC + `inherited_oracle` + `skeleton_fidelity` + verification_method + verdict + (blocked) escape{} or (verified) escape:null + provenance + counts. Stop.
+
+**Feature-add branch** (class == feature-add, playbook-dispatched — steps 1–7 run as above with these changes):
+- **0a (after auto-selecting the slice, before step 4).** Resolve frozen-WHAT: read `.aprd/aprd.lock` → open `.aprd/<aprd.lock.artifact>` (feature-add delta Rule 1, NEVER a hardcoded `v<N>`). Read its `CLASS_EXTENSION` → `REGRESSION_GUARD` + `baseline-map.json` `existing_oracle.suites` + the slice `oracle.json` `class_ext` regression layer (`scope` + `asserts` + `source_suites`). No `REGRESSION_GUARD` / baseline-map / regression layer → HALT (guard).
+- **4 (feature-add).** Run the standard contract/flow/acceptance ladder (discriminator 1–3) as above. THEN run the scoped regression layer (discriminator 4 = the materialized `regression` class_ext, feature-add delta Rules 2–4): re-run/trace each `REGRESSION_GUARD` `AC*`/suite in scope → every previously-green test MUST stay green. NEVER edit/weaken a baseline test to pass (delta Rule 3, guard).
+- **6 (feature-add).** Aggregate: full ladder green AND `regression.verdict == "green"` AND no skeleton-fidelity breach → `verdict:verified`. ANY regression red → `verdict:blocked` → route DIAGNOSE (the feature broke existing behavior — BF4).
+- **7 (feature-add).** Write slice `verify-output.json` as above PLUS `class:"feature-add"` + `aprd_ref` (resolved) + `aprd_version` + `regression_guard_ref` + the `regression` block (schema delta below). Certifies only when `regression.verdict == "green"` AND the full ladder passes. Stop.
 
 ## Output schema — `.build/slices/<id>/verify-output.json`
 Same shape as Part A; the slice deltas (everything else carried verbatim). Worked example keyed to S4 (verdict:verified):
@@ -397,9 +417,58 @@ Same shape as Part A; the slice deltas (everything else carried verbatim). Worke
 }
 ```
 
+### Feature-add schema delta (slice-build, class == feature-add — only what differs, AB1)
+Same shape as the slice schema above; the feature-add slice adds (everything else carried verbatim):
+- `"class": "feature-add"` (was `"greenfield"`).
+- `"aprd_ref": ".aprd/<aprd.lock.artifact>"` (lock-resolved, NEVER a hardcoded `aprd.v<N>.frozen.md`) + `"aprd_version": "<version from .aprd/aprd.lock>"` + `"baseline_map_ref": ".aprd/baseline-map.json"`.
+- `"regression_guard_ref": ".aprd/<aprd.lock.artifact>#CLASS_EXTENSION/REGRESSION_GUARD"` (the scoped guard the regression layer runs).
+- `ladder.class_ext` FIRES (greenfield = `layer_verdict:"n/a"`, `kinds:[]`): `layer_verdict:"pass"|"fail"`, `kinds:[{ kind:"regression", scope, asserts[], result }]` — the scoped regression run.
+- A top-level `regression` block — the BF4 verdict (GATE/DEMO consume); greenfield omits it:
+```json
+"regression": {                          // BF4 — scoped regression layer (feature-add only)
+  "ran": true,                           // MUST be true to certify a feature-add slice — a missing/false run is a BF4 breach (slice MUST NOT certify)
+  "scope": "touched-surface + seams",    // carried from slice oracle.json class_ext.scope (Risk R4 — NOT the whole inherited suite)
+  "scope_basis": "REGRESSION_GUARD AC2,AC7 (time-entry log + persistence, parent of the tagged entry) + integration_seam C1/CT2 (label additive on the time-entry record)", // carried from class_ext.scope_basis
+  "suites_run": [".build/skeleton/oracle/", ".build/slices/S4/oracle/"], // baseline suites referenced (class_ext.source_suites), run BY REFERENCE — never edited
+  "asserts": ["AC2", "AC7"],             // existing AC*/suite refs that must stay green (verbatim from REGRESSION_GUARD / class_ext.asserts)
+  "results": [                           // per previously-green AC*/suite, re-run/traced — every one MUST stay green
+    { "ref": "AC2", "result": "pass", "trace": "log-a-time-entry suite still green: set_label is additive on the time-entry record; entry-logging path (create + list) unchanged by the label field." },
+    { "ref": "AC7", "result": "pass", "trace": "time-entry persistence suite still green: the additive label field does not alter existing record persistence/read behavior." }
+  ],
+  "verdict": "green",                    // green (every in-scope previously-green test stays green) | red (any regression) → slice FAILS, route DIAGNOSE (BF4)
+  "reds": [],                            // [] on green; on red → [{ ref, was:"green", now:"red", what }] — a real regression unless DIAGNOSE proves flaky; NEVER weaken the test (B4)
+  "baseline_tests_edited": false         // MUST be false — a regression test edited/weakened to pass = frozen-test edit (B4) → escape, never patch
+}
+```
+- The slice certifies (`verdict:"verified"`) only when the full ladder passes AND `regression.verdict == "green"` AND no skeleton-fidelity breach. A regression red → `verdict:"blocked"` + `escape{}` (failing layer `regression`, `route:"self-heal → DIAGNOSE"`).
+- `verification_counts` adds `"regression_asserts": <N>` + `"regression_asserts_passed": <N>` (walk to count); `class_ext_layers` = 1 (the regression layer materialized).
+
+**Blocked example — REGRESSION red (the headline BF4 case):** the feature broke a previously-green existing AC → slice MUST FAIL (not certify). FLAG + route; never weaken the regression test:
+```json
+"regression": {
+  "ran": true, "scope": "touched-surface + seams", "suites_run": [".build/skeleton/oracle/", ".build/slices/S4/oracle/"], "asserts": ["AC2", "AC7"],
+  "results": [
+    { "ref": "AC2", "result": "pass", "trace": "log-a-time-entry suite still green." },
+    { "ref": "AC7", "result": "red", "trace": "time-entry persistence regressed: adding the label field changed the record write so an existing entry without a label no longer round-trips — a previously-green suite now fails (BF4)." }
+  ],
+  "verdict": "red",
+  "reds": [ { "ref": "AC7", "was": "green", "now": "red", "what": "existing time-entry persistence broke: label-field write path drops entries with no label" } ],
+  "baseline_tests_edited": false
+},
+"verdict": "blocked",
+"escape": {
+  "failing": [ { "layer": "regression", "id": "AC7", "subcase": "regression", "what": "previously-green AC7 (time-entry persistence) went red after the label feature landed — a real regression (BF4), not a flake; the feature broke existing behavior." } ],
+  "failure_signature": "AssertionError: AC7 regression — existing time-entry without a label no longer round-trips after label-field write",
+  "classification": "my-code",          // PROVISIONAL hint; DIAGNOSE re-derives self-heal-vs-escape
+  "route": "self-heal → DIAGNOSE"
+}
+```
+
 ## Stop condition (slice-build)
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.
 - No ready slice → write nothing; STOP clean.
 - Skeleton-fidelity breach (delta Rule 3, guard) → record breached:true + route Phase 2; state the route; stop.
 - Red found → blocked record + escape to self-heal; state the route; stop.
+- Red found (feature-add: a REGRESSION red — the feature broke previously-green existing behavior, BF4) → blocked record + escape route DIAGNOSE; state the route; stop. NEVER weaken/skip/edit a regression test to pass (B4).
 - Clean → write `.build/slices/<id>/verify-output.json` (verified); state per-layer + per-AC + inherited + skeleton_fidelity summary; CRITIQUE next; stop.
+- Clean (feature-add) → as above PLUS the scoped regression layer ran green alongside the full ladder (`regression.verdict:"green"`, `class:"feature-add"`). State "Verified feature-add slice <id> — full ladder + scoped regression (REGRESSION_GUARD <AC*…>) both green, held_out anti-cheat green, nothing previously green went red (BF4); CRITIQUE next", stop.
