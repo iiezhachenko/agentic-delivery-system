@@ -66,7 +66,26 @@ The new feature's slices must slot into the living roadmap without re-ordering o
 
 ## DONE WHEN
 
-- `SEQUENCE.md` carries a feature-add delta (shared Rules substance untouched).
-- Golden `08-rerank.json` pins baseline in `completed[]`, orders new slices in `remaining_sequence`.
-- RE-RANK/VERTICALITY-CHECK/SEQUENCE-REVIEW confirmed to run verbatim (no edit).
-- Both-directions check holds.
+- [x] `SEQUENCE.md` carries a feature-add delta (shared Rules substance untouched).
+- [x] Golden `08-rerank.json` pins baseline in `completed[]`, orders new slices in `remaining_sequence`.
+- [x] RE-RANK/VERTICALITY-CHECK/SEQUENCE-REVIEW confirmed to run verbatim (no edit).
+- [x] Both-directions check holds.
+
+## STATUS — DONE
+
+What changed:
+- **`prompts/01-roadmap/SEQUENCE.md`** — feature-add delta overlaid (AB1: ONE shared `## Rules` + delta carrying only differences):
+  - Frontmatter: greenfield/feature-add input grouping (feature-add reads `02-slices.json` new candidates + `baseline_completed_slices` and baseline `08-rerank.json` `completed[]`; `04` skeleton==null expected). Output adds `08-rerank.json` for feature-add. Escapes split greenfield/feature-add — `04` skeleton==null is HALT only greenfield; feature-add HALTs on missing baseline frontier; dangling generalized to "neither new set nor `completed[]`".
+  - Shared Rule 1 generalized (no NEW skeleton → no position-1 pin for feature-add).
+  - New `## Rules (feature-add delta)`: (1) no new skeleton pin (BF1); (2) pin accepted baseline in `completed[]`, never re-order (BF1); (3) `depends_on` may cite `completed[]` (pre-satisfied, doesn't gate frontier); (4) hand off to RE-RANK for living loop (reused verbatim).
+  - Feature-add Task-steps branch + feature-add output schema delta + Stop-condition line.
+- **`_fixtures/brownfield-feature/.roadmap/08-rerank.json`** — golden feature-add output: `class:feature-add`, `roadmap_version:3`, baseline S1–S4 pinned verbatim in `completed[]`, NEW S5→S6 in `remaining_sequence` (dependency-legal: S5 leads — dep S2 completed/pre-satisfied, high value + retires risk; S6 waits behind S5; value×risk/cost ordered), `dependency_check` clean.
+
+Reused verbatim (NOT authored): `RE-RANK.md`, `VERTICALITY-CHECK.md`, `SEQUENCE-REVIEW.md` — `git status` shows only `SEQUENCE.md` + the fixture changed.
+
+Both-directions oracle (machinery present in prompt):
+- **Known-good** → golden above: baseline pinned + new slices ranked, legal. PASS.
+- **Defect (baseline re-order)** → `completed[]` slice moved into `remaining_sequence` trips delta Rule 2 + coverage (`base_slices`==`completed`, `remaining_ranked`==new ids only). FAIL.
+- **Defect (dangling dep)** → new-slice dep in neither `completed[]` nor new set trips delta Rule 3 + `dependency_check.dangling_depends_on`. FAIL.
+
+BF1 satisfied (baseline immutable + additive).
