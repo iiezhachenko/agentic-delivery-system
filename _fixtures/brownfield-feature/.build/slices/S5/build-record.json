@@ -1,0 +1,96 @@
+{
+  "slice_build_plan_ref": ".build/slices/S5/build-plan.json",
+  "slice_oracle_lock_ref": ".build/slices/S5/oracle/oracle.lock",
+  "slice_oracle_ref": ".build/slices/S5/oracle/oracle.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "aprd_version": "v2",
+  "convention_baseline_ref": ".aprd/aprd.v2.frozen.md#CLASS_EXTENSION/CONVENTION_BASELINE",
+  "locks_verified": true,
+  "class": "feature-add",
+  "mode": "slice-build",
+  "slice_id": "S5",
+  "slice_name": "Tag a time entry with a label",
+  "build_set": ["C4"],
+  "prior_built_components": ["C1", "C2", "C3", "C6"],
+  "inherited_oracle": {
+    "skeleton_oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
+    "skeleton_build_record_ref": ".build/skeleton/build-record.json",
+    "inherited_green_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5"],
+    "frozen_verified": true
+  },
+  "build_units": [
+    {
+      "component": "C4",
+      "name": "Time Logging",
+      "module_namespace": "freelancer_app.time_logging",
+      "implements_contracts": ["CT2"],
+      "mocked_deps": ["C1"],
+      "traces": ["R11", "R13"],
+      "files": [
+        "src/freelancer_app/time_logging/time_entry_label.py"
+      ],
+      "contract_tests_greened": [
+        "test_ct2_label_field_persists_on_time_entry_record",
+        "test_ct2_label_failure_store_unavailable",
+        "test_ct2_label_failure_constraint_violation"
+      ],
+      "conforms_to_conventions": true,
+      "conventions_checked": ["lang", "layout", "lint", "naming"],
+      "baseline_files_edited": false,
+      "lld_notes": "Grounded existing-code-first (BF5, cheapest-source-first): read neighbor time_logging modules + baseline-map conventions + aPRD CONVENTION_BASELINE BEFORE writing. New code matches the captured conventions, NOT canon defaults — lang Python>=3.11 (ADR-0002); layout src/freelancer_app/time_logging/*.py (one package per component); naming snake_case module file (time_entry_label.py) matching existing identity_record_store.py/oauth_callback.py idiom; lint pyproject pythonpath=['src'], no ruff/black config (so no reformat applied). Additive label feature: set_label persists the label field on the time-entry record via C1 (CT2 label extension, A14) — delegates to data_store; propagates StoreUnavailableError + ConstraintViolationError unmodified from the C1 mock (matches the existing time_logging error-handling idiom — propagate, do not catch). New namespace file ONLY; no existing time_logging baseline file reformatted/restyled/edited (BF1). Framework-agnostic plain Python at the contract layer; synchronous, no async/queue (INV6).",
+      "status": "green",
+      "escape": null
+    }
+  ],
+  "oracle": {
+    "lock": ".build/slices/S5/oracle/oracle.lock",
+    "builder_may_not_edit": true,
+    "starts_red": true
+  },
+  "verification": {
+    "contract": "pass",
+    "method": "static-trace",
+    "flow": "not-run",
+    "acceptance": "not-run",
+    "static_trace_basis": "No pytest runtime available in bench. Each obligation test traced against implementation by construction: CT2 label shape — set_label delegates the label-bearing record to mock_data_store, the persisted label field equals the submitted text; CT2 label failure store-unavailable — StoreUnavailableError propagated unmodified from the C1 mock (no catch); CT2 label failure constraint-violation — ConstraintViolationError propagated unmodified. All assertions hold by construction. Authoritative execution owed to VERIFY-OUTPUT."
+  },
+  "convention_conformance": {
+    "source": "baseline-map.json conventions + .aprd/aprd.v2.frozen.md#CLASS_EXTENSION/CONVENTION_BASELINE",
+    "checked": {
+      "lang": "Python >=3.11 (ADR-0002) — no newer syntax/feature introduced",
+      "layout": "src/freelancer_app/time_logging/*.py — additive file in the existing component package, no new top-level layout",
+      "lint": "no ruff/black config present — baseline files left byte-unchanged, no reformat applied",
+      "naming": "snake_case module file (time_entry_label.py) matching existing session_gate.py/identity_record_store.py idiom"
+    },
+    "baseline_files_edited": false,
+    "verdict": "convention-conformant"
+  },
+  "provenance": {
+    "builder_role": "builder",
+    "built_against": {
+      "slice_oracle_lock": ".build/slices/S5/oracle/oracle.lock",
+      "skeleton_oracle_lock": ".build/skeleton/oracle/oracle.lock",
+      "skeleton_lock": ".hld/skeleton.lock",
+      "adr_lock": ".adr/adr.lock",
+      "aprd_lock": ".aprd/aprd.lock",
+      "aprd_resolved": ".aprd/aprd.v2.frozen.md",
+      "baseline_map": ".aprd/baseline-map.json",
+      "slice_build_plan": ".build/slices/S5/build-plan.json"
+    }
+  },
+  "commits": [
+    {
+      "message": "C4 Time Logging: time-entry label field (CT2 label extension) — additive, convention-conformant",
+      "traces": ["R11", "R13"]
+    }
+  ],
+  "build_record_counts": {
+    "build_units_green": 1,
+    "build_units_blocked": 0,
+    "build_units_total_in_set": 1,
+    "contract_tests_greened": 3
+  }
+}

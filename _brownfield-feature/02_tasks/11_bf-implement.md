@@ -1,5 +1,7 @@
 # Task 11 — BF-IMPLEMENT (OVERLAY)
 
+> **STATUS: DONE** (2026-06-10). feature-add convention delta added to `prompts/04-build/IMPLEMENT.md` slice-build part; frozen-WHAT lock-resolved (07a canon); golden feature-add slice `build-record.json` (S5/C4) on bench shows convention-conformant new code. See §COMPLETION.
+
 > Self-contained. Everything needed embedded below — do NOT hunt other files.
 
 ## TL;DR
@@ -68,3 +70,25 @@ New feature code must look like the existing codebase, not like greenfield canon
 - Frozen-WHAT RESOLVED via `aprd.lock.artifact` (no hardcoded version path); freeze-gate guard verifies the named artifact exists (BF7/P8 + 07a canon).
 - Golden feature-add slice `build-record.json` shows convention-conformant new code, contract layer green.
 - Both-directions check holds (incl. stale-version-walk FAIL).
+
+## COMPLETION (2026-06-10)
+
+### What changed — `prompts/04-build/IMPLEMENT.md` (slice-build / Part B; shared + slice-build Rules SUBSTANCE untouched, AB1)
+1. **Frontmatter inputs** — added `# — slice-build feature-add` block: `.aprd/<aprd.lock.artifact>` (frozen-WHAT RESOLVED via lock → CURRENT version carrying `CLASS_EXTENSION`/`CONVENTION_BASELINE`; NEVER hardcode `aprd.v<N>`; BF7/P8 + 07a canon), `.aprd/baseline-map.json` (`conventions` = ground truth, `integration_seams`), `src/freelancer_app/**` (READ-ONLY convention exemplar — read neighbor code first, never reformat; BF1/BF5).
+2. **Freeze-gate guard REWRITTEN, not added (AB9)** — shared escape now also HALTs when (feature-add) `aprd.lock` names an artifact missing/unparseable (version-mismatch impossible by construction — only the lock-named file opened). Added 2 feature-add slice-build guards: missing baseline-map / no `CLASS_EXTENSION`/`CONVENTION_BASELINE` → HALT (BF5); greening a test by reformatting/editing an existing baseline `src/` file → ESCAPE → Phase 2/3 (BF1).
+3. **Shared Rule 4 generalized (cheapest-source-first, class-aware)** — CLASS sets the cheapest grounding source walked BEFORE canon: greenfield → ADR frame + canon; **feature-add → EXISTING code + `CONVENTION_BASELINE` first** (corpus stated in the delta, AB1). Canon default contradicting a captured baseline truth → baseline wins. Greenfield substance preserved (ADR-0002..0005, INV6 named verbatim).
+4. **`### feature-add delta (slice-build)`** block (5 rules): lock-resolve frozen-WHAT (BF7/P8); ground from existing code FIRST (BF5, Risk R5 — explicit `conventions` block is ground truth); conform-don't-reformat (BF1); MODE=slice, no scaffold; convention drift = CRITIQUE-flaggable defect → re-author (`conforms_to_conventions:true`).
+5. **Task-steps feature-add branch** — step 0a: resolve lock → read `CONVENTION_BASELINE` + `conventions` + READ neighbor `src/` first; step 5: write code CONFORMING to captured conventions (convention wins on conflict), new namespace only; step 7: emit `class:"feature-add"` + `convention_baseline_ref` + per build_unit `conforms_to_conventions`. Greenfield steps intact.
+6. **Feature-add schema delta** — `class:"feature-add"`, resolved `aprd_ref`/`aprd_version`, `convention_baseline_ref`, per build_unit `conforms_to_conventions:true` + `conventions_checked[]` + `baseline_files_edited:false`.
+7. **Stop condition** — feature-add line: convention-conformant new code, baseline untouched, `class:"feature-add"` + `convention_baseline_ref`.
+
+### Golden sentinel
+`_fixtures/brownfield-feature/.build/slices/S5/build-record.json`: target slice S5 (Tag a time entry with a label), `class:"feature-add"`, `aprd_ref:.aprd/aprd.v2.frozen.md` (lock-RESOLVED, not hardcoded), `convention_baseline_ref`, build_unit C4 Time Logging (`freelancer_app.time_logging`), additive label feature (CT2 label extension A14, traces R11/R13), C1 mocked, `conforms_to_conventions:true` + `conventions_checked:[lang,layout,lint,naming]` + `baseline_files_edited:false`, contract layer green (static-trace; no runtime in bench). Valid JSON.
+
+### Verify — both-directions (prompt now enforces all 4)
+- **Known-good** — feature-add S5 → new C4 label code conforms to baseline `conventions` (snake_case `time_entry_label.py` additive file, error-propagation idiom), contract layer green, `conforms_to_conventions:true`. PASS (golden).
+- **Planted: convention drift** — new code using canon-default naming/layout contradicting captured convention → CRITIQUE flags (delta Rule 5 + `conforms_to_conventions` field). MUST FAIL (BF5).
+- **Planted: baseline reformat** — an existing baseline `src/` file restyled → baseline-mutation guard (delta Rule 3 + `baseline_files_edited` field). MUST FAIL (BF1).
+- **Planted: stale-version walk** — copy ignoring `aprd.lock.artifact`, hardcoding `aprd.v<N>.frozen.md` → reads wrong version's `CONVENTION_BASELINE` → rewritten freeze-gate guard (delta Rule 1). MUST FAIL/HALT (BF7/P8; the 07a defect).
+
+> Note: bench `_fixtures/brownfield-feature` is manifest-only (`.aprd`/`.roadmap` + `.build/slices/S5/oracle/` + this golden `build-record.json`); full clean-room bench assembly (skeleton/S4 suites + S5 test `.py` files + build-plan the run executes against) = Task 14 BF-FIXTURE-ORACLE.
