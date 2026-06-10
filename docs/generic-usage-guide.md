@@ -9,7 +9,7 @@
 
 ## 1. What you're setting up
 
-Delivery system = **library of role prompts** (under `prompts/<phase>/<ROLE>.md`) plus small set of **rules** agents always follow + **on-disk artifacts** they produce (`.aprd/ .roadmap/ .adr/ .hld/ .build/`). Deploying = drop those files into your project, wire into harness so single command (or button) runs pipeline.
+Delivery system = **library of role prompts** (under `prompts/<phase>/<ROLE>.md`) plus small set of **rules** agents always follow + **on-disk artifacts** they produce (`.aprd/ .roadmap/ .adr/ .hld/ .build/`). Deploying = one installer command (`npx adp init`) lays those files into your project + wires the harness so a single command (or button) runs the pipeline.
 
 Both harnesses already think in **specs → design → tasks**, exactly this pipeline's shape — so deployment = mostly mapping system onto each harness's native constructs.
 
@@ -25,8 +25,8 @@ Both harnesses already think in **specs → design → tasks**, exactly this pip
 |---|---|---|
 | Form | Terminal CLI (works in any editor/repo) | Full IDE (VS Code–based) with chat panel |
 | Best when | you live in terminal, want scripted/automatable runs | you want visual spec/task board + click-to-run tasks |
-| How it runs | subagents + skills + `CLAUDE.md` | **CLI custom agent** runs pipeline exclusively (Kiro's built-in spec flow **not** used) + steering for canon |
-| Setup effort | low (drop files, allow permissions) | low (drop steering, use Spec button) |
+| How it runs | subagents + skills + `.claude/rules/` canon | **CLI custom agent** runs pipeline exclusively (Kiro's built-in spec flow **not** used) + steering for canon |
+| Setup effort | low (`npx adp init --harness=claude`) | low (`npx adp init --harness=kiro`) |
 
 Pick one; **per-gate interactions identical** (Part C). Deploy/use steps differ — Part A for Claude Code, Part B for Kiro.
 
@@ -44,44 +44,34 @@ curl -fsSL https://claude.ai/install.sh | bash
 # Windows PowerShell: irm https://claude.ai/install.ps1 | iex
 ```
 
-**Step 2 — Lay system into your project.** Copy delivery-system files so project looks like:
+**Step 2 — Install ADP into your project — one command:**
+```bash
+cd your-project
+npx adp init --harness=claude
+```
+Installer lays the runtime, wires the `/deliver` launcher, re-hashes every file vs manifest (integrity), runs a smoke self-test, prints launch command. Needs node ≥ 18. Re-run = no-op (idempotent: skips files already present + valid). Reinstall a new version over an existing one: add `--force`.
+
+Project gains (all machinery under one harness dir — **zero root pollution**):
 ```
 your-project/
-├── CLAUDE.md                     # the rules/canon every agent must follow
-├── prompts/<phase>/<ROLE>.md     # the role library (aprd, roadmap, adr, hld, build)
 └── .claude/
-    ├── settings.json             # permissions (below)
+    ├── settings.json                 # permissions (pre-set by installer)
+    ├── rules/00-adp-canon.md          # always-on canon (Claude auto-loads .claude/rules/*.md)
     ├── agents/
-    │   ├── orchestrator.md        # drives the phases; spawns role agents
-    │   └── step-runner.md         # runs one role prompt verbatim (model: sonnet)
-    └── skills/
-        └── deliver/SKILL.md       # the /deliver entry point
+    │   ├── adp-orchestrator.md         # drives the phases; spawns role agents
+    │   └── adp-step-runner.md          # runs one role prompt verbatim (model: sonnet)
+    ├── skills/deliver/SKILL.md         # the /deliver entry point
+    └── adp/                            # the engine (you don't edit these)
+        ├── prompts/<phase>/<ROLE>.md   # the role library (aprd, roadmap, adr, hld, build)
+        ├── code-canon/                 # per-stack coding-canon profiles
+        ├── tools/                      # economy-lint + fixtures
+        └── docs/                       # this guide + workflow
 ```
-Artifact folders (`.aprd/`, `.roadmap/`, `.adr/`, `.hld/`, `.build/`) created automatically as pipeline runs — you don't make them.
+Artifact folders (`.aprd/ .roadmap/ .adr/ .hld/ .build/`) created at your project root automatically as pipeline runs — you don't make them. They're the deliverable you commit to Git; the `.claude/adp/` engine can be `.gitignore`d.
 
-**Step 3 — `CLAUDE.md` holds always-on rules.** Loaded into every session. Put pipeline's standing rules here (phase order, artifact conventions, "never overwrite frozen artifact," verify-before-done rule). Home for system's canon.
+> **Canon lives in `.claude/rules/00-adp-canon.md`, not a root `CLAUDE.md`.** Claude does NOT auto-load `.claude/CLAUDE.md`, but DOES auto-load `.claude/rules/*.md` — so the installer puts the always-on rules (phase order, artifact conventions, "never overwrite frozen," verify-before-done) there.
 
-**Step 4 — Allow permissions pipeline needs.** Create `.claude/settings.json`:
-```json
-{
-  "permissions": {
-    "allow": ["Read", "Write", "Edit", "Agent", "Bash(git *)"],
-    "defaultMode": "acceptEdits"
-  }
-}
-```
-`Read/Write/Edit` let agents manage artifacts without prompting; `Agent` enables orchestrator to spawn role agents; `acceptEdits` auto-approves file writes (still asked before shell commands).
-
-**Step 5 — `/deliver` entry point.** `.claude/skills/deliver/SKILL.md` = thin launcher:
-```markdown
----
-name: deliver
-description: Run the delivery pipeline on a request (aPRD → roadmap → ADR → HLD → build)
-argument-hint: "<your request in plain language>"
----
-Hand the request in $ARGUMENTS to the orchestrator agent and run the pipeline,
-pausing at the clarifying-questions, roadmap, and demo gates.
-```
+**Step 3 — Permissions.** Installer writes `.claude/settings.json` with what the pipeline needs (`Read/Write/Edit` to manage artifacts, `Agent` to spawn role agents, `acceptEdits` to auto-approve writes — still asked before shell commands). Nothing to hand-edit.
 
 > MCP **not required** — this = disk-artifact pipeline. Add MCP server only if you want system to pull from external tracker (Jira/GitHub) or post to Slack.
 
@@ -118,69 +108,36 @@ Kiro ships own built-in spec workflow (`requirements.md` / `design.md` / `tasks.
 
 **Step 1 — Install Kiro CLI** (`kiro-cli`), open terminal in your project. (Kiro IDE optional — useful for *viewing/editing* agent + artifact files; **driver = custom agent**, run from CLI, not IDE's Spec button.)
 
-**Step 2 — Lay system into your project.** Delivery system drives everything; Kiro only runs it:
+**Step 2 — Install ADP into your project — one command:**
+```bash
+cd your-project
+npx adp init --harness=kiro
+```
+Installer lays the runtime, wires the `delivery` custom agent, re-hashes every file vs manifest (integrity), runs a smoke self-test, prints launch command. Needs node ≥ 18. Re-run = no-op (idempotent); reinstall a new version with `--force`.
+
+Project gains (Kiro used purely as **runtime**; ADP drives everything — zero root pollution):
 ```
 your-project/
-├── prompts/<phase>/<ROLE>.md        # the role library (aprd, roadmap, adr, hld, build)
 └── .kiro/
     ├── agents/
     │   ├── delivery.json             # the orchestrator (the one you run) — lean context, delegates each step
     │   └── step.json                 # generic pipeline-step agent (Sonnet) — runs ONE role prompt in fresh context
-    └── steering/
-        ├── 00-exclusive.md           # "run the pipeline exclusively; do NOT use built-in specs"
-        ├── pipeline.md               # phase order + two-loop rhythm (skeleton once, then slices)
-        ├── rules.md                  # requirements-freeze, slice = vertical & demoable, verify-before-done
-        ├── decisions.md              # require a decision record (ADR) for every significant choice
-        └── verification.md           # tests authored separately from the builder; anti-cheat; demo to accept
+    ├── steering/                      # always-on canon + exclusivity (incl 00-exclusive.md)
+    └── adp/                           # the engine (you don't edit these)
+        ├── prompts/<phase>/<ROLE>.md  # the role library (aprd, roadmap, adr, hld, build)
+        ├── code-canon/ tools/ docs/
 ```
-System's artifact folders (`.aprd/ .roadmap/ .adr/ .hld/ .build/`) written by agents as pipeline runs — **not** Kiro's `.kiro/specs/`.
+System's artifact folders (`.aprd/ .roadmap/ .adr/ .hld/ .build/`) written at your project root by agents as pipeline runs — **not** Kiro's `.kiro/specs/`.
 
-**Step 3 — Define orchestrator agent** `.kiro/agents/delivery.json`. Its prompt = system's orchestration logic. **Keep context lean — do NOT preload prompt library.** Loading all ~39 role prompts every turn = pure token waste; orchestrator only needs rules + ability to read role prompt *when that step runs*. So `resources` loads only steering (small, always-applicable); each role prompt + each step's input artifacts **lazy-loaded from disk on demand**:
-```json
-{
-  "name": "delivery",
-  "description": "Runs the delivery pipeline exclusively: aPRD → roadmap → ADR → HLD → build",
-  "prompt": "file://./prompts/_orchestrator.md",
-  "resources": ["file://.kiro/steering/**/*.md"],
-  "tools": ["read", "write"],
-  "allowedTools": ["read"],
-  "model": "claude-sonnet-4"
-}
-```
-Orchestrator sequences phases and, each step, **delegates to fresh `step` subagent** (Step 5) — handing only that step's role-prompt path. Role prompt then lives only in subagent's fresh context, discarded when step ends, so no turn carries more than active step. Orchestrator stays small for whole run.
+**How the installer wired it (you don't author these — context only):**
 
-**Step 4 — Make discipline (+ exclusivity) steering.** Steering files in `.kiro/steering/*.md` loaded as always-on context (+ committed to Git). Critical one, `00-exclusive.md`, keeps Kiro on rails:
-```markdown
-# Run the delivery pipeline exclusively
-- Do NOT generate or use Kiro's built-in spec files (requirements.md / design.md / tasks.md).
-- The methodology is the role prompts under prompts/<phase>/<ROLE>.md. Follow them verbatim, in phase order.
-- Read inputs from and write outputs to the system's artifact tree (.aprd/ .roadmap/ .adr/ .hld/ .build/).
-- Honor the system's gates: clarifying questions, roadmap confirmation, per-slice demo acceptance.
-```
-Other steering files carry canon (phase order, slice/skeleton rules, ADR requirement, verification/anti-cheat, demo gate).
+- **Orchestrator `delivery.json`** — prompt = `.kiro/adp/prompts/_orchestrator.md`. **Lean context: prompt library NOT preloaded** (all ~39 role prompts every turn = token waste). `resources` loads only steering (small, always-applicable); each role prompt + each step's input artifacts **lazy-loaded from disk on demand**. Each step it **delegates to a fresh `step` subagent**, handing only that step's role-prompt path — role prompt lives only in the subagent's fresh context, discarded when step ends. Orchestrator stays small for whole run.
+- **Generic step agent `step.json`** — execution unit: **one** agent runs **any** role, not 39 per-role configs. Reads the given role prompt, follows verbatim against project root, reads only that step's inputs, writes outputs, ends — fresh context every step. **Sonnet across board** (runtime target — whole pipeline runs on Sonnet). Can drive a step yourself — see B2 "Manual stepping."
+- **Steering `.kiro/steering/*.md`** — always-on context (Git-tracked). Critical `00-exclusive.md` keeps Kiro on rails: do NOT use Kiro's built-in spec files (`requirements.md`/`design.md`/`tasks.md`); methodology = the role prompts, followed verbatim in phase order; read/write the ADP artifact tree; honor the three gates. Others carry canon (phase order, slice/skeleton rules, ADR requirement, verification/anti-cheat, demo gate).
 
-**Step 5 — Generic pipeline-step agent** `.kiro/agents/step.json`. Execution unit: **one** agent runs **any** role, not 39 per-role configs. Orchestrator hands it role-prompt path; it reads that prompt, follows verbatim against project root, reads only that step's input artifacts, writes outputs, ends — fresh context every step.
-```json
-{
-  "name": "step",
-  "description": "Runs one pipeline step: read the given role prompt, execute it against the project, write outputs",
-  "prompt": "file://./prompts/_step-runner.md",
-  "resources": ["file://.kiro/steering/**/*.md"],
-  "tools": ["read", "write"],
-  "model": "claude-sonnet-4"
-}
-```
-**Sonnet = runtime target — whole pipeline must run on Sonnet**, so step agent Sonnet across board. (Search/discovery-heavy steps could later route to **Haiku** for speed + cost; per-step optimization to add once Sonnet baseline proven, not now.) Can also drive step yourself — see B2 "Manual stepping."
+**Verification is mandatory — built into every slice (not optional, not a hook).** Each slice: (1) a role *separate from the builder* authors the oracle (acceptance criteria + contracts → executable tests); (2) build; (3) run full test ladder against the *live* build (contract + flow + acceptance + regression); (4) anti-cheat pass — semantic-diff critique flagging hollow/hard-coded work (values matching fixtures, empty branches, stubs). Slice reaches "done" **only when ladder green + you accepted demo** — never on claim. Build-phase role prompts execute this; nothing ships unverified.
 
-**Step 6 — Verification (mandatory; built into every slice).** Verification **not optional, not a hook** — required phase of pipeline gating every slice. Each slice, system:
-1. **Authors oracle** — role *separate from builder* turns slice's acceptance criteria + contracts into executable tests (builder can't grade own work).
-2. **Builds** slice against design.
-3. **Runs full test ladder** against *live* build (contract + flow + acceptance tests; plus regression for changes to existing products).
-4. **Runs anti-cheat pass** — semantic-diff critique flagging hollow/hard-coded implementations (e.g. values matching test fixtures, empty branches, stub logic).
-
-Slice reaches "done" **only when ladder green + you accepted demo** — never on claim of completion. `verification.md` steering file encodes this gate, build-phase role prompts execute it; nothing ships unverified.
-
-**Step 7 (optional) — Hooks.** Hooks (`.kiro/hooks/*.json`) don't *add* verification — that always runs. They only **auto-trigger** already-mandatory pass on event (e.g. re-run whenever build files change). Create one from IDE Command Palette → **Kiro: Open Kiro Hook UI**, or describe in natural language.
+**(Optional) Hooks** (`.kiro/hooks/*.json`) don't *add* verification — that always runs. They only **auto-trigger** the already-mandatory pass on event (e.g. re-run when build files change). Create from IDE Command Palette → **Kiro: Open Kiro Hook UI**, or describe in natural language.
 
 ## B2. Use (run a project)
 
@@ -312,7 +269,7 @@ Stop at **any** time — clean pause after slice, or abrupt interruption: lost i
 
 ## 8. Shortest version
 
-> **Deploy:** drop system files in (Claude Code: `prompts/` + `.claude/` + `CLAUDE.md`; Kiro: `prompts/` + `.kiro/agents/delivery.json` + `.kiro/steering/`), install harness, allow file access. **Use:** start delivery (Claude Code `/deliver "…"`; Kiro `kiro-cli chat --agent delivery "…"`), then at each gate — answer questions, confirm plan, accept each demo or give concrete feedback. In **both** harnesses system runs *exclusively*: same role prompts, same artifacts, same gates. Repeat until done.
+> **Deploy:** install harness, then `npx adp init --harness=claude|kiro` in your project (lays runtime under `.claude/adp/` or `.kiro/adp/`, wires launcher, sets permissions, smoke-checks). **Use:** start delivery (Claude Code `/deliver "…"`; Kiro `kiro-cli chat --agent delivery "…"`), then at each gate — answer questions, confirm plan, accept each demo or give concrete feedback. In **both** harnesses system runs *exclusively*: same role prompts, same artifacts, same gates. Repeat until done.
 
 ---
 

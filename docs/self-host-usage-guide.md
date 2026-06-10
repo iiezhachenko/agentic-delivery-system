@@ -36,7 +36,7 @@ Same two harnesses, same trade-offs as generic guide. Difference = purely what y
 
 Pick one; **operator gate identical** (Part C). Deploy/use differ — Part A (Claude Code), Part B (Kiro).
 
-> **Prerequisite for either:** generic deployment from `generic-usage-guide.md` (role library under `prompts/`, harness install, file permissions). Self-host **adds** deliverable target on top; doesn't replace it.
+> **Prerequisite for either:** clone the ADP repo + install the harness. Self-host runs ADP on its OWN repo — role library (`prompts/`), root `CLAUDE.md`, and self-host wiring (`.claude/skills/self-host/`, `.claude/agents/step-runner.md` · Kiro `.kiro/agents/{selfhost,step}.json`, `.kiro/steering/`) are ALREADY in-tree. Do NOT `npx adp init` (that's the end-user install into a *different* project — `generic-usage-guide.md`). Self-host **adds** a deliverable target on top of the checkout; doesn't replace it.
 
 ---
 
@@ -44,7 +44,7 @@ Pick one; **operator gate identical** (Part C). Deploy/use differ — Part A (Cl
 
 ## A1. Deploy (one-time setup)
 
-**Step 1 — Have generic deploy in place.** Claude Code installed; `prompts/<phase>/<ROLE>.md`, `CLAUDE.md`, `.claude/{settings.json,agents/,skills/}` present per `generic-usage-guide.md` §A1. Self-host builds on that.
+**Step 1 — Clone repo + install Claude Code.** Self-host runs against the checkout itself — `prompts/<phase>/<ROLE>.md`, root `CLAUDE.md`, `.claude/{settings.json,agents/step-runner.md,skills/self-host/}` already in-tree. No `npx adp init` (that installs into a separate end-user project). Self-host builds on the checkout.
 
 **Step 2 — agentic-delivery-pipeline coding-canon profile = active target.** Lives at `code-canon/agentic-delivery-pipeline.md` (per-stack canon store spec already defines — **not** new registry), selected by stack ADR in `.adr/`. Holds six fields:
 ```
@@ -118,7 +118,7 @@ As in generic guide, **Kiro's built-in spec flow not used.** CLI custom agent ru
 
 ## B1. Deploy (one-time setup)
 
-**Step 1 — Have generic Kiro deploy in place** (per `generic-usage-guide.md` §B1: `kiro-cli`, `prompts/`, `.kiro/agents/{delivery.json,step.json}`, `.kiro/steering/*`).
+**Step 1 — Clone repo + install `kiro-cli`.** Self-host wiring already in-tree: `prompts/`, `.kiro/agents/{selfhost.json,step.json}`, `.kiro/steering/*`. No `npx adp init` (end-user install into a separate project).
 
 **Step 2 — agentic-delivery-pipeline coding-canon profile = active target** at `code-canon/agentic-delivery-pipeline.md` — identical content to §A1 Step 2 (harness-independent).
 

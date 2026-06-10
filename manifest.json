@@ -1,5 +1,5 @@
 {
-  "version": "815ab03+p03b9a94d.l96133636",
+  "version": "d62b6ec+p03b9a94d.l96133636",
   "files": [
     {
       "src": "adapters/claude/agents/adp-orchestrator.md",
@@ -70,7 +70,7 @@
     {
       "src": "docs/generic-usage-guide.md",
       "path": "docs/generic-usage-guide.md",
-      "sha256": "2c506ccdcbc22de172c9db8dfcb6249bfa72b645f27a68971114de1376b865ec",
+      "sha256": "386009f76cc3ed79cfed8c315c82229d54a08141684fbd4d8e661f86dbe39010",
       "harness": "all"
     },
     {
