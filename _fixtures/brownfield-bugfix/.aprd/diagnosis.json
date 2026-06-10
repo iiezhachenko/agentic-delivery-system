@@ -1,0 +1,63 @@
+{
+  "defect_report_ref": ".aprd/change-requests/CR-bug-001.md",
+  "baseline_refs": {
+    "aprd_frozen": ".aprd/aprd.frozen.md",
+    "aprd_lock": ".aprd/aprd.lock",
+    "adr_lock": ".adr/adr.lock",
+    "skeleton_lock": ".hld/skeleton.lock",
+    "slice_oracle": ".build/slices/S4/oracle/oracle.json",
+    "slice_contracts": ".hld/slices/S4/contracts.json"
+  },
+  "locks_verified": true,
+  "class": "bugfix",
+  "mode": "bugfix-localize",
+  "defect": {
+    "summary": "GET /projects returns HTTP 500 when a freelancer owns a project with billable_rate=null; projects with a rate render fine.",
+    "repro_steps": [
+      "Sign in; own >=1 project with billable_rate = null (rate omitted / pre-rates data).",
+      "GET /projects.",
+      "Observed: HTTP 500. Expected: 200, list renders every project."
+    ],
+    "expected_behavior": "AC6 (req_ref R6): the freelancer's projects appear in the project list. The list must render every owned project, including one whose billable_rate is null.",
+    "expected_behavior_source": ".aprd/aprd.frozen.md#AC6 + .build/slices/S4/oracle/oracle.json#OA-AC6"
+  },
+  "reproduction": {
+    "method": "static-trace",
+    "trace": "GET /projects -> wsgi.urlpatterns 'projects' -> _view_project_management -> dispatch_project_request -> _ProjectManagementAdapter.handle_request: parts==['projects'], method GET -> store.list(owner_id) -> _render(projects). _render builds each <li> with f-string field {p['billable_rate']:.2f}. A project whose billable_rate is None makes the ':.2f' numeric format spec raise TypeError: unsupported format string passed to NoneType.__format__.",
+    "confirmed": true,
+    "observed": "TypeError raised in _render on the null-rate project; uncaught -> HTTP 500 for the whole list.",
+    "expected": "HTTP 200; list renders every project, including the null-rate one.",
+    "note": "No interpreter in env (Rule 5: runtime/harness gap is not a defect); reproduction is by static-trace + golden comparison, as the greenfield fixtures are."
+  },
+  "localization": {
+    "component": "C3",
+    "module": "src/freelancer_app/wsgi.py",
+    "symbol": "_ProjectManagementAdapter._render",
+    "site": "f\"<li>{p.get('name','')} — {p.get('currency','')} {p['billable_rate']:.2f}/hr</li>\"",
+    "surface": "single method — _render; the only edit site the repair needs (BLAST_RADIUS candidate)"
+  },
+  "root_cause": {
+    "cause": "_ProjectManagementAdapter._render (src/freelancer_app/wsgi.py) formats each project's billable_rate with the numeric format spec ':.2f' and direct-indexes p['billable_rate']. When billable_rate is null (None), ':.2f' raises TypeError, so rendering the whole project list aborts and GET /projects returns HTTP 500. The render code applies a numeric format to a value the data model allows to be null, with no null guard — the contract CT9 (server-rendered project list) and AC6 are satisfiable and correct; the defect is the rendering implementation.",
+    "mechanism": "null billable_rate reaches a ':.2f' numeric format spec with no null guard; the resulting TypeError is not a declared CT9 failure mode (callee-error = RuntimeError), so dispatch_project_request's except RuntimeError does not catch it and it propagates to an unhandled 500.",
+    "symptom_vs_cause": "symptom = GET /projects 500; cause = null-unsafe rate formatting in _render"
+  },
+  "verdict": "defect-localized",
+  "classification": "my-code",
+  "repair_disposition": "repair-in-place",
+  "regression_surface": {
+    "baseline_ac_must_stay_green": ["AC6"],
+    "oracle_suites": [".build/slices/S4/oracle/"],
+    "note": "AC6 (R6) exercises the same _render path for rated projects plus project create/edit/delete; the repair must keep rated-project rendering + CRUD green (BF4). Scoped to BLAST_RADIUS, not the whole inherited suite (Risk R4)."
+  },
+  "repair_behavior_gap": {
+    "underspecified": true,
+    "question": "What should a null billable_rate render as — blank, zero, or the rate field omitted?",
+    "owner": "GAP-DETECT (bugfix hunt site); not resolved here",
+    "note": "Crash root cause is localized and unambiguous, but the baseline is silent on how a null rate should display. DIAGNOSE localizes the cause only; GAP-DETECT hunts the correct-behavior fork, SYNTHESIZE folds ROOT_CAUSE (H10, lane)."
+  },
+  "diagnosis_counts": {
+    "frozen_inputs_reread": 4,
+    "reproduction_method": "static-trace",
+    "localized_to_single_surface": true
+  }
+}
