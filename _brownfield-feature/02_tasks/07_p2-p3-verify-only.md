@@ -63,3 +63,44 @@ Architecture §2 reuse ledger: Phases 2 + 3 are entirely FREE for feature-add �
 - Frozen `skeleton.frozen.md`, `skeleton.lock`, existing `.adr/log/*` + `adr.lock` all byte-unchanged.
 - Both-directions checks hold (known-good PASS; frozen-redraw / ADR-collision / skeleton-misdispatch FAIL).
 - No new prompt authored (or, if a role broke, the leak is escalated with the exact role + failure).
+
+---
+
+## VERIFY RESULT — 2026-06-10 — ROLE BROKE → SPINE LEAK ESCALATED (broke-branch DONE)
+
+**Verdict: known-good run FAILS. Phase-2 + Phase-3 do NOT run verbatim for feature-add. NO golden recorded, NO prompt authored.** Reuse-ledger claim "Phases 2+3 entirely free, 15 roles run as-is" is FALSE as written. Leak is in the spine, not a feature-add overlay — fix once (P3), do NOT patch here.
+
+### Test bench
+Seeded feature-CR fixture per task step 1: baseline trees from `_fixtures/greenfield-clean/` (`.adr/ .hld/ .roadmap/ .build/`) + post-CR `.aprd/` from `_fixtures/brownfield-feature/` (v1 `aprd.frozen.md` IMMUTABLE + `aprd.v2.frozen.md` feature version + `aprd.lock` re-signed → `artifact: aprd.v2.frozen.md, version: v2` + `baseline-map.json`). `skeleton.lock` present (increment-dispatch signal).
+
+### The leak (root cause — single, shared by 13 roles)
+**Frozen-WHAT input hardcoded to literal path `.aprd/aprd.frozen.md`; NEVER resolved through `aprd.lock.artifact`.** Greenfield: `lock.artifact == aprd.frozen.md` → coincidentally works. Feature-add: `lock.artifact == aprd.v2.frozen.md ≠ aprd.frozen.md` → every consumer walks the STALE v1 baseline. Feature (R11–R13 / E8 / A14–A16) invisible; `CLASS` re-reads as `greenfield` from v1 body. Lock used as freeze-signature only (`status==frozen` + "names frozen artifact"); the named artifact is never opened.
+
+Static sweep (all P2/P3 roles): 13/15 take `path: ".aprd/aprd.frozen.md"`; 0/15 resolve `aprd.lock.artifact` to pick version. (`SYNTHESIZE-ADR`, `TRIAGE` don't read the aPRD directly — they inherit the wrong scope downstream of `DECISION-EXTRACT`.)
+
+### Empirical proof (clean-room, step-runner, prompt verbatim + bench path only)
+`DECISION-EXTRACT` (Phase-2 head) on the feature-CR bench → wrote `.adr/01-decision-points.json` with:
+- `aprd_ref: ".aprd/aprd.frozen.md"` — walked v1, NOT v2.
+- `lock_verified: true` — passed despite `lock.artifact` (v2) ≠ file walked (v1). Version-mismatch is a no-op; no guard catches it.
+- `class: "greenfield"` — re-derived from v1 body; feature-add re-entry unrecognized.
+- 10 decision points **DP1–DP10 = the BASELINE forks already resolved by frozen ADR-0001..0006.** Zero feature DPs. R11–R13 / E8 never seen.
+
+Downstream blast: those re-extracted baseline DPs flow to OPTION-GEN → EVALUATE-DECIDE → SYNTHESIZE-ADR, which would re-mint ADRs for already-frozen decisions → **ADR collision / baseline-redecision = BF1 immutability violation produced by the spine itself.** Phase-3 inherits identically — `MODEL-DATA` etc. read v1 `ENTITIES` (E1–E7), never E8 (Tag) → cannot model the feature's data scope.
+
+Frozen immutability held at file level (runner stayed in lane; only non-frozen `.adr/01-decision-points.json` written; `sha256 -c` on `skeleton.frozen.md`/`skeleton.lock`/`adr.lock`/`.adr/log/*`/`aprd.frozen.md` = all OK). The defect is in the CONTENT the spine derives, not a frozen overwrite.
+
+### Both-directions status
+Known-good direction FAILS → oracle cannot be armed. No planted-defect run needed: the spine emits the defect (baseline re-decision) on the known-good input. FAIL is the signal.
+
+### Escalation — fix the spine ONCE (P3), keep P2/P3 as REUSE (no feature-add delta)
+**Defect:** frozen-WHAT input bound to literal `.aprd/aprd.frozen.md` instead of "the frozen aPRD the lock names."
+**Roles:** all P2/P3 frozen-WHAT consumers — `DECISION-EXTRACT`, `OPTION-GEN`, `EVALUATE-DECIDE`, `RECONCILE`, `CRITIQUE` (02-adr); `MODEL-DATA`, `DERIVE-COMPONENTS`, `DEFINE-CONTRACTS`, `MODEL-FLOWS`, `MAP-NFR`, `DERIVE-TESTS`, `RESOLVE-LOCAL`, `RECONCILE-CRITIQUE` (03-hld). `TRIAGE` + `SYNTHESIZE-ADR` inherit via scope.
+**Fix (class-agnostic, single):** resolve frozen-WHAT input via `aprd.lock.artifact` (read lock → open the file it names), not a hardcoded filename. Greenfield unaffected (`lock.artifact == aprd.frozen.md`); feature-add resolves to `aprd.v2.frozen.md`. Per AB9/P1 this is REWRITE of the input binding, never ADD. Keeps the REUSE posture intact — NOT a feature-add overlay.
+**Owner:** spine task (Phase 0/2/3 input-binding), upstream of this checkpoint. This checkpoint cannot pass until that lands. Blocks Task 14 (BF-FIXTURE-ORACLE) consuming a clean P2/P3 run.
+
+### Box check (broke-branch)
+- [x] Ran P2 head clean-room on feature-CR fixture; **did NOT pass** — leak surfaced.
+- [ ] golden `.hld/slices/S<new>/` — NOT recorded (no clean run; recording would launder a defect).
+- [x] Frozen `skeleton.frozen.md` / `skeleton.lock` / `.adr/log/*` / `adr.lock` byte-unchanged (verified sha256 -c).
+- [x] No new prompt authored.
+- [x] Leak escalated with exact role(s) + exact failure + single-fix recommendation (above).

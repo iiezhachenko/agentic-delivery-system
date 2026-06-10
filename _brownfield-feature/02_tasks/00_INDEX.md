@@ -12,6 +12,7 @@ Add `class=feature-add` capability to the pipeline: re-enter a project the green
 - **OVERLAY** — feature-add DELTA block on existing role (shared `## Rules` + delta carrying ONLY what differs, AB1).
 - **CONFIG** — playbook binding / mechanical frontmatter sweep. No new substance.
 - **VERIFY-ONLY** — REUSE role, nothing authored; prove it runs clean on a feature-CR fixture.
+- **SPINE-FIX** — class-agnostic spine defect surfaced by a checkpoint; REWRITE once (P3), not a per-class overlay.
 
 ## Tasks (build in order)
 
@@ -24,6 +25,7 @@ Add `class=feature-add` capability to the pipeline: re-enter a project the green
 | 05 | BF-GAP-DETECT | OVERLAY | `prompts/00-aprd/GAP-DETECT.md` | 04 |
 | 06 | BF-SYNTHESIZE | OVERLAY | `prompts/00-aprd/SYNTHESIZE.md` | 05 |
 | 07 | P2+P3 VERIFY-ONLY | VERIFY-ONLY | Phase-2 (7 roles) + Phase-3 (8 roles) checkpoint | 06 |
+| 07a | FIX-FROZEN-WHAT-VERSION-RESOLVE | SPINE-FIX | 13 P2/P3 roles resolve frozen-WHAT via `aprd.lock.artifact` | 07 |
 | 08 | BF-SLICE-EXTRACT | OVERLAY | `prompts/01-roadmap/SLICE-EXTRACT.md` | 06 |
 | 09 | BF-SEQUENCE | OVERLAY | `prompts/01-roadmap/SEQUENCE.md` | 08 |
 | 10 | BF-MATERIALIZE-ORACLE | OVERLAY | `prompts/04-build/MATERIALIZE-ORACLE.md` | 09 |
@@ -43,6 +45,7 @@ flowchart TD
     GD["05 BF-GAP-DETECT<br/>(OVERLAY)"]
     SY["06 BF-SYNTHESIZE<br/>(OVERLAY)"]
     P23["07 P2+P3 VERIFY-ONLY"]
+    SF["07a SPINE-FIX<br/>frozen-WHAT via lock"]
     SE["08 BF-SLICE-EXTRACT<br/>(OVERLAY)"]
     SQ["09 BF-SEQUENCE<br/>(OVERLAY)"]
     MO["10 BF-MATERIALIZE-ORACLE<br/>(OVERLAY)"]
@@ -54,8 +57,11 @@ flowchart TD
     PB --> BM --> CG --> EX --> GD --> SY
     SY --> SE --> SQ
     SY -.-> P23
+    P23 -.->|leak surfaced| SF
     SQ --> MO --> IM --> IN --> VO --> FX
+    SF -.-> FX
     P23 -.-> FX
+    style SF fill:#fdd
     style BM fill:#cdf
     style PB fill:#ffd
     style CG fill:#ffd
