@@ -139,3 +139,11 @@ Follow the scaffold. Concretely:
 - `prompts/00-aprd/BASELINE-MAP.md` present, scaffold-conformant, caveman + economy clean.
 - Golden `_fixtures/brownfield-feature/.aprd/baseline-map.json` validates against the schema with correct ID high-water-marks for the seeded baseline.
 - Both-directions check holds (known-good PASS; corrupt-lock + no-trees FAIL/escape).
+
+## STATUS — DONE (2026-06-10)
+
+- **Authored** `prompts/00-aprd/BASELINE-MAP.md`. Scaffold-conformant (matches sibling `00-aprd/EXTRACT.md`): frontmatter (`role/phase/class:feature-add/interactive:false/inputs/outputs/escapes`), caveman block verbatim (PR4), ≤3-line identity (AB6), discriminator, numbered Rules (grounding folded as bullet — AB4), procedure-only Task steps (AB1), inline-comment schema (AB5), Stop condition. Guards live ONLY in `escapes:` (AB2).
+- **Seeded baseline** = `_fixtures/greenfield-clean` (greenfield-built, all locks `status:frozen`). Hand-ran role against it → golden `_fixtures/brownfield-feature/.aprd/baseline-map.json`. JSON valid.
+- **Known-good PASS:** ID high-water cross-checked vs baseline trees — all 7 spaces exact: `R10 AC10 C6 E7 CT11 ADR6 S4`. Seams catalogued from `realizes_seam` + fronting contract: C1/persistence/CT2, C2/domain/CT3, C2/primary_external_integration/CT8, C6/ingress/CT9. Conventions cited from `src/` + `pyproject.toml` + ADR-0002. Oracle inventory = skeleton + S4 suites, `must_stay_green`. Lock digest = 5 real `*.lock` paths → frozen.
+- **Planted-defect FAIL (by construction):** escape 1 — lock absent OR `status!=frozen` → HALT, write nothing. Escape 2 — no frozen trees → out-of-scope route + HALT, never reconstruct from raw `src/`. Both restated in Task step 1 + Stop condition.
+- Satisfies BF2 (read-first), BF3 (ID continuation), BF5 (CONVENTION_BASELINE), BF6 (seam catalog), BF4 (regression oracle inventory). Full fixture (corrupt-lock + no-trees variants) deferred to Task 14.

@@ -1,0 +1,27 @@
+{
+  "built_by": "greenfield-spine",
+  "id_high_water": { "R": 10, "AC": 10, "S": 4, "ADR": 6, "C": 6, "E": 7, "CT": 11 },
+  "conventions": {
+    "lang": "Python >=3.11 (ADR-0002)",
+    "layout": "src/freelancer_app/<component_snake>/*.py; one package per component (C1 data_store, C2 identity_auth, C3 project_management, C4 time_logging, C5 invoice_export, C6 web_ingress)",
+    "lint": "pyproject.toml [tool.pytest.ini_options] pythonpath=['src']; setuptools build; no ruff/black config present",
+    "naming": "module dir = snake_case(component.name); module files snake_case (e.g. session_gate.py, oauth_callback.py, identity_record_store.py); pkg = freelancer-app"
+  },
+  "integration_seams": [
+    { "at": "C1", "kind": "persistence", "contract_ref": "CT2" },
+    { "at": "C2", "kind": "domain", "contract_ref": "CT3" },
+    { "at": "C2", "kind": "primary_external_integration", "contract_ref": "CT8" },
+    { "at": "C6", "kind": "ingress", "contract_ref": "CT9" }
+  ],
+  "existing_oracle": {
+    "suites": [".build/skeleton/oracle/", ".build/slices/S4/oracle/"],
+    "must_stay_green": true
+  },
+  "frozen_locks": {
+    ".aprd/aprd.lock": "frozen",
+    ".adr/adr.lock": "frozen",
+    ".hld/skeleton.lock": "frozen",
+    ".build/skeleton/oracle/oracle.lock": "frozen",
+    ".build/slices/S4/oracle/oracle.lock": "frozen"
+  }
+}
