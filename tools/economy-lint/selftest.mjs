@@ -73,6 +73,37 @@ for (const id of Object.keys(defects)) {
   ok(hit, `${id}: expected check "${expect[id]}" in violations`);
 }
 
+// C8 calibration (W9) — a canon-BUNDLE enumeration line ("AB1–AB6 + PR1–PR4 + caveman block")
+// is a load-bearing reference, NOT a duplicated register reminder. Even alongside ONE genuine
+// reminder it must NOT trip C8 (only the bundle ref would be the 2nd "hit" pre-calibration).
+{
+  const fp = write("c8-bundle-ref.md", ref.replace(/(## Rules\n)/,
+    "$1Author against the scaffold (DRY skeleton) + coding canon (AB1–AB6 + PR1–PR4 + caveman block).\nArtifact content stays caveman — PR4, no exception.\n"));
+  const r = lint(fp);
+  const c8 = r.violations.filter(v => v.check === "caveman-footer-dup");
+  ok(c8.length === 0, `C8 calibration: bundle-ref + single reminder must NOT trip C8, got ${c8.length} (lines ${c8.map(v=>v.line)})`);
+  console.log(`  C8-calibration (bundle-ref not a reminder) → ${c8.length === 0 ? "OK" : "FAIL"}`);
+}
+
+// C6 calibration (W9) — a multi-exit role whose Stop names mode + output path on SUCCESS exits
+// (greenfield → write 05; feature-add → write 08) must NOT trip C6. Those bullets share mode/path
+// vocabulary with mode-keyed escapes but re-state no guard PREDICATE (the failure conditions live
+// only on the generic HALT line). Only a predicate copied onto a HALT line is genuine C6.
+{
+  const fp = write("c6-multiexit.md", ref.replace(/(## Stop condition\n)([\s\S]*)$/, (m, h) =>
+    h +
+    "- Guard tripped (escapes) → write nothing; print which guard fired; HALT.\n" +
+    "- Greenfield order produced → write .roadmap/05-sequence.json verdict: sequenced, FOUNDATION-CUT next, stop.\n" +
+    "- Feature-add order produced → write .roadmap/08-rerank.json (class:feature-add, completed[] pinned, remaining_sequence), stop.\n"));
+  // give it mode-keyed escapes so the success bullets WOULD overlap pre-calibration
+  const fp2 = write("c6-multiexit2.md", fs.readFileSync(fp, "utf8").replace(/(escapes:\n)/,
+    '$1  - { when: "greenfield + (input missing/unparseable OR verdict != all_vertical)", target: "self / HALT" }\n  - { when: "feature-add but .roadmap/08-rerank.json missing, OR 08 has no completed[]", target: "BASELINE-MAP / HALT" }\n'));
+  const r = lint(fp2);
+  const c6 = r.violations.filter(v => v.check === "escapes-in-stop");
+  ok(c6.length === 0, `C6 calibration: mode-keyed success exits must NOT trip C6, got ${c6.length}`);
+  console.log(`  C6-calibration (success-exit mode/path not a re-enumeration) → ${c6.length === 0 ? "OK" : "FAIL"}`);
+}
+
 // determinism — same input → byte-identical lint.json
 const a = JSON.stringify(lint(REF)), b = JSON.stringify(lint(REF));
 ok(a === b, "determinism: two runs differ");

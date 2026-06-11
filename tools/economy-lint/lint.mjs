@@ -168,7 +168,11 @@ function run(p, prof, V, W) {
     let ss = -1; for (let i = 0; i < N; i++) if (/^##\s+Stop/i.test(lines[i])) { ss = i; break; }
     if (ss >= 0 && whens.length) {
       let stopTok = new Set(), stopLine = ss + 1;
-      for (let i = ss + 1; i < N; i++) { if (/^#{1,6}\s/.test(lines[i])) break; sigTokens(lines[i]).forEach(t => stopTok.add(t)); }
+      // CALIBRATION (W9): a guard's WRONG home is a FAILURE-exit line (HALT / write-nothing) — that is
+      // where a re-stated predicate lives. SUCCESS / write-and-continue exit lines legitimately NAME
+      // mode + output path (PR stop-contract); a multi-exit role's mode/path vocabulary overlaps its
+      // mode-keyed escapes WITHOUT being a re-enumeration. Count overlap only from failure-exit lines.
+      for (let i = ss + 1; i < N; i++) { if (/^#{1,6}\s/.test(lines[i])) break; if (!/(?<!not[- ])\bHALT\b|write nothing/i.test(lines[i])) continue; sigTokens(lines[i]).forEach(t => stopTok.add(t)); }
       let restated = 0;
       for (const w of whens) { let ov = 0; for (const t of w) if (stopTok.has(t)) ov++; if (ov >= 3) restated++; }
       if (restated >= 2) push(V, "C6", stopLine, `Stop re-enumerates ${restated} specific guard conditions (guards' one home = escapes:)`);
@@ -204,11 +208,15 @@ function run(p, prof, V, W) {
     }
   }
 
-  // C8 — caveman-footer / PR4-reminder duplication (outside Register block)
+  // C8 — caveman-footer / PR4-reminder duplication (outside Register block).
+  // CALIBRATION (W9): a bare "PR4" inside a canon-BUNDLE enumeration ("PR1–PR4", "AB1–AB6 + PR1–PR4
+  // + caveman block") NAMES the coding-canon set IMPLEMENT authors against — load-bearing reference,
+  // NOT a duplicated register reminder. Exclude it so C8 fires only on genuine reminder dups.
   if (on("C8")) {
     const re = /\bPR4\b|caveman governs|register governs|clean prose|caveman too/i;
+    const bundleRef = /PR\d\s*[–—-]\s*PR4|AB\d[^.]*\bPR\d/;   // canon-bundle range/list, not a reminder
     const hits = [];
-    for (let i = 0; i < N; i++) { if (cls[i] === "code" || inReg(i)) continue; if (re.test(lines[i])) hits.push(i); }
+    for (let i = 0; i < N; i++) { if (cls[i] === "code" || inReg(i)) continue; if (re.test(lines[i]) && !bundleRef.test(lines[i])) hits.push(i); }
     if (hits.length > 1) for (const i of hits) push(V, "C8", i + 1, `caveman/PR4 reminder duplicated (one home = Register block); found ${hits.length}`);
   }
 

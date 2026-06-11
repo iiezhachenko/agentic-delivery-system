@@ -1,0 +1,100 @@
+{
+  "wave": "W9-ECON-RECONCILE",
+  "class": "agentic-delivery-pipeline",
+  "verdict": "reconciled",
+  "date": "2026-06-11",
+  "_note": "Terminal economy sweep, done_sentinel for W9 (orchestrator STEP-0 derived-state). Operator-RESCOPED 2026-06-11: Layer-2 (ECONOMY-AUDIT, LLM) surfaced 15 INHERITED findings on the 4 touched prompts; none from the W9 edit (the _step-runner C4 'just' drop audited clean). Resolving all 15 = re-authoring 3 content-untouched shipped prompts + orchestrator, which overlaps the deferred W10 full-sweep + risks regressing W6/W7-verified prompts. Operator chose: CLOSE W9 (lint 44/44 clean + _step-runner fixed + zero-new-L2-debt + both-directions proof) and ROLL the 15 inherited findings into a new W10-ECON-SWEEP-FULL (full 44-prompt L2 reconcile, corpus-wide auditor calibration). Disk = source of truth (D20); this report is the W9 sentinel, not a tracker.",
+  "scope": {
+    "lint_layer1": "whole corpus (44 prompts) — deterministic, ran in full",
+    "audit_layer2": "4 touched prompts only (SEQUENCE, SLICE-EXTRACT, _orchestrator, _step-runner); full 44-prompt L2 sweep -> W10",
+    "fix_path": "lint mis-fires = controller-direct calibration (P3, like W7); genuine prompt debt = IMPLEMENT + clean-room (operator-chosen)"
+  },
+  "lint_layer1": {
+    "corpus_total": 44,
+    "clean": 44,
+    "blocked": 0,
+    "result": "44/44 lint-clean after 2 calibrations + 1 prompt fix",
+    "initial_blocked": 4,
+    "resolution": [
+      {
+        "finding": "C8 caveman-footer-dup (AB1) @ _orchestrator.md:65,110",
+        "root": "lint mis-fire — regex matched 'PR4' on L65 (canon-bundle enum 'AB1-AB6 + PR1-PR4 + caveman block', a load-bearing REFERENCE naming what IMPLEMENT authors against) and L110 (RULES' own register self-rule for the shipped prompt) = two DISTINCT facts at two homes, not a duplicated reminder",
+        "resolution_class": "(c) lint-profile calibration",
+        "fix": "tools/economy-lint/lint.mjs C8: exclude lines where PR4 is inside a canon-bundle range/list (bundleRef = /PR\\d[–—-]PR4|AB\\d[^.]*PR\\d/). Analog of routes_to:canon — fix the checker, not the artifact (ledger pre-flagged this W7).",
+        "regression_test": "tools/economy-lint/selftest.mjs 'C8-calibration' (bundle-ref + single reminder must NOT trip C8) + original C8 defect still blocks"
+      },
+      {
+        "finding": "C6 escapes-in-stop (AB2) @ SEQUENCE.md:67",
+        "root": "lint mis-fire (pure) — C6 counted token overlap from SUCCESS-exit Stop bullets (greenfield/feature-add -> write 05/08), which a Stop MUST name (PR stop-contract). Mode/path/verdict vocabulary overlaps the mode-keyed escapes WITHOUT re-stating any guard PREDICATE. The dependency-defect mnemonic sits on a write-and-route (non-HALT) line. No predicate on any HALT line.",
+        "resolution_class": "(c) lint-profile calibration",
+        "fix": "tools/economy-lint/lint.mjs C6: build stopTok only from FAILURE-exit lines (/(?<!not[- ])\\bHALT\\b|write nothing/), excluding success/write-and-continue exits + negated 'not-HALT' mentions. A guard's wrong home is a HALT/write-nothing line; that is where a re-enumeration lives.",
+        "regression_test": "tools/economy-lint/selftest.mjs 'C6-calibration' (mode-keyed success exits must NOT trip C6) + original C6 defect (predicates copied onto HALT lines) still blocks"
+      },
+      {
+        "finding": "C6 escapes-in-stop (AB2) @ SLICE-EXTRACT.md:68",
+        "root": "lint mis-fire (dominant) — same multi-exit collision; the one genuine residue (HALT-line parenthetical re-listing 'no frozen aPRD, missing/invalid lock, unplaybooked class') tripped only 1 guard >=3 overlap (below the >=2 fire threshold) post-calibration. Minor AB2 residue is sub-threshold + arguably an acceptable mnemonic; routed to W10 for the corpus-wide call.",
+        "resolution_class": "(c) lint-profile calibration",
+        "fix": "same C6 calibration as SEQUENCE; SLICE-EXTRACT goes clean with calibration alone (no prompt edit). Minor HALT-line parenthetical catalogued in W10."
+      },
+      {
+        "finding": "C4 banned-hedge (AB8) @ _step-runner.md:7",
+        "root": "GENUINE prompt debt — filler 'just' in 'The operator just pasted one prompt into you'",
+        "resolution_class": "(a) prompt REWRITE (fix-by-cutting, AB9)",
+        "fix": "IMPLEMENT authored scratch (drop 'just', all else byte-identical) -> lint clean -> L2 audit clean on the changed line -> promoted prompts/_step-runner.md. Verify: 1-line diff confirmed; behavioral surface (Hard rules/Register/Final reply) byte-identical -> clean-room behavior provably unchanged.",
+        "route": "IMPLEMENT + clean-room (operator-chosen)"
+      }
+    ]
+  },
+  "audit_layer2": {
+    "scope": "4 touched prompts",
+    "new_debt_from_w9": 0,
+    "new_debt_note": "The W9 edit (_step-runner:7 'just' drop) audited CLEAN — no Layer-2 finding on the changed line.",
+    "inherited_findings_total": 15,
+    "verdict_per_prompt": {
+      "SEQUENCE": "blocked (6 inherited) — routed W10",
+      "SLICE-EXTRACT": "blocked (2 inherited) — routed W10",
+      "_orchestrator": "blocked (4 inherited) — routed W10",
+      "_step-runner": "blocked (3 inherited) — routed W10"
+    },
+    "audit_artifacts": "ephemeral economy-audit.json per prompt produced under .roadmap/_w9-scratch/audit/<name>/ (clean-room staged; not committed — re-derived by W10)"
+  },
+  "both_directions_proof": {
+    "holds": true,
+    "claim": "calibrations narrowed mis-fires WITHOUT blinding genuine catches",
+    "selftest": "tools/economy-lint/selftest.mjs -> PASS 24 checks: reference clean + all 10 defect injectors (C1/C1g/C2/C3/C4/C5/C6/C7/C8/C9) still BLOCK naming the right check + 2 new calibration regressions + determinism stable",
+    "corpus_demonstration": [
+      "CLEAN: SEQUENCE.md (untouched) -> clean",
+      "DEFECT (genuine C6): guard predicates copied onto HALT lines -> BLOCKED, C6 caught @67",
+      "DEFECT (genuine C8): real duplicated caveman reminder (not a bundle-ref) -> BLOCKED, C8 caught"
+    ]
+  },
+  "discriminator": {
+    "zero_unresolved_blocking_lint": true,
+    "lint_clean_corpus": "44/44",
+    "both_directions_proof_holds": true,
+    "new_l2_debt_resolved": "0 introduced",
+    "inherited_l2_backlog": "catalogued + routed to W10 (operator-rescoped close)",
+    "satisfied": true
+  },
+  "rolled_to": {
+    "wave": "W10-ECON-SWEEP-FULL",
+    "carries": "full 44-prompt Layer-2 ECONOMY-AUDIT + the 15 inherited findings below, reconciled corpus-wide (each -> prompt DELETE/REWRITE | _economy-audit Rule-2 calibration | lint-profile note). Priority: _step-runner I2 starvation (only UNDER-direction finding — judge condensed-Register infra convention vs genuine PR4 substance-floor breach).",
+    "inherited_findings": [
+      { "prompt": "SEQUENCE", "id": "I1", "category": "mandate-narration", "target": "26", "fix": "REWRITE", "summary": "Role narrates Rule 2 (dependency-legality) + Rule 9 (lane prohibitions) before Rules section; >3 lines", "w9_triage": "genuine" },
+      { "prompt": "SEQUENCE", "id": "I2", "category": "duplicate-fact", "target": "34", "fix": "REWRITE", "summary": "Rule 1 parenthetical restates feature-add no-skeleton-pin (home delta Rule 1) + 'See delta Rule 1' pointer", "w9_triage": "defensible — dual-mode cross-ref; Rule-2 calibration candidate" },
+      { "prompt": "SEQUENCE", "id": "I3", "category": "duplicate-fact", "target": "64", "fix": "DELETE", "summary": "feature-add task step 6 restates delta Rules 1/2/4 prohibitions (cites them)", "w9_triage": "genuine-minor" },
+      { "prompt": "SEQUENCE", "id": "I4", "category": "no-objective", "target": "70", "fix": "DELETE", "summary": "Stop greenfield parenthetical narrates FOUNDATION-CUT/SEQUENCE-REVIEW downstream actions", "w9_triage": "defensible — orientation" },
+      { "prompt": "SEQUENCE", "id": "I5", "category": "duplicate-fact", "target": "70", "fix": "DELETE", "summary": "Stop greenfield tail 'No foundation cut, no client touch' restates Rule 9", "w9_triage": "genuine-minor" },
+      { "prompt": "SEQUENCE", "id": "I6", "category": "duplicate-fact", "target": "71", "fix": "DELETE", "summary": "Stop feature-add tail 'No skeleton, no completed[] re-order, no client touch' restates delta Rules 1/2", "w9_triage": "genuine-minor" },
+      { "prompt": "SLICE-EXTRACT", "id": "I1", "category": "duplicate-fact", "target": "51+60", "fix": "DELETE", "summary": "guard-check step duplicated across both mode branches; factor above the split", "w9_triage": "defensible — dual-mode; Rule-2 calibration candidate" },
+      { "prompt": "SLICE-EXTRACT", "id": "I2", "category": "no-objective", "target": "30", "fix": "DELETE", "summary": "motivational tail '(... Cluster vertically here so it has nothing to reject.)'", "w9_triage": "genuine-minor" },
+      { "prompt": "_orchestrator", "id": "I1", "category": "duplicate-fact", "target": "33", "fix": "DELETE", "summary": "GIVEN 'no bookkeeping' paragraph also at RULES:113 + STEP6:93-95", "w9_triage": "defensible — deliberate ADR-0010 emphasis (3 homes); W10 judges emphasis vs dup" },
+      { "prompt": "_orchestrator", "id": "I2", "category": "duplicate-fact", "target": "17-18", "fix": "DELETE", "summary": "Model section Sonnet-runtime + Opus-retired rationale; runtime home = SUBAGENT CONTRACT:104", "w9_triage": "defensible — retirement rationale partly distinct" },
+      { "prompt": "_orchestrator", "id": "I3", "category": "duplicate-fact", "target": "113", "fix": "DELETE", "summary": "RULES parenthetical restates STEP-4-gate distinction (self-acknowledges 'Distinction in STEP 4 intro')", "w9_triage": "genuine" },
+      { "prompt": "_orchestrator", "id": "I4", "category": "ambiguous", "target": "83", "fix": "REWRITE", "summary": "'retry budget: 3' — 3 total attempts vs 3 retries; state exactly", "w9_triage": "genuine" },
+      { "prompt": "_step-runner", "id": "I1", "category": "no-objective", "target": "3-6", "fix": "DELETE", "summary": "blockquote provenance/metadata block; agent reads from line 7", "w9_triage": "defensible — orientation convention (corpus-wide; Rule-2/lint-profile candidate)" },
+      { "prompt": "_step-runner", "id": "I2", "category": "starvation", "target": "17-21", "fix": "REWRITE", "summary": "condensed Register vs PR4 canonical caveman block — missing NOT/YES anchors, exception clause, economy-invariant sentence, AB9/AB8/AB7 fix lines", "w9_triage": "PRIORITY/needs-judgment — only UNDER-direction finding; infra-convention vs PR4 substance-floor" },
+      { "prompt": "_step-runner", "id": "I3", "category": "no-objective", "target": "25", "fix": "DELETE", "summary": "'The grader reads the files, not this message' rationale tail", "w9_triage": "defensible — disk-is-deliverable reinforcement" }
+    ]
+  }
+}
