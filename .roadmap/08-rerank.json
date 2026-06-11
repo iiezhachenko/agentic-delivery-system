@@ -3,7 +3,7 @@
   "class": "agentic-delivery-pipeline",
   "roadmap_version": 4,
   "verdict": "re_ranked",
-  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each entry = one remaining PROMPT-BUILD/CR, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). roadmap_version 4 = CR-002 re-rank (aprd v4->v5, deterministic-machine). SCOPED TO THIS CR's wave (operator call 2026-06-11): completed[] + remaining_sequence carry ONLY the W0-W8 deterministic-spine wave. Prior waves (greenfield 10, bugfix 8) are delivered; their done-state lives on disk (sentinels under _fixtures/greenfield-* + _fixtures/brownfield-bugfix/), NOT re-listed here (disk is source of truth, D20 — this ledger is informational, not the truth the loop derives from). W0-CANON-CR = THIS intake (CR-002 + aprd.v5 + ADRs 0024-0027/D24-D27 extending D22 + skeleton.lock v5 canon CR + all re-signed locks); shipped, so derived frontier = W1-SCHEMA-REGISTRY. Compound sentinels (the full '+ selftest green' bars from directive §6) summarized per entry in rationale; the single done_sentinel path is the frontier key, the both-directions selftest is the gate the drain loop enforces. Contracts before consumers, code before prompt-edits (W6), orchestrator swap last among consumers (W7); re-run harmless (D20).",
+  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each entry = one remaining PROMPT-BUILD/CR, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). roadmap_version 4 = CR-002 re-rank (aprd v4->v5, deterministic-machine). SCOPED TO THIS CR's wave (operator call 2026-06-11): completed[] + remaining_sequence carry ONLY the W0-W8 deterministic-spine wave. Prior waves (greenfield 10, bugfix 8) are delivered; their done-state lives on disk (sentinels under _fixtures/greenfield-* + _fixtures/brownfield-bugfix/), NOT re-listed here (disk is source of truth, D20 — this ledger is informational, not the truth the loop derives from). W0-CANON-CR = THIS intake (CR-002 + aprd.v5 + ADRs 0024-0027/D24-D27 extending D22 + skeleton.lock v5 canon CR + all re-signed locks); shipped, so derived frontier = W1-SCHEMA-REGISTRY. Compound sentinels (the full '+ selftest green' bars from directive §6) summarized per entry in rationale; the single done_sentinel path is the frontier key, the both-directions selftest is the gate the drain loop enforces. Contracts before consumers, code before prompt-edits (W6), orchestrator swap last among consumers (W7); re-run harmless (D20). W9-ECON-RECONCILE appended by operator (2026-06-11): terminal sweep fixing ALL lint + ECONOMY-AUDIT findings deferred per-wave during the W6/W7 re-authors (defer-not-chase avoids over-stripping the standalone-PART-A/B dual-mode design); lands BEFORE W8 so dist ships economy-clean. Hand-appended under operator override; a formal RE-RANK pass would normally regenerate this entry.",
   "completed": [
     { "position": 1, "id": "W0-CANON-CR", "name": "deterministic-machine canon CR (intake)", "status": "shipped", "unit": ".aprd/change-requests/CR-002.md + aprd.v5 + ADRs 0024-0027 + skeleton.lock v5 + all re-signed locks", "done_sentinel": ".aprd/change-requests/CR-002.md" }
   ],
@@ -106,15 +106,27 @@
     },
     {
       "position": 10,
+      "id": "W9-ECON-RECONCILE",
+      "name": "reconcile ALL accumulated lint + ECONOMY-AUDIT findings across the re-authored corpus",
+      "value": "high",
+      "retires_risk": "accumulated-economy-debt-ships",
+      "unit": "prompts/**/*.md lint-clean + ECONOMY-AUDIT-clean (both-directions) + prompts/_economy-audit.md Rule-2 / lint-profile calibration where a finding is a dual-mode false-positive",
+      "done_sentinel": ".roadmap/09-economy-reconcile.json",
+      "rationale": "Terminal sweep. Every prompt's lint + ECONOMY-AUDIT residue deferred per-wave during W6/W7 (defer-not-chase, avoids over-stripping the standalone-PART-A/B design) is resolved to EXACTLY ONE of: (a) prompt DELETE/REWRITE — genuine AB1/AB7 debt; (b) prompts/_economy-audit.md Rule-2 calibration — a dual-mode standalone-Part restatement is sanctioned, NOT a duplicate (the auditor mis-fires, fix the auditor not the prompt, routes_to:canon); (c) lint-profile threshold note in the stack profile. done_sentinel .roadmap/09-economy-reconcile.json records per-prompt lint verdict:clean + economy-audit verdict:clean across the whole corpus + a both-directions proof (planted-bloat copy still BLOCKED). Discriminator: zero prompt carries an unresolved blocking lint/audit finding AND the report's both-directions proof holds. NEVER ADD an instruction to silence a finding (AB9 keystone).",
+      "coarse_depends_on": ["W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST", "W7-ORCH-SWAP"],
+      "real_depends_on": ["W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST", "W7-ORCH-SWAP"]
+    },
+    {
+      "position": 11,
       "id": "W8-PACK-GATE",
       "name": "pack gate: wire all selftests, re-skin, ship",
       "value": "high",
       "retires_risk": "spine-untested-in-dist",
       "unit": "pack.mjs wires all selftests + dist/adp-v5.tgz",
       "done_sentinel": "dist/adp-v5.tgz",
-      "rationale": "Compound: pack.mjs runs all selftests (validator + resolver + graph-lint + det modules + emitters + economy-lint) green; dist/adp-v<ver>.tgz ships. No tarball if any selftest mis-proves.",
-      "coarse_depends_on": ["W7-ORCH-SWAP"],
-      "real_depends_on": ["W7-ORCH-SWAP"]
+      "rationale": "Compound: pack.mjs runs all selftests (validator + resolver + graph-lint + det modules + emitters + economy-lint) green; dist/adp-v<ver>.tgz ships. Lands AFTER W9 so the corpus is economy-clean in the tarball. No tarball if any selftest mis-proves.",
+      "coarse_depends_on": ["W7-ORCH-SWAP", "W9-ECON-RECONCILE"],
+      "real_depends_on": ["W7-ORCH-SWAP", "W9-ECON-RECONCILE"]
     }
   ],
   "dependency_check": {
@@ -128,16 +140,16 @@
     "scope_note": "Scoped to the CR-002 deterministic-machine wave only. Prior delivered waves (greenfield, bugfix) are not tracked here; their done-state is on disk (D20).",
     "completed": ["W0-CANON-CR"],
     "remaining_ranked": [
-      "W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST", "W3-GRAPH-LINT", "W4-DET-MODULES", "W5-TIER1-EMITTERS", "W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST", "W7-ORCH-SWAP", "W8-PACK-GATE"
+      "W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST", "W3-GRAPH-LINT", "W4-DET-MODULES", "W5-TIER1-EMITTERS", "W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST", "W7-ORCH-SWAP", "W9-ECON-RECONCILE", "W8-PACK-GATE"
     ],
     "missing": [],
     "duplicated": []
   },
   "rerank_counts": {
     "completed": 1,
-    "remaining": 9,
+    "remaining": 10,
     "reordered": 0,
     "deps_removed": 0,
-    "deps_added": 9
+    "deps_added": 13
   }
 }
