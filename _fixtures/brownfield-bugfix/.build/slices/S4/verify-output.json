@@ -9,296 +9,123 @@
   "adr_lock_ref": ".adr/adr.lock",
   "aprd_lock_ref": ".aprd/aprd.lock",
   "locks_verified": true,
-  "class": "greenfield",
-  "mode": "slice-build",
+  "class": "bugfix",
+  "mode": "bugfix",
   "slice_id": "S4",
   "slice_name": "Create and manage client projects with currency and billable rate",
-  "flow": "F4",
-  "slice_path": ["C6", "C3", "C2", "C1"],
+  "diagnosis_ref": ".aprd/diagnosis.json",
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "aprd_version": "v2",
+  "regression_guard_ref": ".aprd/aprd.v2.frozen.md#CLASS_EXTENSION/REGRESSION_GUARD",
   "prior_built_components": ["C1", "C2", "C6"],
   "verification_method": "static-trace",
   "inherited_oracle": {
+    "slice_oracle_ref": ".build/slices/S4/oracle/oracle.json",
     "skeleton_oracle_ref": ".build/skeleton/oracle/oracle.json",
-    "skeleton_oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
     "skeleton_integration_ref": ".build/skeleton/integration-record.json",
-    "inherited_tests": [
-      "OCT-CT1",
-      "OCT-CT8",
-      "OF-F1",
-      "OA-AC1",
-      "OA-AC5"
-    ],
+    "inherited_tests": ["OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
     "frozen_verified": true,
     "re_run": false,
-    "note": "Skeleton greens frozen-verified at skeleton-build; inherited by reference (H14). Not re-run here."
+    "note": "Baseline S4 oracle greens inherited by reference (H14). AC6 re-run ONLY via scoped regression layer (bugfix delta Rule 4)."
   },
   "ladder": {
     "contract": {
-      "layer_verdict": "green",
-      "tests": [
-        {
-          "id": "OCT-CT2",
-          "file": "contract/test_CT2.py",
-          "target": "CT2",
-          "caller": "C3",
-          "provider": "C1",
-          "assertions": [
-            {
-              "id": "OCT-CT2/shape",
-              "test": "test_ct2_shape_persists_project_records",
-              "result": "pass",
-              "trace": "ProjectStore(mock_data_store).create(payload) -> self._store.create_project(payload) -> mock returns {id:'proj-1',...}. create_project.called=True; result['id']=='proj-1'; result['name']=='Acme Website'; result['currency']=='USD'; result['billable_rate']=='150.00'. All 5 assertions hold."
-            },
-            {
-              "id": "OCT-CT2/failure-store-unavailable",
-              "test": "test_ct2_failure_store_unavailable",
-              "result": "pass",
-              "trace": "mock_data_store.create_project.side_effect=StoreUnavailableError. store.create({}) -> self._store.create_project(payload) raises StoreUnavailableError; ProjectStore.create() has no try/except -> propagates. pytest.raises(StoreUnavailableError) holds. create_project.call_count==1 (fires once, no retry). not update_project.called=True (no partial write)."
-            },
-            {
-              "id": "OCT-CT2/failure-constraint-violation",
-              "test": "test_ct2_failure_constraint_violation",
-              "result": "pass",
-              "trace": "mock_data_store.create_project.side_effect=ConstraintViolationError. store.create({}) -> propagates unmodified. pytest.raises(ConstraintViolationError) holds. create_project.call_count==1. not update_project.called=True."
-            },
-            {
-              "id": "OCT-CT2/failure-not-found",
-              "test": "test_ct2_failure_not_found",
-              "result": "pass",
-              "trace": "mock_data_store.get_project.side_effect=NotFoundError. store.get('project-99',owner_id='freelancer-1') -> self._store.get_project('project-99','freelancer-1') raises NotFoundError -> propagates. pytest.raises(NotFoundError) holds. get_project.called=True."
-            }
-          ],
-          "layer_verdict": "green"
-        },
-        {
-          "id": "OCT-CT3",
-          "file": "contract/test_CT3.py",
-          "target": "CT3",
-          "caller": "C3",
-          "provider": "C2",
-          "assertions": [
-            {
-              "id": "OCT-CT3/shape",
-              "test": "test_ct3_shape_resolves_authenticated_session",
-              "result": "pass",
-              "trace": "SessionResolver(mock_identity_auth).resolve({'session_token':'tok-abc'}). mock_identity_auth.resolve_session.return_value={'freelancer_id':'freelancer-42','provider':'google'}. try: identity=self._auth.resolve_session(request_context) -> {'freelancer_id':'freelancer-42','provider':'google'} (no exception). identity is not None -> returns identity. mock_identity_auth.resolve_session.called=True; identity['freelancer_id']=='freelancer-42'. Both assertions hold."
-            },
-            {
-              "id": "OCT-CT3/failure-no-valid-session",
-              "test": "test_ct3_failure_no_valid_session",
-              "result": "pass",
-              "trace": "mock_identity_auth.resolve_session.return_value=None. SessionResolver.resolve({'session_token':None}): try: identity=self._auth.resolve_session(context) -> None (no exception, so no except branch). if identity is None: raise UnauthorizedError('No authenticated session'). pytest.raises(UnauthorizedError) holds. mock_identity_auth.resolve_session.called=True."
-            },
-            {
-              "id": "OCT-CT3/failure-callee-error",
-              "test": "test_ct3_failure_callee_error",
-              "result": "pass",
-              "trace": "mock_identity_auth.resolve_session.side_effect=RuntimeError('store lookup failure'). SessionResolver.resolve({'session_token':'tok-bad'}): try: identity=self._auth.resolve_session(context) -> raises RuntimeError -> except Exception as exc: raise SessionResolutionError('Session resolution failed: store lookup failure') from exc. pytest.raises(SessionResolutionError) holds. mock_identity_auth.resolve_session.call_count==1."
-            }
-          ],
-          "layer_verdict": "green"
-        },
-        {
-          "id": "OCT-CT9",
-          "file": "contract/test_CT9.py",
-          "target": "CT9",
-          "caller": "C6",
-          "provider": "C3",
-          "assertions": [
-            {
-              "id": "OCT-CT9/shape",
-              "test": "test_ct9_shape_dispatches_project_page_request",
-              "result": "pass",
-              "trace": "mock_project_management.handle_request.return_value={'status':200,'body':'<html>projects</html>','content_type':'text/html'}. dispatch_project_request(request={...}, project_management=mock_project_management, identity_auth=mock_identity_auth): try: response=project_management.handle_request(request) -> returns dict (no exception) -> return response. mock_project_management.handle_request.called=True; response['status']==200; 'text/html' in response['content_type']. All 3 assertions hold."
-            },
-            {
-              "id": "OCT-CT9/failure-callee-error",
-              "test": "test_ct9_failure_callee_error",
-              "result": "pass",
-              "trace": "mock_project_management.handle_request.side_effect=RuntimeError('unhandled exception'). dispatch_project_request: try: response=handle_request(request) -> raises RuntimeError -> except RuntimeError: return {'status':500,'body':'<html>Internal Server Error</html>','content_type':'text/html'}. response['status']=500>=500; 'RuntimeError' not in '<html>Internal Server Error</html>'. Both assertions hold."
-            },
-            {
-              "id": "OCT-CT9/failure-not-found",
-              "test": "test_ct9_failure_not_found",
-              "result": "pass",
-              "trace": "mock_project_management.handle_request.side_effect=NotFoundError('project-deleted not found'). dispatch_project_request: try: handle_request(request) -> raises NotFoundError -> except NotFoundError: return {'status':404,'body':'<html>Not Found</html>','content_type':'text/html'}. response['status']==404. Assertion holds."
-            }
-          ],
-          "layer_verdict": "green"
-        }
-      ]
+      "layer_verdict": "n/a",
+      "note": "Bugfix mints no new contract (bugfix delta Rule 2). Contract layer n/a."
     },
     "flow": {
-      "layer_verdict": "green",
-      "tests": [
-        {
-          "id": "OF-F4",
-          "file": "flow/test_F4.py",
-          "target": "F4",
-          "path": ["C6", "C3", "C2", "C1"],
-          "via": ["CT9", "CT3", "CT2"],
-          "happy": {
-            "test": "test_f4_happy_path_project_create_and_list",
-            "result": "pass",
-            "assertions": [
-              {
-                "id": "F4/AC6-create-status",
-                "assert": "create_response['status'] in (200, 201, 302)",
-                "result": "pass",
-                "trace": "_simulate_create_flow side_effect: mock_identity_auth.resolve_session({'session_token':'sess-f4-valid'}) -> {'freelancer_id':'freelancer-42','provider':'google'} (truthy); mock_data_store.create_project({name:'Beta Client Portal',owner_id:'freelancer-42'}) -> created_project; returns {'status':201,'project':created_project}. dispatch_project_request -> handle_request(request) -> side_effect returns {'status':201,...} -> dispatcher returns that dict. create_response['status']=201 in (200,201,302)=True."
-              },
-              {
-                "id": "F4/AC6-list-status",
-                "assert": "list_response['status'] == 200",
-                "result": "pass",
-                "trace": "handle_request.side_effect=None; handle_request.return_value={'status':200,'body':'<html>Beta Client Portal</html>','content_type':'text/html','projects':[created_project]}. dispatch_project_request -> handle_request returns return_value -> list_response['status']=200==200=True."
-              },
-              {
-                "id": "F4/AC6-project-in-list",
-                "assert": "any(p['id'] == 'proj-new' for p in list_response.get('projects', []))",
-                "result": "pass",
-                "trace": "list_response.get('projects',[])=[created_project]; created_project['id']='proj-new'; any(p['id']=='proj-new' for p in [created_project])=True."
-              }
-            ]
-          },
-          "failure": {
-            "test": "test_f4_failure_ct3_no_valid_session",
-            "result": "pass",
-            "assertions": [
-              {
-                "id": "F4-failure-status",
-                "assert": "response['status'] in (302, 401, 403)",
-                "result": "pass",
-                "trace": "mock_identity_auth.resolve_session.return_value=None. _unauthorized_handler(request): mock_identity_auth.resolve_session({'session_token':None})->None; if not None: raises UnauthorizedError('no valid session'). dispatch_project_request -> handle_request(request) -> _unauthorized_handler raises UnauthorizedError -> except UnauthorizedError: return {'status':302,'body':'','content_type':'text/html','location':'/auth/login'}. response['status']=302 in (302,401,403)=True."
-              },
-              {
-                "id": "F4-failure-no-data-store-touch",
-                "assert": "not mock_data_store.create_project.called",
-                "result": "pass",
-                "trace": "_unauthorized_handler raises UnauthorizedError before reaching mock_data_store.create_project({}) line; exception propagates to dispatcher; dispatcher catches UnauthorizedError; mock_data_store.create_project never called. .called=False; not False=True."
-              }
-            ]
-          }
-        }
-      ]
+      "layer_verdict": "n/a",
+      "note": "Bugfix oracle_layers=[reproduction,regression]; flow not run."
     },
     "acceptance": {
-      "layer_verdict": "green",
-      "per_ac": [
+      "layer_verdict": "n/a",
+      "note": "Bugfix oracle_layers=[reproduction,regression]; acceptance not run as a separate layer. AC6 covered by regression layer."
+    },
+    "class_ext": {
+      "layer_verdict": "pass",
+      "kinds": [
         {
-          "id": "OA-AC6",
-          "target": "AC6",
-          "req_ref": "R6",
-          "visible": {
-            "file": "acceptance/visible/test_AC6.py",
-            "result": "pass",
-            "tests": [
-              {
-                "id": "OA-AC6/visible/create-appears-in-list",
-                "test": "test_ac6_create_project_appears_in_list",
-                "result": "pass",
-                "trace": "POST /projects session=sess-ac6-visible data={name:'Gamma Design',currency:'GBP',billable_rate:'95.00',...}. _view_project_management: session_token='sess-ac6-visible'; _IdentityAuthAdapter.resolve_session({'session_token':'sess-ac6-visible'}) -> _session_checker.resolve_session('sess-ac6-visible') [patched] -> {'freelancer_id':'freelancer-42'}; owner_id='freelancer-42'; method=POST parts=['projects']; store.create({id:'gamma-design',owner_id:'freelancer-42',name:'Gamma Design',currency:'GBP',billable_rate:'95.00'}) -> _PROJECT_DATA_STORE._by_owner['freelancer-42']['gamma-design']=record; returns {'status':201,...}; HttpResponse status=201. create_resp['status']=201 in (200,201,302)=True. GET /projects: store.list('freelancer-42')=[{name:'Gamma Design',...}]; _render -> '<li>Gamma Design — GBP 95.00</li>'; list_resp['status']==200=True; 'Gamma Design' in body=True."
-              },
-              {
-                "id": "OA-AC6/visible/edit-name-rate",
-                "test": "test_ac6_edit_project_name_and_rate",
-                "result": "pass",
-                "trace": "Pre-create POST /projects name='Gamma Design' -> _by_owner['freelancer-42']['gamma-design'] set. GET /projects -> 'Gamma Design' in body=True. POST /projects/gamma-design/edit data={name:'Gamma Redesign',billable_rate:'110.00'}: parts=['projects','gamma-design','edit'], method=POST, parts[2]='edit'; store.update('gamma-design','freelancer-42',{name:'Gamma Redesign',billable_rate:'110.00'}) -> _PROJECT_DATA_STORE.update_project: record found; record.update({name:'Gamma Redesign',billable_rate:'110.00'}) -> updated; returns {'status':302,'location':'/projects'} -> HttpResponseRedirect. edit_resp['status']=302 in (200,302)=True. GET /projects: list -> [{name:'Gamma Redesign',billable_rate:'110.00',...}]; _render -> '<li>Gamma Redesign — GBP 110.00</li>'; 'Gamma Redesign' in body=True; '110.00' in body=True."
-              },
-              {
-                "id": "OA-AC6/visible/delete-removed-from-list",
-                "test": "test_ac6_delete_project_removed_from_list",
-                "result": "pass",
-                "trace": "Pre-create POST /projects name='Gamma Design' -> _by_owner['freelancer-42']['gamma-design'] set (creates/resets record). POST /projects/gamma-design/delete: parts=['projects','gamma-design','delete'], method=POST, parts[2]='delete'; store.delete('gamma-design','freelancer-42') -> _PROJECT_DATA_STORE.delete_project: _by_owner['freelancer-42'].pop('gamma-design',None) -> removed; returns {'status':302,'location':'/projects'} -> HttpResponseRedirect. del_resp['status']=302 in (200,302)=True. GET /projects: store.list('freelancer-42')=[]; _render([]) -> '<html><body><ul></ul></body></html>'; 'Gamma Design' not in body=True."
-              }
-            ]
-          },
-          "held_out": {
-            "file": "acceptance/held_out/test_AC6.py",
-            "result": "pass",
-            "tests": [
-              {
-                "id": "OA-AC6/held_out/create-appears-in-list",
-                "test": "test_ac6_held_out_create_project_appears_in_list",
-                "result": "pass",
-                "trace": "POST /projects session=sess-ac6-ho-xk9m data={name:'Zeta Analytics',currency:'JPY',billable_rate:'18000',...}. _IdentityAuthAdapter.resolve_session({'session_token':'sess-ac6-ho-xk9m'}) -> _session_checker.resolve_session('sess-ac6-ho-xk9m') [patched] -> {'freelancer_id':'freelancer-7f3a'}; owner_id='freelancer-7f3a'; store.create({id:'zeta-analytics',owner_id:'freelancer-7f3a',name:'Zeta Analytics',currency:'JPY',billable_rate:'18000'}) -> persisted; status=201 in (200,201,302)=True. GET /projects: list('freelancer-7f3a')=[{name:'Zeta Analytics',...}]; _render -> '<li>Zeta Analytics — JPY 18000</li>'; list_resp['status']==200=True; 'Zeta Analytics' in body=True."
-              },
-              {
-                "id": "OA-AC6/held_out/edit-name-rate",
-                "test": "test_ac6_held_out_edit_project_name_and_rate",
-                "result": "pass",
-                "trace": "Pre-create 'Zeta Analytics' -> _by_owner['freelancer-7f3a']['zeta-analytics'] set. POST /projects/zeta-analytics/edit data={name:'Zeta Analytics Pro',billable_rate:'20000'}: parts=['projects','zeta-analytics','edit']; store.update('zeta-analytics','freelancer-7f3a',{name:'Zeta Analytics Pro',billable_rate:'20000'}) -> record updated; status=302 in (200,302)=True. GET /projects: list -> [{name:'Zeta Analytics Pro',billable_rate:'20000',...}]; _render -> '<li>Zeta Analytics Pro — JPY 20000</li>'; 'Zeta Analytics Pro' in body=True; '20000' in body=True."
-              },
-              {
-                "id": "OA-AC6/held_out/delete-removed-from-list",
-                "test": "test_ac6_held_out_delete_project_removed_from_list",
-                "result": "pass",
-                "trace": "Pre-create 'Zeta Analytics' -> _by_owner['freelancer-7f3a']['zeta-analytics'] set. POST /projects/zeta-analytics/delete: store.delete('zeta-analytics','freelancer-7f3a') -> _by_owner['freelancer-7f3a'].pop('zeta-analytics',None) -> removed; status=302 in (200,302)=True. GET /projects: list('freelancer-7f3a')=[]; 'Zeta Analytics' not in body=True."
-              }
-            ]
-          },
-          "overfit_check": "visible uses Gamma Design/GBP/95.00/sess-ac6-visible/freelancer-42; held_out uses Zeta Analytics/JPY/18000/sess-ac6-ho-xk9m/freelancer-7f3a. Implementation generalizes: session->owner_id via patched resolve_session, name->slug via _project_slug(). No hardcoded visible inputs in src/. Both pass on distinct unguessable inputs -> no overfit.",
-          "ac_verdict": "green"
+          "kind": "regression",
+          "scope": "touched-surface + seams",
+          "scope_basis": "REGRESSION_GUARD AC6 scoped to BLAST_RADIUS _ProjectManagementAdapter._render — rated-project rendering + CRUD; float() coercion in _rate_str preserves prior string→formatted behavior",
+          "asserts": ["AC6"],
+          "source_suites": [".build/slices/S4/oracle/"],
+          "result": "pass"
         }
       ]
     },
-    "class_ext": {
-      "layer_verdict": "n/a",
-      "note": "oracle.json class_ext=[]. Greenfield class. Layer not applicable."
-    },
     "nfr": {
-      "layer_verdict": "pass-vacuous",
-      "note": "nfr-mechanisms.json new_mechanisms=[], mechanisms=[]. All NFRs satisfied-by-frame (A13/A2/C1/C2 inherited, no M* wired in src/ required). Vacuous pass per Rule 4."
+      "layer_verdict": "pass",
+      "mechanisms_checked": [],
+      "note": "slice nfr-mechanisms.json mechanisms == [] — no M* requires wiring check (MAP-NFR). NFR layer passes vacuously."
     }
+  },
+  "reproduction": {
+    "ran": true,
+    "test_id": "OREPRO-1",
+    "target": "AC11",
+    "req_ref": "R11",
+    "file": "reproduction/test_AC11_null_rate.py",
+    "was": "red",
+    "now": "green",
+    "flips_green_when": "null billable_rate → _rate_str(None)='—'; HTTP 200, no TypeError/500",
+    "trace": "conftest.client fixture imports create_app from repaired wsgi.py (exists). create_app(project_store=mock, identity_auth=mock_resolve→{freelancer_id:'freelancer-repro-7f3a'}) → _AppHandle(_injected_wsgi). project_store.list.return_value=[{id:'proj-null-rate-001',billable_rate:None,...}]. client.get('/projects', headers={'Cookie':'session=repro-sess-9b2e4d1c; Path=/'}) → _TestClient extracts HTTP_COOKIE='session=repro-sess-9b2e4d1c'. _injected_wsgi: PATH_INFO='/projects', method=GET, session_token='repro-sess-9b2e4d1c'. _InjectedProjectMgmtAdapter.handle_request: identity_auth.resolve_session('repro-sess-9b2e4d1c')→{freelancer_id:'freelancer-repro-7f3a'}; project_store.list('freelancer-repro-7f3a')→[null_rate_project]; _rate_str(None)→'—' (null guard present); renders '<li>Zero-Rate Engagement — USD —</li>'; status=200. Assertions: response.status_code==200 PASS; 'Zero-Rate Engagement' in body PASS; '—' in body PASS.",
+    "baseline_ref": "AC6"
+  },
+  "regression": {
+    "ran": true,
+    "scope": "touched-surface + seams",
+    "scope_basis": "REGRESSION_GUARD AC6 scoped to BLAST_RADIUS _ProjectManagementAdapter._render — rated-project rendering (billable_rate='95.00' string → float coercion) + project CRUD; production singleton _project_mgmt_adapter unchanged path",
+    "suites_run": [".build/slices/S4/oracle/"],
+    "asserts": ["AC6"],
+    "results": [
+      {
+        "ref": "AC6",
+        "result": "pass",
+        "trace": "AC6 visible (3 tests) + held-out (3 tests) all traced against repaired wsgi.py. _rate_str('95.00')=f'{float(95.00):.2f}/hr'='95.00/hr': create POST→201, 'Gamma Design' in list PASS; edit→302, 'Gamma Redesign'+'110.00' in list PASS; delete→302, 'Gamma Design' not in list PASS. Held-out: _rate_str('18000')='18000.00/hr': Zeta Analytics create/list PASS; edit Zeta Analytics Pro/20000 PASS; delete PASS. No test required editing. float() coercion on string rate preserves prior behavior. Repair scoped to BLAST_RADIUS — no skeleton test touched."
+      }
+    ],
+    "verdict": "green",
+    "reds": [],
+    "baseline_tests_edited": false
   },
   "skeleton_fidelity": {
     "breached": false,
-    "inherited_tests": [
-      "OCT-CT1",
-      "OCT-CT8",
-      "OF-F1",
-      "OA-AC1",
-      "OA-AC5"
-    ],
-    "note": "Frozen skeleton oracle tests not re-run (H14). Skeleton F1 routes (GET /, GET /auth/login, GET /auth/callback) in wsgi.py unchanged; S4 additive routes appended only. No frozen test file edited or re-materialized. No skeleton oracle artifact edited."
+    "inherited_tests": ["OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
+    "note": "Bugfix edits BLAST_RADIUS src file (src/freelancer_app/wsgi.py, symbol _ProjectManagementAdapter._render) — sanctioned repair (H14). No frozen oracle test edited or re-run. Inherited greens verified at skeleton-build/S4-build; re-running here not required (delta Rule 4)."
   },
   "per_ac_summary": [
-    {
-      "id": "AC6",
-      "oracle_test_id": "OA-AC6",
-      "req_ref": "R6",
-      "visible_passed": true,
-      "held_out_passed": true,
-      "overfit": false,
-      "verdict": "green"
-    }
+    { "ac": "AC11", "reproduction": "green", "note": "OREPRO-1 flipped red→green" },
+    { "ac": "AC6", "regression": "green", "note": "scoped regression, all 6 tests pass" }
   ],
   "verdict": "verified",
   "escape": null,
   "provenance": {
-    "verifier_role": "VERIFY-OUTPUT",
+    "verifier_role": "verifier",
     "built_against": {
       "slice_oracle_lock": ".build/slices/S4/oracle/oracle.lock",
-      "build_record": ".build/slices/S4/build-record.json",
-      "integration_record": ".build/slices/S4/integration-record.json",
-      "skeleton_oracle_lock": ".build/skeleton/oracle/oracle.lock",
+      "skeleton_oracle": ".build/skeleton/oracle/oracle.json",
+      "skeleton_integration": ".build/skeleton/integration-record.json",
       "skeleton_lock": ".hld/skeleton.lock",
       "adr_lock": ".adr/adr.lock",
-      "aprd_lock": ".aprd/aprd.lock"
+      "aprd_lock": ".aprd/aprd.lock",
+      "diagnosis": ".aprd/diagnosis.json",
+      "slice_build_record": ".build/slices/S4/build-record.json",
+      "slice_integration_record": ".build/slices/S4/integration-record.json"
     }
   },
   "verification_counts": {
-    "contract_tests": 3,
-    "contract_assertions": 10,
-    "flow_assertions": 5,
-    "acceptance_acs": 1,
-    "acceptance_visible_passed": 3,
-    "acceptance_held_out_passed": 3,
-    "class_ext_layers": 0,
+    "reproduction_flipped": 1,
+    "regression_asserts": 1,
+    "regression_asserts_passed": 1,
+    "contract_assertions": 0,
+    "flow_assertions": 0,
+    "acceptance_acs": 0,
+    "class_ext_layers": 1,
     "mechanisms_checked": 0,
     "inherited_tests_not_run": 5,
-    "layers_applicable": 3,
-    "layers_passed": 3,
+    "layers_applicable": 2,
+    "layers_passed": 2,
     "layers_failed": 0
   }
 }
