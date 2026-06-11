@@ -3,17 +3,8 @@ role: SLICE-EXTRACT
 phase: 01-roadmap
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal clustering — reads disk, writes disk, stops. Client re-engages later at SEQUENCE-REVIEW (order gate), not here (PR1).
-inputs:
-  # — shared (both classes) —
-  - { path: ".aprd/aprd.lock", format: "json — freeze gate AND frozen-WHAT RESOLVER: present + status==frozen; its `artifact` value names the CURRENT frozen version to open (.aprd/<aprd.lock.artifact>) — NEVER hardcode aprd.v<N>.frozen.md (BF7/P8, 07a canon); don't recompute hash" }
-  # — greenfield —
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — greenfield frozen WHAT (= lock artifact at v1): slice from PROJECT (centrality basis), ENTITIES E* (shared-entity grouping), REQUIREMENTS R* (cluster + cover), ACCEPTANCE AC* (demo/verticality oracle); CLASS gates path" }
-  # — feature-add —
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — CURRENT frozen version RESOLVED via lock (feature-add → aprd.v<N>.frozen.md); carries NEW R*/AC* above high-water + CLASS_EXTENSION block. Slice ONLY the new R*/AC*; baseline carried by REFERENCE (BF1)" }
-  - { path: ".aprd/baseline-map.json", format: "json — baseline S* high-water (id_high_water.S): new S* mint strictly above (BF3); R/AC high-water bounds the new cover set; conventions/seams for reference" }
-  - { path: ".roadmap/08-rerank.json", format: "json — baseline frontier: completed[] = pinned baseline slices (BF1); carried into baseline_completed_slices, never re-sliced" }
 outputs:
-  - { path: ".roadmap/02-slices.json", format: "json (schema below) — candidate vertical slices[]" }
+  - { path: ".roadmap/02-slices.json", schema: "02-slices" }
 escapes:
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the frozen version it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — nothing frozen to slice; Phase 1 consumes only FROZEN WHAT resolved via the lock (P8/BF7), never draft, never a hardcoded version. Version-mismatch impossible: only the lock-named file is opened" }
   - { when: "feature-add but .aprd/baseline-map.json or .roadmap/08-rerank.json missing/unparseable", target: "BASELINE-MAP / HALT — baseline S* high-water + pinned completed slices unknown; cannot slice additively (BF1/BF3)" }
@@ -73,50 +64,6 @@ Slice **vertical iff at least one acceptance criterion is black-box and user-obs
 5. Coverage over the NEW ID set only (delta Rule 1). Carry baseline `completed[]` into `baseline_completed_slices` (reference, never re-sliced).
 6. Do NOT name a skeleton or cut foundation (delta Rule 4).
 7. Write `.roadmap/02-slices.json` with `class:"feature-add"` + `aprd_version` + `baseline_completed_slices`. Stop.
-
-## Output schema — `.roadmap/02-slices.json`
-
-```json
-{
-  "aprd_ref": ".aprd/aprd.frozen.md",
-  "lock_verified": true,                 // lock present + names frozen artifact (don't recompute hash)
-  "class": "greenfield",
-  "project": "<verbatim PROJECT line from frozen aPRD>",
-  "slices": [                            // emission order = each slice's lowest contributing R* index; NOT priority order
-    {
-      "id": "S1",                        // stable S* space, contiguous from S1, in emission order. Never priority order
-      "name": "<one line: demoable, user-visible capability — verb client recognises ('Sign in', 'Log hours', 'Export invoice'), never a layer ('data model', 'API layer')>",
-      "requirements": ["R5", "R1"],      // non-empty; R* IDs verbatim from frozen aPRD; what this capability needs to run end-to-end
-      "acceptance": ["AC5", "AC1"],      // NON-EMPTY; AC* IDs verbatim; ≥1 must be black-box/user-observable (demo gate + verticality proof). Empty → invalid, re-cut/merge
-      "value": "high",                   // exactly one of high | med | low; provisional, client-owned (§7)
-      "value_basis": "<why this value — centrality to PROJECT statement; proposal, client confirms at SEQUENCE-REVIEW>",
-      "retires_risk": "<concrete named unproven decision/integration this slice first exercises | null — never fabricated risk>",
-      "depends_on": [],                  // S* IDs (may be empty); coarse slice-level prerequisites from aPRD; acyclic
-      "candidate": true                  // always true; SEQUENCE/SKELETON-IDENTIFY enrich later
-    }
-  ],
-  "unsliceable": [                       // every R*/behaviour you could not place; [] on full coverage (true orphan also appears here)
-    { "ref": "R?", "reason": "<why no demoable vertical slice can carry it>", "escape": "Phase 0 (change request)" }
-  ],
-  "coverage": {                          // requirement_orphans & acceptance_orphans both [] on clean run (any orphan = slicing defect)
-    "requirements_total": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10"],   // every R* in frozen aPRD
-    "requirements_covered": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10"],
-    "requirement_orphans": [],
-    "acceptance_total": ["AC1", "AC2", "AC3", "AC4", "AC5", "AC6", "AC7", "AC8", "AC9", "AC10"],  // every AC* in frozen aPRD
-    "acceptance_covered": ["AC1", "AC2", "AC3", "AC4", "AC5", "AC6", "AC7", "AC8", "AC9", "AC10"],
-    "acceptance_orphans": []
-  },
-  "slice_counts": { "total": 0 }         // must equal slices.length
-}
-```
-All prose fields (`name`/`value_basis`/`reason`) are caveman (governs artifact bodies too — PR4).
-
-### Feature-add schema delta (only what differs — AB1)
-Same shape as above; differences:
-- `"class": "feature-add"`, `"aprd_version": "<version from .aprd/aprd.lock>"`, `"aprd_ref": ".aprd/<aprd.lock.artifact>"` (lock-resolved, NOT a hardcoded `aprd.v<N>.frozen.md`).
-- `"baseline_completed_slices": [ { "id": "S*", "name": "<baseline slice>" } ]` — pinned baseline slices from `08-rerank.json` `completed[]`/`coverage.base_slices`; carried for reference + `depends_on` legality only. NEVER appear in `slices[]` (BF1).
-- `slices[]` cover ONLY new `R*/AC*` (above high-water); each `id` minted above `id_high_water.S`. A new slice's `depends_on` may cite a baseline `S*`.
-- `coverage.requirements_total`/`acceptance_total` = the NEW ID set only (not the whole aPRD).
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:` — no frozen aPRD, missing/invalid lock, or unplaybooked class) → write nothing; print which guard fired + offending detail; "HALT".

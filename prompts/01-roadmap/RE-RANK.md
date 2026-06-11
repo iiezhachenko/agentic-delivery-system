@@ -3,14 +3,8 @@ role: RE-RANK
 phase: 01-roadmap
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal re-rank — reads disk, writes re-ranked living roadmap, stops. Client saw order at SEQUENCE-REVIEW; re-ranks surface as updates + per-slice demo, not re-negotiation (§9). PR1
-inputs:
-  - { path: ".roadmap/07-sequence-reviewed.json", format: "json — client-confirmed base sequence; sequence[] carried verbatim (coarse aPRD-derived depends_on) = order to re-rank + value/risk to carry, never re-scored" }
-  - { path: ".hld/skeleton/build-dag.json", format: "json — REAL component dependency DAG (nodes[].depends_on); replaces coarse aPRD graph (§5.11). Authoritative component-level prerequisites" }
-  - { path: ".hld/skeleton/components.json", format: "json — per component traces[R*] + realizes_seam[]; projection key (seam-realizer = skeleton-built; trace = which slice introduces non-seam component)" }
-  - { path: ".roadmap/02-slices.json", format: "json — slices[].requirements[R*]; slice→component projection input (slice's component set = components whose traces hit its requirements)" }
-  - { path: ".build/skeleton/demo/demo.json", format: "json (+ .build/slices/S*/demo/demo.json if present) — completed-slice acceptance records: slice + client_response + learnings[]; accepted slices COMPLETED (pinned, not re-ranked), learnings = only value/risk-change source" }
 outputs:
-  - { path: ".roadmap/08-rerank.json", format: "json (schema below) — re-ranked LIVING roadmap (roadmap_version bumped): completed slices pinned + remaining slices re-ordered dependency-legal against real DAG" }
+  - { path: ".roadmap/08-rerank.json", schema: "08-rerank" }
 escapes:
   - { when: "any input missing/unparseable, OR no demo record with client_response:accepted exists (foundation loop not complete — nothing built to re-rank against)", target: "self / HALT — report which guard, write nothing (§5.11 runs AFTER foundation loop)" }
   - { when: "07 / build-dag / components / 02 class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — re-rank depth not authored; HALT, report class" }
@@ -59,72 +53,6 @@ Re-ranker of LIVING roadmap, Phase 1. Runs AFTER foundation loop (walking skelet
 6. Apply learning-driven value/risk changes (Rule 5), each grounded in specific learning. Write one-line `rationale` per remaining position (what real dep freed/held it, its value, risk retired) + `moved`/`value_risk_change` where applicable.
 7. Run accounting check (Rule 7); set `verdict` (`re_ranked` if any move/change, `unchanged` if none, `dependency_defect` if cycle/dangling guard fired), `dependency_check`, `changes`, bump `roadmap_version`.
 8. Write `.roadmap/08-rerank.json`. Stop.
-
-## Output schema — `.roadmap/08-rerank.json`
-
-```json
-{
-  "base_ref": ".roadmap/07-sequence-reviewed.json",
-  "build_dag_ref": ".hld/skeleton/build-dag.json",
-  "components_ref": ".hld/skeleton/components.json",
-  "slices_ref": ".roadmap/02-slices.json",
-  "completed_demo_refs": [".build/skeleton/demo/demo.json"],   // every accepted demo record read
-  "class": "greenfield",
-  "roadmap_version": 2,                  // base 07 = confirmed v1 baseline; each re-rank bumps version (living roadmap, §5.9/RM6). Subsequent re-ranks increment further
-  "verdict": "re_ranked",                // "re_ranked" = ≥1 remaining slice moved or value/risk changed; "unchanged" = no material info, base remaining order preserved (anti-thrash); "dependency_defect" = real-DAG cycle/dangling blocked it (then remaining_sequence:[])
-  "completed": [                         // accepted slices, pinned — NOT re-ranked (§5.9). One row per accepted demo record
-    { "position": 1, "id": "<Sx>", "name": "<verbatim>", "status": "accepted", "demo_ref": "<demo record path>" }
-  ],
-  "introduction_map": {                  // projection basis (discriminator 2) — auditable. Values below SHAPE ONLY; derive real mapping from inputs
-    "skeleton_built": ["<C* realizing a foundational seam>", "..."],   // foundational-seam realizers — introduced by completed skeleton slice
-    "remaining": { "<Sx>": ["<C* it introduces by characteristic requirement>"] }   // remaining slice → component(s) it introduces
-  },
-  "remaining_sequence": [                // re-ranked remaining slices; positions continue after completed set, ascending, no gaps. [] when verdict:dependency_defect. One row per remaining slice (shape shown for one)
-    {
-      "position": 2,
-      "id": "<Sx>",
-      "name": "<carried verbatim from 07>",
-      "value": "<high|med|low — verbatim from 07, never re-scored unless a logged value_risk_change>",
-      "retires_risk": "<verbatim from 07 | null>",
-      "components": ["<C* this slice introduces>"],   // from introduction_map
-      "coarse_depends_on": ["<S* from the base 07 (aPRD-derived)>"],
-      "real_depends_on": ["<S* projected from the build-dag (discriminator 3); includes completed prerequisites (e.g. the skeleton slice), which are satisfied and don't gate ordering>"],
-      "depends_on_delta": { "confirmed": ["<coarse dep the DAG also yields>"], "removed": ["<coarse dep the DAG does NOT yield — the genuine refinement; a satisfied completed prereq is confirmed, NOT removed>"], "added": ["<real dep absent from the coarse graph>"] },
-      "cost_proxy": 0,                   // len(requirements)+len(acceptance) from 02
-      "moved": null,                     // null if unmoved; else { "from_position": <int>, "to_position": <int>, "basis": "<material change — removed/added real dep or value/risk change — that licensed move>" }
-      "value_risk_change": null,         // null, or { "field": "retires_risk|value", "from": "<old>", "to": "<new|null>", "basis": "<specific learning>" }
-      "rationale": "<one line — which real dep freed/held it at this position, its value, risk retired; caveman>"
-    }
-  ],
-  "dependency_check": {
-    "acyclic": true,                     // false → cycle path in cycles
-    "legal": true,                       // every remaining slice after all its real depends_on + completed prerequisites
-    "against": "real_component_dag",     // re-ranked against build-dag, not coarse aPRD graph
-    "cycles": [],
-    "dangling_real_depends_on": []       // real dep referencing slice absent from base sequence
-  },
-  "changes": {                           // material-change ledger (anti-thrash audit, Rule 4)
-    "reordered": ["<S* whose position changed vs base remaining order>"],
-    "dependency_refinements": [          // every non-empty coarse→real delta
-      { "slice": "<Sx>", "removed": ["<S*>"], "added": ["<S*>"] }
-    ],
-    "value_risk_changes": [],            // every logged value_risk_change
-    "thrash_avoided": "<one line: slices left in base order, nothing material changed them>"
-  },
-  "coverage": {
-    "base_slices": ["<all S* in the 07 sequence>"],
-    "completed": ["<accepted S*>"],
-    "remaining_ranked": ["<remaining S* in emitted order>"],
-    "missing": [],                       // base ids neither completed nor ranked; empty on clean run
-    "duplicated": []
-  },
-  "structural_defects": [],              // cycle/dangling detail when verdict:dependency_defect (else [])
-  "aprd_defects": [],                    // { slice, defect, route:"Phase 0" } — learning exposed bad WHAT (Rule 6)
-  "foundation_gaps": [],                 // { slice, gap, route:"FOUNDATION-CUT" } — foundational surprise flood (Rule 6)
-  "rerank_counts": { "completed": 0, "remaining": 0, "reordered": 0, "deps_removed": 0, "deps_added": 0 }
-}
-```
-All prose content (`rationale`, `*.basis`, `thrash_avoided`) is caveman (governs artifact bodies too — PR4).
 
 ## Stop condition
 - HALT-guard tripped (escapes) → write nothing; print which guard + offending detail; "HALT".

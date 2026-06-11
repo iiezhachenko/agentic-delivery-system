@@ -3,11 +3,8 @@ role: VERTICALITY-CHECK
 phase: 01-roadmap
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # adversarial gate — reads disk, writes pass/reject list, stops. Does NOT re-cut slices (loops back to clustering) and does NOT touch client (order gate = SEQUENCE-REVIEW, later). PR1.
-inputs:
-  - { path: ".roadmap/02-slices.json", format: "json — candidate slices[]: id S*, name, acceptance[AC*] (IDs to test); carry id+name verbatim onto verdict" }
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — AC* TEXT oracle; 02 carries only AC IDs, verticality judged on each AC's actual ACCEPTANCE-section wording" }
 outputs:
-  - { path: ".roadmap/03-verticality.json", format: "json (schema below) — valid[] + rejected[] with reason; verdict deterministic from rejected" }
+  - { path: ".roadmap/03-verticality.json", schema: "03-verticality" }
 escapes:
   - { when: ".roadmap/02-slices.json missing/unparseable, OR .aprd/aprd.frozen.md missing/unparseable, OR slices[] empty", target: "self / HALT — nothing to validate; report which guard fired, write nothing" }
   - { when: "02-slices.json class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — verticality bar not authored; report class, write nothing" }
@@ -57,40 +54,6 @@ Applies to ALL prose: narration AND artifact bodies (spec/ADR/prompt/doc) AND co
 4. Set `verdict`: `all_vertical` if `rejected[]` empty, else `horizontal_found` (deterministic — Rule 6).
 5. Run accounting check (Rule 6): every `S*` exactly once across `valid[]`+`rejected[]`; fill `slice_counts`.
 6. Write `.roadmap/03-verticality.json`. Stop.
-
-## Output schema — `.roadmap/03-verticality.json`
-
-```json
-{
-  "slices_ref": ".roadmap/02-slices.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
-  "class": "greenfield",
-  "verdict": "all_vertical",             // all_vertical iff rejected[] empty, else horizontal_found. Deterministic; never set by feel
-  "valid": [
-    {
-      "id": "S1",                        // carried verbatim from candidate slice
-      "name": "<carried verbatim from the slice>",
-      "vertical": true,                  // always true in valid[]
-      "qualifying_acceptance": ["AC5"],  // non-empty subset of slice's acceptance that passed black-box + user-observable (verticality proof)
-      "reason": "<one line: which AC is black-box + user-observable, and what a client watches pass>"
-    }
-  ],
-  "rejected": [
-    {
-      "id": "S?",                        // carried verbatim
-      "name": "<carried verbatim from the slice>",
-      "vertical": false,                 // always false in rejected[]
-      "qualifying_acceptance": [],       // always [] in rejected[]
-      "category": "horizontal_cut | no_acceptance | unresolved_acceptance",  // horizontal_cut = ACs all internal/structural; no_acceptance = empty acceptance; unresolved_acceptance = AC ID not in frozen aPRD
-      "reason": "<why no AC is black-box + user-observable — name each AC and why it fails>",
-      "remedy": "re-cut | merge",        // you recommend; clustering performs it
-      "remedy_detail": "<re-cut into the capabilities its requirements serve | merge into S? (a named vertical neighbour with a qualifying AC)>"
-    }
-  ],
-  "slice_counts": { "total": 0, "valid": 0, "rejected": 0 }   // total == slices.length; valid == valid.length; rejected == rejected.length; valid + rejected == total
-}
-```
-All prose (`reason`/`remedy_detail`) is caveman (governs artifact bodies too — PR4).
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:` — no slices file, no frozen aPRD, empty slices, or unplaybooked class) → write nothing; print which guard fired + offending detail; "HALT".

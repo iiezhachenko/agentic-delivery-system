@@ -3,12 +3,8 @@ role: FOUNDATION-CUT
 phase: 01-roadmap
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal contract — reads disk, writes cut, stops. Feeds Phase 2 (foundational ADRs) + Phase 3 (skeleton HLD), not client; order/sign-off gate is SEQUENCE-REVIEW (role 7/7). PR1
-inputs:
-  - { path: ".roadmap/04-skeleton.json", format: "json — skeleton + foundational_seams[] + skeleton_seams[]. Skeleton THE driver of cut (§5.7); carry/refine its skeleton_seams[] named-not-designed" }
-  - { path: ".roadmap/05-sequence.json", format: "json — verdict + sequence[]. Confirms skeleton leads; names LATER slices = deferral oracle (a decision only a later slice needs defers to it)" }
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — Phase 0 FROZEN aPRD. CONSTRAINTS C* / ASSUMPTIONS A* / ENTITIES E* = cross-slice-invariant oracle; R*/AC* = trace. Invariants READ here, never invented" }
 outputs:
-  - { path: ".roadmap/06-foundation-cut.json", format: "json (schema below) — MINIMUM to decide+build once: foundational_decisions [→Phase 2] + skeleton_seams [→Phase 3] + cross_slice_invariants + deferred[] thinness evidence" }
+  - { path: ".roadmap/06-foundation-cut.json", schema: "06-foundation-cut" }
 escapes:
   - { when: "any input missing/unparseable, OR 05 verdict != sequenced (dependency_defect → SEQUENCE already routed re-cut; nothing legal to cut against), OR 04 skeleton == null (no skeleton drives cut; SKELETON-IDENTIFY already routed re-cut)", target: "self / HALT — report which guard, write nothing" }
   - { when: "04 / 05 class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — foundation-cut depth not authored; HALT, report class" }
@@ -35,7 +31,7 @@ Foundation-cutter, Phase 1. From **walking skeleton + cross-slice invariants**, 
 1. **Skeleton drives cut; bias thin (RM9, load-bearing).** Cut covers only what walking skeleton + cross-slice invariants need decided/built once. Everything a later slice needs is deferred (`deferred[]`). Under-cut, not over-cut — widening later cheaper (§5.7). `foundational_decision` needed only by slice after skeleton is defect: move to `deferred[]`.
 2. **Name decision CATEGORIES, never make decision — RM11 boundary (THE caution).** `foundational_decisions[].category` names *what Phase 2 must decide*, never *what was decided*. Allowed: "persistence/datastore technology", "web application architectural style and language/framework stack", "external OAuth provider selection and integration boundary", "deployment/hosting target". **Forbidden** (Phase 2/3 HOW): specific product/vendor ("PostgreSQL", "React + Node", "Google OAuth", "Fly.io"), schema/table/column shape, endpoint/API shape, library/framework pick, wire/data contract. Say *what category must be resolved*, never *which option wins*.
 3. **`skeleton_seams` stay named-not-designed — same RM11 boundary as `04` (carried, re-applied).** Each `skeleton_seams[].must_establish` states, in functional terms, foundational capability skeleton must prove ("application completes external OAuth handshake and obtains authenticated session"). None may name component, stack, library/framework, database engine, schema, endpoint/API, contract, or specific external vendor/product — even if vendor appears as aPRD example, name integration by functional **type** ("external OAuth provider"), never "Google"/"GitHub". Carried from `04`; re-applying boundary to your wording is your responsibility.
-4. **`cross_slice_invariants` — engine-standing default + aPRD-read (P11).** TWO sources. (a) **Engine-standing:** `INV-ECON` cut by DEFAULT (spec-00 §2.1 / spec-01 §5.7), grounded spec `P13`+`A-ECON`, cross-cutting like security, emitted EVERY project regardless of stack — engine canon, not "invented", not opt-in. Always `cross_slice_invariants[0]`. (b) **aPRD-read:** every other invariant cites `C*`/`A*`/`E*` it comes from and restates aPRD's actual fixed property. §6.1 examples (auth model, error strategy, observability) are **prompts to look**, not checklist — record invariant only if aPRD states it. Manufacture no "error-handling" / "observability" invariant aPRD is silent on. Note decision-vs-invariant distinction: aPRD may **fix model** (invariant — "auth delegates to external OAuth provider, no stored credentials", A2/E1/A7) while leaving **HOW open** (foundational_decision — "which OAuth provider + integration boundary"). Same topic, one of each: invariant = fixed property, decision = open category.
+4. **`cross_slice_invariants` — engine-standing default + aPRD-read (P11).** TWO sources. (a) **Engine-standing:** `INV-ECON` cut by DEFAULT (spec-00 §2.1 / spec-01 §5.7), grounded spec `P13`+`A-ECON`, cross-cutting like security, emitted EVERY project regardless of stack — engine canon, not "invented", not opt-in. Always `cross_slice_invariants[0]`. NOT aPRD-derived, so emit it VERBATIM — `id`:`INV-ECON`, `invariant`:`every produced artifact authored to context-economy — one home per fact, every statement earns place, single interpretation`, `applies_to`:`ALL slices, ALL stages' emitted prose; cross-cutting like security; VERIFY-OUTPUT NFR check measures each output against it (any stack)`, `grounded_in`:`["P13","A-ECON"]`. (b) **aPRD-read:** every other invariant cites `C*`/`A*`/`E*` it comes from and restates aPRD's actual fixed property. §6.1 examples (auth model, error strategy, observability) are **prompts to look**, not checklist — record invariant only if aPRD states it. Manufacture no "error-handling" / "observability" invariant aPRD is silent on. Note decision-vs-invariant distinction: aPRD may **fix model** (invariant — "auth delegates to external OAuth provider, no stored credentials", A2/E1/A7) while leaving **HOW open** (foundational_decision — "which OAuth provider + integration boundary"). Same topic, one of each: invariant = fixed property, decision = open category.
 5. **Carry IDs verbatim; never mint (P9, P11).** Skeleton `id`, seam names, every `R*`/`AC*`/`C*`/`A*`/`E*`/`S*` reference carried verbatim from `04`/`05`/aPRD. Never mint ID, rewrite seam into design, or re-score/re-order anything SEQUENCE produced.
 6. **Full accounting — every present seam carried, every later slice's deferral considered (P9).** Every present foundational seam in `04` `skeleton_seams[]` appears in cut's `skeleton_seams[]` exactly once. Every slice after skeleton in `05`'s order accounted for in `deferred[]` (named with what it will own) — no later slice silently ignored.
 7. **Cheapest source first; LLM not oracle (P5, P11).** Skeleton + seams from `04`; running order (skeleton-leads + later slices to defer to) from `05`; cross-slice invariants from frozen aPRD CONSTRAINTS/ASSUMPTIONS, read verbatim. You name categories and read invariants from these — never oracle. Make no decision cut names (no stack/vendor/schema), design no seam into contract, invent no invariant aPRD is silent on, mint no ID. Bias thin: unsure → defer.
@@ -50,71 +46,6 @@ Foundation-cutter, Phase 1. From **walking skeleton + cross-slice invariants**, 
 6. Run accounting check (Rule 6): every present `04` seam carried once; every post-skeleton slice in `05` represented in `deferred[]`.
 7. Write `.roadmap/06-foundation-cut.json` (create `.roadmap/` if absent). Stop.
 
-## Output schema — `.roadmap/06-foundation-cut.json`
-
-```json
-{
-  "skeleton_ref": ".roadmap/04-skeleton.json",
-  "sequence_ref": ".roadmap/05-sequence.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
-  "class": "greenfield",
-  "skeleton_id": "S1",                   // 04 skeleton id, carried verbatim
-  "foundation_cut": {
-    "foundational_decisions": [          // each FD* a decision CATEGORY (Rule 2). Decision needed only by post-skeleton slice belongs in deferred[], not here
-      {
-        "id": "FD1",
-        "category": "<what Phase 2 must resolve — named, NOT decided; no vendor/stack/schema/endpoint/library>",
-        "needed_by": ["S1"],             // skeleton (and any first slice sharing need) by S*
-        "why_foundational": "<why decided once before slicing — skeleton/every slice needs it; cannot be deferred>",
-        "grounded_in": ["R1", "C1"]      // aPRD IDs that exist verbatim
-      }
-    ],
-    "skeleton_seams": [                   // carried from 04, one per present seam, wording refinable; no present seam dropped, none added
-      {
-        "seam": "ingress",
-        "must_establish": "<functional touch-point skeleton must prove; named-not-designed (Rule 3 — no component/stack/library/db-engine/schema/endpoint/contract/vendor)>",
-        "grounded_in": ["R1", "C1", "AC1"]   // kept from 04
-      }
-    ],
-    "cross_slice_invariants": [          // [0] ALWAYS engine-standing INV-ECON (default, Rule 4a); rest aPRD-read (Rule 4b), recorded ONLY if aPRD states it, never invented
-      {
-        "id": "INV-ECON",                // engine-standing default — cut into EVERY project, NOT aPRD-derived, NOT opt-in
-        "invariant": "every produced artifact authored to context-economy — one home per fact, every statement earns place, single interpretation",
-        "applies_to": "ALL slices, ALL stages' emitted prose; cross-cutting like security; VERIFY-OUTPUT NFR check measures each output against it (any stack)",
-        "grounded_in": ["P13", "A-ECON"]     // engine canon (spec-00 §2.1), NOT project aPRD; carried verbatim, not minted
-      },
-      {
-        "id": "INV1",
-        "invariant": "<aPRD-fixed property holding across all slices, decided once — restates aPRD>",
-        "applies_to": "<why holds across slices / which slices inherit it>",
-        "grounded_in": ["A2", "E1", "A7"]    // C*/A*/E* it comes from
-      }
-    ]
-  },
-  "deferred": [                          // thinness evidence; every post-skeleton slice in 05's order represented (Rule 6)
-    {
-      "item": "<HOW-decision deliberately NOT in cut>",
-      "defer_to": "S3",                  // S* that will own it
-      "reason": "<why deferring safe — only this slice needs it; not cross-slice, not on skeleton's path>",
-      "grounded_in": ["A1"]
-    }
-  ],
-  "coverage": {
-    "skeleton_seams_carried": ["ingress", "domain", "persistence", "primary_external_integration"],  // present seams carried from 04
-    "post_skeleton_slices": ["S4", "S2", "S3"],   // slice ids after position 1 in 05's order
-    "deferred_slices": ["S4", "S2", "S3"]         // distinct defer_to ids in deferred[]; should cover post_skeleton_slices
-  },
-  "cut_counts": {                        // integer counts of each cut list
-    "foundational_decisions": 4,
-    "skeleton_seams": 4,
-    "cross_slice_invariants": 6,
-    "deferred": 5
-  }
-}
-```
-All prose content (`category`, `why_foundational`, `must_establish`, `invariant`, `applies_to`, `item`, `reason`) is caveman (governs artifact bodies too — PR4). D7: file numbered by spine order (06), not §10 illustrative `04-foundation-cut.json`.
-
 ## Stop condition
 - Guard tripped (escapes) → write nothing; print which guard fired + offending detail; "HALT".
 - Cut produced → write `.roadmap/06-foundation-cut.json` (Phase 2 reads `foundational_decisions` + `cross_slice_invariants`; Phase 3 reads `skeleton_seams`; SEQUENCE-REVIEW presents order, not this cut, to client), state "foundation cut named: FD count, seam count, invariant count, deferred count; Phase 2 + Phase 3 consume it, SEQUENCE-REVIEW next", stop. No decisions made, no design, no client touch.
-```

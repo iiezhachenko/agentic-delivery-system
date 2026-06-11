@@ -3,12 +3,8 @@ role: SKELETON-IDENTIFY
 phase: 01-roadmap
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal designation — reads disk, writes skeleton + seams, stops. Does NOT sequence other slices (SEQUENCE), define foundation cut (FOUNDATION-CUT), or touch client (order gate = SEQUENCE-REVIEW, later). PR1.
-inputs:
-  - { path: ".roadmap/03-verticality.json", format: "json — verdict (must be all_vertical) + valid[] = ELIGIBILITY set; only validated-vertical slice can be skeleton" }
-  - { path: ".roadmap/02-slices.json", format: "json — full slice BODIES (requirements[R*], acceptance[AC*], retires_risk, depends_on) joined by id for seam/thinness/dependency reasoning; carried verbatim onto skeleton" }
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — oracle for naming foundational seams (PROJECT, ENTITIES E*, CONSTRAINTS C*, ASSUMPTIONS A*, REQUIREMENTS R*, ACCEPTANCE AC*) + confirming which seam each slice crosses" }
 outputs:
-  - { path: ".roadmap/04-skeleton.json", format: "json (schema below) — walking-skeleton designation S* + foundational seams it must establish" }
+  - { path: ".roadmap/04-skeleton.json", schema: "04-skeleton" }
 escapes:
   - { when: "any of three inputs missing/unparseable, OR 03-verticality.json verdict != all_vertical, OR valid[] empty", target: "self / HALT — slice set not clean validated-vertical set; rejected/horizontal candidate must re-cut before skeleton named (§5.14 SkeletonNamed follows Verticalized); report which guard fired, write nothing" }
   - { when: "02-slices.json or 03-verticality.json class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — skeleton rule + seam set not authored; report class, write nothing" }
@@ -65,63 +61,6 @@ Slice satisfying these in order = walking skeleton; assign `kind: walking_skelet
 6. Build `skeleton_seams[]` — foundational seams skeleton must establish, **named not designed** (Rule 5). (When `skeleton: null`, lists foundational seams whatever re-cut produces must establish.)
 7. Record `rejected_as_skeleton[]` — every other eligible slice + reason it not #1 (Rule 8). Accounting check: `skeleton` (if any) + `rejected_as_skeleton` covers every `valid[]` id exactly once.
 8. Write `.roadmap/04-skeleton.json`. Stop.
-
-## Output schema — `.roadmap/04-skeleton.json`
-
-```json
-{
-  "verticality_ref": ".roadmap/03-verticality.json",
-  "slices_ref": ".roadmap/02-slices.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
-  "class": "greenfield",
-  "foundational_seams": [                // four seam categories (or project's actual set)
-    {
-      "seam": "ingress",                 // one of ingress | domain | persistence | primary_external_integration
-      "present": true,                   // false only when genuinely absent from aPRD; present:false seam adds "reason" field naming why category absent
-      "instance": "<concrete instance for this project, functional terms; null when present:false. NO component/stack/engine/schema/endpoint/contract/vendor (Rule 5)>",
-      "grounded_in": ["R1", "C1", "AC1"] // aPRD IDs that exist verbatim; [] when present:false
-    },
-    { "seam": "domain", "present": true, "instance": "<...>", "grounded_in": ["E1", "R5"] },
-    { "seam": "persistence", "present": true, "instance": "<...>", "grounded_in": ["A2", "E1"] },
-    { "seam": "primary_external_integration", "present": true, "instance": "<primary third-party dependency on skeleton's path, functional type — 'an external OAuth provider', never vendor name>", "grounded_in": ["A2", "AC5", "R5"] }
-  ],
-  "eligible_slices": ["S1", "S2", "S3", "S4"],   // exactly valid[] ids from 03-verticality.json
-  "skeleton": {                          // designated walking skeleton, or null (→ all eligible slices in rejected_as_skeleton)
-    "id": "S1",                          // carried verbatim from 02-slices.json
-    "name": "<carried verbatim from 02-slices.json>",
-    "kind": "walking_skeleton",          // always walking_skeleton when present
-    "requirements": ["R1", "R5"],        // carried verbatim from 02
-    "acceptance": ["AC1", "AC5"],        // carried verbatim from 02
-    "qualifying_acceptance": ["AC1", "AC5"],   // carried verbatim from 03
-    "retires_risk": "<carried verbatim from 02-slices.json | null>",
-    "depends_on": [],                    // carried verbatim from 02
-    "seam_coverage": [                   // maps every PRESENT seam to slice AC/requirement that touches it + what it must establish (functional, never design — Rule 5)
-      { "seam": "ingress", "touched_by": "AC1", "establishes": "<functional touch-point skeleton must prove — NOT design>" },
-      { "seam": "primary_external_integration", "touched_by": "AC5", "establishes": "<...>" },
-      { "seam": "persistence", "touched_by": "AC5", "establishes": "<...>" },
-      { "seam": "domain", "touched_by": "R5", "establishes": "<...>" }
-    ],
-    "minimal_behaviour_rationale": "<why this THINNEST end-to-end slice — what feature depth stays hardcoded/deferred so carries minimal behaviour>",
-    "selection_rationale": "<why this slice over other eligible ones — root of dependency graph, first to exercise primary integration / riskiest seam, retires integration risk first (RM4)>"
-  },
-  "skeleton_seams": [                    // one entry per present foundational seam skeleton must establish; contract FOUNDATION-CUT + Phase 3 consume
-    {
-      "seam": "ingress",
-      "must_establish": "<foundational capability skeleton must prove at this seam — functional, never component/stack/engine/schema/endpoint/contract/vendor (Rule 5)>",
-      "grounded_in": ["R1", "AC1"]       // aPRD IDs that exist verbatim
-    }
-  ],
-  "rejected_as_skeleton": [              // every eligible slice that not the skeleton; skeleton + rejected_as_skeleton covers every eligible_slices id exactly once
-    {
-      "id": "S?",
-      "name": "<carried verbatim>",
-      "reason": "<why not #1 — misses seam / not dependency root / deeper than skeleton needs / does not exercise primary integration>"
-    }
-  ],
-  "uncovered_seams": []                  // [] when skeleton found; when skeleton:null, present seams no single eligible slice crosses (re-cut diagnosis)
-}
-```
-All prose (`instance`, `establishes`, `must_establish`, rationale, reason) is caveman (governs artifact bodies too — PR4).
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which guard fired + offending detail; "HALT".

@@ -3,16 +3,9 @@ role: SEQUENCE
 phase: 01-roadmap
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal ordering — reads disk, writes proposed running order, stops. Client order gate is SEQUENCE-REVIEW (role 7/7), later. PR1
-inputs:
-  # — greenfield —
-  - { path: ".roadmap/04-skeleton.json", format: "json — skeleton{id} MUST lead order [RM4, position 1]; eligible_slices[] = set to sequence. (feature-add: skeleton==null — no NEW skeleton, no position-1 pin; delta Rule 1)" }
-  - { path: ".roadmap/02-slices.json", format: "json — slice bodies (value, value_basis, retires_risk, depends_on, requirements, acceptance): scoring + dependency + cost-proxy inputs, carried verbatim. feature-add 02 also carries class:feature-add + baseline_completed_slices" }
-  - { path: ".roadmap/03-verticality.json", format: "json — verdict + valid[]; only validated-vertical slices sequenced (VERTICALITY-CHECK reused verbatim across classes)" }
-  # — feature-add (class-dispatched; 02 carries class:feature-add) —
-  - { path: ".roadmap/08-rerank.json", format: "json — BASELINE living roadmap: completed[] = accepted baseline slices to PIN (BF1), never re-sequenced; coverage.base_slices = baseline id-set for dangling check. Read for feature-add only; SEQUENCE writes the bumped 08-rerank merging new slices into remaining_sequence" }
 outputs:
-  - { path: ".roadmap/05-sequence.json", format: "json (schema below) — GREENFIELD dependency-legal running order, skeleton-first, value×risk/cost ordered, one-line rationale per position" }
-  - { path: ".roadmap/08-rerank.json", format: "json (feature-add only; 08-rerank shape, see delta schema) — bumped living roadmap: baseline pinned in completed[], NEW slices merged into remaining_sequence dependency-legal + value×risk/cost ordered. RE-RANK owns subsequent re-ranking" }
+  - { path: ".roadmap/05-sequence.json", schema: "05-sequence" }
+  - { path: ".roadmap/08-rerank.json", schema: "08-rerank" }
 escapes:
   # — greenfield —
   - { when: "greenfield + (any input missing/unparseable, OR 03 verdict != all_vertical, OR 04 skeleton == null, OR eligible_slices empty)", target: "self / HALT — re-cut already routed upstream / nothing to order; report which guard, write nothing (§5.14: Sequenced follows SkeletonNamed follows Verticalized). NOTE 04 skeleton==null is EXPECTED for feature-add (no NEW skeleton), NOT a HALT there — delta Rule 1" }
@@ -71,70 +64,8 @@ Sequencer, Phase 1. Draw **dependency-legal running order** delivery loops dispa
 6. Do NOT name a skeleton, cut foundation, re-order `completed[]`, or author re-rank/client logic (delta Rules 1/2/4).
 7. Write `.roadmap/08-rerank.json` with `class:"feature-add"` + bumped `roadmap_version` + pinned `completed[]` + ordered `remaining_sequence[]`. Stop — RE-RANK owns the living loop from here.
 
-## Output schema — `.roadmap/05-sequence.json`
-
-```json
-{
-  "skeleton_ref": ".roadmap/04-skeleton.json",
-  "slices_ref": ".roadmap/02-slices.json",
-  "verticality_ref": ".roadmap/03-verticality.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
-  "class": "greenfield",
-  "verdict": "sequenced",                // "sequenced" = legal order produced; "dependency_defect" = cycle/dangling/skeleton-with-deps blocked it. Deterministic: dependency_defect iff dependency_check.acyclic==false OR dangling_depends_on non-empty OR skeleton_is_root==false
-  "sequence": [                          // ordered array; position ascending from 1, no gaps; position 1 always skeleton:true. When verdict:dependency_defect → []
-    {
-      "position": 1,
-      "id": "S1",                        // carried verbatim from 02
-      "name": "<carried verbatim from 02>",
-      "skeleton": true,                  // true ONLY on position 1 (04 skeleton id); false elsewhere. Only kind-like marker SEQUENCE assigns — carries skeleton designation forward, assigns NO kind to non-skeleton slices (RM11)
-      "value": "high",                   // carried verbatim from 02, never re-scored
-      "retires_risk": "<verbatim from 02 | null>",
-      "depends_on": [],                  // carried verbatim from 02; every listed id must appear at earlier position (topological invariant)
-      "cost_proxy": 4,                   // len(requirements)+len(acceptance)
-      "rationale": "<one line — why this slice sits at this position; caveman>"
-    },
-    {
-      "position": 2,
-      "id": "S4",
-      "name": "<...>",
-      "skeleton": false,
-      "value": "high",
-      "retires_risk": null,
-      "depends_on": ["S1"],
-      "cost_proxy": 4,
-      "rationale": "<...>"
-    }
-  ],
-  "ordering_basis": "<one short caveman paragraph: skeleton pinned to position 1 (RM4); dependency legality is the hard constraint (no slice before a depends_on prerequisite); within the dependency-legal ready frontier ordered by value (high>med>low, from 02) then risk-retiring (retires_risk != null first) then lower cost; cost has no source field so the declared proxy is feature depth = requirements+acceptance count; ties broken by lowest S* index. Value is client-owned and only proposed here — confirmed/overridden at SEQUENCE-REVIEW.>",
-  "dependency_check": {
-    "acyclic": true,                     // false → cycle path in cycles
-    "skeleton_is_root": true,            // false → skeleton carried eligible-slice depends_on
-    "cycles": [],
-    "dangling_depends_on": []            // ids referenced by depends_on but absent from eligible set
-  },
-  "coverage": {
-    "eligible_slices": ["S1", "S2", "S3", "S4"],   // == 04 set
-    "sequenced": ["S1", "S4", "S2", "S3"],         // ids in emitted order; == eligible_slices as set on verdict:sequenced
-    "missing": [],                       // eligible not sequenced; empty on verdict:sequenced
-    "duplicated": []                     // ids placed more than once; empty on verdict:sequenced
-  },
-  "sequence_counts": { "total": 4, "positions": 4 }
-}
-```
-All prose content (`rationale`, `ordering_basis`) is caveman (governs artifact bodies too — PR4).
-
-### Feature-add output — `.roadmap/08-rerank.json` (only what differs — AB1)
-Feature-add does NOT write `05-sequence.json`; it emits the INITIAL feature-add order directly into the living `08-rerank.json` shape (RE-RANK owns it thereafter — delta Rule 4). Same `08-rerank.json` schema RE-RANK defines; SEQUENCE fills only the initial-order fields:
-- `"class": "feature-add"`, `"roadmap_version": <baseline version + 1>` (baseline `08` version bumped).
-- `"verdict": "sequenced"` (initial feature-add order produced) or `"dependency_defect"` (cycle / dangling among new slices → `remaining_sequence: []`).
-- `"completed": [ … ]` — baseline `08-rerank.json` `completed[]` copied VERBATIM (pinned positions, `status:"accepted"`, `demo_ref`); never re-ordered (BF1, delta Rule 2).
-- `"remaining_sequence": [ … ]` — NEW slices, dependency-legal + value×risk/cost ordered, positions continuing after the completed set. Per row: `position`, `id`, `name`, `value`, `retires_risk`, `depends_on` (verbatim from `02`; may cite a `completed[]` slice — pre-satisfied, delta Rule 3), `cost_proxy` (`len(requirements)+len(acceptance)`), `rationale` (caveman). `moved`/`value_risk_change` null here (SEQUENCE sets initial order; RE-RANK logs moves later).
-- `"dependency_check"`: `acyclic`, `legal`, `dangling_real_depends_on` (dep in neither `completed[]` nor new set).
-- `"coverage"`: `base_slices` (baseline `completed[]` ids), `completed` (== pinned), `remaining_ranked` (new slice ids in emitted order), `missing`/`duplicated` ([] on clean run).
-
 ## Stop condition
 - Guard tripped (escapes) → write nothing; print which guard fired + offending detail; "HALT".
 - Dependency defect (cycle / dangling / skeleton-with-deps, recorded-not-HALT escape) → greenfield: write `05-sequence.json` `verdict:dependency_defect` + refs + `sequence:[]`; feature-add: write `08-rerank.json` `verdict:dependency_defect` + refs + `remaining_sequence:[]`; state "dependency defect, re-cut at SLICE-EXTRACT", stop.
 - Greenfield order produced → write `.roadmap/05-sequence.json` with `verdict: sequenced`, state "sequence = [S?, S?, …], FOUNDATION-CUT next" (FOUNDATION-CUT consumes skeleton + order; SEQUENCE-REVIEW presents order to client), stop. No foundation cut, no client touch.
 - Feature-add order produced → write `.roadmap/08-rerank.json` (`class:"feature-add"`, baseline pinned in `completed[]`, new slices in `remaining_sequence`, bumped `roadmap_version`), state "feature-add initial order = [S?, S?, …], RE-RANK owns living loop next", stop. No skeleton, no `completed[]` re-order, no client touch.
-```

@@ -6,11 +6,9 @@ interactive: true           # THE one Phase-1 client gate (§9, §5.8). { when: 
 interaction:
   when: "after Phase A renders roadmap.md + presents it in chat; agent pauses, waits for client's single selection, then applies it and writes confirmed roadmap"
   what: "client confirms proposed build order, picks dependency-legal reorder, or states priority override (multiple-choice + escape)"
-inputs:
-  - { path: ".roadmap/05-sequence.json", format: "json — SEQUENCE proposed order. verdict MUST be 'sequenced'; sequence[] per-position id/name/skeleton/value/retires_risk/depends_on/cost_proxy/rationale. Order to present; carried verbatim, never re-scored" }
 outputs:
-  - { path: ".roadmap/roadmap.md", format: "markdown (schema below, Phase A) — client-facing presentation + demo plan, written autonomously BEFORE client replies. Always produced" }
-  - { path: ".roadmap/07-sequence-reviewed.json", format: "json (schema below, Phase B) — CLIENT-CONFIRMED living baseline order + captured overrides. Written ONLY after client responds; downstream reads this, not 05" }
+  - { path: ".roadmap/roadmap.md", schema: null }
+  - { path: ".roadmap/07-sequence-reviewed.json", schema: "07-sequence-reviewed" }
 escapes:
   - { when: ".roadmap/05-sequence.json missing or unparseable", target: "self / HALT — no order to review; cannot run" }
   - { when: "05 class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — review depth not authored; HALT, report class" }
@@ -102,54 +100,7 @@ This order is set by what each capability needs built first — there's no alter
 *S1 stays first regardless of your choice — it's the foundation that proves the rest can be built.*
 ```
 
-## Output schema — `.roadmap/07-sequence-reviewed.json` (Phase B, after the client replies)
-
-```json
-{
-  "sequence_ref": ".roadmap/05-sequence.json",
-  "class": "greenfield",
-  "verdict": "confirmed",                // "confirmed" = client accepts proposed order (or only blocked overrides requested); "reordered" = at least one dependency-legal override applied
-  "review": {
-    "presented_order": ["S1", "S4", "S2", "S3"],   // proposed order's ids in 05 position order (what client saw)
-    "client_response": "confirmed",      // confirmed | reordered | deferred | blocked. confirmed=accepted proposed order; reordered=≥1 legal override applied; deferred=client explicitly declines to decide (keep proposed order, verdict:confirmed); blocked=client requested reorder but every requested move dependency-illegal so none applied (order held, verdict:confirmed, needs_followup:true). Use "blocked" whenever blocked_overrides[] non-empty AND overrides[] empty
-    "skeleton_pinned": "S1",             // position-1 skeleton id (RM4)
-    "electable_slices": [],              // non-skeleton slice ids offered as "build earlier" options (had ordering slack); empty when order dependency-forced
-    "overrides": [],                     // applied legal reorders, each {slice, from_position, to_position, client_rationale}; empty on plain confirm
-    "blocked_overrides": [],             // requested reorders refused for breaking dependency or moving skeleton, each {request, reason} (conflicting depends_on edge / RM4 named in plain language); empty when none
-    "needs_followup": false,             // true iff any blocked override recorded (client asked for something dependencies forbid; human follow-up warranted); else false
-    "signoff": "<one line capturing client's confirmation/instruction verbatim or faithfully paraphrased>"
-  },
-  "sequence": [                          // confirmed order; same fields + content as 05 carried verbatim (value/risk/depends_on/cost_proxy never changed); position renumbered 1..N after any reorder; rationale rewritten only where move changed it. Position 1 always skeleton
-    {
-      "position": 1,
-      "id": "S1",
-      "name": "<carried verbatim from 05>",
-      "skeleton": true,
-      "value": "high",
-      "retires_risk": "<carried verbatim from 05 | null>",
-      "depends_on": [],
-      "cost_proxy": 4,
-      "rationale": "<carried from 05; rewrite only if reorder changed why it sits here>"
-    }
-  ],
-  "dependency_check": {
-    "acyclic": true,                     // always true here (defect order never reaches review)
-    "legal": true,                       // confirmed order is valid topological sort of depends_on
-    "skeleton_first": true               // position 1 is skeleton
-  },
-  "coverage": {
-    "presented": ["S1", "S2", "S3", "S4"],   // 05 id set
-    "confirmed": ["S1", "S2", "S3", "S4"],    // emitted order's id set; == presented as sets (review permutes, never changes set)
-    "missing": [],
-    "added": []
-  },
-  "sequence_counts": { "total": 4, "positions": 4 }
-}
-```
-Two registers: `07-sequence-reviewed.json` prose (`signoff`, blocked-override reasons) is caveman (governs artifact bodies too — PR4); client-facing `roadmap.md` stays plain readable language (client non-technical, comprehension load-bearing).
-
 ## Stop condition
 - Guard tripped (escapes) → write nothing; print which guard fired + offending detail; "HALT".
 - Phase A complete, no client response this session → `.roadmap/roadmap.md` written + presented; state "order presented, awaiting client selection", stop. Do **not** write `07`; do **not** fabricate client answer.
 - Phase B complete (client replied) → write `.roadmap/07-sequence-reviewed.json` (RE-RANK / foundation-loop dispatch reads this confirmed living order); state outcome ("order confirmed" / "order reordered: <move>" / "override blocked: <reason>, order held"), stop.
-```
