@@ -4,44 +4,13 @@ phase: 04-build
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 mode: skeleton-build|slice-build|bugfix-localize   # one role, three modes (dispatch: MODE DISPATCH §). bugfix-localize = Phase-0 intake (reproduce/localize/root-cause a reported defect → .aprd/diagnosis.json), NOT a build red
 interactive: false          # internal — build self-heal/escape decision is team's; client signed WHAT (P0) + ordered slices (P1). Demo gate later (PR1, §9)
-inputs:
-  # — shared (both modes) —
-  - { path: ".adr/adr.lock + .adr/log/<NNNN>-<slug>.md", format: "json+md — frozen frame (status==frozen): is a frozen DECISION (ADR) genuinely unbuildable (→Phase 2) or just misread? INV6 single-server synchronous" }
-  - { path: ".aprd/aprd.lock + .aprd/aprd.frozen.md", format: "json+md — frozen WHAT (status==frozen): is a frozen AC*/requirement genuinely ambiguous/contradictory as build revealed (→Phase 0) or misread?" }
-  - { path: ".hld/skeleton.lock", format: "json — frozen skeleton gate (status==frozen + gate clean): foundation covered; class" }
-  # — skeleton-build —
-  - { path: ".build/skeleton/build-record.json | .build/skeleton/integration-record.json", format: "json (PRIMARY — the red): verifying role's BLOCKED record (status==blocked + escape). escape = PROVISIONAL HINT, re-derived never trusted; attempts[] = stall evidence" }
-  - { path: ".build/skeleton/oracle/oracle.json", format: "json — oracle manifest: which frozen test (contract/flow/acceptance) the failure_signature names; asserted shape/failure_mode/AC" }
-  - { path: ".build/skeleton/oracle/{contract,flow,acceptance}/<failing test>.py + conftest.py", format: "python (FROZEN, read-only) — literal failing assertion(s) + mock fixtures; reflection-pass evidence" }
-  - { path: ".hld/skeleton/contracts.json", format: "json — frozen CT* contracts; is cited contract genuinely wrong/unbuildable, or did impl misread a satisfiable one?" }
-  - { path: ".hld/skeleton/components.json", format: "json — component/flow the red is on + its responsibility lane" }
-  - { path: "src/freelancer_app/**/*.py", format: "python (built code under diagnosis, read-only) — compare impl/wiring against frozen contract; you read it, NEVER edit it" }
-  - { path: ".build/skeleton/diagnosis.json", format: "json (OPTIONAL — prior DIAGNOSE run on same red) — present on re-run after routed fix landed; absent on first diagnosis" }
-  # — slice-build —
-  - { path: ".roadmap/08-rerank.json", format: "json — living roadmap: remaining_sequence + completed[] — auto-selects the target slice (PR1)" }
-  - { path: ".build/slices/<id>/build-record.json | .build/slices/<id>/integration-record.json", format: "json (PRIMARY — blocked slice record): status==blocked + escape. escape = PROVISIONAL HINT, re-derived never trusted; attempts[] = stall evidence" }
-  - { path: ".build/slices/<id>/oracle/oracle.json", format: "json — slice oracle manifest: which frozen slice test the failure_signature names; asserted shape/failure_mode/AC" }
-  - { path: ".build/slices/<id>/oracle/{contract,flow,acceptance}/<failing test>.py + conftest.py", format: "python (FROZEN slice oracle, read-only) — literal failing assertion(s) + mock fixtures; reflection-pass evidence" }
-  - { path: ".hld/slices/<id>/contracts.json", format: "json — slice contracts: is cited SLICE contract genuinely wrong/unbuildable, or misread?" }
-  - { path: ".hld/slices/<id>/components.json", format: "json — slice components + responsibility lane for the red" }
-  - { path: ".build/slices/<id>/build-plan.json", format: "json — slice build path + per-seam real|mocked + prior_built_components" }
-  - { path: ".hld/skeleton/contracts.json", format: "json — frozen skeleton contracts; skeleton-fidelity check: would the fix touch THIS? (H14)" }
-  - { path: ".build/skeleton/oracle/oracle.json + .build/skeleton/integration-record.json", format: "json — frozen skeleton oracle + composition root (the baseline); skeleton-fidelity check" }
-  - { path: "src/freelancer_app/**/*.py", format: "python (prior-built + this-slice code, read-only) — compare impl/wiring against frozen contracts; NEVER edit" }
-  - { path: ".build/slices/<id>/diagnosis.json", format: "json (OPTIONAL — prior DIAGNOSE run) — present on re-run; absent on first diagnosis" }
-  # — bugfix-localize (Phase-0 intake; reads frozen baseline + src directly, P5) —
-  - { path: ".aprd/change-requests/<CR>.md", format: "markdown (PRIMARY — the defect report): class:bugfix, REPRO_STEPS, localization hint, expected-vs-observed. The reported defect to reproduce + localize" }
-  - { path: ".aprd/aprd.frozen.md + .aprd/aprd.lock", format: "json+md — frozen baseline WHAT (status==frozen): the AC*/R* the defect violates = the expected behavior (correct behavior under-test). Immutable (BF1)" }
-  - { path: ".hld/slices/<id>/contracts.json + .build/slices/<id>/oracle/oracle.json", format: "json — slice CT* + AC* on the defect surface: contract satisfiable (→my-code) or wrong (→spec-defect)? + regression-baseline inventory (BF4)" }
-  - { path: "src/freelancer_app/**/*.py", format: "python (built code under diagnosis, read-only) — trace REPRO_STEPS to the failing site; localize component/module/symbol. You read it, NEVER edit it (lane)" }
-  - { path: ".aprd/diagnosis.json", format: "json (OPTIONAL — prior bugfix-localize run) — present on re-run after report sharpened; absent on first localization" }
 outputs:
   # — skeleton-build —
-  - { path: ".build/skeleton/diagnosis.json", format: "json (schema below) — verdict (self-heal|escape|flaky-quarantine) + confirmed classification + routable_diagnosis or corrected understanding. FLAG + route only" }
+  - { path: ".build/skeleton/diagnosis.json", schema: "build-diagnosis" }
   # — slice-build —
-  - { path: ".build/slices/<id>/diagnosis.json", format: "json (schema below) — same verdict structure + skeleton_fidelity block. FLAG + route only" }
+  - { path: ".build/slices/<id>/diagnosis.json", schema: "build-diagnosis" }
   # — bugfix-localize —
-  - { path: ".aprd/diagnosis.json", format: "json (schema below) — intake verdict: reproduction + localization + root_cause (SYNTHESIZE carries VERBATIM into ROOT_CAUSE) + regression_surface. LOCALIZE only; never author scope/fix" }
+  - { path: ".aprd/diagnosis.json", schema: "diagnosis" }
 escapes:
   # — shared (both modes) —
   - { when: "skeleton.lock | adr.lock | aprd.lock status != frozen, OR skeleton.lock gate not clean, OR oracle.lock status != frozen", target: "self / HALT — cannot adjudicate against an unfrozen frame; report which" }
@@ -106,78 +75,12 @@ Three modes, checked in order; run exactly ONE part, ignore the others:
 Active record = `.build/skeleton/build-record.json | .build/skeleton/integration-record.json`.
 
 ## Task steps
-1. Read inputs (shared + skeleton-build). Check guards (frontmatter `escapes:`) — any tripped → STOP/HALT as guard says, report which + status/offending detail, write no diagnosis. Else continue.
+1. Read injected inputs (orchestrator resolves via io-manifest; role grounding in Rules). Check guards (frontmatter `escapes:`) — any tripped → STOP/HALT as guard says, report which + status/offending detail, write no diagnosis. Else continue.
 2. Identify the red: from blocked record's `escape{}` read `failure_signature`, failing test(s), component/flow, `attempts[]` (if any), PROVISIONAL `{classification, route}` (hint only). Locate named frozen test in oracle.
 3. Apply discriminator in order: (1) flaky? (2) progressing/not-stall? (3) reflection pass — misread vs genuinely-wrong? Record each gate's outcome.
 4. If 1/2/3 resolve to self-heal or flaky → set `verdict` + route-back / quarantine action; SKIP escape.
 5. Else classify genuine defect (discriminator 4) by which frozen artifact is wrong; build routable diagnosis (discriminator 5 / Rule 6). Cannot name a frozen_ref + concrete change_request → downgrade to self-heal (builder bug).
-6. Write `.build/skeleton/diagnosis.json` (schema below): verdict + confirmed classification + flaky_check + stall_analysis + reflection_pass + routable_diagnosis (escape) or self_heal (self-heal/flaky) + counts. Stop.
-
-## Output schema — `.build/skeleton/diagnosis.json`
-
-```json
-{
-  "blocked_record_ref": ".build/skeleton/build-record.json",   // or integration-record.json — the red under diagnosis
-  "oracle_ref": ".build/skeleton/oracle/oracle.json",
-  "contracts_ref": ".hld/skeleton/contracts.json",
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "adr_lock_ref": ".adr/adr.lock",
-  "aprd_lock_ref": ".aprd/aprd.lock",
-  "locks_verified": true,                  // skeleton/adr/aprd/oracle frozen + skeleton gate clean (don't recompute hashes)
-  "class": "greenfield",
-  "mode": "skeleton-build",
-  "slice": "S1",                           // = skeleton_id
-  "red_under_diagnosis": {
-    "from_role": "IMPLEMENT",              // IMPLEMENT | INTEGRATE | VERIFY-OUTPUT — who escalated
-    "target": "C1",                        // component (IMPLEMENT) or flow F* (INTEGRATE) under build
-    "failing_tests": ["test_ct1_shape_persists_identity_record"],
-    "failure_signature": "AssertionError: save_identity returned None on second call (duplicate provider_id)",
-    "provisional_hint": { "classification": "contract", "route": "Phase 3" }  // producer's escape{} — HINT, re-derived below, NEVER trusted
-  },
-  "flaky_check": {                         // discriminator 1
-    "deterministic": true,                 // false → flaky-quarantine
-    "evidence": "Signature is a deterministic AssertionError on a fixed input; no timing/external/order dependence.",
-    "action": null                         // when flaky → "re-run 2-3x; quarantine; fix harness"; null when deterministic
-  },
-  "stall_analysis": {                      // discriminator 2
-    "basis": "attempts-trajectory",        // "attempts-trajectory" | "producer-asserted" (Rule 2)
-    "same_signature_attempts": 3,
-    "net_new_passes_trend": "flat",        // "flat" | "rising" (progressing)
-    "progressing": false,
-    "stall_confirmed": true                // K=3 same-signature + 0 net-new (incl. oscillation)
-  },
-  "reflection_pass": {                     // discriminator 3 — MANDATORY before any escape (Rule 3)
-    "frozen_inputs_reread": ["oracle/contract/test_CT1.py", "contracts.json#CT1", "ADR-0003"],
-    "finding": "CT1 shape requires create-or-update returning a non-None acknowledgement; contract satisfiable. Impl raised/returned None on duplicate provider_id instead — MISREAD a correct contract.",
-    "misread": true                        // true → self-heal (my-code); false → frozen artifact genuinely wrong → escape
-  },
-  "verdict": "self-heal",                  // self-heal | escape | flaky-quarantine
-  "classification": "my-code",             // my-code | contract | decision | WHAT | missing-foundation (confirmed; re-derived, may differ from hint)
-  "routable_diagnosis": null,              // present iff verdict==escape (else null) — see escape example below
-  "self_heal": {                           // present iff verdict==self-heal (else null)
-    "route_back_to": "IMPLEMENT",          // IMPLEMENT (component code) | INTEGRATE (wiring)
-    "corrected_understanding": "CT1 save_identity is create-or-update: on existing (provider, provider_id) perform update and return acknowledgement; do not raise/return None on second call. Fix the impl; contract is correct.",
-    "misread_artifact": "contracts.json#CT1"
-  },
-  "quarantine": null,                      // present iff verdict==flaky-quarantine → { rerun_count, harness_fix, note }
-  "diagnosis_counts": {
-    "frozen_inputs_reread": 3,
-    "gates_to_verdict": 3                  // discriminator gates fired before verdict (1=flaky, 2=progress, 3=misread, 4/5=escape)
-  }
-}
-```
-
-**Escape example** — frozen artifact genuinely wrong (`verdict:"escape"`, `self_heal:null`, `flaky_check.deterministic:true`, `stall_analysis.stall_confirmed:true`, `reflection_pass.misread:false`):
-
-```json
-"routable_diagnosis": {
-  "classification": "contract",
-  "target_phase": "Phase 3",              // pure function of classification (Rule 6)
-  "frozen_ref": "contracts.json#CT5",
-  "change_request": "CT5 declares kind:async_event between C4 and C3, but INV6 mandates single-server synchronous (no async/queue). Unbuildable as frozen — re-spec CT5 as sync_api or lift INV6.",
-  "routable": true
-}
-```
+6. Write `.build/skeleton/diagnosis.json` (schema: build-diagnosis registry id): verdict + confirmed classification + flaky_check + stall_analysis + reflection_pass + routable_diagnosis (escape) or self_heal (self-heal/flaky) + counts. Stop.
 
 ## Stop condition
 - Guard tripped → write nothing; print which fired + detail; HALT (no-red guard → STOP).
@@ -198,83 +101,13 @@ Active record = auto-selected `.build/slices/<id>/build-record.json | .build/sli
    - Record the check either way in `skeleton_fidelity{}`.
 
 ## Task steps (slice-build)
-1. Read inputs (shared + slice-build). Check guards (frontmatter `escapes:`) — any tripped → HALT (or STOP clean per guard), report which + detail, write no diagnosis. Else continue.
+1. Read injected inputs + check guards (as Part A step 1). Any tripped → HALT (or STOP clean per guard), report which + detail, write no diagnosis. Else continue.
 2. Auto-select the target slice (delta Rule 1). None blocked → STOP clean.
 3. Identify the red: from the blocked record's `escape{}` read `failure_signature`, failing test(s), component/flow, `attempts[]` (if any), PROVISIONAL `{classification, route}`. Locate the named frozen slice test in the slice oracle.
 4. Apply discriminator in order: (1) flaky? (2) progressing/not-stall? (3) reflection pass — misread vs genuinely-wrong? — PLUS delta Rule 3 (skeleton-fidelity check) and delta Rule 2 (prior-built suspect check). Record each gate's outcome.
 5. If 1/2/3 resolve to self-heal or flaky → set `verdict` + route-back / quarantine action; include `skeleton_fidelity` block; SKIP escape.
 6. Else classify genuine defect: apply delta Rule 3 to determine whether the frozen_ref is a SKELETON artifact (breach) or a SLICE artifact (no breach). Build routable diagnosis (discriminator 5 / Rule 6). Cannot name frozen_ref + concrete change_request → downgrade to self-heal.
-7. Write `.build/slices/<id>/diagnosis.json` (schema below): all shared fields + `skeleton_fidelity` + slice refs + `mode:"slice-build"` + `slice_id`. Stop.
-
-## Output schema — `.build/slices/<id>/diagnosis.json`
-Same shape as Part A; slice deltas noted (everything else carried verbatim):
-
-```json
-{
-  "blocked_record_ref": ".build/slices/S4/integration-record.json",  // or build-record.json — the slice red under diagnosis
-  "slice_oracle_ref": ".build/slices/S4/oracle/oracle.json",
-  "slice_contracts_ref": ".hld/slices/S4/contracts.json",
-  "slice_components_ref": ".hld/slices/S4/components.json",
-  "slice_build_plan_ref": ".build/slices/S4/build-plan.json",
-  "skeleton_contracts_ref": ".hld/skeleton/contracts.json",          // skeleton-fidelity check inputs (delta Rule 3)
-  "skeleton_integration_ref": ".build/skeleton/integration-record.json",
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "adr_lock_ref": ".adr/adr.lock",
-  "aprd_lock_ref": ".aprd/aprd.lock",
-  "locks_verified": true,                  // slice oracle.lock(frozen) + skeleton/adr/aprd frozen + skeleton gate clean (don't recompute hashes)
-  "class": "greenfield",
-  "mode": "slice-build",
-  "slice_id": "S4",                        // auto-selected target (delta Rule 1)
-  "red_under_diagnosis": {
-    "from_role": "INTEGRATE",
-    "target": "F4",
-    "failing_tests": ["test_f4_happy_path_project_create_and_list"],
-    "failure_signature": "test_f4_happy_path_project_create_and_list: flow cannot compose — CT9 (C6->C3) declares kind:async_event requiring Web Ingress to enqueue the project page request and not block, but no broker is wired and an asynchronous dispatch cannot return server-rendered HTML inside the synchronous request/response cycle (ADR-0004 MPA/SSR, INV6).",
-    "provisional_hint": { "classification": "my-code-wiring", "route": "self-heal → INTEGRATE" }
-  },
-  "flaky_check": {
-    "deterministic": true,
-    "evidence": "Failure asserts a structural composition impossibility: CT9.kind=async_event requires a broker absent under INV6. Three identical signatures, zero variance. Deterministic.",
-    "action": null
-  },
-  "stall_analysis": {
-    "basis": "attempts-trajectory",
-    "same_signature_attempts": 3,
-    "net_new_passes_trend": "flat",
-    "progressing": false,
-    "stall_confirmed": true
-  },
-  "reflection_pass": {
-    "frozen_inputs_reread": [
-      ".hld/slices/S4/contracts.json#CT9",
-      ".build/slices/S4/oracle/flow/test_F4.py",
-      ".build/slices/S4/oracle/conftest.py",
-      "aprd.frozen.md#A13",
-      ".adr/log/0001-adopt-single-deployment-monolith-flat-structure.md#INV6",
-      ".adr/log/0004-adopt-server-rendered-multi-page-application-mpa-ssr-as-api-style.md#ADR-0004"
-    ],
-    "finding": "CT9 declares kind:async_event contradicting INV6 + A13 (no broker) and ADR-0004 (MPA/SSR in-cycle). Frozen slice oracle already materializes CT9 as synchronous dispatch. CT9.kind=async_event is unbuildable as frozen. Provisional my-code-wiring hint is a mis-classification.",
-    "misread": false
-  },
-  "skeleton_fidelity": {                   // delta Rule 3 — slice-build only
-    "breached": false,
-    "skeleton_artifacts_checked": ["contracts.json#CT1", "contracts.json#CT8", ".build/skeleton/oracle/flow/test_F1.py", ".build/skeleton/integration-record.json"],
-    "finding": "Defect is in SLICE contract CT9 (introduced this slice). Frozen skeleton — CT1/CT8, F1 flow test, skeleton composition root — needs no change to resolve it. Slice-local Phase-3 re-derive; no skeleton ripple (H14). Not a skeleton-fidelity breach."
-  },
-  "verdict": "escape",
-  "classification": "contract",
-  "routable_diagnosis": {
-    "classification": "contract",
-    "target_phase": "Phase 3",
-    "frozen_ref": ".hld/slices/S4/contracts.json#CT9",              // SLICE contract, not skeleton (no breach)
-    "change_request": "Change slice contract CT9.kind from 'async_event' to 'sync_api'. Restore CT9.shape to synchronous in-process dispatch: Web Ingress routes authenticated HTTP request in-process to Project Management, which returns server-rendered HTML within the request/response cycle. Honors INV6 + ADR-0004. Slice-introduced seam — re-derive at S4 HLD increment; frozen skeleton untouched.",
-    "routable": true
-  },
-  "self_heal": null,
-  "quarantine": null,
-  "diagnosis_counts": { "frozen_inputs_reread": 6, "gates_to_verdict": 4 }
-}
-```
+7. Write `.build/slices/<id>/diagnosis.json` (schema: build-diagnosis registry id): all shared fields + `skeleton_fidelity` + slice refs + `mode:"slice-build"` + `slice_id`. Stop.
 
 ## Stop condition (slice-build)
 - Guard tripped → write nothing; print which fired + detail; HALT.
@@ -285,7 +118,7 @@ Same shape as Part A; slice deltas noted (everything else carried verbatim):
 
 # PART C — BUGFIX-LOCALIZE  (filed bugfix defect report; Phase-0 intake)
 
-Headline bugfix role (playbook `prompt_overlays`): reproduce → localize → root-cause a reported defect BEFORE synthesis (BF2). Input = a filed defect report against the frozen, demo-accepted baseline; NO build red. Writes `.aprd/diagnosis.json` — the ROOT_CAUSE source SYNTHESIZE folds VERBATIM (H10).
+Headline bugfix role (playbook `prompt_overlays`): reproduce → localize → root-cause a reported defect BEFORE synthesis (BF2). Writes `.aprd/diagnosis.json` — the ROOT_CAUSE source SYNTHESIZE folds VERBATIM (H10).
 
 ## The decision (discriminator — ordered) — bugfix-localize
 1. **Reproduce (the gate).** Static-trace REPRO_STEPS through `src/` to the failing site (no runtime needed — Rule 5: repro by trace + golden comparison). Failing path confirmed → continue. No failing path, behavior matches the frozen `AC*` → `cannot-reproduce`, HALT, route back to reporter (a report that does not trip is not a defect).
@@ -302,68 +135,13 @@ Headline bugfix role (playbook `prompt_overlays`): reproduce → localize → ro
 3. **Baseline frozen; read, never mutate (BF1).** READ the frozen upstream (aprd.frozen/adr.log/locks) only to know the expected behavior. A defect whose fix would need a frozen-spec change = `spec-defect` escape, not repair-in-place.
 
 ## Task steps (bugfix-localize)
-1. Read the defect report + frozen baseline + slice oracle/contracts + `src/`. Check guards (frontmatter `escapes:`) — no defect report → STOP; baseline unfrozen → HALT; else continue.
+1. Read injected inputs + check guards (as Part A step 1). No defect report → STOP; baseline unfrozen → HALT; else continue.
 2. Reproduce: static-trace REPRO_STEPS to the failing site (discriminator 1). No failing path → write `verdict:"cannot-reproduce"` + the traced path, HALT.
 3. Localize the failing site to component/module/symbol; record the smallest surface (discriminator 2).
 4. State the root cause — mechanism + symptom-vs-cause (discriminator 3); write the self-contained `root_cause.cause` SYNTHESIZE carries verbatim.
 5. Classify against the frozen contract/AC (discriminator 4): `my-code` (repair-in-place) | `spec-defect` (escape + `routable_diagnosis`, Rule 6).
 6. Identify the regression surface (BF4) + flag any under-specified correct behavior for GAP-DETECT (discriminator 5). Author neither.
-7. Write `.aprd/diagnosis.json` (schema below). State verdict + localized surface, stop.
-
-## Output schema — `.aprd/diagnosis.json`
-
-```json
-{
-  "defect_report_ref": ".aprd/change-requests/<CR>.md",   // the filed defect report under localization
-  "baseline_refs": {                                       // frozen baseline read to know expected behavior (BF1); trust status, don't hash
-    "aprd_frozen": ".aprd/aprd.frozen.md", "aprd_lock": ".aprd/aprd.lock",
-    "adr_lock": ".adr/adr.lock", "skeleton_lock": ".hld/skeleton.lock",
-    "slice_oracle": ".build/slices/<id>/oracle/oracle.json", "slice_contracts": ".hld/slices/<id>/contracts.json"
-  },
-  "locks_verified": true,                                  // baseline locks frozen (BF1)
-  "class": "bugfix",
-  "mode": "bugfix-localize",
-  "defect": {
-    "summary": "<one line: the reported wrong behavior, from the defect report>",
-    "repro_steps": ["<ordered step to trip the defect — grounded in the report's REPRO_STEPS>"],
-    "expected_behavior": "<the frozen AC*/R* the defect violates = the correct behavior>",
-    "expected_behavior_source": "<.aprd/aprd.frozen.md#AC* + the slice oracle ref where it is pinned>"
-  },
-  "reproduction": {                                        // discriminator 1 — the GATE
-    "method": "static-trace",                              // no runtime in env (Rule 5: runtime gap ≠ defect); trace + golden comparison
-    "trace": "<the failing path through src/ from entry to the failing site>",
-    "confirmed": true,                                     // false → verdict:cannot-reproduce
-    "observed": "<the symptom the trace produces>",
-    "expected": "<what the correct path would produce>"
-  },
-  "localization": {                                        // discriminator 2 — smallest failing surface
-    "component": "C<k>", "module": "src/<path>.py", "symbol": "<function/method>",
-    "site": "<the offending line/expression>",
-    "surface": "<the single edit site the repair needs — BLAST_RADIUS candidate>"
-  },
-  "root_cause": {                                          // discriminator 3 — SYNTHESIZE carries .cause VERBATIM into ROOT_CAUSE
-    "cause": "<self-contained prose: the code mechanism producing the wrong behavior + why it is the code, not the contract>",
-    "mechanism": "<the precise fault>",
-    "symptom_vs_cause": "symptom = <observable>; cause = <mechanism>"
-  },
-  "verdict": "defect-localized",                           // defect-localized | spec-defect | cannot-reproduce
-  "classification": "my-code",                             // my-code (impl defect, repair-in-place) | contract | decision | WHAT (spec-defect → escape)
-  "repair_disposition": "repair-in-place",                // repair-in-place (my-code) | escape:Phase N (spec-defect) | route-back (cannot-reproduce)
-  "routable_diagnosis": null,                              // present iff verdict==spec-defect: { classification, target_phase, frozen_ref, change_request, routable } — same shape as the build-red escape
-  "regression_surface": {                                  // discriminator 5 — FLAG (BF4); SYNTHESIZE authors REGRESSION_GUARD from it
-    "baseline_ac_must_stay_green": ["AC<k>"],
-    "oracle_suites": [".build/slices/<id>/oracle/"],
-    "note": "<baseline behavior on the localized surface that must stay green; scoped to blast radius, not full suite (Risk R4)>"
-  },
-  "repair_behavior_gap": {                                 // discriminator 5 — FLAG only; GAP-DETECT's bugfix hunt site, not resolved here (lane)
-    "underspecified": true,                                // false when the correct behavior is already pinned by the baseline
-    "question": "<the under-specified correct-behavior fork the defect exposes>",
-    "owner": "GAP-DETECT (bugfix hunt site); not resolved here",
-    "note": "<why the localized cause is unambiguous but the correct behavior is a downstream fork>"
-  },
-  "diagnosis_counts": { "frozen_inputs_reread": 0, "reproduction_method": "static-trace", "localized_to_single_surface": true }
-}
-```
+7. Write `.aprd/diagnosis.json` (schema: diagnosis registry id). State verdict + localized surface, stop.
 
 ## Stop condition (bugfix-localize)
 - No defect report → write nothing; STOP. Baseline unfrozen → write nothing; HALT (name which lock).

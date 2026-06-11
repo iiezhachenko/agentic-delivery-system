@@ -1,50 +1,16 @@
 ---
 role: VERIFY-OUTPUT
 phase: 04-build
-class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
+class: <dispatched by playbook>   # Other classes still HALT at CLASSIFIER.
 mode: skeleton-build|slice-build|bugfix   # one role, three modes (dispatch: MODE DISPATCH §)
 interactive: false          # internal — verification team's; client signed WHAT (P0) + ordered slices (P1). Demo gate later (PR1, §9)
-inputs:
-  # — shared (both modes) —
-  - { path: ".hld/skeleton.lock", format: "json — frozen skeleton gate (status==frozen + gate clean); class" }
-  - { path: ".adr/adr.lock", format: "json — frozen frame gate (status==frozen); class" }
-  - { path: ".aprd/aprd.lock", format: "json — frozen WHAT gate (status==frozen)" }
-  # — skeleton-build —
-  - { path: ".build/skeleton/integration-record.json", format: "json (PRIMARY) — composed flow surface + composition.files; status:integrated + flow:pass required, self-reported flow:pass is CLAIM you re-derive" }
-  - { path: ".build/skeleton/build-record.json", format: "json (PRIMARY) — built components + module_namespace; every build_set unit status:green required, self-reported contract:pass is CLAIM you re-derive" }
-  - { path: ".build/skeleton/oracle/oracle.lock", format: "json — FROZEN oracle gate (status==frozen + builder_may_not_edit==true). Immutable suite you run; NEVER edit it (B4/B5)" }
-  - { path: ".build/skeleton/oracle/oracle.json", format: "json — oracle manifest: the ladder inventory per layer, exactly which tests define done" }
-  - { path: ".build/skeleton/oracle/{contract,flow,acceptance/visible,acceptance/held_out}/*.py + conftest.py", format: "python (FROZEN, read-only) — executable ladder. acceptance/held_out/* GATE-ONLY: never run by IMPLEMENT/INTEGRATE, you run it FIRST (B7 anti-overfit)" }
-  - { path: "src/freelancer_app/**/*.py", format: "python (read-only) — component modules + composition root wsgi.py = what frozen oracle runs against. Read + run; NEVER edit it" }
-  - { path: ".hld/skeleton/nfr-mechanisms.json", format: "json — mechanisms[] = M* whose wiring you confirm (closes H5). satisfied-by-frame / not-applicable NFRs NOT M* (no check — MAP-NFR)" }
-  - { path: ".hld/skeleton/components.json", format: "json — components + name→module map + each M* realizing component, to locate wiring in src/" }
-  - { path: ".build/skeleton/verification.json", format: "json (OPTIONAL — prior VERIFY-OUTPUT run) — present on re-run after routed red healed upstream; absent on first run" }
-  # — slice-build —
-  - { path: ".roadmap/08-rerank.json", format: "json — living roadmap: remaining_sequence + completed[] — auto-selects target slice (PR1)" }
-  - { path: ".build/slices/<id>/integration-record.json", format: "json (PRIMARY) — status==integrated + verification.flow==pass + composition.files + slice_path. Self-reported flow:pass is CLAIM you re-derive" }
-  - { path: ".build/slices/<id>/build-record.json", format: "json (PRIMARY) — built slice components + module_namespace; every build_unit status:green required, self-reported contract:pass is CLAIM you re-derive" }
-  - { path: ".build/slices/<id>/oracle/oracle.lock", format: "json — FROZEN slice-oracle gate (status==frozen + builder_may_not_edit==true). Immutable slice suite you run; NEVER edit (B4/B5/H14)" }
-  - { path: ".build/slices/<id>/oracle/oracle.json", format: "json — slice oracle manifest: the ladder inventory per layer + inherited_oracle ref (frozen skeleton greens NOT re-run)" }
-  - { path: ".build/slices/<id>/oracle/{contract,flow,acceptance/visible,acceptance/held_out}/*.py + conftest.py", format: "python (FROZEN, read-only) — executable slice ladder. held_out GATE-ONLY, you run it FIRST (B7)" }
-  - { path: "src/freelancer_app/**/*.py", format: "python (this-slice + prior-built component code + composition root, read-only) — what the slice oracle runs against. Run/trace; NEVER edit (Rule 5)" }
-  - { path: ".hld/slices/<id>/nfr-mechanisms.json", format: "json — slice mechanisms[] = M* whose wiring you confirm; satisfied-by-frame / not-applicable NFRs NOT M* (no check). S4: mechanisms==[] → vacuous pass" }
-  - { path: ".hld/slices/<id>/components.json", format: "json — slice components + name→module map + each M* realizing component" }
-  - { path: ".build/skeleton/oracle/oracle.json + .build/skeleton/integration-record.json", format: "json — FROZEN skeleton oracle + composition root, INHERITED BY REFERENCE (H14): skeleton greens NOT re-run; skeleton-fidelity baseline" }
-  - { path: ".build/slices/<id>/verify-output.json", format: "json (OPTIONAL — prior VERIFY-OUTPUT run) — present on re-run after routed red healed; absent on first run" }
-  # — slice-build feature-add (class dispatched by playbook) —
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — CURRENT frozen WHAT RESOLVED via lock (read .aprd/aprd.lock, open .aprd/ + its artifact value; feature-add → aprd.v<N>.frozen.md, e.g. aprd.v2 — NEVER a hardcoded version path; BF7/P8 + 07a canon). Carries CLASS_EXTENSION → REGRESSION_GUARD: which existing AC*/suites must stay green (BF4)" }
-  - { path: ".aprd/baseline-map.json", format: "json — baseline inventory: existing_oracle.suites = the prior-green suites the scoped regression layer references. Run the regression layer the slice oracle.json class_ext materialized (Task 10) against these BY REFERENCE; never re-run-author/edit a baseline test (BF4/H14 analog)" }
-  # — slice-build bugfix (class dispatched by playbook) —
-  - { path: ".aprd/diagnosis.json", format: "json — DISPATCH signal (class==bugfix): localization.symbol = defect_site + root_cause + regression_surface. Re-derive reproduction claim from this + oracle reproduction_test" }
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — CURRENT frozen WHAT via lock (bugfix → aprd.v<N>; NEVER hardcoded; BF7/P8). CLASS_EXTENSION(bugfix) → BLAST_RADIUS + REGRESSION_GUARD + repro AC (AC11/R11)" }
-  - { path: ".build/slices/<id>/oracle/reproduction/test_*.py + conftest.py", format: "python (FROZEN, read-only) — ONE reproduction test (OREPRO-1); run vs repaired code to re-derive red→green flip" }
 outputs:
   # — skeleton-build —
-  - { path: ".build/skeleton/verification.json", format: "json (schema below) — authoritative ladder verdict: per-layer + per-AC + overall (verified|blocked); blocked carries escape→DIAGNOSE. FLAG only. CRITIQUE/GATE/DEMO consume" }
+  - { path: ".build/skeleton/verification.json", schema: "verification" }
   # — slice-build —
-  - { path: ".build/slices/<id>/verify-output.json", format: "json (schema below) — slice ladder verdict: per-layer + per-AC + inherited_oracle + skeleton_fidelity + verdict (verified|blocked). Roadmap done-sentinel. CRITIQUE/GATE/DEMO consume" }
+  - { path: ".build/slices/<id>/verify-output.json", schema: "verify-output" }
   # — slice-build bugfix (class dispatched by playbook) —
-  - { path: ".build/slices/<id>/verify-output.json", format: "json (bugfix schema delta below) — class/mode:bugfix + reproduction(red→green re-derived) + regression(scoped) + inherited_oracle + skeleton_fidelity + verdict (verified|blocked)" }
+  - { path: ".build/slices/<id>/verify-output.json", schema: "verify-output" }
 escapes:
   # — shared (both modes) —
   - { when: "the active oracle.lock missing OR status != frozen OR builder_may_not_edit != true, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate not clean, OR (feature-add) the artifact aprd.lock names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no frozen oracle/frame to verify against (§5.1, B4; BF7/P8 — walk the lock-named version, never a hardcoded aprd.frozen.md). Report which" }
@@ -80,7 +46,7 @@ One load-bearing thing: AUTHORITATIVE run of "done" — re-run/re-trace every ap
 Lane: Rule 8.
 
 ## MODE DISPATCH (decide first, before anything else)
-Scan disk for a ready slice to verify. **A slice with a green `.build/slices/<id>/build-record.json` (every build_unit `status:"green"`) + an integrated `.build/slices/<id>/integration-record.json` (`status:"integrated"` + `verification.flow=="pass"`) + a frozen `.build/slices/<id>/oracle/oracle.lock` (`status:"frozen"`) WITHOUT a sibling `.build/slices/<id>/verify-output.json` (`verdict:"verified"`) → SLICE-BUILD (Part B)** — target the first such slice in `08-rerank.json` `remaining_sequence` order; run the slice ladder, inheriting the frozen skeleton oracle by reference (§5.7/D11/H14). **None ready → SKELETON-BUILD (Part A)** — run the full ladder against `.build/skeleton/` (§5.7/B7). Read the shared verification ladder + Rules below + run exactly ONE part (its delta Rules + steps + schema + stop); ignore the other part.
+Scan disk for a ready slice to verify. **A slice with a green `.build/slices/<id>/build-record.json` (every build_unit `status:"green"`) + an integrated `.build/slices/<id>/integration-record.json` (`status:"integrated"` + `verification.flow=="pass"`) + a frozen `.build/slices/<id>/oracle/oracle.lock` (`status:"frozen"`) WITHOUT a sibling `.build/slices/<id>/verify-output.json` (`verdict:"verified"`) → SLICE-BUILD (Part B)** — target the first such slice in `08-rerank.json` `remaining_sequence` order; run the slice ladder, inheriting the frozen skeleton oracle by reference (§5.7/D11/H14). **None ready → SKELETON-BUILD (Part A)** — run the full ladder against `.build/skeleton/` (§5.7/B7). Read the shared verification ladder + Rules below + run exactly ONE part (its delta Rules + steps + stop); ignore the other part.
 
 ## Verification ladder (discriminator — run every applicable layer, derive each verdict from oracle + code, NOT from producer's claim; both modes)
 1. **Contract layer** (`oracle.json` `contract_tests[]` — `CT*` shape + each failure_mode test). Run/trace each against the built component module (`build-record.json` `module_namespace`). Layer passes iff every test green.
@@ -108,131 +74,11 @@ Scan disk for a ready slice to verify. **A slice with a green `.build/slices/<id
 The active oracle = `.build/skeleton/oracle/`, active records = `.build/skeleton/{integration,build}-record.json`, output = `.build/skeleton/verification.json`.
 
 ## Task steps
-1. Read inputs (shared + skeleton-build). Check guards (frontmatter `escapes:`) — any pre-run guard tripped → HALT/STOP as it says, report which + offending detail, write nothing. Else continue (green, integrated build + frozen oracle present).
+1. Read injected inputs (orchestrator resolves via io-manifest; role grounding in Rules). Check guards (frontmatter `escapes:`) — any pre-run guard tripped → HALT/STOP as it says, report which + offending detail, write nothing. Else continue (green, integrated build + frozen oracle present).
 2. Enumerate the ladder from `oracle.json`: `contract_tests[]`, `flow_tests[]`, `acceptance_tests[]` (visible + held_out files), `class_ext[]`. Map each build_set component to its `module_namespace` (build-record) + composition files (integration-record).
 3. Run/trace each layer in order (discriminator 1→5), deriving each verdict from frozen test + code on disk (Rule 1, 7): contract → flow → acceptance (visible + held_out per AC*) → class-ext (only if materialized) → NFR-wiring (each M* in `mechanisms[]`; `[]` → vacuous pass). Record per-assertion / per-AC outcome + trace.
 4. Aggregate per the overall-verdict rule above → `verdict:verified`. Any red (incl. visible-pass/held_out-fail AC, or a designed-but-unwired M*) → `verdict:blocked`.
-5. Write `.build/skeleton/verification.json` (schema below): per-layer + per-AC + verification_method + verdict + (blocked) escape{} or (verified) escape:null + provenance + counts. Stop. No code edit, no frozen-test edit, no diagnosis, no anti-cheat, no demo.
-
-## Output schema — `.build/skeleton/verification.json`
-
-```json
-{
-  "integration_record_ref": ".build/skeleton/integration-record.json",
-  "build_record_ref": ".build/skeleton/build-record.json",
-  "oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
-  "oracle_ref": ".build/skeleton/oracle/oracle.json",
-  "nfr_mechanisms_ref": ".hld/skeleton/nfr-mechanisms.json",
-  "components_ref": ".hld/skeleton/components.json",
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "adr_lock_ref": ".adr/adr.lock",
-  "aprd_lock_ref": ".aprd/aprd.lock",
-  "locks_verified": true,                  // oracle.lock(frozen+builder_may_not_edit) + skeleton/adr/aprd frozen + skeleton gate clean (don't recompute hashes)
-  "class": "greenfield",
-  "mode": "skeleton-build",
-  "slice": "S1",                           // = skeleton_id
-  "verification_method": "static-trace",   // "executed" (pytest ran) | "static-trace" (no runtime; outcomes traced against the code, authoritative-by-trace) — Rule 7; a runtime gap is NOT a red
-  "ladder": {
-    "contract": {                          // discriminator 1 — re-derived, not copied from build-record
-      "layer_verdict": "pass",             // pass | fail | n/a
-      "tests": [
-        {
-          "id": "OCT-CT1", "target": "CT1", "provider": "C1", "module": "freelancer_app.data_store.identity_record_store",
-          "shape": { "test": "test_ct1_shape_persists_identity_record", "result": "pass" },
-          "failures": [
-            { "test": "test_ct1_failure_store_unavailable", "result": "pass" },
-            { "test": "test_ct1_failure_constraint_violation", "result": "pass" },
-            { "test": "test_ct1_failure_partial_failure", "result": "pass" }
-          ],
-          "trace": "save_identity is create-or-update returning a non-None dict acknowledgement; failure modes propagate as-raised (ConnectionError/ValueError/RuntimeError) — every assertion satisfied."
-        }
-        // … one entry per oracle.json contract_tests[] (CT8 likewise)
-      ]
-    },
-    "flow": {                              // discriminator 2 — re-derived against the composition root
-      "layer_verdict": "pass",
-      "tests": [
-        {
-          "id": "OF-F1", "target": "F1", "path": ["C6", "C2", "C1"], "wsgi_entry": "freelancer_app.wsgi.application",
-          "happy": { "test": "test_f1_happy_path_oauth_login_establishes_session", "asserts_ac": ["AC1", "AC5"], "result": "pass" },
-          "failure": { "test": "test_f1_failure_store_unavailable", "exercises": "CT1:store-unavailable", "result": "pass" },
-          "trace": "GET / renders entry page (AC1); /auth/login redirects; /auth/callback exchanges code → handle_callback → save_identity → session cookie (AC5); failure: ConnectionError → no cookie → redirect to login with error."
-        }
-      ]
-    },
-    "acceptance": {                        // discriminator 3 — VERIFY-OUTPUT runs this FIRST (producers left it RED); held_out is gate-only (B7)
-      "layer_verdict": "pass",
-      "per_ac": [
-        {
-          "ac": "AC1", "req_ref": "R1",
-          "visible":  { "file": "acceptance/visible/test_AC1.py",  "result": "pass", "trace": "GET / → HttpResponse(200, non-empty HTML), no native-install gate." },
-          "held_out": { "file": "acceptance/held_out/test_AC1.py", "result": "pass", "trace": "GET / over HTTPS proxy + curl UA + non-localhost host → same 200 non-empty render; property holds regardless of client identity (not hardcoded to the visible input)." }
-        },
-        {
-          "ac": "AC5", "req_ref": "R5",
-          "visible":  { "file": "acceptance/visible/test_AC5.py",  "result": "pass", "trace": "/auth/login redirect + /auth/callback (visible code/provider_id) → session cookie set, no password entry." },
-          "held_out": { "file": "acceptance/held_out/test_AC5.py", "result": "pass", "trace": "same OAuth-to-session property with a DIFFERENT unguessable provider_id/code/profile → session cookie still set; the build is not hardcoded to the visible identity (B7)." }
-        }
-      ]
-    },
-    "class_ext": {                         // discriminator 4 — only what the oracle materialized
-      "layer_verdict": "n/a",              // n/a when oracle.json class_ext == [] (greenfield skeleton)
-      "kinds": [],                         // [regression|benchmark|parity] the oracle materialized, with results; [] → none
-      "note": "Greenfield skeleton — oracle materialized no class extension (B13/§11)."
-    },
-    "nfr": {                               // discriminator 5 — each M* actually wired (closes H5); M* only (Rule 4)
-      "layer_verdict": "pass",             // pass | fail; vacuous pass when mechanisms == []
-      "mechanisms_checked": [],            // one entry per M* in mechanisms[]: { id:"M*", realized_by:["C*"], wired_in:"src/…", result:"pass|fail", trace:"…" }
-      "note": "nfr-mechanisms.json mechanisms == [] — all NFRs satisfied-by-frame / not-applicable under INV6/A13; no M* requires a wiring check (MAP-NFR). NFR layer passes vacuously."
-    }
-  },
-  "per_ac_summary": [                      // the §8 per-AC report, flattened
-    { "ac": "AC1", "visible": "pass", "held_out": "pass" },
-    { "ac": "AC5", "visible": "pass", "held_out": "pass" }
-  ],
-  "verdict": "verified",                   // verified (every applicable layer green + every M* wired) | blocked (any red)
-  "escape": null,                          // null on verified; on blocked → see example below
-  "provenance": {
-    "verifier_role": "verifier",           // runs the inherited oracle; defines nothing (B1) — distinct from builder/integrator/test-author
-    "built_against": {
-      "oracle_lock": ".build/skeleton/oracle/oracle.lock",
-      "skeleton_lock": ".hld/skeleton.lock",
-      "adr_lock": ".adr/adr.lock",
-      "aprd_lock": ".aprd/aprd.lock",
-      "build_plan": ".build/skeleton/build-plan.json",
-      "build_record": ".build/skeleton/build-record.json",
-      "integration_record": ".build/skeleton/integration-record.json"
-    }
-  },
-  "verification_counts": {                 // walk to count, don't estimate
-    "contract_tests": 2,                   // oracle contract_tests[] entries
-    "contract_assertions": 7,              // shape + failure tests across them
-    "flow_assertions": 2,                  // F* happy + failure
-    "acceptance_acs": 2,
-    "acceptance_visible_passed": 2,
-    "acceptance_held_out_passed": 2,
-    "class_ext_layers": 0,
-    "mechanisms_checked": 0,
-    "layers_applicable": 4,                // of {contract,flow,acceptance,class_ext,nfr}: those not n/a (class_ext n/a here → 4)
-    "layers_passed": 4,
-    "layers_failed": 0
-  }
-}
-```
-
-**Blocked example** — any red after the authoritative run (`verdict:"blocked"`, failing layer's `layer_verdict:"fail"`). FLAG + route (shared Rule 5):
-
-```json
-"verdict": "blocked",
-"escape": {
-  "failing": [
-    { "layer": "acceptance", "id": "AC5", "subcase": "held_out", "what": "held_out OAuth-to-session fails: a session cookie is set ONLY for the visible provider_id (google-uid-visible-12345); the held_out identity gets no session — the callback hardcodes the visible case." }
-  ],
-  "failure_signature": "AssertionError: AC5 held_out — no 'session' Set-Cookie and callback_status not in (302,303) for the held_out provider_id",
-  "classification": "my-code",            // PROVISIONAL hint for DIAGNOSE (overfit to the visible set = a build defect, B7) — DIAGNOSE re-derives; my-code|contract|decision|WHAT|missing-foundation
-  "route": "self-heal → DIAGNOSE"          // any red returns to the self-heal loop; DIAGNOSE adjudicates self-heal-vs-escape independently (§5.8)
-}
-```
+5. Write `.build/skeleton/verification.json` (schema: "verification" registry id): per-layer + per-AC + verification_method + verdict + (blocked) escape{} or (verified) escape:null + provenance + counts. Stop. No code edit, no frozen-test edit, no diagnosis, no anti-cheat, no demo.
 
 ## Stop condition
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT (already-verified → STOP).
@@ -265,264 +111,37 @@ The active oracle = the auto-selected `.build/slices/<id>/oracle/`, active recor
 2. **Reproduction re-derives the red→green flip (THE bugfix lane line).** OREPRO-1 MUST pass vs repaired code — `reproduction.now:"green"` is a CLAIM, re-derive (Rule 1). Still-red → `verdict:blocked` → self-heal→DIAGNOSE. No new contract; `contract` `n/a`.
 3. **Regression MANDATORY (BF4) and scoped (Risk R4).** Run REGRESSION_GUARD AC6 on BLAST_RADIUS `_ProjectManagementAdapter._render`. Every previously-green test MUST stay green; any red → `verdict:blocked` → DIAGNOSE (feature-add delta Rule 3 + shared Rule 5 bind).
 4. **Inherit frozen baseline S4 oracle BY REFERENCE (H14).** Greens inherited, NOT re-run — EXCEPT AC6 re-run via scoped regression layer.
-5. **Both green = the bar.** Reproduction red→green AND scoped regression green → `verdict:verified`. Either fails → `verdict:blocked` (Rules 2–3 above).
+5. **Bugfix bar (three conditions).** Reproduction red→green (Rule 2) AND scoped regression green (Rule 3) AND skeleton-fidelity not breached (delta Rule 3) → `verdict:verified`. Any fails → `verdict:blocked`.
 
 ## Task steps (slice-build)
-1. Read inputs (shared + slice-build). Check guards (frontmatter `escapes:`) — any tripped → HALT (or STOP clean for "no ready slice"), report which + detail, write nothing. Else continue.
+1. Read injected inputs + check guards (as Part A step 1); HALT (or STOP clean for "no ready slice"). Else continue.
 2. Auto-select the target slice (delta Rule 1). None ready → STOP clean.
 3. Enumerate the slice ladder from the slice `oracle.json`: `contract_tests[]`, `flow_tests[]`, `acceptance_tests[]` (visible + held_out), `class_ext[]`, + `inherited_oracle.inherited_tests[]` (record inherited, NOT re-run — delta Rule 2). Map each build_unit component to its `module_namespace` (build-record) + composition files (integration-record).
 4. Run/trace each slice layer in order (discriminator 1→5), deriving each verdict from the frozen slice test + code on disk (Rule 1, 7): contract → flow → acceptance (visible + held_out per AC*) → class-ext (only if materialized) → NFR-wiring (each M* in slice `mechanisms[]`; `[]` → vacuous pass). Record per-assertion / per-AC outcome + trace.
 5. Skeleton-fidelity check (delta Rule 3): confirm no frozen skeleton test / composition root was edited / re-run / re-greened. Breach → record `skeleton_fidelity.breached:true` + route Phase 2 (guard), stop.
 6. Aggregate per the overall-verdict rule above, AND no skeleton-fidelity breach → `verdict:verified`. Any red → `verdict:blocked`.
-7. Write `.build/slices/<id>/verify-output.json` (schema below): slice refs + per-layer + per-AC + `inherited_oracle` + `skeleton_fidelity` + verification_method + verdict + (blocked) escape{} or (verified) escape:null + provenance + counts. Stop.
+7. Write `.build/slices/<id>/verify-output.json` (schema: "verify-output" registry id): slice refs + per-layer + per-AC + `inherited_oracle` + `skeleton_fidelity` + verification_method + verdict + (blocked) escape{} or (verified) escape:null + provenance + counts. Stop.
 
 **Feature-add branch** (class == feature-add, playbook-dispatched — steps 1–7 run as above with these changes):
 - **0a (after auto-selecting the slice, before step 4).** Resolve frozen-WHAT: read `.aprd/aprd.lock` → open `.aprd/<aprd.lock.artifact>` (feature-add delta Rule 1, NEVER a hardcoded `v<N>`). Read its `CLASS_EXTENSION` → `REGRESSION_GUARD` + `baseline-map.json` `existing_oracle.suites` + the slice `oracle.json` `class_ext` regression layer (`scope` + `asserts` + `source_suites`). No `REGRESSION_GUARD` / baseline-map / regression layer → HALT (guard).
 - **4 (feature-add).** Run the standard contract/flow/acceptance ladder (discriminator 1–3) as above. THEN run the scoped regression layer (discriminator 4 = the materialized `regression` class_ext, feature-add delta Rules 2–4): re-run/trace each `REGRESSION_GUARD` `AC*`/suite in scope → every previously-green test MUST stay green. NEVER edit/weaken a baseline test to pass (delta Rule 3, guard).
 - **6 (feature-add).** Aggregate: full ladder green AND `regression.verdict == "green"` AND no skeleton-fidelity breach → `verdict:verified`. ANY regression red → `verdict:blocked` → route DIAGNOSE (the feature broke existing behavior — BF4).
-- **7 (feature-add).** Write slice `verify-output.json` as above PLUS `class:"feature-add"` + `aprd_ref` (resolved) + `aprd_version` + `regression_guard_ref` + the `regression` block (schema delta below). Certifies only when `regression.verdict == "green"` AND the full ladder passes. Stop.
+- **7 (feature-add).** Write slice `verify-output.json` (schema: "verify-output" registry id) as above PLUS `class:"feature-add"` + `aprd_ref` (resolved) + `aprd_version` + `regression_guard_ref` + the `regression` block (feature-add delta Rules 2–4). Certifies only when `regression.verdict == "green"` AND the full ladder passes. Stop.
 
 **Bugfix branch** (class == bugfix — REPLACES contract/flow/acceptance; no new component/contract/integration-record):
-- **1b–3b.** Read inputs; guards per step 1 + bugfix-specific (`diagnosis.json` present + `oracle_layers:[reproduction,regression]`; mismatch → fall through). Resolve frozen-WHAT (Rule 1); read `diagnosis.json` `root_cause` + `localization.symbol` + oracle `reproduction_test`. Missing → HALT.
+- **1b–3b.** Read injected inputs (orchestrator resolves via io-manifest; role grounding in Rules). Check guards (frontmatter `escapes:`) per step 1 + bugfix-specific (`diagnosis.json` present + `oracle_layers:[reproduction,regression]`; mismatch → fall through). Resolve frozen-WHAT (Rule 1); read `diagnosis.json` `root_cause` + `localization.symbol` + oracle `reproduction_test`. Missing → HALT.
 - **4b.** Re-derive reproduction flip (Rule 2): run/trace `reproduction/test_AC11_null_rate.py`; `_rate_str(None)='—'`; GET /projects → 200; `'—'` in body; no TypeError/500. Still red → blocked.
 - **5b.** Re-derive scoped regression (Rule 3): run/trace REGRESSION_GUARD AC6 on BLAST_RADIUS. Any red → blocked.
 - **6b.** Skeleton-fidelity (delta Rule 3): BLAST_RADIUS src edit = sanctioned repair; `skeleton_fidelity.breached:false`. No frozen test edited (H14).
-- **7b.** Aggregate (bugfix delta Rule 5): all three conditions green → `verdict:verified`; any fail → `verdict:blocked`.
-- **8b.** Write slice `verify-output.json` (step 7 shape + bugfix schema delta below). Stop.
-
-## Output schema — `.build/slices/<id>/verify-output.json`
-Same shape as Part A; the slice deltas (everything else carried verbatim). Worked example keyed to S4 (verdict:verified):
-
-```json
-{
-  "integration_record_ref": ".build/slices/S4/integration-record.json",
-  "build_record_ref": ".build/slices/S4/build-record.json",
-  "slice_oracle_lock_ref": ".build/slices/S4/oracle/oracle.lock",
-  "slice_oracle_ref": ".build/slices/S4/oracle/oracle.json",
-  "slice_nfr_mechanisms_ref": ".hld/slices/S4/nfr-mechanisms.json",
-  "slice_components_ref": ".hld/slices/S4/components.json",
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "adr_lock_ref": ".adr/adr.lock",
-  "aprd_lock_ref": ".aprd/aprd.lock",
-  "locks_verified": true,                  // slice oracle.lock(frozen+builder_may_not_edit) + skeleton/adr/aprd frozen + skeleton gate clean (don't recompute hashes)
-  "class": "greenfield",
-  "mode": "slice-build",
-  "slice_id": "S4",                        // auto-selected target (delta Rule 1)
-  "slice_name": "Create and manage client projects with currency and billable rate",
-  "flow": "F4",                            // slice flow verified
-  "slice_path": ["C6", "C3", "C2", "C1"],  // carried from integration-record
-  "prior_built_components": ["C1", "C2", "C6"], // frozen-green from own oracle; exercised only as the slice oracle requires (delta Rule 4)
-  "verification_method": "static-trace",   // "executed" | "static-trace" — Rule 7; mirrors build-record/integration-record (no pytest runtime). A runtime gap is NOT a red
-  "inherited_oracle": {                    // delta Rule 2 — frozen skeleton greens inherited BY REFERENCE, NOT re-run (H14)
-    "skeleton_oracle_ref": ".build/skeleton/oracle/oracle.json",
-    "skeleton_integration_ref": ".build/skeleton/integration-record.json",
-    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5"], // from slice oracle.json inherited_oracle.inherited_tests[]
-    "frozen_verified": true,               // verified at skeleton-build; re-running here = skeleton-fidelity breach
-    "re_run": false
-  },
-  "ladder": {                              // SLICE oracle's tests only (Rule 2 + delta Rule 2)
-    "contract": {                          // discriminator 1
-      "layer_verdict": "pass",
-      "tests": [
-        {
-          "id": "OCT-CT2", "target": "CT2", "provider": "C1", "caller": "C3", "module": "freelancer_app.project_management.project_store",
-          "shape": { "test": "test_ct2_shape_persists_project_records", "result": "pass" },
-          "failures": [
-            { "test": "test_ct2_failure_store_unavailable", "result": "pass" },
-            { "test": "test_ct2_failure_constraint_violation", "result": "pass" },
-            { "test": "test_ct2_failure_not_found", "result": "pass" }
-          ],
-          "trace": "ProjectStore CRUD delegates to C1 data store; StoreUnavailableError/ConstraintViolationError/NotFoundError propagate unmodified — every assertion satisfied."
-        },
-        {
-          "id": "OCT-CT3", "target": "CT3", "provider": "C2", "caller": "C3", "module": "freelancer_app.project_management.session_resolver",
-          "shape": { "test": "test_ct3_shape_resolves_authenticated_session", "result": "pass" },
-          "failures": [
-            { "test": "test_ct3_failure_no_valid_session", "result": "pass" },
-            { "test": "test_ct3_failure_callee_error", "result": "pass" }
-          ],
-          "trace": "SessionResolver resolves session via C2; identity==None → UnauthorizedError (no-valid-session); any C2 exception wrapped in SessionResolutionError (callee-error)."
-        },
-        {
-          "id": "OCT-CT9", "target": "CT9", "provider": "C3", "caller": "C6", "module": "freelancer_app.web_ingress.dispatcher",
-          "shape": { "test": "test_ct9_shape_dispatches_project_page_request", "result": "pass" },
-          "failures": [
-            { "test": "test_ct9_failure_callee_error", "result": "pass" },
-            { "test": "test_ct9_failure_not_found", "result": "pass" }
-          ],
-          "trace": "dispatch_project_request delegates to project_management.handle_request; RuntimeError → 500 (detail not in body); NotFoundError → 404."
-        }
-      ]
-    },
-    "flow": {                              // discriminator 2 — against composition root from integration-record
-      "layer_verdict": "pass",
-      "tests": [
-        {
-          "id": "OF-F4", "target": "F4", "path": ["C6", "C3", "C2", "C1"], "wsgi_entry": "freelancer_app.wsgi.application",
-          "happy": { "test": "test_f4_happy_path_project_create_and_list", "asserts_ac": ["AC6"], "result": "pass" },
-          "failure": { "test": "test_f4_failure_ct3_no_valid_session", "exercises": "CT3:no-valid-session", "result": "pass" },
-          "trace": "Authenticated request → dispatcher → handle_request: resolve_session (CT3) + create_project/list_projects (CT2) → project created, appears in list (AC6); failure: resolve_session→None → UnauthorizedError → 302 redirect to /auth/login, no data store touched."
-        }
-      ]
-    },
-    "acceptance": {                        // discriminator 3 — VERIFY-OUTPUT runs this FIRST (B7)
-      "layer_verdict": "pass",
-      "per_ac": [
-        {
-          "ac": "AC6", "req_ref": "R6",
-          "visible":  { "file": "acceptance/visible/test_AC6.py",  "result": "pass", "trace": "freelancer creates project (name/client/currency/rate) → appears in list; edits name/rate; deletes — all via the session-scoped CRUD." },
-          "held_out": { "file": "acceptance/held_out/test_AC6.py", "result": "pass", "trace": "same property with a DIFFERENT unguessable project/client/currency/rate/session → CRUD + list still hold; not hardcoded to the visible project (B7)." }
-        }
-      ]
-    },
-    "class_ext": {                         // discriminator 4
-      "layer_verdict": "n/a",              // slice oracle.json class_ext == []
-      "kinds": [],
-      "note": "S4 slice oracle materialized no class extension (B13/§11)."
-    },
-    "nfr": {                               // discriminator 5 — M* only (Rule 4)
-      "layer_verdict": "pass",             // vacuous pass when mechanisms == []
-      "mechanisms_checked": [],
-      "note": "slice nfr-mechanisms.json mechanisms == [] — inherited_nfrs (A13/A2/C1/C2) all satisfied-by-frame, new_mechanisms == []; no M* requires a wiring check (MAP-NFR). NFR layer passes vacuously."
-    }
-  },
-  "skeleton_fidelity": {                   // delta Rule 3 — slice-build only (H14)
-    "breached": false,
-    "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5"], // inherited by reference, not re-run
-    "note": "Slice ladder verified entirely on the slice oracle (CT2/CT3/CT9, F4, AC6) + slice composition additive routes. No frozen skeleton test re-run/re-greened, no skeleton composition root edited. Baseline untouched (H14)."
-  },
-  "per_ac_summary": [
-    { "ac": "AC6", "visible": "pass", "held_out": "pass" }
-  ],
-  "verdict": "verified",                   // verified (every applicable slice layer green + every M* wired + no skeleton-fidelity breach) | blocked (any red)
-  "escape": null,
-  "provenance": {
-    "verifier_role": "verifier",
-    "built_against": {
-      "slice_oracle_lock": ".build/slices/S4/oracle/oracle.lock",
-      "skeleton_oracle": ".build/skeleton/oracle/oracle.json",          // inherited frozen baseline (by reference)
-      "skeleton_integration": ".build/skeleton/integration-record.json",
-      "skeleton_lock": ".hld/skeleton.lock",
-      "adr_lock": ".adr/adr.lock",
-      "aprd_lock": ".aprd/aprd.lock",
-      "slice_build_plan": ".build/slices/S4/build-plan.json",
-      "slice_build_record": ".build/slices/S4/build-record.json",
-      "slice_integration_record": ".build/slices/S4/integration-record.json"
-    }
-  },
-  "verification_counts": {                 // walk to count, don't estimate
-    "contract_tests": 3,                   // CT2, CT3, CT9
-    "contract_assertions": 10,             // CT2 (shape+3) + CT3 (shape+2) + CT9 (shape+2)
-    "flow_assertions": 2,                  // F4 happy + failure
-    "acceptance_acs": 1,
-    "acceptance_visible_passed": 1,
-    "acceptance_held_out_passed": 1,
-    "class_ext_layers": 0,
-    "mechanisms_checked": 0,
-    "inherited_tests_not_run": 5,          // skeleton greens inherited by reference (delta Rule 2)
-    "layers_applicable": 4,                // class_ext n/a → 4 of {contract,flow,acceptance,class_ext,nfr}
-    "layers_passed": 4,
-    "layers_failed": 0
-  }
-}
-```
-
-**Blocked example** — slice-build red after the authoritative run (`verdict:"blocked"`; defect slice-local, NOT a skeleton breach). FLAG + route; never fix, never edit a frozen test:
-
-```json
-"verdict": "blocked",
-"skeleton_fidelity": { "breached": false, "inherited_tests": ["OCT-CT1", "OCT-CT8", "OF-F1", "OA-AC1", "OA-AC5"], "note": "Defect is in slice AC6 held_out — slice-local. No frozen skeleton artifact touched (H14)." },
-"escape": {
-  "failing": [
-    { "layer": "acceptance", "id": "AC6", "subcase": "held_out", "what": "held_out project CRUD fails: create/list succeed ONLY for the visible project/client/currency/rate; the held_out unguessable project gets no persisted record / does not appear in list — the project store hardcodes the visible case." }
-  ],
-  "failure_signature": "AssertionError: AC6 held_out — created project not found in list_projects() for the held_out project id/currency",
-  "classification": "my-code",            // PROVISIONAL hint (overfit to the visible project = build defect, B7); DIAGNOSE re-derives; my-code|contract|decision|WHAT|missing-foundation
-  "route": "self-heal → DIAGNOSE"
-}
-```
-
-### Feature-add schema delta (slice-build, class == feature-add — only what differs, AB1)
-Same shape as the slice schema above; the feature-add slice adds (everything else carried verbatim):
-- `"class": "feature-add"` (was `"greenfield"`).
-- `"aprd_ref": ".aprd/<aprd.lock.artifact>"` (lock-resolved, NEVER a hardcoded `aprd.v<N>.frozen.md`) + `"aprd_version": "<version from .aprd/aprd.lock>"` + `"baseline_map_ref": ".aprd/baseline-map.json"`.
-- `"regression_guard_ref": ".aprd/<aprd.lock.artifact>#CLASS_EXTENSION/REGRESSION_GUARD"` (the scoped guard the regression layer runs).
-- `ladder.class_ext` FIRES (greenfield = `layer_verdict:"n/a"`, `kinds:[]`): `layer_verdict:"pass"|"fail"`, `kinds:[{ kind:"regression", scope, asserts[], result }]` — the scoped regression run.
-- A top-level `regression` block — the BF4 verdict (GATE/DEMO consume); greenfield omits it:
-```json
-"regression": {                          // BF4 — scoped regression layer (feature-add only)
-  "ran": true,                           // MUST be true to certify a feature-add slice — a missing/false run is a BF4 breach (slice MUST NOT certify)
-  "scope": "touched-surface + seams",    // carried from slice oracle.json class_ext.scope (Risk R4 — NOT the whole inherited suite)
-  "scope_basis": "REGRESSION_GUARD AC2,AC7 (time-entry log + persistence, parent of the tagged entry) + integration_seam C1/CT2 (label additive on the time-entry record)", // carried from class_ext.scope_basis
-  "suites_run": [".build/skeleton/oracle/", ".build/slices/S4/oracle/"], // baseline suites referenced (class_ext.source_suites), run BY REFERENCE — never edited
-  "asserts": ["AC2", "AC7"],             // existing AC*/suite refs that must stay green (verbatim from REGRESSION_GUARD / class_ext.asserts)
-  "results": [                           // per previously-green AC*/suite, re-run/traced — every one MUST stay green
-    { "ref": "AC2", "result": "pass", "trace": "log-a-time-entry suite still green: set_label is additive on the time-entry record; entry-logging path (create + list) unchanged by the label field." },
-    { "ref": "AC7", "result": "pass", "trace": "time-entry persistence suite still green: the additive label field does not alter existing record persistence/read behavior." }
-  ],
-  "verdict": "green",                    // green (every in-scope previously-green test stays green) | red (any regression) → slice FAILS, route DIAGNOSE (BF4)
-  "reds": [],                            // [] on green; on red → [{ ref, was:"green", now:"red", what }] — a real regression unless DIAGNOSE proves flaky; NEVER weaken the test (B4)
-  "baseline_tests_edited": false         // MUST be false — a regression test edited/weakened to pass = frozen-test edit (B4) → escape, never patch
-}
-```
-- The slice certifies (`verdict:"verified"`) only when the full ladder passes AND `regression.verdict == "green"` AND no skeleton-fidelity breach. A regression red → `verdict:"blocked"` + `escape{}` (failing layer `regression`, `route:"self-heal → DIAGNOSE"`).
-- `verification_counts` adds `"regression_asserts": <N>` + `"regression_asserts_passed": <N>` (walk to count); `class_ext_layers` = 1 (the regression layer materialized).
-
-**Blocked example — REGRESSION red (the headline BF4 case):** the feature broke a previously-green existing AC → slice MUST FAIL (not certify). FLAG + route; never weaken the regression test:
-```json
-"regression": {
-  "ran": true, "scope": "touched-surface + seams", "suites_run": [".build/skeleton/oracle/", ".build/slices/S4/oracle/"], "asserts": ["AC2", "AC7"],
-  "results": [
-    { "ref": "AC2", "result": "pass", "trace": "log-a-time-entry suite still green." },
-    { "ref": "AC7", "result": "red", "trace": "time-entry persistence regressed: adding the label field changed the record write so an existing entry without a label no longer round-trips — a previously-green suite now fails (BF4)." }
-  ],
-  "verdict": "red",
-  "reds": [ { "ref": "AC7", "was": "green", "now": "red", "what": "existing time-entry persistence broke: label-field write path drops entries with no label" } ],
-  "baseline_tests_edited": false
-},
-"verdict": "blocked",
-"escape": {
-  "failing": [ { "layer": "regression", "id": "AC7", "subcase": "regression", "what": "previously-green AC7 (time-entry persistence) went red after the label feature landed — a real regression (BF4), not a flake; the feature broke existing behavior." } ],
-  "failure_signature": "AssertionError: AC7 regression — existing time-entry without a label no longer round-trips after label-field write",
-  "classification": "my-code",          // PROVISIONAL hint; DIAGNOSE re-derives self-heal-vs-escape
-  "route": "self-heal → DIAGNOSE"
-}
-```
-
-### Bugfix schema delta (class == bugfix — only what differs, AB1)
-Same shape as the slice schema; adds `class:"bugfix"` + `mode:"bugfix"` + `diagnosis_ref` + top-level `reproduction` block + top-level `regression` block (same shape as feature-add's). `ladder.contract/flow/acceptance` n/a — no new contract. Certifies `verified` ONLY when all three hold: `reproduction.now=="green"` + `regression.verdict=="green"` + `skeleton_fidelity.breached==false`.
-
-The two new top-level blocks (bugfix-only); everything else `// …carried verbatim` from slice schema above:
-```json
-// top-level additions — class:"bugfix", mode:"bugfix", diagnosis_ref, aprd_ref (lock-resolved), aprd_version, regression_guard_ref
-// inherited_oracle: { …same shape, re_run:false — AC6 re-run ONLY via regression layer }
-// skeleton_fidelity: { breached:false, note:"Bugfix edits BLAST_RADIUS src file — sanctioned repair (H14)" }
-// verification_counts: { reproduction_flipped:1, regression_asserts:1, regression_asserts_passed:1, contract_assertions:0, flow_assertions:0, acceptance_acs:0, class_ext_layers:1, … }
-"reproduction": {                              // re-derived, NOT copied from build-record (Rule 1)
-  "ran": true, "test_id": "OREPRO-1", "target": "AC11", "req_ref": "R11",
-  "file": "reproduction/test_AC11_null_rate.py",
-  "was": "red", "now": "green",                // MUST be "green"; still-red → verdict:blocked
-  "flips_green_when": "null billable_rate → em-dash '—'; HTTP 200, no 500",
-  "trace": "_rate_str(None)='—'; GET /projects → 200; '—' in body; no TypeError",
-  "baseline_ref": "AC6"
-},
-"regression": {                                // same shape as feature-add regression block; bugfix values:
-  "ran": true, "scope_basis": "REGRESSION_GUARD AC6 / BLAST_RADIUS _ProjectManagementAdapter._render",
-  "suites_run": [".build/slices/S4/oracle/"], "asserts": ["AC6"],
-  "results": [{ "ref": "AC6", "result": "pass", "trace": "rated render 95.00→'95.00/hr' + CRUD still green" }],
-  "verdict": "green", "reds": [], "baseline_tests_edited": false
-}
-// verdict:"verified", escape:null, provenance(add diagnosis to built_against) — carried verbatim
-```
-
-**Blocked (reproduction still red):** `"reproduction":{"now":"red","result":"fail"}`, `"regression":{"ran":false}`, `"verdict":"blocked"`, `escape.failing[0].layer:"reproduction"`, `escape.route:"self-heal → DIAGNOSE"`.
+- **7b.** Aggregate: meet bugfix bar (bugfix delta Rule 5) → `verdict:verified`; any fail → `verdict:blocked`.
+- **8b.** Write slice `verify-output.json` (schema: "verify-output" registry id; bugfix shape: `class:"bugfix"` + `reproduction` block + `regression` block per bugfix delta Rules 2–3). Stop.
 
 ## Stop condition (slice-build)
-- Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.
+- Guard tripped → as Part A.
 - No ready slice → write nothing; STOP clean.
 - Skeleton-fidelity breach (delta Rule 3, guard) → record breached:true + route Phase 2; state the route; stop.
 - Red found → blocked record + escape to self-heal; state the route; stop.
 - Red found (feature-add: a REGRESSION red — the feature broke previously-green existing behavior, BF4) → blocked record + escape route DIAGNOSE; state the route; stop. NEVER weaken/skip/edit a regression test to pass (B4).
 - Clean → write `.build/slices/<id>/verify-output.json` (verified); state per-layer + per-AC + inherited + skeleton_fidelity summary; CRITIQUE next; stop.
 - Clean (feature-add) → as above PLUS the scoped regression layer ran green alongside the full ladder (`regression.verdict:"green"`, `class:"feature-add"`). State "Verified feature-add slice <id> — full ladder + scoped regression (REGRESSION_GUARD <AC*…>) both green, held_out anti-cheat green, nothing previously green went red (BF4); CRITIQUE next", stop.
-- Clean (bugfix) → reproduction OREPRO-1 flipped red→green AND scoped regression (REGRESSION_GUARD AC6) stayed green. State "Verified bugfix slice S4 — reproduction OREPRO-1 red→green + scoped regression AC6 green, edit scoped to BLAST_RADIUS, BF4 clear; CRITIQUE next"; stop.
+- Clean (bugfix) → bugfix bar met (delta Rule 5: reproduction OREPRO-1 red→green + scoped regression AC6 green + skeleton-fidelity not breached). State "Verified bugfix slice S4 — reproduction OREPRO-1 red→green + scoped regression AC6 green, edit scoped to BLAST_RADIUS, BF4 clear; CRITIQUE next"; stop.

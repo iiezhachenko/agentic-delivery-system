@@ -4,48 +4,15 @@ phase: 04-build
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 mode: skeleton-build|slice-build|bugfix   # DISPATCHED on disk: a ready frozen slice oracle (.build/slices/<id>/oracle/oracle.lock, build-record absent/incomplete) → SLICE-BUILD (Part B: implement ONE slice component against the frozen slice oracle + prior-built slices, §5.5/D11); none → SKELETON-BUILD (Part A: implement ONE walking-skeleton component to contract-green, §5.5/B3). bugfix = slice-build re-entry of the defect's EXISTING slice (class dispatched by playbook → bugfix delta in Part B): minimal fix at root_cause, flip reproduction test red→green, regression stays green. One role, modes
 interactive: false          # internal — team owns HOW + LLD (B8); client signed WHAT (P0) + ordered slices (P1). Demo gate later (PR1, §9)
-inputs:
-  # — shared (both modes) —
-  - { path: ".hld/skeleton/components.json", format: "json — component id/name/responsibility + name→module mapping for your component" }
-  - { path: ".hld/skeleton/contracts.json", format: "json — CT* id/between/kind/shape/failure_modes for seams your component provides or consumes; frozen contract is the wall (B3)" }
-  - { path: ".hld/skeleton/data-model.json", format: "json — entity id/name/owner/persisted for the entity your component persists (LLD grounding C1); field schemas deferred" }
-  - { path: ".adr/adr.lock", format: "json — frozen frame gate (status==frozen); class" }
-  - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — frozen stack (read-only): ADR-0002 Python, 0003 PostgreSQL, 0004 MPA/SSR, 0005 Google OAuth, INV6 synchronous. Ground in frame, never re-decide (B5)" }
-  - { path: ".hld/skeleton.lock", format: "json — frozen skeleton gate (status==frozen + gate clean)" }
-  - { path: ".aprd/aprd.lock", format: "json — frozen WHAT gate (status==frozen)" }
-  # — skeleton-build —
-  - { path: ".build/skeleton/build-plan.json", format: "json (PRIMARY scope) — build_set + build_order + per-unit seams/traces. Pick NEXT un-built component; structural_defects must be empty" }
-  - { path: ".build/skeleton/oracle/oracle.lock", format: "json — FROZEN oracle gate (frozen + builder_may_not_edit + starts_red). Immutable suite you green, never edit (B4/B5)" }
-  - { path: ".build/skeleton/oracle/oracle.json", format: "json — oracle manifest: contract-test surface (contract layer). Flow/acceptance layers are INTEGRATE/VERIFY-OUTPUT, not yours" }
-  - { path: ".build/skeleton/oracle/contract/*.py + conftest.py", format: "python (FROZEN, read-only) — executable contract tests + mock fixtures = the literal surface your component satisfies (§4.3)" }
-  - { path: ".build/skeleton/build-record.json", format: "json (OPTIONAL — prior runs) — build_units already green; read to pick NEXT un-built component (resumable). Absent on first run" }
-  # — slice-build —
-  - { path: ".build/slices/<slice_id>/build-plan.json", format: "json (PRIMARY scope) — slice build_set + build_order + per-seam real|mocked + traces. Auto-select target; structural_defects must be empty" }
-  - { path: ".build/slices/<slice_id>/oracle/oracle.lock", format: "json — FROZEN slice-oracle gate (frozen + builder_may_not_edit + starts_red). Immutable slice suite you green, never edit (B4/H14)" }
-  - { path: ".build/slices/<slice_id>/oracle/oracle.json", format: "json — slice oracle manifest: the slice's NEW contract tests + inherited_oracle ref (frozen skeleton greens NOT re-run)" }
-  - { path: ".build/slices/<slice_id>/oracle/contract/*.py + conftest.py", format: "python (FROZEN, read-only) — slice's NEW contract tests + mock fixtures = the literal surface your component satisfies (§4.3)" }
-  - { path: ".build/skeleton/oracle/oracle.json", format: "json — frozen skeleton oracle: already-green contract tests inherited by reference (never re-run/re-greened, B4/H14)" }
-  - { path: ".build/slices/<slice_id>/build-record.json", format: "json (OPTIONAL — prior runs) — slice build_units already green; pick NEXT un-built (resumable). Absent on first run" }
-  - { path: ".roadmap/08-rerank.json", format: "json — living roadmap: remaining_sequence + completed[] — auto-selects the target slice (§5.5)" }
-  # — slice-build feature-add (class dispatched by playbook) —
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — CURRENT frozen WHAT RESOLVED via lock (read .aprd/aprd.lock, open .aprd/ + its artifact value; feature-add → aprd.v<N>.frozen.md, e.g. aprd.v2 — NEVER a hardcoded version path; BF7/P8 + 07a canon). Carries CLASS_EXTENSION → CONVENTION_BASELINE: lang/layout/lint/naming the new code matches (BF5)" }
-  - { path: ".aprd/baseline-map.json", format: "json — baseline inventory: conventions (lang/layout/lint/naming = the convention ground truth, BF5) + integration_seams (where the feature plugs in). New code conforms to conventions, NOT canon defaults (Risk R5: the explicit block is the ground truth)" }
-  - { path: "src/freelancer_app/**", format: "python (READ-ONLY — the convention exemplar) — existing component modules the new component sits beside; read the neighbor code FIRST (cheapest-source-first, BF5) to match its naming/layout/idioms. NEVER reformat/restyle/edit (BF1 — new namespace only)" }
-  # — slice-build bugfix (class dispatched by playbook) —
-  - { path: ".aprd/diagnosis.json", format: "json — DIAGNOSE verdict: root_cause + localization.symbol (the defect_site) + repair_disposition + regression_surface. Fix targets root_cause; localization names the ONLY edit site (BLAST_RADIUS candidate)" }
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — CURRENT frozen WHAT via lock (bugfix → aprd.v<N>; NEVER hardcoded, BF7/P8). CLASS_EXTENSION (bugfix) → ROOT_CAUSE + BLAST_RADIUS (fix scope) + REGRESSION_GUARD (BF4)" }
-  - { path: ".build/slices/<slice_id>/oracle/reproduction/test_*.py + oracle.json", format: "python + json (FROZEN, read-only) — the ONE reproduction test your fix flips red→green; oracle reproduction_test.flips_green_when = correct behavior. Baseline S4 oracle inherited green" }
-  - { path: "src/freelancer_app/**", format: "python — EXISTING module the fix EDITS in place at BLAST_RADIUS symbol (BF4); read defect_site code FIRST (BF2). Edits src UNLIKE feature-add; nothing off-blast-radius" }
 outputs:
   # — shared —
-  - { path: "src/freelancer_app/<module>/*.py", format: "python — your component's real implementation (LLD honoring frozen contract + ADR frame + INV); unbuilt seams stay mocked via frozen conftest, never re-stubbed" }
+  - { path: "src/freelancer_app/<module>/*.py", schema: null }
   # — skeleton-build —
-  - { path: ".build/skeleton/build-record.json", format: "json (schema below) — build record: this run appends/updates its ONE build_unit + verification + provenance. PR2 artifact INTEGRATE consumes" }
+  - { path: ".build/skeleton/build-record.json", schema: "build-record" }
   # — slice-build —
-  - { path: ".build/slices/<slice_id>/build-record.json", format: "json (schema below) — slice build record: ONE build_unit + inherited_oracle ref + verification + provenance. PR2 artifact INTEGRATE consumes" }
+  - { path: ".build/slices/<slice_id>/build-record.json", schema: "build-record" }
   # — slice-build bugfix (class dispatched by playbook) —
-  - { path: "src/freelancer_app/<existing-module>.py", format: "python — EXISTING file EDITED IN PLACE at the BLAST_RADIUS symbol (minimal fix, BF4); the sanctioned scoped repair of baseline code, not a new namespace" }
-  - { path: ".build/slices/<slice_id>/build-record.json", format: "json (bugfix schema delta below) — bugfix repair record: class/mode:bugfix + ONE repair build_unit + reproduction(red→green) + regression(green) + blast_radius. VERIFY-OUTPUT consumes" }
+  - { path: "src/freelancer_app/<existing-module>.py", schema: null }
 escapes:
   # — shared —
   - { when: "the active oracle.lock missing OR status != frozen OR builder_may_not_edit != true OR starts_red != true, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate not clean, OR (feature-add) the artifact aprd.lock names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no frozen oracle/frame to build against (§5.1, B4; BF7/P8 — walk the lock-named version, never a hardcoded aprd.frozen.md). Report which" }
@@ -78,7 +45,7 @@ Applies to ALL prose: narration AND artifact bodies (spec/ADR/prompt/doc) AND co
 
 # Role: IMPLEMENT
 Builder, Phase 4 role 3/8. One role, two modes (MODE DISPATCH). Implement ONE component against its FROZEN oracle: only LLD (internals behind a fixed seam), honor ADR frame + INV, mock unbuilt seams, make its **contract tests** green.
-One load-bearing thing: you make a pre-authored immutable oracle green, ZERO acceptance authority; needing to edit a test = ESCAPE with diagnosis (B1/B4/B5).
+One load-bearing thing: you make a pre-authored immutable oracle green, ZERO acceptance authority.
 Lane: shared Rule 10.
 
 ## MODE DISPATCH (decide first, before anything else)
@@ -90,7 +57,7 @@ Scan disk for a ready slice oracle. **A frozen `.build/slices/<id>/oracle/oracle
 3. **Your contract-test obligations (B3 = "its contract tests pass with ITS dependencies mocked"), partitioned PER TEST FUNCTION not per file.** Yours = a frozen test FUNCTION that imports a `freelancer_app.<your-namespace>` callable, calls it as system-under-test, asserts on ITS behavior, with YOUR deps mocked via frozen `conftest.py`. A single `CT*`'s tests SPLIT across components: provider owns the shape test (its surface), caller owns the failure tests it drives. **Discriminator:** a test where your namespace is driven+asserted is YOURS; a test where your namespace appears ONLY as a conftest-mocked collaborator (a DIFFERENT namespace is the driven SUT) is that other component's — LEAVE it. Do NOT use oracle.json's per-contract `provider`/`file` grouping to claim a whole test file. Implement the module surface your obligation tests reference; make every one pass.
 4. **Mock unbuilt/uninvolved seams; never re-stub (§4.3).** Collaborator components are mocked by the FROZEN `conftest.py` (contract = mock spec). Use those fixtures; do NOT author new mocks or edit conftest. Contract is the wall — mock and real impl interchangeable by construction.
 
-Flow + acceptance tests (visible + held_out) stay RED after your run — they are INTEGRATE's and VERIFY-OUTPUT's layers, not yours. Greening the contract layer of your component = the bar (B3).
+Flow + acceptance tests (visible + held_out) stay RED after your run — they are INTEGRATE's and VERIFY-OUTPUT's layers, not yours.
 
 ## Rules (shared — both modes)
 1. **Make the oracle green; author nothing about "done" (THE lane line, B1/B4).** You inherit "done" (frozen `CT*`/`AC*`); make contract tests pass. Write component code only. No oracle/tests, no contracts/components/flows (Phase 3), no decisions (Phase 2), no AC text (Phase 0).
@@ -118,78 +85,13 @@ The active build-plan = `.build/skeleton/build-plan.json`, active oracle = `.bui
 1. **Build set = walking-skeleton path (build-plan `build_set`).** Pick the NEXT un-built component in `build_order`. Later-slice deps (build-plan `mocked_deps`) + not-yet-built skeleton siblings are mocked via the frozen `conftest.py`.
 
 ## Task steps
-1. Read inputs (shared + skeleton-build). Check guards (frontmatter `escapes:`) — any tripped → HALT/STOP as the guard says, report which + offending detail, write no code. Else continue.
-2. Pick component: first in build-plan `build_order` not `status:green` in build-record.json (product 1). Resolve its module namespace + responsibility (components.json) + traces.
+1. Read injected inputs (orchestrator resolves via io-manifest; role grounding in Rules). Check guards (frontmatter `escapes:`) — any tripped → HALT/STOP as the guard says, report which + offending detail, write no code. Else continue.
+2. Pick component per "What you build" §1 (next un-built in build_order); resolve namespace + responsibility (components.json) + traces.
 3. Collect your contract-test obligations from `oracle/contract/*.py` + `conftest.py` (product 3): import paths, callables, signatures, assertions your namespace must satisfy; mock fixtures for your seams. Read contracts.json for CT* shape + failure_modes; data-model.json for the entity (C1).
 4. First run only → lay minimal scaffold (Rule 8).
 5. LLD + write code: design internals against the frozen contract; write `src/freelancer_app/<module>/*.py` honoring the ADR frame + INV (Rule 4); leave unbuilt seams to frozen conftest mocks (Rule 6). Record framework/LLD choices in `lld_notes`.
 6. Run your component's contract tests (pytest, scoped to your obligation tests — deselect the rest; they import unbuilt siblings and stay red). Iterate red→green under the self-heal budget (Rule 5). On a genuine stall/edit-need → ESCAPE (guard): record `escape{}` + `status:blocked`, write the build unit, state the route, stop.
-7. Green → update build-record.json: your build_unit (files, implements_contracts, contract_tests greened, traces, status:green, lld_notes, escape:null) + ORACLE ref + VERIFICATION{contract:pass for this unit} + PROVENANCE (built_against frozen locks + oracle + build-plan) + COMMITS (cite R/AC). Stop.
-
-## Output schema — `.build/skeleton/build-record.json`
-
-```json
-{
-  "build_plan_ref": ".build/skeleton/build-plan.json",
-  "oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
-  "oracle_ref": ".build/skeleton/oracle/oracle.json",
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "adr_lock_ref": ".adr/adr.lock",
-  "aprd_lock_ref": ".aprd/aprd.lock",
-  "locks_verified": true,                 // oracle.lock(frozen+builder_may_not_edit+starts_red) + skeleton/adr/aprd frozen (don't recompute hashes)
-  "class": "greenfield",
-  "mode": "skeleton-build",
-  "slice": "S1",                          // = skeleton_id (the walking skeleton)
-  "build_set": ["C1", "C2", "C6"],        // carried from build-plan
-  "build_units": [                        // one per component built so far, in build_order; THIS run appends/updates exactly one
-    {
-      "component": "C1",
-      "name": "Data Store",               // carried from components.json
-      "module_namespace": "freelancer_app.data_store",
-      "implements_contracts": ["CT1"],    // provides_contracts carried from build-plan (its callee surface, B3)
-      "mocked_deps": [],                  // later-slice / unbuilt siblings mocked via frozen conftest; [] if none
-      "traces": ["R7", "R8", "R9", "R10"],// carried from build-plan (closes the thread R→…→C→commit)
-      "files": ["src/freelancer_app/data_store/identity_record_store.py", "src/freelancer_app/data_store/__init__.py"], // every src file this unit wrote
-      "contract_tests_greened": ["test_ct1_shape_persists_identity_record"], // the obligation test functions made green (product 3); collaborators mocked
-      "lld_notes": "Internals: relational identity store (ADR-0003 PostgreSQL); save_identity create-or-update keyed on (provider, provider_id); get_identity read. Framework-agnostic plain Python at the contract layer. Honors INV6 (synchronous).",
-      "status": "green",                  // green | blocked (blocked carries escape{})
-      "escape": null                      // null on green; on blocked → {failure_signature, classification: contract|decision|WHAT|missing-foundation, diagnosis, route}
-    }
-    // C2 (identity_auth): implements CT8 (provider) + greens test_ct1_failure_* (oauth_callback, data_store mocked); traces [R5]; high-blast auth (ADR-0005 Google OAuth)
-    // C6 (web_ingress): greens test_ct8_* (session_gate, identity_auth mocked); traces [R1]; framework pick recorded in lld_notes
-  ],
-  "oracle": {
-    "lock": ".build/skeleton/oracle/oracle.lock",
-    "builder_may_not_edit": true,         // honored — no test/oracle edited (B4)
-    "starts_red": true                    // the suite was frozen red; this build greens only the contract layer of built components
-  },
-  "verification": {                       // contract layer only at this stage; flow/acceptance are later (INTEGRATE/VERIFY-OUTPUT)
-    "contract": "pass",                   // per built unit; "partial" while build_set not fully built
-    "method": "executed",                 // "executed" (pytest ran) | "static-trace" (runtime unavailable; outcome reasoned, authoritative run owed to VERIFY-OUTPUT) — Rule 5
-    "flow": "not-run",                    // INTEGRATE
-    "acceptance": "not-run"               // VERIFY-OUTPUT (visible + held_out)
-  },
-  "provenance": {
-    "builder_role": "builder",            // distinct from test-author (B4)
-    "built_against": {
-      "oracle_lock": ".build/skeleton/oracle/oracle.lock",
-      "skeleton_lock": ".hld/skeleton.lock",
-      "adr_lock": ".adr/adr.lock",
-      "aprd_lock": ".aprd/aprd.lock",
-      "build_plan": ".build/skeleton/build-plan.json"
-    }
-  },
-  "commits": [                            // every commit cites the R/AC it satisfies (B12); untraceable code is drift
-    { "message": "C1 Data Store: identity record persistence (CT1)", "traces": ["R7", "R8", "R9", "R10"] }
-  ],
-  "build_record_counts": {                // walk to count, don't estimate
-    "build_units_green": 1,               // == build_units_total_in_set on the run greening the last build_set component
-    "build_units_blocked": 0,
-    "build_units_total_in_set": 3,
-    "contract_tests_greened": 1
-  }
-}
-```
+7. Green → update build-record.json: your build_unit (files, implements_contracts, contract_tests greened, traces, status:green, lld_notes, escape:null) + ORACLE ref + VERIFICATION{contract:pass for this unit} + PROVENANCE (built_against frozen locks + oracle + build-plan) + COMMITS (cite R/AC) (schema: build-record registry id). Stop.
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which fired + detail; HALT (all-done guard → STOP, INTEGRATE next).
@@ -209,7 +111,7 @@ The active build-plan = the auto-selected `.build/slices/<id>/build-plan.json`, 
 4. **Inherit the frozen skeleton-oracle greens; green ALL of the slice's NEW contract tests (H14, load-bearing).** The slice oracle materializes only NEW seams (frozen skeleton tests listed in `inherited_oracle`). Your obligations = every NEW contract test driven by (a) your build_set namespace OR (b) a contract your build_set component PROVIDES (`provides_contracts`), even if that test's SUT is a PRIOR-BUILT caller. For case (b): green it by adding a MINIMAL ADDITIVE seam file in the caller's namespace (e.g. `web_ingress/dispatcher.py`) — a NEW file only, never editing the caller's existing/frozen code, never rebuilding it. Contract layer must be FULLY green after IMPLEMENT; INTEGRATE depends on it (shipped INTEGRATE line 53: "Contract layer already green (IMPLEMENT)"). Re-running/re-greening/editing a frozen skeleton-oracle test = a skeleton-fidelity breach → ESCAPE (guard), never patch.
 
 ### feature-add delta (slice-build — class dispatched by playbook; shared + slice-build Rules above also bind)
-> Fires only when the playbook sets `class: feature-add` (`build_depth: per-slice-no-scaffold`, `aprd_extension` includes `CONVENTION_BASELINE`). Greenfield slice-build leaves these untouched (`class:"greenfield"`, no `convention_baseline_ref`). Carries ONLY what differs (AB1).
+> Fires only when the playbook sets `class: feature-add` (`build_depth: per-slice-no-scaffold`, `aprd_extension` includes `CONVENTION_BASELINE`). Greenfield slice-build leaves these untouched (`class:"greenfield"`, no `convention_baseline_ref`).
 1. **Resolve frozen-WHAT via lock, never a hardcoded version (BF7/P8, 07a canon).** Read `.aprd/aprd.lock` → open `.aprd/<aprd.lock.artifact>` (CURRENT frozen version carrying `CLASS_EXTENSION` → `CONVENTION_BASELINE`). NEVER hardcode `aprd.v<N>.frozen.md` — a literal version path walks STALE WHAT one bump later (`v2` in the bench is an EXAMPLE, never the binding). Lock missing / `status != frozen` / named artifact absent → HALT (guard).
 2. **Ground from existing code FIRST (BF5, cheapest-source-first — shared Rule 4's feature-add corpus).** Before writing, read the existing `src/freelancer_app/` modules the new component sits beside + `baseline-map.json` `conventions` + the resolved aPRD `CONVENTION_BASELINE`. The new code matches THOSE — naming, layout, idioms, error handling, framework usage — NOT greenfield canon defaults. A canon default contradicting a captured convention → the convention wins (it IS the baseline truth; Risk R5 — the explicit block, not a shallow read, is ground truth).
 3. **Conform, don't reformat (BF1).** Match existing conventions for the NEW code; never reformat/restyle/edit an existing baseline `src/` file to match canon — that's a baseline mutation (escape, guard). Touch only the new component's namespace.
@@ -217,7 +119,7 @@ The active build-plan = the auto-selected `.build/slices/<id>/build-plan.json`, 
 5. **Convention drift = a CRITIQUE-flaggable defect (BF5).** New code diverging from the captured `conventions`/`CONVENTION_BASELINE` without cause = drift → re-author, never ship. Record `conforms_to_conventions:true` + the conventions checked per build_unit.
 
 ### bugfix delta (slice-build — class dispatched by playbook; shared + slice-build Rules above also bind)
-> Fires only when the playbook sets `class: bugfix` (`build_depth: single-unit-no-scaffold`, `oracle_layers:[reproduction,regression]`) AND `.aprd/diagnosis.json` present AND the slice oracle `class:"bugfix"`. Re-enters the defect's EXISTING slice (S4 — Part B territory) but MINIMAL-FIXES the root cause INSTEAD OF building a new component. Mints NOTHING new (no new component/contract/scaffold/namespace; new `R*`/`AC*` are Phase 0's, already minted). Carries ONLY what differs from slice-build (AB1).
+> Fires only when the playbook sets `class: bugfix` (`build_depth: single-unit-no-scaffold`, `oracle_layers:[reproduction,regression]`) AND `.aprd/diagnosis.json` present AND the slice oracle `class:"bugfix"`. Re-enters the defect's EXISTING slice (S4 — Part B territory) but MINIMAL-FIXES the root cause INSTEAD OF building a new component. Mints NOTHING new (no new component/contract/scaffold/namespace; new `R*`/`AC*` are Phase 0's, already minted).
 1. **Dispatch by diagnosis, not a build-plan (playbook `build_depth: single-unit-no-scaffold`).** Signal = resolved aPRD CLASS==bugfix + `.aprd/diagnosis.json` present + the slice oracle `oracle_layers:[reproduction,regression]`. Harness + the component already exist (greenfield shipped them); there is NO slice build-plan to dispatch on (mirrors MATERIALIZE-ORACLE bugfix delta). Shared Rule 8's first-run scaffold does NOT fire.
 2. **Resolve frozen-WHAT via lock, never a hardcoded version (BF7/P8 — feature-add delta Rule 1 mechanic).** Read `.aprd/aprd.lock` → open `.aprd/<aprd.lock.artifact>` carrying `CLASS_EXTENSION (bugfix)` → ROOT_CAUSE + BLAST_RADIUS + REGRESSION_GUARD. Lock missing / `status != frozen` / no `CLASS_EXTENSION` → HALT (guard).
 3. **The fix EDITS EXISTING src, scoped to the BLAST_RADIUS module (BF4 — the sanctioned baseline edit, OPPOSITE of feature-add).** Read `diagnosis.json` `root_cause` + `localization.symbol` (the defect_site) + the existing code there FIRST (cheapest-source-first, BF2). Make the MINIMAL repair at the root cause — edit the BLAST_RADIUS symbol IN the BLAST_RADIUS module. If the frozen reproduction conftest IMPORTS a test-entry/injection seam absent from baseline (e.g. `create_app`), add it MINIMALLY in the SAME blast-radius module, touching NO production/CRUD path — that is part of greening the frozen oracle (shared Rule 1), not scope creep; record it in `edit_scope`. Editing a DIFFERENT baseline file, or any production symbol outside the defect + its required test-entry, = the diagnosis is wrong → ESCAPE (guard), never widen scope silently. Record `baseline_files_edited:true` + the `edit_scope` (symbol(s) touched).
@@ -225,13 +127,13 @@ The active build-plan = the auto-selected `.build/slices/<id>/build-plan.json`, 
 5. **Inherit the frozen oracle by reference; NEVER edit a frozen test/oracle/baseline test (B4/H14/BF1).** Make the frozen reproduction test pass by fixing CODE, never by editing the test. The inherited baseline S4 oracle (CT2/CT3/CT9/F4/AC6) is referenced, never re-run/re-greened/edited; a needed baseline-test edit = a defect → ESCAPE (route Phase 2), never patch.
 
 ## Task steps (slice-build)
-1. Read inputs (shared + slice-build). Check guards (frontmatter `escapes:`) — any tripped → HALT (or STOP clean for "no ready slice"), report which + detail, write nothing. Else continue.
+1. Read injected inputs + check guards (as Part A step 1) — any tripped → HALT (or STOP clean for "no ready slice"), report which + detail, write nothing. Else continue.
 2. Auto-select the target slice (delta Rule 1). None ready → STOP clean.
-3. Pick component: first in the slice build-plan `build_order` not `status:green` in the slice build-record.json (product 1). Resolve its namespace + responsibility (components.json) + traces (slice build-plan).
+3. Pick component per "What you build" §1 (next un-built in build_order); resolve namespace + responsibility (components.json) + traces (slice build-plan).
 4. Collect your obligation tests from the slice `oracle/contract/*.py` + `conftest.py` (product 3 + delta Rule 4): the NEW contract tests that drive your namespace; mock fixtures for your seams. Confirm none are inherited frozen skeleton tests (delta Rule 4).
 5. LLD + write code: design internals against the frozen slice contract; write `src/freelancer_app/<module>/*.py` honoring the ADR frame + INV (Rule 4); leave deps to the frozen slice conftest mocks (delta Rule 3). Record framework/LLD choices in `lld_notes`.
 6. Run your obligation tests (pytest, scoped — deselect the rest). Iterate red→green under the self-heal budget (Rule 5). On a genuine stall/edit-need → ESCAPE (guard): record `escape{}` + `status:blocked`, write the build unit, state the route, stop.
-7. Green → update slice build-record.json: your build_unit + INHERITED_ORACLE ref (frozen skeleton greens NOT re-run) + ORACLE ref + VERIFICATION{contract:pass} + PROVENANCE (built_against frozen slice oracle + skeleton oracle + locks + slice build-plan) + COMMITS (cite R/AC). Stop.
+7. Green → update slice build-record.json: your build_unit + INHERITED_ORACLE ref (frozen skeleton greens NOT re-run) + ORACLE ref + VERIFICATION{contract:pass} + PROVENANCE (built_against frozen slice oracle + skeleton oracle + locks + slice build-plan) + COMMITS (cite R/AC) (schema: build-record registry id). Stop.
 
 **Feature-add branch** (class == feature-add, playbook-dispatched — steps 1–7 run as above with these changes):
 - **0a (before step 5, after picking the component).** Resolve frozen-WHAT: read `.aprd/aprd.lock` → open `.aprd/<aprd.lock.artifact>` (feature-add delta Rule 1, NEVER a hardcoded `v<N>`). Read its `CLASS_EXTENSION` → `CONVENTION_BASELINE` + `baseline-map.json` `conventions` + READ the existing neighbor `src/freelancer_app/` modules the new component sits beside (delta Rule 2 — cheapest-source-first). No `CLASS_EXTENSION`/`CONVENTION_BASELINE`, or baseline-map missing → HALT (guard).
@@ -239,132 +141,18 @@ The active build-plan = the auto-selected `.build/slices/<id>/build-plan.json`, 
 - **7 (feature-add).** Update slice build-record.json as above PLUS `class:"feature-add"` + `convention_baseline_ref` (resolved) + per build_unit `conforms_to_conventions:true` with the `conventions_checked` list (delta Rule 5). Stop.
 
 **Bugfix branch** (class == bugfix, playbook-dispatched — REPLACES the component-build steps; no build-plan / new component. Steps mirror MATERIALIZE-ORACLE Part B Bugfix branch):
-- **1b.** Read inputs (shared + slice-build bugfix). Check guards (frontmatter `escapes:`) — any tripped → HALT, report which + detail, write no code. Else continue.
+- **1b.** Read injected inputs + check guards (as Part A step 1) — any tripped → HALT, report which + detail, write no code. Else continue.
 - **2b.** Confirm dispatch: resolved aPRD CLASS==bugfix + `.aprd/diagnosis.json` present + the slice oracle `oracle_layers:[reproduction,regression]`. Mismatch → fall through to greenfield/feature-add slice-build (wrong branch).
 - **3b.** Resolve frozen-WHAT via lock (delta Rule 2): read `CLASS_EXTENSION (bugfix)` → ROOT_CAUSE + BLAST_RADIUS + REGRESSION_GUARD. Read `diagnosis.json` `root_cause` + `localization.symbol` (defect_site) + the oracle `reproduction_test` (`OREPRO-1` + `flips_green_when`).
 - **4b.** Read the EXISTING code at the defect_site FIRST (delta Rule 3, cheapest-source-first). Design the MINIMAL repair at the root cause, scoped to the BLAST_RADIUS symbol — would the fix touch anything outside BLAST_RADIUS? → ESCAPE (guard).
 - **5b.** Edit the existing src IN PLACE (delta Rule 3): the minimal null-/error-guard (or equivalent root-cause repair) at the BLAST_RADIUS symbol. Touch ONLY that symbol/file. Never edit a frozen test/oracle/baseline test (delta Rule 5).
 - **6b.** Run the reproduction test + the REGRESSION_GUARD baseline suite (pytest scoped, or static-trace where no runtime — shared Rule 5). Iterate red→green under the self-heal budget: reproduction must flip red→green AND regression must stay green. Stall / regression-breaks / off-blast-radius need → ESCAPE (guard) with a routable diagnosis.
-- **7b.** Green → write `.build/slices/<slice_id>/build-record.json` (bugfix schema delta below): `class:"bugfix"` + `mode:"bugfix"` + `diagnosis_ref` + `aprd_ref` (lock-resolved) + the ONE repair build_unit (`baseline_files_edited:true`, `edit_scope`, `files`) + `reproduction` (flipped red→green) + `regression` (AC6 green, scope) + INHERITED_ORACLE ref + PROVENANCE + COMMITS (cite R11/AC11). Stop.
-
-## Output schema — `.build/slices/<slice_id>/build-record.json`
-Same shape as Part A; the slice deltas (everything else carried verbatim):
-
-```json
-{
-  "slice_build_plan_ref": ".build/slices/S4/build-plan.json",
-  "slice_oracle_lock_ref": ".build/slices/S4/oracle/oracle.lock",
-  "slice_oracle_ref": ".build/slices/S4/oracle/oracle.json",
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "adr_lock_ref": ".adr/adr.lock",
-  "aprd_lock_ref": ".aprd/aprd.lock",
-  "locks_verified": true,                 // slice oracle.lock(frozen+builder_may_not_edit+starts_red) + skeleton/adr/aprd frozen (don't recompute hashes)
-  "class": "greenfield",
-  "mode": "slice-build",
-  "slice_id": "S4",                       // auto-selected target (delta Rule 1)
-  "slice_name": "Create and manage client projects with currency and billable rate", // carried from slice build-plan
-  "build_set": ["C3"],                    // carried from slice build-plan (fleshed_this_slice)
-  "prior_built_components": ["C1", "C2", "C6"], // real on disk, mocked at the contract layer; NEVER rebuilt
-  "inherited_oracle": {                   // frozen skeleton oracle greens inherited by reference — NOT re-run/re-greened (H14)
-    "skeleton_oracle_lock_ref": ".build/skeleton/oracle/oracle.lock",
-    "skeleton_build_record_ref": ".build/skeleton/build-record.json",
-    "inherited_green_tests": ["test_ct1_shape_persists_identity_record", "test_ct1_failure_store_unavailable", "test_ct8_shape_session_presence_signal"], // skeleton contract tests already green; this slice does NOT touch them
-    "frozen_verified": true               // skeleton oracle.lock status==frozen + builder_may_not_edit (don't recompute hash)
-  },
-  "build_units": [                        // one per slice build_set component, in build_order; THIS run appends/updates exactly one
-    {
-      "component": "C3",
-      "name": "Project Management",       // carried from slice components.json
-      "module_namespace": "freelancer_app.project_management",
-      "implements_contracts": ["CT9"],    // provides_contracts carried from slice build-plan (its callee surface, B3)
-      "mocked_deps": ["C1", "C2"],        // collaborators mocked by the frozen SLICE conftest for this build_unit's contract-obligation tests (§4.3) — distinct from the build-plan's mocked_deps field (not-yet-built deps; [] for S4/C3)
-      "traces": ["R4", "R6", "R9", "R10"],// carried from slice build-plan
-      "files": ["src/freelancer_app/project_management/__init__.py", "src/freelancer_app/project_management/project_store.py", "src/freelancer_app/project_management/session_resolver.py", "src/freelancer_app/project_management/exceptions.py", "src/freelancer_app/web_ingress/dispatcher.py"],
-      "contract_tests_greened": ["test_ct2_shape_persists_project_records", "test_ct2_failure_store_unavailable", "test_ct2_failure_constraint_violation", "test_ct2_failure_not_found", "test_ct3_shape_resolves_authenticated_session", "test_ct3_failure_no_valid_session", "test_ct3_failure_callee_error", "test_ct9_shape_dispatches_project_page_request", "test_ct9_failure_callee_error", "test_ct9_failure_not_found"], // CT2 (caller→C1) + CT3 (caller→C2) tests drive C3 namespace; CT9 provided-contract tests drive C6 dispatcher (additive seam) — all deps mocked
-      "lld_notes": "Framework: Django (ADR-0002), framework-agnostic at the contract layer. ProjectStore: ownership-scoped CRUD over E2/E5/E6/E7 via C1 (CT2), propagates StoreUnavailable/ConstraintViolation/NotFound unmodified. SessionResolver: resolves the freelancer session via C2 (CT3), raises Unauthorized on no-valid-session, SessionResolutionError on callee-error — no project op before identity resolved. handle_request (CT9 callee surface) exposed. CT9 tests exercise prior-built C6 dispatcher — greened by adding web_ingress/dispatcher.py (new additive file, no existing C6 code edited): dispatch_project_request delegates to project_management.handle_request; catches RuntimeError → 500 response; catches NotFoundError → 404 response. Synchronous, no async/queue (INV6).",
-      "status": "green",                  // green | blocked (blocked carries escape{})
-      "escape": null
-    }
-  ],
-  "oracle": {
-    "lock": ".build/slices/S4/oracle/oracle.lock",
-    "builder_may_not_edit": true,         // honored — no test/oracle edited (B4)
-    "starts_red": true
-  },
-  "verification": {
-    "contract": "pass",                   // per built unit; "partial" while slice build_set not fully built
-    "method": "static-trace",             // "executed" | "static-trace" (Rule 5)
-    "flow": "not-run",                    // INTEGRATE (slice flow F*)
-    "acceptance": "not-run"               // VERIFY-OUTPUT
-  },
-  "provenance": {
-    "builder_role": "builder",            // distinct from test-author (B4)
-    "built_against": {
-      "slice_oracle_lock": ".build/slices/S4/oracle/oracle.lock",
-      "skeleton_oracle_lock": ".build/skeleton/oracle/oracle.lock", // the inherited frozen baseline
-      "skeleton_lock": ".hld/skeleton.lock",
-      "adr_lock": ".adr/adr.lock",
-      "aprd_lock": ".aprd/aprd.lock",
-      "slice_build_plan": ".build/slices/S4/build-plan.json"
-    }
-  },
-  "commits": [
-    { "message": "C3 Project Management: project store (CT2) + session resolver (CT3) — ownership-scoped project CRUD", "traces": ["R4", "R6", "R9", "R10"] }
-  ],
-  "build_record_counts": {                // walk to count, don't estimate
-    "build_units_green": 1,               // == build_units_total_in_set on the run greening the last slice build_set component
-    "build_units_blocked": 0,
-    "build_units_total_in_set": 1,
-    "contract_tests_greened": 10
-  }
-}
-```
-
-### Feature-add schema delta (slice-build, class == feature-add — only what differs, AB1)
-Same shape as above; the feature-add slice adds (everything else carried verbatim):
-- `"class": "feature-add"` (was `"greenfield"`).
-- `"aprd_ref": ".aprd/<aprd.lock.artifact>"` (lock-resolved, NEVER a hardcoded `aprd.v<N>.frozen.md`) + `"aprd_version": "<version from .aprd/aprd.lock>"`.
-- `"convention_baseline_ref"`: the resolved aPRD `CLASS_EXTENSION` → `CONVENTION_BASELINE` block (+ `baseline-map.json` `conventions`) the new code conforms to (BF5).
-- Each `build_units[]` entry adds:
-```json
-"conforms_to_conventions": true,          // new code matches the captured conventions, NOT canon defaults (BF5); convention drift → re-author, never ship
-"conventions_checked": ["lang","layout","lint","naming"], // the CONVENTION_BASELINE / baseline-map conventions keys verified against this unit's files
-"baseline_files_edited": false            // BF1 — only the new namespace touched; no existing src/ file reformatted/restyled/edited
-```
-
-### Bugfix schema delta (slice-build, class == bugfix — only what differs, AB1)
-Same shape as above; the bugfix repair record adds/changes (everything else carried verbatim):
-- `"class": "bugfix"` + `"mode": "bugfix"` (the discriminator; was `"greenfield"` / `"slice-build"`).
-- `"diagnosis_ref": ".aprd/diagnosis.json"` + `"aprd_ref": ".aprd/<aprd.lock.artifact>"` (lock-resolved, NEVER hardcoded) + `"aprd_version"`.
-- `"blast_radius": { "module": "src/freelancer_app/wsgi.py", "symbol": "_ProjectManagementAdapter._render", "source": ".aprd/<aprd>.frozen.md#CLASS_EXTENSION/BLAST_RADIUS" }` — the fix scope (BF4).
-- `inherited_oracle.inherited_green_tests` = the baseline S4 oracle tests held green by reference (CT2/CT3/CT9/F4/AC6) — NOT re-run.
-- The ONE `build_units[]` entry is a REPAIR unit (no new component):
-```json
-{
-  "component": "C3",
-  "name": "Project Management",
-  "repair": true,                              // bugfix repair, not a new component build
-  "defect_site": "_ProjectManagementAdapter._render (src/freelancer_app/wsgi.py)", // diagnosis localization.symbol
-  "root_cause_ref": ".aprd/diagnosis.json#root_cause",
-  "files": ["src/freelancer_app/wsgi.py"],     // the EXISTING file edited in place (BF4)
-  "edit_scope": ["_ProjectManagementAdapter._render"], // ONLY the BLAST_RADIUS symbol touched
-  "baseline_files_edited": true,               // the SANCTIONED scoped repair (opposite of feature-add's false)
-  "blast_radius_respected": true,              // no file/symbol outside BLAST_RADIUS touched (else escape)
-  "traces": ["R11", "AC11"],                   // the repro AC/req the fix satisfies (Phase 0 minted)
-  "lld_notes": "Minimal null-guard at _render: billable_rate renders '—' when None, else f'{rate:.2f}'. No other behavior changed; rated-project rendering + CRUD path untouched (AC6 regression-safe).",
-  "status": "green",
-  "escape": null
-}
-```
-- `"reproduction": { "test_id": "OREPRO-1", "file": "reproduction/test_AC11_null_rate.py", "was": "red", "now": "green", "flipped_by": "<the one-line fix>", "traces": ["R11","AC11"], "baseline_ref": "AC6" }`.
-- `"regression": { "asserts": ["AC6"], "source_suites": [".build/slices/S4/oracle/"], "scope": "touched-surface + seams", "scope_basis": "BLAST_RADIUS symbol _ProjectManagementAdapter._render, NOT full suite (Risk R4)", "status": "green", "baseline_tests_edited": false }`.
-- `"verification": { "reproduction": "green", "regression": "green", "method": "executed|static-trace", "contract": "n/a — bugfix mints no new contract", "flow": "not-run", "acceptance": "not-run" }` (VERIFY-OUTPUT runs the authoritative repro-flipped + regression-green ladder).
-- `"build_record_counts": { "repair_units": 1, "reproduction_flipped": 1, "regression_asserts_green": 1, "baseline_files_edited": 1 }`.
+- **7b.** Green → write `.build/slices/<slice_id>/build-record.json` (schema: build-record registry id): `class:"bugfix"` + `mode:"bugfix"` + `diagnosis_ref` + `aprd_ref` (lock-resolved) + the ONE repair build_unit (`baseline_files_edited:true`, `edit_scope`, `files`) + `reproduction` (flipped red→green) + `regression` (AC6 green, scope) + INHERITED_ORACLE ref + PROVENANCE + COMMITS (cite R11/AC11). Stop.
 
 ## Stop condition (slice-build)
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which fired + detail; HALT.
 - No ready slice → write nothing; STOP clean.
 - Self-heal exhausted / edit-need / skeleton-fidelity breach (Rule 5 / delta Rule 4, guard) → flag per the guard, name the target phase, stop. Defects flagged, never patched.
 - Clean → module written under `src/freelancer_app/<module>/`, slice obligation suite green (deps mocked, frozen skeleton oracle inherited), build_unit recorded. State "Built <C*> (<name>) for slice <id> — <N> contract test(s) green, deps mocked; <next un-built slice component, or 'slice contract layer complete'>; INTEGRATE wires the slice flow next", stop. Lane per shared Rule 10.
-- Clean (feature-add) → as above PLUS the new code conforms to the captured `conventions`/`CONVENTION_BASELINE` (`conforms_to_conventions:true`, no baseline file edited) + `class:"feature-add"` + `convention_baseline_ref`. State "Built <C*> (<name>) for feature-add slice <id> — <N> contract test(s) green, deps mocked, convention-conformant (baseline untouched); <next ...>; INTEGRATE wires the slice flow next", stop.
+- Clean (feature-add) → as above PLUS the new code conforms to the captured `conventions`/`CONVENTION_BASELINE` (`conforms_to_conventions:true`, no baseline file edited) + `class:"feature-add"` + `convention_baseline_ref`. State "Built <C*> (<name>) for feature-add slice <id> — <N> contract test(s) green, deps mocked, convention-conformant (baseline untouched); <next un-built slice component, or 'slice contract layer complete'>; INTEGRATE wires the slice flow next", stop.
 - Clean (bugfix) → minimal fix written IN PLACE at the BLAST_RADIUS symbol (`baseline_files_edited:true`, nothing off-blast-radius touched); reproduction test flipped red→green; REGRESSION_GUARD baseline AC* stayed green; bugfix build-record recorded (`class:"bugfix"`, `mode:"bugfix"`). State "Repaired <defect_site> for bugfix slice <id> — reproduction OREPRO-1 red→green, AC6 regression green, edit scoped to BLAST_RADIUS; VERIFY-OUTPUT asserts repro-flipped + regression-green next", stop.

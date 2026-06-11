@@ -7,34 +7,13 @@ interactive: true           # THE Phase-4 client gate — §9 client re-engageme
 interaction:
   when: "after Phase A renders the demo (demo.md) + presents the click-through in chat; agent PAUSES and waits for the client's single accept/not-quite selection, then records it"
   what: "client watches the slice run and accepts it, or says it is not what they expected (one selection + optional reason) — recognition-over-recall, the client does NOT author (§9, B10)"
-inputs:
-  # — shared (both modes) —
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — frozen WHAT, demo ORACLE: AC* TEXT each demonstrated AC translated from into client-watchable outcome language (client signed these; demo proves them running)" }
-  - { path: ".hld/skeleton.lock", format: "json — frozen skeleton gate (status==frozen + gate clean) + walking_skeleton_flow; class" }
-  - { path: ".adr/adr.lock", format: "json — frozen frame gate (status==frozen); class" }
-  - { path: ".aprd/aprd.lock", format: "json — frozen WHAT gate (status==frozen)" }
-  # — skeleton-build —
-  - { path: ".build/skeleton/verification.json", format: "json (GATE — verdict MUST be verified, §5.7 precedes §5.10) — per_ac[]{ac, visible, held_out} + ladder = WHICH ACs build actually runs GREEN. Demo shows ONLY these, grounded in this evidence; green here = running proof each demoed AC passes" }
-  - { path: ".build/skeleton/critique.json", format: "json (GATE — verdict MUST be clean) — anti-cheat must pass BEFORE client watches; fraudulent green must never reach demo (§5.7→§5.10 order)" }
-  - { path: ".build/skeleton/integration-record.json", format: "json (PRIMARY — RUNNING composition) — composition{wsgi_entry, lld_notes (real routes/views click-through walks), framework} + flow_test (happy + failure assertions) + walking_skeleton_path. Actual software demo narrates" }
-  - { path: ".build/skeleton/build-record.json", format: "json — build_set + build_units[]{traces} + commits + mocked_deps. Skeleton component set + R/AC trace + what is legitimately deferred (later-slice deps = learnings source, B10)" }
-  - { path: ".hld/skeleton/flows.json", format: "json — flows[F1]{name, trigger, steps[]{action, external}, failure_path{trigger, arrives_at}, traces[R*/AC*]}. Walking-skeleton flow in plain action language = demo narrative spine + demonstrable-AC set (F1.traces ∩ verified ACs)" }
-  - { path: ".build/skeleton/demo/demo.json", format: "json (OPTIONAL — prior DEMO-GEN run) — present on re-run; status==accepted = already-accepted guard (immutable, §10); absent on first run" }
-  # — slice-build —
-  - { path: ".roadmap/08-rerank.json", format: "json — living roadmap: remaining_sequence + completed[] — auto-selects target slice (PR1)" }
-  - { path: ".build/slices/<id>/verify-output.json", format: "json (GATE — slice verdict MUST be verified, §5.7) — per_ac_summary[]{id, visible_passed, held_out_passed, verdict} + ladder = WHICH slice ACs build actually runs GREEN. Demo shows ONLY these" }
-  - { path: ".build/slices/<id>/critique.json", format: "json (GATE — slice verdict MUST be clean + skeleton_fidelity.breached==false) — anti-cheat must pass BEFORE client watches; fraudulent green must never reach demo" }
-  - { path: ".build/slices/<id>/integration-record.json", format: "json (PRIMARY — RUNNING slice composition) — composition{wsgi_entry, lld_notes (additive slice routes/views), framework} + flow_test (happy + failure) + mocks_retained. The slice's actual software demo narrates" }
-  - { path: ".build/slices/<id>/build-record.json", format: "json — slice build_set + build_units[]{traces, mocked_deps} + prior_built_components + commits. Slice component set + R/AC trace + later-slice deps still deferred (learnings source, B10)" }
-  - { path: ".hld/slices/<id>/flows.json", format: "json — slice flows[F*]{name, trigger, steps[]{action, external}, failure_path{trigger, arrives_at}, traces[R*/AC*]}. Slice flow in plain action language = demo narrative spine + demonstrable-AC set (F*.traces ∩ verified slice ACs)" }
-  - { path: ".build/slices/<id>/demo/demo.json", format: "json (OPTIONAL — prior DEMO-GEN run) — present on re-run; status==accepted = already-accepted guard (immutable, §10); absent on first run" }
 outputs:
   # — skeleton-build —
-  - { path: ".build/skeleton/demo/demo.md", format: "markdown (schema below, Phase A) — client-facing running-demo artifact: UI click-through showing each demonstrable AC passing in plain language + accept/not-quite offer, written autonomously BEFORE client replies. Always produced" }
-  - { path: ".build/skeleton/demo/demo.json", format: "json (schema below, Phase B) — IMMUTABLE demo/acceptance record + captured learnings + handoff. Written ONLY after client responds" }
+  - { path: ".build/skeleton/demo/demo.md", schema: null }      # Phase A — client-facing running-demo artifact; always produced
+  - { path: ".build/skeleton/demo/demo.json", schema: "demo" }  # Phase B — IMMUTABLE demo/acceptance record; written only after client responds
   # — slice-build —
-  - { path: ".build/slices/<id>/demo/demo.md", format: "markdown (Phase A — slice deltas noted) — client-facing running-demo artifact for the slice's NEW capability, built atop the accepted prior increments. Always produced" }
-  - { path: ".build/slices/<id>/demo/demo.json", format: "json (schema below, Phase B) — IMMUTABLE slice demo/acceptance record + captured learnings + handoff. Roadmap done-sentinel. Written ONLY after client responds. Phase 1 re-rank reads learnings (B10); on accept slice delivered to STAGING (§1.2)" }
+  - { path: ".build/slices/<id>/demo/demo.md", schema: null }      # Phase A — slice client-facing artifact; always produced
+  - { path: ".build/slices/<id>/demo/demo.json", schema: "demo" }  # Phase B — IMMUTABLE slice demo/acceptance record + roadmap done-sentinel; written only after client responds
 escapes:
   # — shared (both modes) —
   - { when: "the active verification record (verification.json | verify-output.json) missing/unparseable OR verdict != verified", target: "self / HALT — no green build to demo; demo runs only on verified ladder (§5.7 precedes §5.10). Report verdict found, write nothing" }
@@ -63,7 +42,7 @@ One load-bearing thing: demo shows ONLY what the verified build runs — every d
 Lane: Rule 8.
 
 ## MODE DISPATCH (decide first, before anything else)
-Scan disk for a ready slice to demo. **A slice with a `.build/slices/<id>/critique.json` (`verdict:"clean"`, `skeleton_fidelity.breached==false`) over a `.build/slices/<id>/verify-output.json` (`verdict:"verified"`), WITHOUT a sibling `.build/slices/<id>/demo/demo.json` status:accepted → SLICE-BUILD (Part B)** — target the FIRST such slice in `08-rerank.json` `remaining_sequence` order (`completed[]` pinned/skip); demo the slice's NEW capability against the accepted prior increments (§5.10/D11). **None ready → SKELETON-BUILD (Part A)** — demo the walking skeleton against `.build/skeleton/` (§5.10/B10). Read the shared lane + Two-phases + Selecting + Rules below + run exactly ONE part (its delta + steps + schema + stop); ignore the other part.
+Scan disk for a ready slice to demo. **A slice with a `.build/slices/<id>/critique.json` (`verdict:"clean"`, `skeleton_fidelity.breached==false`) over a `.build/slices/<id>/verify-output.json` (`verdict:"verified"`), WITHOUT a sibling `.build/slices/<id>/demo/demo.json` status:accepted → SLICE-BUILD (Part B)** — target the FIRST such slice in `08-rerank.json` `remaining_sequence` order (`completed[]` pinned/skip); demo the slice's NEW capability against the accepted prior increments (§5.10/D11). **None ready → SKELETON-BUILD (Part A)** — demo the walking skeleton against `.build/skeleton/` (§5.10/B10). Read the shared lane + Two-phases + Selecting + Rules below + run exactly ONE part (its delta + steps + stop); ignore the other part.
 
 ## Two phases in one session (the discriminator — both modes)
 Single client session in two phases (reusable interactive pattern, D8):
@@ -75,7 +54,7 @@ If no client response arrives this session (clean-room run, no client present), 
 ## Selecting demonstrable ACs + demo modality (deterministic — derive, never default; both modes)
 - **Demonstrable-AC set = the active flow's `traces` ∩ verified per_ac where AC's verdict is `pass`** (ACs verified the flow runs end-to-end). Skeleton-build: skeleton F1.traces ∩ verification per_ac — foundation ACs (reach app + sign in), NOT every aPRD AC. Slice-build: the slice flow F*.traces ∩ verify-output per_ac_summary (verdict green) — the slice's NEW ACs ONLY (e.g. S4/F4 → AC6); skeleton + earlier-slice ACs are already-accepted, inherited by reference (H14) — NOT re-demoed. Showing an unbuilt/unverified AC = demo-fabrication cheat — forbidden.
 - **Modality = per demonstrated flow's surface** (§8): user-observable web/UI flow → **UI click-through** (client watches screens); headless API/contract flow → **API trace**; perf NFR target → **benchmark chart**. Derive from running composition — greenfield F1/F4 = browser flows (routes render pages + redirects), so modality = **UI click-through**. Only greenfield UI-click-through modality authored; others escape (frontmatter).
-- Each demonstrated AC's evidence = its verified per_ac result (visible **and** held_out pass) + real composition route/view that produces it (integration-record `lld_notes`). Held_out pass = what makes demo honest, not overfit (B7).
+- Each demonstrated AC's evidence = its verified per_ac result (visible **and** held_out pass) + real composition route/view that produces it (integration-record `lld_notes`). Held_out pass = what makes demo honest.
 
 ## Rules (both modes)
 1. **Show only verified running build; never fabricate (THE load-bearing discipline, B10/§5.10).** Every demoed step maps to REAL route/view in running composition (integration-record) and every demoed AC to GREEN verified result (visible + held_out). Never narrate screen, result, AC, or feature build does not produce — verified-but-unbuilt AC, later-slice feature, invented success. If build does not run it, it is not in demo.
@@ -95,103 +74,17 @@ Active records = `.build/skeleton/{verification,critique,integration-record,buil
 
 ## Task steps
 ### Phase A — Render the demo (autonomous)
-1. Read inputs (shared + skeleton-build). Check guards (frontmatter `escapes:`) — any tripped → HALT/STOP as it says, report which + offending detail, write nothing. Else continue (verified, clean-critiqued, integrated build + frozen frame present).
+1. Read injected inputs (orchestrator resolves via io-manifest; role grounding in Rules). Check guards (frontmatter `escapes:`) — any tripped → HALT/STOP as it says, report which + offending detail, write nothing. Else continue (verified, clean-critiqued, integrated build + frozen frame present).
 2. Build oracles: **demonstrable-AC set** (F1.traces ∩ verification per_ac with verdict pass); **modality** (demonstrated flow's surface — UI click-through here); **narrative spine** (flows F1 `trigger` + `steps[].action` + `failure_path`, in plain language); **route map** (integration-record `lld_notes` — which real route/view produces each step); **AC text oracle** (aPRD AC* text → client outcome language); **evidence** (each AC's visible+held_out pass).
-3. Render `demo.md` per the schema below: what we built (one plain paragraph), click-through (numbered client actions → what you see → which promise it keeps, each AC grounded in green evidence; include graceful-failure step for confidence), what this proves (demonstrated ACs in plain words), accept/not-quite offer. Write it to disk (create `.build/skeleton/demo/` if absent).
-4. Present same click-through in chat. Then **PAUSE — wait for client's one selection.** Do not proceed to Phase B until client replies. Do not write `demo.json`. Do not fabricate acceptance.
+3. Render `demo.md` (schema: demo registry id, Phase A): what we built (one plain paragraph), click-through (numbered client actions → what you see → which promise it keeps, each AC grounded in green evidence; include graceful-failure step for confidence), what this proves (demonstrated ACs in plain words), accept/not-quite offer. Write it to disk (create `.build/skeleton/demo/` if absent).
+4. Present same click-through in chat. Then PAUSE for client accept per Two-phases gate — do not proceed to Phase B until client replies.
 
 ### Phase B — Capture acceptance (only after the client replies)
 5. Read client's selection:
    - **Accept** → `client_response: accepted`, `status: accepted`. Write immutable acceptance record (`accepted_by`, `accepted_at`). Capture learnings (Rule 6) from artifacts. `next` = Phase 1 re-rank (next slice) — or DONE if this completes all slices to STAGING.
-   - **Not-quite** (with reason) → `client_response: rejected` (or `changes_requested` if they ask for specific change), `status` to match. Record reason faithfully + `routes_to` (Phase 0 for misunderstood WHAT, else Phase 1; Rule 5). `accepted_by`/`accepted_at` null. NEVER edit code or frozen artifact.
-6. Write `.build/skeleton/demo/demo.json` per the Phase-B schema below. Stop. On accept, Phase 1 re-rank reads learnings; accepted staging build = slice's delivery (§1.2). On not-quite, routed phase handles change request.
+   - **Not-quite** (with reason) → `client_response: rejected` (or `changes_requested` if they ask for specific change), `status` to match. Record reason faithfully + `routes_to` (Phase 0 for misunderstood WHAT, else Phase 1; Rule 5). `accepted_by`/`accepted_at` null.
+6. Write `.build/skeleton/demo/demo.json` (schema: demo registry id, Phase B). Stop. On accept, Phase 1 re-rank reads learnings; accepted staging build = slice's delivery (§1.2). On not-quite, routed phase handles change request.
 
-## Output schema — `.build/skeleton/demo/demo.md` (Phase A, client-facing)
-Clean, plain client-facing Markdown. Keep the headings; fill the placeholders. No internal ids in the visible prose (the slice label `S1 — <name>` is the only id, a recognizable handle).
-
-```markdown
-# Demo — <plain slice name, e.g. "Sign in to your time-tracking app">
-
-This is the first working increment of your app, running on our staging environment. It is the foundation: it proves the app is live and you can sign in — everything else gets built on top of this. Watch it run, then tell us if it's what you wanted.
-
-## Watch it run
-
-1. **Open the app in your browser.** You land on the app's home page with a "Sign in with Google" button — it loads in a normal browser, nothing to install. *(This is your app being live on the web.)*
-2. **Click "Sign in with Google".** You're sent to Google's sign-in, you sign in with your Google account, and you land back in the app — already signed in, no password to create or remember. *(This is signing in to your account.)*
-3. **If something goes wrong** (say the database is briefly unavailable mid-sign-in), the app sends you back to the sign-in page with a notice instead of breaking or leaving you half-signed-in. *(This is the app failing safely.)*
-
-## What this proves
-
-- **Your app is live and reachable in a browser** — no app-store install. <!-- AC1, plain -->
-- **You can sign in with your Google account and arrive signed in** — no password. <!-- AC5, plain -->
-
-Both were checked running on staging, including with sign-in details we hadn't shown the build beforehand — so it's the real thing working, not a canned screenshot.
-
-## Is this what you wanted?
-
-Reply with the letter that fits:
-
-- **A.** Yes — this is what I wanted. Go ahead and build the next piece. *(recommended)*
-- **B.** Not quite — here's what's off: <tell us in your own words>.
-
-*This is the staging build — what we'll keep building on. It's not yet released to production; that's a separate step outside this delivery.*
-```
-
-## Output schema — `.build/skeleton/demo/demo.json` (Phase B, after the client replies — immutable)
-
-```json
-{
-  "verification_ref": ".build/skeleton/verification.json",
-  "critique_ref": ".build/skeleton/critique.json",
-  "integration_record_ref": ".build/skeleton/integration-record.json",
-  "build_record_ref": ".build/skeleton/build-record.json",
-  "flows_ref": ".hld/skeleton/flows.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "adr_lock_ref": ".adr/adr.lock",
-  "aprd_lock_ref": ".aprd/aprd.lock",
-  "locks_verified": true,                    // verification verdict==verified + critique verdict==clean + integration status==integrated + skeleton/adr/aprd frozen + skeleton gate clean (don't recompute hashes)
-  "class": "greenfield",
-  "mode": "skeleton-build",
-  "slice": "S1",                             // = skeleton_id
-  "demo_artifact": ".build/skeleton/demo/demo.md",   // the client-facing running-demo artifact rendered in Phase A
-  "demo_modality": "ui-click-through",       // derived from the demonstrated flow's surface (ui-click-through | api-trace | benchmark-chart); only ui-click-through authored
-  "flow_demonstrated": "F1",                 // the walking-skeleton flow the demo narrates
-  "demonstrated_acs": [                       // ONLY ACs the verified build runs (F1.traces ∩ verified per_ac, verdict pass); each grounded in green evidence + a real route
-    {
-      "ac": "AC1",
-      "req_ref": "R1",
-      "plain_outcome": "The app is live and reachable in a browser; the entry page loads with no native install.",  // client language, translated from the AC text
-      "route": "GET / -> entry page",         // the real composition route/view that produces it (integration-record lld_notes)
-      "evidence": { "visible": "pass", "held_out": "pass" }   // from verification per_ac — the green running proof (held_out = honest, not overfit, B7)
-    },
-    {
-      "ac": "AC5",
-      "req_ref": "R5",
-      "plain_outcome": "The freelancer signs in with Google and arrives at an authenticated session — no password.",
-      "route": "GET /auth/login -> Google OAuth -> GET /auth/callback -> session established, redirect to /",
-      "evidence": { "visible": "pass", "held_out": "pass" }
-    }
-  ],
-  "client_response": "accepted",             // accepted | rejected | changes_requested. accepted=client confirms the running result; rejected=not what they expected; changes_requested=accepts the run but asks for a specific change
-  "accepted_by": "client",                   // the accepting party; null if not accepted
-  "accepted_at": "2026-06-08T00:00:00Z",     // ISO timestamp; immutable once written; null if not accepted
-  "rejection": null,                          // null on accept; on not-quite: { "reason": "<client's words, faithfully captured>", "routes_to": "Phase 1 | Phase 0" } — recorded + routed, NEVER patched (§5.9, B5)
-  "learnings": [                              // captured for Phase 1 re-rank (B10); each entry a PLAIN STRING sentence (never an object — Phase 1 reads a flat string list); grounded in the artifacts (mocked later-slice deps, external boundary, risk outcomes) + on a rejection the client's stated value driver; [] if none — never invented
-    "Later-slice capabilities C3/C4/C5 (project management, time logging, invoice export) are stubbed and ready to build next.",
-    "The Google OAuth provider is mocked at the walking-skeleton level — real Google OAuth credentials are needed to wire the live sign-in on staging."
-  ],
-  "signoff": "<one line capturing the client's verdict verbatim or faithfully paraphrased>",
-  "next": "Phase 1 re-rank (next slice)",    // on accept: Phase 1 re-rank, or "DONE — all slices delivered to STAGING" if this completes delivery; on not-quite: the routes_to phase
-  "status": "accepted",                       // accepted | rejected | changes_requested (matches client_response). The acceptance record is immutable once accepted (§10)
-  "demo_counts": {
-    "demonstrated_acs": 2,                    // == len(demonstrated_acs)
-    "acs_visible_passed": 2,                  // demonstrated ACs with visible==pass
-    "acs_held_out_passed": 2,                 // demonstrated ACs with held_out==pass
-    "learnings": 2
-  }
-}
-```
 ## Stop condition
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT (already-done → STOP).
 - Phase A done, no client reply this session → demo.md written + presented; state "rendered, awaiting client"; stop. Write no record, fabricate nothing.
@@ -210,69 +103,17 @@ Active records = auto-selected `.build/slices/<id>/{verify-output,critique,integ
 
 ## Task steps (slice-build)
 ### Phase A — Render the demo (autonomous)
-1. Read inputs (shared + slice-build). Check guards (frontmatter `escapes:`) — any tripped → HALT (or STOP clean for "no ready slice"), report which + detail, write nothing. Else continue.
+1. Read injected inputs (orchestrator resolves via io-manifest; role grounding in Rules). Check guards (frontmatter `escapes:`) — any tripped → HALT (or STOP clean for "no ready slice"), report which + detail, write nothing. Else continue.
 2. Auto-select the target slice (delta Rule 1). None ready → STOP clean.
 3. Build oracles for the slice: **demonstrable-AC set** (slice F*.traces ∩ verify-output per_ac_summary verdict green); **modality** (demonstrated flow's surface — UI click-through here); **narrative spine** (slice flows F* `trigger` + `steps[].action` + `failure_path`, plain language); **route map** (integration-record `lld_notes` — which real additive route/view produces each step); **AC text oracle** (aPRD AC* text → client outcome language); **evidence** (each AC's visible+held_out pass from verify-output per_ac_summary).
 4. Render `demo.md` (same shape as Part A — slice deltas: title = the slice's plain capability; one recap line of the accepted foundation then the NEW click-through; what this proves = the slice's NEW ACs only). Write it to disk (create `.build/slices/<id>/demo/` if absent).
-5. Present same click-through in chat. Then **PAUSE — wait for client's one selection.** Do not proceed to Phase B. Do not write `demo.json`. Do not fabricate acceptance.
+5. Present same click-through in chat. Then PAUSE for client accept per Two-phases gate — do not proceed to Phase B.
 
 ### Phase B — Capture acceptance (only after the client replies)
 6. Read client's selection (same as Part A):
    - **Accept** → `client_response: accepted`, `status: accepted` + immutable `accepted_by`/`accepted_at`. Capture learnings (Rule 6) from slice artifacts. `next` = Phase 1 re-rank (next slice), or DONE if this completes all slices to STAGING.
-   - **Not-quite** (with reason) → `client_response: rejected` (or `changes_requested`), `status` to match + reason faithfully + `routes_to` (Phase 0 misunderstood WHAT, else Phase 1; Rule 5). `accepted_by`/`accepted_at` null. NEVER edit code or frozen artifact.
-7. Write `.build/slices/<id>/demo/demo.json` per the schema below. Stop. On accept, Phase 1 re-rank reads learnings; accepted staging build = the slice's delivery (§1.2). On not-quite, routed phase handles it.
-
-## Output schema — `.build/slices/<id>/demo/demo.json` (Phase B — immutable)
-Same shape as Part A; the slice deltas noted (everything else carried verbatim — refs slice-scoped, `slice_id`/`slice_name` replace `slice`, demonstrated_acs = slice-new only). Worked example keyed to S4 (accepted):
-
-```json
-{
-  "verify_output_ref": ".build/slices/S4/verify-output.json",
-  "critique_ref": ".build/slices/S4/critique.json",
-  "integration_record_ref": ".build/slices/S4/integration-record.json",
-  "build_record_ref": ".build/slices/S4/build-record.json",
-  "flows_ref": ".hld/slices/S4/flows.json",
-  "aprd_ref": ".aprd/aprd.frozen.md",
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "adr_lock_ref": ".adr/adr.lock",
-  "aprd_lock_ref": ".aprd/aprd.lock",
-  "locks_verified": true,                    // verify-output verdict==verified + critique verdict==clean (skeleton_fidelity.breached==false) + integration status==integrated + skeleton/adr/aprd frozen + skeleton gate clean (don't recompute hashes)
-  "class": "greenfield",
-  "mode": "slice-build",
-  "slice_id": "S4",                          // auto-selected target (delta Rule 1)
-  "slice_name": "Create and manage client projects with currency and billable rate",
-  "builds_on": ["S1"],                       // prior accepted increments the slice runs atop (inherited by reference, H14); recap-only, NOT re-demoed
-  "demo_artifact": ".build/slices/S4/demo/demo.md",
-  "demo_modality": "ui-click-through",       // derived from the demonstrated flow's surface; only ui-click-through authored
-  "flow_demonstrated": "F4",                 // the slice flow the demo narrates
-  "demonstrated_acs": [                       // ONLY the slice's NEW ACs the verified build runs (F4.traces ∩ verify-output per_ac_summary, verdict green); each grounded in green evidence + a real route
-    {
-      "ac": "AC6",
-      "req_ref": "R6",
-      "plain_outcome": "The freelancer adds a client project (name, currency, hourly rate) and it appears in their project list; they can edit its name or rate and delete it.",  // client language, from the AC text
-      "route": "POST /projects -> create ; GET /projects -> list ; POST /projects/<slug>/edit -> update ; POST /projects/<slug>/delete -> remove",  // real additive composition routes (integration-record lld_notes)
-      "evidence": { "visible": "pass", "held_out": "pass" }   // from verify-output per_ac_summary (visible_passed + held_out_passed) — green running proof (held_out = honest, not overfit, B7)
-    }
-  ],
-  "client_response": "accepted",             // accepted | rejected | changes_requested
-  "accepted_by": "client",                   // null if not accepted
-  "accepted_at": "2026-06-09T00:00:00Z",     // ISO timestamp; immutable once written; null if not accepted
-  "rejection": null,                          // null on accept; on not-quite: { "reason": "<client's words>", "routes_to": "Phase 1 | Phase 0" } — recorded + routed, NEVER patched (§5.9, B5)
-  "learnings": [                              // captured for Phase 1 re-rank (B10); each a PLAIN STRING; grounded in slice artifacts (later-slice deps still deferred, external boundary, risk outcomes) + on rejection the client's value driver; [] if none — never invented
-    "Later-slice capabilities C4 (time logging) and C5 (invoice export) remain to build — project records created here are what those slices log hours against and invoice.",
-    "Project records persist via the Data Store at the contract layer in tests; real PostgreSQL persistence (ADR-0003) is wired at integration — production database provisioning remains a deployment prerequisite."
-  ],
-  "signoff": "<one line capturing the client's verdict verbatim or faithfully paraphrased>",
-  "next": "Phase 1 re-rank (next slice)",    // on accept: Phase 1 re-rank, or "DONE — all slices delivered to STAGING"; on not-quite: the routes_to phase
-  "status": "accepted",                       // accepted | rejected | changes_requested (matches client_response); immutable once accepted (§10)
-  "demo_counts": {
-    "demonstrated_acs": 1,                    // == len(demonstrated_acs)
-    "acs_visible_passed": 1,                  // demonstrated ACs with visible==pass
-    "acs_held_out_passed": 1,                 // demonstrated ACs with held_out==pass
-    "learnings": 2
-  }
-}
-```
+   - **Not-quite** (with reason) → `client_response: rejected` (or `changes_requested`), `status` to match + reason faithfully + `routes_to` (Phase 0 misunderstood WHAT, else Phase 1; Rule 5). `accepted_by`/`accepted_at` null.
+7. Write `.build/slices/<id>/demo/demo.json` (schema: demo registry id, Phase B). Stop. On accept, Phase 1 re-rank reads learnings; accepted staging build = the slice's delivery (§1.2). On not-quite, routed phase handles it.
 
 ## Stop condition (slice-build)
 - Guard tripped → act as the matching escape says (HALT, no-ready-slice / already-accepted → STOP clean); report which fired; write nothing.
