@@ -1,5 +1,5 @@
 {
-  "version": "956447a+pafe4432e.l96133636",
+  "version": "ba759be+p15af10d9.l297a7900",
   "files": [
     {
       "src": "adapters/claude/agents/adp-orchestrator.md",
@@ -76,265 +76,259 @@
     {
       "src": "docs/generic-usage-guide.md",
       "path": "docs/generic-usage-guide.md",
-      "sha256": "af1cb365e98444459c997814b5a1838a648e1eefa9bd56091651b8e915eec9a8",
+      "sha256": "8ba904fd3575b31390f3befa148ad0a7f24e58e29e567c6916d1448dfc6d342c",
       "harness": "all"
     },
     {
       "src": "docs/generic-workflow.md",
       "path": "docs/generic-workflow.md",
-      "sha256": "212fb3cd6250cb4b1fe040951cdcc4a4846cb3613379c4042f8bc3a8e42f112f",
+      "sha256": "25fa86ed0a847c6640ddf80ce1eadb747894507c7406b36e5f1b87ad8f1ae553",
       "harness": "all"
     },
     {
       "src": "prompts/00-aprd/CLASSIFIER.md",
       "path": "prompts/00-aprd/CLASSIFIER.md",
-      "sha256": "4ae072215ce9c32539a28f43283481a065a506bb6d79cf208c9db59c33348707",
+      "sha256": "4164cdfbdba522aecc82e01bbe8cab8ec2af9ba079abfbaa6cc674a403af5774",
       "harness": "all"
     },
     {
       "src": "prompts/00-aprd/CRITIQUE.md",
       "path": "prompts/00-aprd/CRITIQUE.md",
-      "sha256": "8f15fbe33e695ad2899471c83749d2215ac39e17972af44ce955b77ee754d18d",
+      "sha256": "87a22b17f92a349fa59c117b8099c38011f5d84591b3af7fd379bf2138597ea1",
       "harness": "all"
     },
     {
       "src": "prompts/00-aprd/EXTRACT-RULES.md",
       "path": "prompts/00-aprd/EXTRACT-RULES.md",
-      "sha256": "58402a03654dfda18c348c210265fe08b5150d4d82b0740977f571d666e40a52",
+      "sha256": "a9e3745ef89a14dc7c4c34bdcac52c9c5281dc7291491f0b8e3b479c2e17b62a",
       "harness": "all"
     },
     {
       "src": "prompts/00-aprd/EXTRACT.md",
       "path": "prompts/00-aprd/EXTRACT.md",
-      "sha256": "3dfd1ab73a67195ad7c659d55cc75dbb2dfdfff488968e7617f11b68db7938e7",
+      "sha256": "66592733bdb752b7c7c1f0ae8da8123bbf1a63046e5d1ee26817e1c510b08b0b",
       "harness": "all"
     },
     {
       "src": "prompts/00-aprd/GAP-DETECT.md",
       "path": "prompts/00-aprd/GAP-DETECT.md",
-      "sha256": "d464098635dbdfc0f2ed32e9e39669ac22b4fa42670e016f6e63b2b7d31c055b",
+      "sha256": "a48e3df30082738da9906e16cb8e64b214d1d345f376296e8f2c745160152a52",
       "harness": "all"
     },
     {
       "src": "prompts/00-aprd/QUESTION-GEN.md",
       "path": "prompts/00-aprd/QUESTION-GEN.md",
-      "sha256": "5f4574d2cc74decc530244c0381defc5bd3e4f5256bb901e6f05b9c6daae5f26",
+      "sha256": "bb14afbabfe796b9487340319780c627db77e822b29bd279d027b29f32928bdb",
       "harness": "all"
     },
     {
       "src": "prompts/00-aprd/RECONCILE.md",
       "path": "prompts/00-aprd/RECONCILE.md",
-      "sha256": "6f8d736d47f7960495c2beb93ff15fea4fb1be040cd17fe6e27cb4444f327be8",
+      "sha256": "b6a9b840359e97728f891104b748b6747b8e20ae29c222a5c4b5d3c75bd27b34",
       "harness": "all"
     },
     {
       "src": "prompts/00-aprd/SYNTHESIZE.md",
       "path": "prompts/00-aprd/SYNTHESIZE.md",
-      "sha256": "c0c6e99e18bd843e6ba08dff3a81625bd091ace568d9ddaee39748ddc9ebb5d1",
+      "sha256": "6f787e5b3b556c0c26e9d3e59dd3482f1f46dcc1e3ccc48249449a51480c1fe7",
       "harness": "all"
     },
     {
       "src": "prompts/00-aprd/VERIFY.md",
       "path": "prompts/00-aprd/VERIFY.md",
-      "sha256": "00e8964d04e108ed348421fa0fedc83efbc8147e70995a59b4b1aa874e0e67c1",
+      "sha256": "c7970338097b8f25278c7ffd6933dc4b040ecedf601d5a506a7e40d030d8daca",
       "harness": "all"
     },
     {
       "src": "prompts/01-roadmap/FOUNDATION-CUT.md",
       "path": "prompts/01-roadmap/FOUNDATION-CUT.md",
-      "sha256": "125de6bdbfe4373036cb03f51d2c698a529618fa5b0a91099b082aa9dac2b0c2",
+      "sha256": "3893a6b4d36a521cd198b242d24c9bc3cca4e8e7970c803490a57d0c0c6ce96a",
       "harness": "all"
     },
     {
       "src": "prompts/01-roadmap/RE-RANK.md",
       "path": "prompts/01-roadmap/RE-RANK.md",
-      "sha256": "d5b5f3e8c81bb9c3827cb27eaef9d6e241d582dbafc133520d0b8fff3f027810",
+      "sha256": "949905a520a74073976d3c6be4af095562744b7e19718a4eb1b230472c9f4745",
       "harness": "all"
     },
     {
       "src": "prompts/01-roadmap/SEQUENCE-REVIEW.md",
       "path": "prompts/01-roadmap/SEQUENCE-REVIEW.md",
-      "sha256": "cfb633626147f37a0e102ed25e70cbe620a3a224003ca3cb4c142db92a517c1f",
+      "sha256": "be9baa3f3a720d1c883f752d079af8737b330e33bb7170a0d2a4223fed7f0383",
       "harness": "all"
     },
     {
       "src": "prompts/01-roadmap/SEQUENCE.md",
       "path": "prompts/01-roadmap/SEQUENCE.md",
-      "sha256": "e3b94503c5c5c9ea7bad881aa588b8e2153df00dea769a25ea38671c12c8bcf7",
+      "sha256": "ad031fd303d258bc3437428b055ee22b20d20f82dd166ff026ed118fcc1df14a",
       "harness": "all"
     },
     {
       "src": "prompts/01-roadmap/SKELETON-IDENTIFY.md",
       "path": "prompts/01-roadmap/SKELETON-IDENTIFY.md",
-      "sha256": "7e16440ee7e6c457390cedda7fa496d9193ebbd19e2401c5bea03bb699eaef9c",
+      "sha256": "e9d2e8ae2950dc38e0b81d5f055e691c4f1a987168661c02a00de15f80ba1e50",
       "harness": "all"
     },
     {
       "src": "prompts/01-roadmap/SLICE-EXTRACT.md",
       "path": "prompts/01-roadmap/SLICE-EXTRACT.md",
-      "sha256": "c8667fd35f33970843491feb8fa632cf9bd5174be211cc7f63f9d0f1d67e4ba1",
+      "sha256": "468828fe2d65e21204f782d150dd5505633fe3b17d0486822feb874ba184bef6",
       "harness": "all"
     },
     {
       "src": "prompts/01-roadmap/VERTICALITY-CHECK.md",
       "path": "prompts/01-roadmap/VERTICALITY-CHECK.md",
-      "sha256": "b3cf49a6854c126cdd667ced5e972c2c8990b7ef1c4f4b3f0437f44705bca0d8",
+      "sha256": "5b5e15192dd9ef21641f022d55def2899aecf275c62c19e891916a5663333b0e",
       "harness": "all"
     },
     {
       "src": "prompts/02-adr/CRITIQUE.md",
       "path": "prompts/02-adr/CRITIQUE.md",
-      "sha256": "554f4d09452b623b088e18f52188aa5e89065cb12115dec1724768834591e440",
+      "sha256": "d50cf6ede9868ba046f91cbd96a71bda14f20fdff242016dee9951fa3053e981",
       "harness": "all"
     },
     {
       "src": "prompts/02-adr/DECISION-EXTRACT.md",
       "path": "prompts/02-adr/DECISION-EXTRACT.md",
-      "sha256": "0c4cf72f5e7a3e6e94e835cd25a4c55367e4cee50867572f96cd68e5d1419afc",
+      "sha256": "c44fed7df408bb01c4847d34bebe1bd762efc3ca44cd43a78b1b7a1d120802d0",
       "harness": "all"
     },
     {
       "src": "prompts/02-adr/EVALUATE-DECIDE.md",
       "path": "prompts/02-adr/EVALUATE-DECIDE.md",
-      "sha256": "cd7884656457655d4b7fb58832e6c05997959e78ae92c1fc39db258d0a95266a",
+      "sha256": "91e90a90dfa671ee3c8a7b550e46613e7323b365c3be77bf577632b63e4138d7",
       "harness": "all"
     },
     {
       "src": "prompts/02-adr/OPTION-GEN.md",
       "path": "prompts/02-adr/OPTION-GEN.md",
-      "sha256": "e07a037136af3cbd3a9363ace331439976b930d6d97c4dab1be6f31ca2b15bc5",
+      "sha256": "428b65f73d3c8b454ca1f9f9a3d875d3ec1fbb46767fc7910b43654da48bda43",
       "harness": "all"
     },
     {
       "src": "prompts/02-adr/RECONCILE.md",
       "path": "prompts/02-adr/RECONCILE.md",
-      "sha256": "39272e6bd8c555fc93eca7522d220eee616b1de7a0ef6a8fe47ffcdfc14e7e6b",
+      "sha256": "5b2126d4f896505890bde75f2d3a982c23172030b596490279d61318e1c6e49b",
       "harness": "all"
     },
     {
       "src": "prompts/02-adr/SYNTHESIZE-ADR.md",
       "path": "prompts/02-adr/SYNTHESIZE-ADR.md",
-      "sha256": "02dc7008abefca267c9f6939cd17372ebba8c1fc6e9f84b058ad913318771980",
+      "sha256": "33c47cb909615a78e54ac7ee8e07630ef5a3a45353f850a2de6623a387041ec7",
       "harness": "all"
     },
     {
       "src": "prompts/02-adr/TRIAGE.md",
       "path": "prompts/02-adr/TRIAGE.md",
-      "sha256": "3e7dbf3d49fcf217e9e9fedee7bfcfd9916463dc1505c7c59dfc311639b76a5c",
+      "sha256": "68ac5d2521e0a03d24b604006790af189ebc40e596fa815273d8237f56874892",
       "harness": "all"
     },
     {
       "src": "prompts/03-hld/DEFINE-CONTRACTS.md",
       "path": "prompts/03-hld/DEFINE-CONTRACTS.md",
-      "sha256": "d16d03d9d6e3e17b8e6e4da220ad0b55c3c847e1d01a3608ef7cf0d36e108de2",
+      "sha256": "6a6c418eb590f6b12c306eda0db5442a483928098c3fe85b9a3a29c9cbc94bee",
       "harness": "all"
     },
     {
       "src": "prompts/03-hld/DERIVE-COMPONENTS.md",
       "path": "prompts/03-hld/DERIVE-COMPONENTS.md",
-      "sha256": "c7a6ac1a136ea0231e280b2571b4f6cf8b836bc78e1eb2fdce92083ab09bfe6e",
+      "sha256": "1a6ab7bff6228a2c40f66b74a1773e73467663a472a939f8049e571438fac7b7",
       "harness": "all"
     },
     {
       "src": "prompts/03-hld/DERIVE-TESTS.md",
       "path": "prompts/03-hld/DERIVE-TESTS.md",
-      "sha256": "0fcfa288b71575fad976f3f1ec6dce29bdbbd778f8c0a70afa7c2c6573def0b7",
+      "sha256": "3bb66842c5820d4830e4a852aab14105f25f7bbdaf28874332aa2288b282dd32",
       "harness": "all"
     },
     {
       "src": "prompts/03-hld/MAP-NFR.md",
       "path": "prompts/03-hld/MAP-NFR.md",
-      "sha256": "ff06d92eac11a6bb42bbbc109a2f66d3ea26930533828c4186eefed7fa60aa1f",
+      "sha256": "62d813841a2d9a36bd0b2e3222d2e7e9a7670fb59f9ba4669074bf39567f8adc",
       "harness": "all"
     },
     {
       "src": "prompts/03-hld/MODEL-DATA.md",
       "path": "prompts/03-hld/MODEL-DATA.md",
-      "sha256": "fea40608261c3de8f94cd523e4854599dfadd0e2e70a3339cf6d9ef65cbc6de9",
+      "sha256": "562f2e376115d049a4d895a0a15ea2620bd977ffbbfefd298c30986f1d70057f",
       "harness": "all"
     },
     {
       "src": "prompts/03-hld/MODEL-FLOWS.md",
       "path": "prompts/03-hld/MODEL-FLOWS.md",
-      "sha256": "fb63ffa174592bbda83392cb77f9257179b3a11f02aca4fa43ab07e19e2971db",
+      "sha256": "574dae61e0a862144f268942b1e9f2832a4a01ee440a709658b2421dda6f0c7a",
       "harness": "all"
     },
     {
       "src": "prompts/03-hld/RECONCILE-CRITIQUE.md",
       "path": "prompts/03-hld/RECONCILE-CRITIQUE.md",
-      "sha256": "66c395b3eb062d02e3411f050b9dd1ab28126ab9736f0339c8f3a2486a18b758",
+      "sha256": "0070456970534ea32373a849d3e106b2442370279e592cccc70b4fbfd8789754",
       "harness": "all"
     },
     {
       "src": "prompts/03-hld/RESOLVE-LOCAL.md",
       "path": "prompts/03-hld/RESOLVE-LOCAL.md",
-      "sha256": "b5f7cd130cc850d3b3ead8e51efa80231922be215992e4cd1765129962241be4",
-      "harness": "all"
-    },
-    {
-      "src": "prompts/04-build/BUILD-PLAN.md",
-      "path": "prompts/04-build/BUILD-PLAN.md",
-      "sha256": "dc2f99caaf1cac2e1a39640505236f1ba80b1146f25e67b4b52a725a2000611c",
+      "sha256": "3f396c9440f9c8f4f432ba5c47f29ed60f71cd8361b43e2f1997c2a0abb0f81d",
       "harness": "all"
     },
     {
       "src": "prompts/04-build/CRITIQUE.md",
       "path": "prompts/04-build/CRITIQUE.md",
-      "sha256": "f80e79411807fb85c8941f5761ac9260ba8daf0285fec95d6861d1e1972c59a4",
+      "sha256": "e0803fe920e7587b4a1204301d83c050860c0c5318ddd302278e7cb3ac491de4",
       "harness": "all"
     },
     {
       "src": "prompts/04-build/DEMO-GEN.md",
       "path": "prompts/04-build/DEMO-GEN.md",
-      "sha256": "1f689346c5ab50acc36d13dd3f72c53502fec642391e65c180699c5436be2ffb",
+      "sha256": "a484dc27fe913f78e828e2f2e98a2377fc4b392806452df92465ad66ca9d3bcb",
       "harness": "all"
     },
     {
       "src": "prompts/04-build/DIAGNOSE.md",
       "path": "prompts/04-build/DIAGNOSE.md",
-      "sha256": "bf65b6dfb11d0dc431574740c827c2321afe2354df5b45ab6fbb27fb217ab30d",
+      "sha256": "a65c9d773c4254e7b737c8a8d5ac936626c08ba7fd311f6619c853631c2db45d",
       "harness": "all"
     },
     {
       "src": "prompts/04-build/IMPLEMENT.md",
       "path": "prompts/04-build/IMPLEMENT.md",
-      "sha256": "29c5af10bf34be2ea6870a73accd9a53ab7f83e02f77d880ec5dc6281c5f504f",
+      "sha256": "bcb8f6c3f88cc912005a3699ac63eb44fcbf55bdf789d5567a061c5a8a49293e",
       "harness": "all"
     },
     {
       "src": "prompts/04-build/INTEGRATE.md",
       "path": "prompts/04-build/INTEGRATE.md",
-      "sha256": "1bcb89a92cb9cb94d33d957a09645856864487bd42285b46676e503c86479293",
+      "sha256": "11e32f161b19f17e6912ecc0b682f0b812cac163fad1fa1b621779d362e0e442",
       "harness": "all"
     },
     {
       "src": "prompts/04-build/MATERIALIZE-ORACLE.md",
       "path": "prompts/04-build/MATERIALIZE-ORACLE.md",
-      "sha256": "42986e1fea0460fdb5eb07f8644d5d9e93af4a5e8667eae41f0f6baa8728ef53",
+      "sha256": "d355717cd612723c6bf8c518afc16e2d8e0237bf5533306bb1910127ff230af4",
       "harness": "all"
     },
     {
       "src": "prompts/04-build/VERIFY-OUTPUT.md",
       "path": "prompts/04-build/VERIFY-OUTPUT.md",
-      "sha256": "72542ab19ec7c4da5aa2a1522793f25d804adf805eb11892fc6d95fb9e7a2eab",
+      "sha256": "178baa84c6367dd765fe8c745718b0b902178b7ada1f8de5615bcacec4ad2db5",
       "harness": "all"
     },
     {
       "src": "prompts/_economy-audit.md",
       "path": "prompts/_economy-audit.md",
-      "sha256": "3f2f705764982541d4b04a4ca4997e1c0a092273036bd7efffa532d95a7ac880",
+      "sha256": "551ddd3aec4625845c719552eb0c1e2b9b191489e147f7a1412f9766bc750a92",
       "harness": "all"
     },
     {
       "src": "prompts/_orchestrator.generic.md",
       "path": "prompts/_orchestrator.md",
-      "sha256": "7c951138efe4153ab5e98591db40d9432222db9b2e95b3c62391bb1f16a26bf5",
+      "sha256": "ecca48c0a6e69c64c83aef69b2b70fab0bc940b02fe39ba35c2bdd37ec3043c0",
       "harness": "all"
     },
     {
       "src": "prompts/_step-runner.md",
       "path": "prompts/_step-runner.md",
-      "sha256": "21a378e97644664f4ff6b9471404c369c08575262cac7a2f516d996ab5f338b1",
+      "sha256": "4073b08a97ca08a3b0f3c47c96a882988b14f7c67e6571a2cdb3b0e0cbd6b528",
       "harness": "all"
     },
     {
@@ -352,13 +346,13 @@
     {
       "src": "tools/economy-lint/lint.mjs",
       "path": "tools/economy-lint/lint.mjs",
-      "sha256": "d2687811efbd86df2eaff4e4b44352a7dcde00a8df2a706f5c6116443445d335",
+      "sha256": "22bb1b5153ac9ec2e77a0b729e9ab40408f2cce3546e92e26189010f1713de09",
       "harness": "all"
     },
     {
       "src": "tools/economy-lint/selftest.mjs",
       "path": "tools/economy-lint/selftest.mjs",
-      "sha256": "4e9198969295262311541d6ab1fdd8d68c81e6a680c817eb43c85ed68f0b2307",
+      "sha256": "d0d172b5089fa6739f27ebd5453cef2d789fed91b77823cbca95e2afcac5efb6",
       "harness": "all"
     },
     {
@@ -410,7 +404,6 @@
       "prompts/03-hld/MODEL-FLOWS.md",
       "prompts/03-hld/RECONCILE-CRITIQUE.md",
       "prompts/03-hld/RESOLVE-LOCAL.md",
-      "prompts/04-build/BUILD-PLAN.md",
       "prompts/04-build/CRITIQUE.md",
       "prompts/04-build/DEMO-GEN.md",
       "prompts/04-build/DIAGNOSE.md",
@@ -468,7 +461,6 @@
       "prompts/03-hld/MODEL-FLOWS.md",
       "prompts/03-hld/RECONCILE-CRITIQUE.md",
       "prompts/03-hld/RESOLVE-LOCAL.md",
-      "prompts/04-build/BUILD-PLAN.md",
       "prompts/04-build/CRITIQUE.md",
       "prompts/04-build/DEMO-GEN.md",
       "prompts/04-build/DIAGNOSE.md",

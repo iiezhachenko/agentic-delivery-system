@@ -20,15 +20,15 @@ CORE PRINCIPLE: pack runs system's OWN gate (selftest) on payload BEFORE tarball
 
 ```mermaid
 flowchart TD
-  A["repo @ frozen locks"] --> B["1. verify: roadmap remaining_sequence DRAINED<br/>(every done_sentinel present+parseable on disk)"]
+  A["repo @ frozen locks"] --> B["1. verify: roadmap remaining_sequence DRAINED<br/>(every done_sentinel present+parseable on disk;<br/>pack-gate's own dist/ self-ref skipped)"]
   B -->|unshipped remains| H["HALT — no tarball"]
   B --> C["2. gen manifest (gen-manifest.mjs)"]
   C --> D["3. confirm re-skin: P0 generic siblings present<br/>(canon/CLAUDE.generic.md + prompts/_orchestrator.generic.md)"]
   D -->|missing| H
   D --> E["4. allowlist copy: ONLY manifest paths → payload/<br/>(non-destructive; src sha must match manifest)"]
   E -->|src drift| H
-  E --> F["5. GATE: economy-lint selftest BOTH-DIRECTIONS<br/>(clean golden PASS + planted-defect FAIL)"]
-  F -->|selftest red| H
+  E --> F["5. GATE: ALL tools/**/*.selftest.mjs GREEN<br/>(spine proof; incl. economy-lint both-directions)"]
+  F -->|any selftest red| H
   F --> G["6. tarball: tar payload/ + manifest.json → dist/adp-v*.tgz<br/>(self-check: entries == manifest, no scaffold/leak)"]
   G --> I["7. sign: sha256 beside artifact + optional cosign"]
   I --> O["dist/ artifacts"]
@@ -36,11 +36,11 @@ flowchart TD
 
 ### Step detail
 
-1. **verify drained** — read `.roadmap/08-rerank.json`; each `remaining_sequence` entry's `done_sentinel` must exist on disk (+ parse if `.json`). Any absent/invalid → unshipped frontier → HALT. Never pack a half-built lib.
+1. **verify drained** — read `.roadmap/08-rerank.json`; each `remaining_sequence` entry's `done_sentinel` must exist on disk (+ parse if `.json`). Any absent/invalid → unshipped frontier → HALT. Never pack a half-built lib. The pack-gate's OWN entry (sentinel under `dist/` = the tarball this run produces) is skipped — can't gate on its own output (bootstrap); it's the packaging step, not a prompt-build.
 2. **gen manifest** — invoke `gen-manifest.mjs` (writes `manifest.json` at root). See Manifest below.
 3. **confirm re-skin** — P0 generic siblings present. Absence = un-re-skinned build (would ship ADP's own self-host design as user's). HALT.
 4. **allowlist copy** — for each manifest row, read `src`, verify `sha256(src) == row.sha256` (copy must match what manifest signed), write to `payload/<path>`. Path-mapping applied here (generic sibling → canonical name). NON-DESTRUCTIVE: originals NEVER edited; only `payload/` + `dist/` written.
-5. **GATE** — `economy-lint/selftest.mjs` both-directions: linter must discriminate (clean golden PASSes, planted-defect FAILs). exit≠0 → HALT. Two further substeps DISABLED (see below).
+5. **GATE** — run EVERY `tools/**/*.selftest.mjs` (discovered, sorted; matches both `<name>.selftest.mjs` and bare `selftest.mjs`): validator + resolver + graph-lint + det modules + emitters + economy-lint. Proves the spine that PRODUCED the corpus before shipping it (retires spine-untested-in-dist); economy-lint's is the both-directions discrimination proof (clean golden PASSes, planted-defect FAILs). Any exit≠0 → HALT naming the offender, no tarball. Two further substeps DISABLED (see below).
 6. **tarball** — stage npm pkg root `package/{package.json, bin/init.mjs, manifest.json, payload/**}`, `tar -czf dist/adp-v<ver>.tgz -C dist/.pkgstage package`. Installer wrapper (`package.json`+`bin/init.mjs`) ships verbatim from repo so the artifact is npm-installable; payload = gated allowlist copy. Self-verifies: extracted entry list == `package/package.json`+`package/bin/init.mjs`+`package/manifest.json`+every `package/payload/<path>` (no extra scaffold, no missing). Mismatch → HALT.
 7. **sign** — sha256 written to `<tgz>.sha256`. If `cosign` on PATH, also `sign-blob` → `<tgz>.sig`. Absent → skip (optional hook).
 
@@ -70,13 +70,12 @@ Generator `tools/pack/gen-manifest.mjs` (zero-dep, deterministic — sorted by `
 
 Ex: `815ab03+p03b9a94d.l96133636`.
 
-## DISABLED gate substeps (maintainer decision — ADP remediation out of pack scope)
+## Gate substeps
 
-`pack.mjs` step 5 substeps 4b + 4c are commented (re-enable instructions inline). They trip ONLY on un-remediated ADP content, not pack mechanics:
-- **4b lint payload prompts** — 5 shipped prompts carry block-grade economy violations (CRITIQUE/DEMO-GEN C3 format-clause field-lists; DEFINE-CONTRACTS/DERIVE-COMPONENTS/_step-runner C3/C4/C9).
-- **4c self-host token grep EMPTY** — re-skin-drift guard (`self-host|selfhost|agentic-delivery-pipeline\.md|\.aprd\.frozen`). Trips on 3 lines (`_step-runner.md` canon ref; `typescript.md` ×2).
-
-Active gate = `selftest` both-directions (passes; discriminates). RE-ENABLE both once prompt remediation + re-skin cleanup land (separate prompt-builds).
+`pack.mjs` step 5 runs three substeps:
+- **5a ALL selftests** — every `tools/**/*.selftest.mjs` green (spine proof; incl. economy-lint both-directions). ENABLED.
+- **5b lint payload prompts** — ENABLED (W8). Each payload prompt must lint-clean; blocked → HALT. W9/W10 made the corpus 44/44 economy-clean, so the prior 5 block-grade offenders (CRITIQUE/DEMO-GEN C3; DEFINE-CONTRACTS/DERIVE-COMPONENTS/_step-runner C3/C4/C9) are reconciled — a payload economy regression now HALTs the ship.
+- **5c self-host token grep EMPTY** — re-skin-drift guard (`self-host|selfhost|agentic-delivery-pipeline\.md|\.aprd\.frozen`). DISABLED: trips on un-remediated re-skin content (`_step-runner.md` canon ref; `typescript.md` ×2). RE-ENABLE once re-skin remediation lands (a separate prompt-build).
 
 ## Install side (how deliverable is consumed)
 

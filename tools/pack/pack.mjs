@@ -29,14 +29,19 @@ const DIST = r('dist');
 {
   const rr = JSON.parse(fs.readFileSync(r('.roadmap/08-rerank.json'), 'utf8'));
   const unshipped = [];
+  let selfRef = 0;
   for (const e of rr.remaining_sequence ?? []) {
     const s = e.done_sentinel;
+    // pack-gate's OWN sentinel lives under dist/ (the tarball this run produces) — cannot gate on its
+    // own output (bootstrap). It is the packaging step, not a prompt-build; drain = all PROMPT-builds shipped.
+    if (s && /^dist\//.test(s)) { selfRef++; continue; }
     let ok = s && fs.existsSync(r(s));
     if (ok && s.endsWith('.json')) { try { JSON.parse(fs.readFileSync(r(s), 'utf8')); } catch { ok = false; } }
     if (!ok) unshipped.push(`${e.id} (${s})`);
   }
   if (unshipped.length) HALT(`unshipped prompts remain — frontier not drained:\n  - ${unshipped.join('\n  - ')}`);
-  log(`verify: roadmap drained — ${(rr.remaining_sequence ?? []).length} prompt-builds all shipped`);
+  const checked = (rr.remaining_sequence ?? []).length - selfRef;
+  log(`verify: roadmap drained — ${checked} prompt-builds shipped (${selfRef} pack-gate self-ref skipped)`);
 }
 
 // ── 2. gen manifest — invoke P2 generator (writes manifest.json at root) ─────────
@@ -62,34 +67,51 @@ for (const f of manifest.files) {
 }
 log(`copy: ${manifest.files.length} files → payload/ (allowlist, non-destructive)`);
 
-// ── 5. GATE — system runs its OWN bar on payload; any fail → HALT, no tarball ────
-// (a) selftest BOTH-DIRECTIONS — linter must discriminate (clean golden PASS + planted-defect FAIL)
-//     before the lib's own economy gate is trusted. exit!=0 → HALT.
-try {
-  execFileSync('node', [r('tools/economy-lint/selftest.mjs')], { stdio: ['ignore', 'ignore', 'inherit'] });
-  log('gate: selftest both-directions GREEN');
-} catch {
-  HALT('selftest FAILED — linter no longer discriminates (clean PASS / defect FAIL broken)');
+// ── 5. GATE — system runs its OWN bar before tarball; any fail → HALT, no tarball ────
+// (a) ALL selftests GREEN — prove the spine that PRODUCED the corpus before shipping it
+//     (retires spine-untested-in-dist). EVERY tools/**/*.selftest.mjs must exit 0: validator + resolver
+//     + graph-lint + det modules + emitters + economy-lint (the last is the both-directions discrimination
+//     proof — clean golden PASS + planted-defect FAIL). Discovery (sorted), not a hand-list → a new spine
+//     tool's selftest auto-gates; none can silently ship untested. First red → HALT, no tarball.
+//     Match BOTH conventions: `<name>.selftest.mjs` (det/io/emit) AND bare `selftest.mjs` (economy-lint).
+{
+  const isTest = (n) => /(^|\.)selftest\.mjs$/.test(n);
+  const walkTests = (relDir) => {
+    const out = [];
+    for (const e of fs.readdirSync(r(relDir), { withFileTypes: true })) {
+      const rel = `${relDir}/${e.name}`;
+      if (e.isDirectory()) out.push(...walkTests(rel));
+      else if (e.isFile() && isTest(e.name)) out.push(rel);
+    }
+    return out;
+  };
+  const tests = walkTests('tools').sort();
+  if (!tests.length) HALT('no selftests under tools/ — gate cannot prove the spine');
+  for (const t of tests) {
+    try { execFileSync('node', [r(t)], { stdio: ['ignore', 'ignore', 'inherit'] }); }
+    catch { HALT(`selftest FAILED: ${t} — spine no longer proves; ship blocked`); }
+  }
+  log(`gate: ${tests.length} selftests ALL GREEN (spine proven before ship)`);
 }
 
-// (b) lint payload prompts — DISABLED (maintainer decision, out of P4 scope).
-//     5 shipped prompts carry block-grade economy violations (CRITIQUE/DEMO-GEN C3 format-clause
-//     field-lists; DEFINE-CONTRACTS/DERIVE-COMPONENTS/_step-runner C3/C4/C9). ADP remediation is a
-//     separate prompt-build, not this pack task. Re-enable once those prompts pass their own bar.
-//     ── re-enable: import { lint } and loop payload/prompts/**/*.md; blocked verdict → HALT.
-// {
-//   const { lint } = await import(r('tools/economy-lint/lint.mjs'));
-//   const proms = manifest.files.filter((f) => f.path.startsWith('prompts/') && f.path.endsWith('.md'));
-//   const blocked = [];
-//   for (const f of proms) { const res = lint(path.join(PAYLOAD, f.path)); if (res.verdict === 'blocked') blocked.push(`${f.path} [${[...new Set(res.violations.map(v=>v.check))].join(',')}]`); }
-//   if (blocked.length) HALT(`payload prompts FAIL lint:\n  - ${blocked.join('\n  - ')}`);
-//   log(`gate: ${proms.length} payload prompts lint-clean`);
-// }
+// (b) lint payload prompts — ENABLED (W8; W9/W10 made the corpus 44/44 economy-clean, so the
+//     prompts now pass their own bar — the "Lands AFTER W10 so the corpus is economy-clean in the
+//     tarball" guarantee, now MECHANICAL). Any blocked verdict → HALT: a payload economy regression
+//     never ships silently. The 5 prior block-grade offenders (CRITIQUE/DEMO-GEN C3; DEFINE-CONTRACTS/
+//     DERIVE-COMPONENTS/_step-runner C3/C4/C9) were reconciled W9/W10.
+{
+  const { lint } = await import(r('tools/economy-lint/lint.mjs'));
+  const proms = manifest.files.filter((f) => f.path.startsWith('prompts/') && f.path.endsWith('.md'));
+  const blocked = [];
+  for (const f of proms) { const res = lint(path.join(PAYLOAD, f.path)); if (res.verdict === 'blocked') blocked.push(`${f.path} [${[...new Set(res.violations.map(v=>v.check))].join(',')}]`); }
+  if (blocked.length) HALT(`payload prompts FAIL lint:\n  - ${blocked.join('\n  - ')}`);
+  log(`gate: ${proms.length} payload prompts lint-clean`);
+}
 
-// (c) self-host token grep on payload EMPTY — DISABLED (same maintainer decision, out of scope).
+// (c) self-host token grep on payload EMPTY — DISABLED (re-skin remediation is a separate build).
 //     re-skin-drift guard: a leaked self-host line ships ADP's own build design as the user's. Trips
-//     today on out-of-scope un-remediated content (_step-runner.md → code-canon/agentic-delivery-pipeline.md
-//     ref; typescript.md ×2). Re-enable once re-skin remediation lands.
+//     today on un-remediated content (_step-runner.md → code-canon/agentic-delivery-pipeline.md ref;
+//     typescript.md ×2). Re-enable once re-skin remediation lands.
 //     ── re-enable: scan every payload file; any /self-host|selfhost|agentic-delivery-pipeline\.md|\.aprd\.frozen/ → HALT.
 // {
 //   const re = /self-host|selfhost|agentic-delivery-pipeline\.md|\.aprd\.frozen/;
