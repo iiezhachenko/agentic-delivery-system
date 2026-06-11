@@ -1,17 +1,14 @@
 ---
 role: EXTRACT-RULES
 phase: 00-aprd
-class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
-interactive: false          # pure manifest parsing — reads disk, writes disk, stops. No client touch (PR1). Client approves the canon later (RECONCILE/VERIFY emit agreed[]+conflicts[]).
-inputs:
-  - { path: ".aprd/03-grounding/sources.json", format: "json — curated source allowlist + fetch index; per-source SRC* entry carries tier/tool/version/kind/url. Built by upstream mechanical step, not an LLM stage." }
-  - { path: ".aprd/03-grounding/manifests/", format: "directory of raw fetched manifest files, one per source in sources.json — ground truth, transcribe verbatim; fetched not recalled (§7.2)" }
+class: <dispatched by playbook>   # greenfield canon-grounding sub-pipeline (§7); other classes HALT at CLASSIFIER
+interactive: false          # pure manifest parsing — reads disk, writes disk, stops. No client touch (PR1); client approves canon later (RECONCILE/VERIFY)
 outputs:
-  - { path: ".aprd/03-grounding/rules-extracted.json", format: "json (schema below) — per-source atomic rules RULE*, each with verbatim evidence" }
+  - { path: ".aprd/03-grounding/rules-extracted.json", schema: "rules-extracted" }
 escapes:
   - { when: ".aprd/03-grounding/sources.json missing/unreadable", target: "self / HALT — no allowlist to extract against; cannot run" }
   - { when: "manifests/ directory absent OR every source file named in sources.json missing on disk", target: "self / HALT — fetch produced nothing to parse" }
-  - { when: "sources.json class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — that canon playbook not authored; HALT and report rather than extract under the wrong corpus" }
+  - { when: "sources.json class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — canon playbook not authored; HALT, report, do not extract under wrong corpus" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.
@@ -31,71 +28,25 @@ Rule = prescription constraining **how code is written or quality is enforced** 
 
 ## Rules
 1. **Transcribe, never recall (P11, §7.2 — load-bearing).** Every rule literally present in one fetched manifest; carries `evidence`: verbatim snippet from that file proving it exists. Never add rule from training knowledge, however obviously correct — canonical rule absent from every fetched file = **absent**, full stop. Cannot quote source text → drop rule. Do not paraphrase one setting into different setting; transcribe what is there.
-2. **Atomic — one rule = one setting or one directive.** Config object with twenty keys → twenty rules, not one "use strict config" rule. Do not bundle or summarize block into slogan; split every distinct prescription into its own `RULE*`.
+2. **Atomic — one rule = one setting or one directive.** Config object with twenty keys → twenty rules, not one "use strict config" rule. Do not bundle or summarize a block into a slogan; each distinct prescription = its own `RULE*` (prose clause-splitting mechanics in Rule 6).
 3. **Do NOT reconcile, dedupe, merge, or detect conflicts — that is RECONCILE's job.** Same rule from two sources → extract **twice**, once per source. Two sources **contradict** (single vs double quotes, 2- vs 4-space indent) → extract **both**, each tagged to own source, no winner chosen. Collapsing duplicates or resolving conflicts destroys per-source signal RECONCILE needs. Preserve source separation absolutely.
 4. **Do NOT verify currency or judge correctness — that is VERIFY's job.** Copy `tool` + `tool_version_pinned` from source's `sources.json` entry onto every rule from that source. Do not flag setting deprecated/superseded/wrong even if you believe it is — extract faithfully, let VERIFY check against pinned version.
-5. **Thread provenance (P9).** Mint stable `RULE1, RULE2, …` contiguous. Every rule cites `source_ref` = `SRC*` id in `sources.json` it came from; carries source's `tier`, `tool`, `tool_version_pinned`. SRC* → RULE* = traceability link RECONCILE and VERIFY follow back.
-6. **Config vs prose — two extraction modes** (applied only to normative settings kept by discriminator).
-   - **Tier-1 machine-readable config** (ESLint/Prettier/tsconfig/EditorConfig, `kind: "config"`): parse each kept setting into one `RULE*`. Put literal key-and-value into `setting` verbatim (`"semi": ["error", "always"]`). State prescription in `rule` as caveman prose ("Semicolons required at statement ends."). `evidence` = verbatim line(s) from file.
-   - **Tier-2 expert prose** (style guides, reference books, `kind: "opinion"`): extract each **prescriptive directive** — "always / never / prefer / avoid / must / should". One directive = one rule, `setting: null`, `kind: "opinion"`, `rule` = prescription in caveman prose, `evidence` = verbatim sentence. **Skip non-normative prose** — rationale paragraphs, examples, history, hedged musings. Extract prescription, not discussion around it.
+5. **Thread provenance (P9).** Mint stable `RULE1, RULE2, …` contiguous across ALL sources (one shared space, never renumbered on re-run). Every rule cites `source_ref` = the `SRC*` id in `sources.json` it came from; carries that source's `tier`, `tool`, `tool_version_pinned` copied verbatim. SRC* → RULE* = traceability link RECONCILE and VERIFY follow back.
+6. **Config vs prose — two extraction modes** (applied only to normative settings kept by discriminator). Rule-level `kind` derives from the source's `kind` in `sources.json`: source `kind:"config"` → rule `kind:"config"`; source `kind:"doc"`/`"opinion"` → rule `kind:"opinion"`.
+   - **Tier-1 machine-readable config** (ESLint/Prettier/tsconfig/EditorConfig): parse each kept setting into one `RULE*`. Put literal key-and-value into `setting` verbatim (`"semi": ["error", "always"]`). State prescription in `rule` as caveman prose ("Semicolons required at statement ends."). `evidence` = verbatim line(s) from file.
+   - **Tier-2 expert prose** (style guides, reference books): extract each **prescriptive directive** — every clause headed by always / never / prefer / avoid / must / should / do-not. One directive = one rule (`setting: null`, `rule` = prescription in caveman prose, `evidence` = verbatim sentence(s)). **Count clauses, not sentences:** two imperatives sharing one sentence = two rules ("Prefer `const` over `let`, and never use `var`" → rule "Prefer const over let" + rule "Never use var"); two imperative sentences in one section = two rules ("Indent four spaces. Do not use tabs." → rule "Indent four spaces" + rule "Do not use tabs"). Clauses sharing a source sentence each copy that same verbatim `evidence`. **Skip non-normative prose** — rationale paragraphs, examples, history, hedged musings, sections explicitly disclaiming rule-status. Extract prescription, not discussion around it.
 7. **No fetching, no client.** Manifests already on disk; fetch upstream and mechanical. Never reach network, never ask client. Source listed in `sources.json` with **no file on disk** (fetch failed/partial) → do not invent or recall its rules — record in `unfetched_sources[]` with reason, continue extracting present sources. One dead source must not abort grounding.
 8. **Cheapest source first; LLM never the source (P5, P11, §7.2).** Truth = fetched manifest file in front of you, not memory of what tool defaults "should" be. Parse those files, never author their content. Every rule traces to file via `source_ref`, proves itself via verbatim `evidence`; rule that cannot point at text in fetched manifest = hallucinated — drop it.
 
 ## Task steps
-1. Read `.aprd/03-grounding/sources.json` first. Check guards (frontmatter `escapes:`) — any tripped → HALT, report offending detail, write nothing. Else continue.
-2. For each `SRC*` in `sources.json.sources`, locate its `file` under `.aprd/03-grounding/`. Missing → append to `unfetched_sources[]` (id + reason), move on. Present → read in full.
-3. Extract per source: keep only **normative prescriptions** (discriminator — skip env/parser/plugin/build plumbing), apply right mode (Rule 6): config → one rule per kept setting with verbatim `setting`; prose → one rule per prescriptive directive. Mint `RULE*` continuing shared sequence across all sources. Tag each with `source_ref`, `tier`, `tool`, `tool_version_pinned` from that source's entry, copy verbatim `evidence`.
-4. Do not dedupe across sources, resolve contradictions, or currency-check (Rules 3–4). Same rule from two sources → two `RULE*`. Contradicting rules → both kept.
-5. Fill `extraction_meta` by walking actual lists. Verify every `source_ref` matches real `SRC*`; every extracted source had ≥1 rule (present-but-empty manifest allowed — yields zero rules, not error).
-6. Write JSON. Stop.
-
-## Output schema — `.aprd/03-grounding/rules-extracted.json`
-
-```json
-{
-  "sources_ref": ".aprd/03-grounding/sources.json",
-  "class": "greenfield",
-  "stack": ["typescript", "react", "node"],
-  "rules": [                              // per-source duplicates AND contradictions kept intact for RECONCILE — never collapsed here
-    {
-      "id": "RULE1",                      // stable RULE* space, contiguous from RULE1, never renumbered on re-run (P9)
-      "source_ref": "SRC1",               // must equal a SRC* id in sources.json.sources; exactly one per rule — the provenance link
-      "tier": 1,                          // copied verbatim from the source's sources.json entry
-      "tool": "eslint",                   // copied verbatim
-      "tool_version_pinned": "9.x",       // copied verbatim; never invented or altered
-      "kind": "config",                   // "config" for parsed machine-readable settings, "opinion" for prose prescriptions
-      "topic": "<short subject slug — e.g. semicolons, quotes, no-unused-vars, indent; lets RECONCILE group candidates; NOT a unique id — two rules may share a topic (how RECONCILE finds conflicts)>",
-      "rule": "<one atomic prescription, caveman prose>",
-      "setting": "<verbatim key+value from the config, e.g. \"semi\": [\"error\", \"always\"]>",   // null for kind:"opinion"
-      "evidence": "<verbatim snippet copied from the manifest file proving this rule exists>"      // non-empty; the anti-hallucination proof; a rule with no quotable evidence must not be emitted
-    },
-    {
-      "id": "RULE2",
-      "source_ref": "SRC2",
-      "tier": 2,
-      "tool": "airbnb-style-guide",
-      "tool_version_pinned": "n/a",
-      "kind": "opinion",
-      "topic": "quotes",
-      "rule": "Use double quotes for all string literals.",
-      "setting": null,
-      "evidence": "Always use double quotes (\") for strings."
-    }
-  ],
-  "unfetched_sources": [                  // every SRC* whose file is missing on disk, with a reason; [] if all fetched; these are NOT extracted and NOT recalled
-    { "id": "SRC4", "reason": "listed in sources.json but file manifests/<name> absent on disk — fetch incomplete; recorded, not extracted or recalled" }
-  ],
-  "extraction_meta": {                    // integer tallies; walk to count, do not estimate
-    "sources_total": 4,
-    "sources_extracted": 3,               // sources_extracted + sources_unfetched == sources_total
-    "sources_unfetched": 1,
-    "rules_total": 12,                    // == rules.length
-    "by_tier": { "1": 8, "2": 4, "3": 0 }  // sums to rules_total
-  }
-}
-```
-Do NOT include any agreed/conflict/merged/verified fields — that is RECONCILE's and VERIFY's output. All `rule`/`topic` content is caveman prose; `setting`/`evidence` are verbatim transcriptions (caveman governs this too).
+1. Read `.aprd/03-grounding/sources.json` first (path → output `sources_ref`). Check guards (frontmatter `escapes:`) — any tripped → HALT, report offending detail, write nothing. Else copy `class` + `stack` verbatim from `sources.json` top-level onto the output (same keys); continue.
+2. For each `SRC*` in `sources.json.sources`, locate its `file` under `.aprd/03-grounding/`. Missing → append `{id, reason}` to `unfetched_sources[]` (id = the `SRC*`, reason = why, e.g. file absent on disk), move on. Present → read in full.
+3. Extract per source: keep only **normative prescriptions** (discriminator — skip env/parser/plugin/build plumbing), apply right mode (Rule 6): config → one rule per kept setting with verbatim `setting`; prose → one rule per prescriptive directive (`setting:null`). Mint `RULE*` continuing the shared sequence across all sources. Each rule = `{id (RULE*), source_ref (SRC*), tier, tool, tool_version_pinned, kind, topic, rule, setting, evidence}`: `tier`/`tool`/`tool_version_pinned` copied verbatim from that source's `sources.json` entry; `rule` = atomic prescription in caveman prose; `setting` = verbatim config key+value (null for `kind:"opinion"`); `evidence` = verbatim snippet from the file (non-empty — the anti-hallucination proof; no quotable text → do not emit the rule).
+4. Set each rule's `topic` = short subject slug (e.g. `semicolons`, `quotes`, `no-unused-vars`, `indent`, `variable-declarations`). Topic groups candidates for RECONCILE; it is **NOT a unique id** — two rules may share a topic (a config single-quote rule + a prose double-quote rule both `topic:"quotes"` is how RECONCILE finds the conflict). Derive from the setting key (config) or the directive subject (prose).
+5. Do not dedupe across sources, resolve contradictions, or currency-check (Rules 3–4). Same rule from two sources → two `RULE*`. Contradicting rules → both kept, each tagged to its own source.
+6. Fill `extraction_meta` by walking the actual lists (count, do not estimate): `sources_total` = sources in `sources.json`; `sources_extracted` = sources with a file read; `sources_unfetched` = `unfetched_sources.length` (and `sources_extracted + sources_unfetched == sources_total`); `rules_total` = `rules.length`; `by_tier` = object mapping each tier (string key, e.g. `"1"`, `"2"`) to its rule count (sums to `rules_total`). Verify every `source_ref` matches a real `SRC*`; a present-but-empty manifest is allowed (yields zero rules, not an error).
+7. Write JSON. Output object = `{sources_ref, class, stack, rules, unfetched_sources, extraction_meta}` (top-level keys named in steps 1/2/6). Stop.
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → do **not** write `rules-extracted.json`; print which guard fired + offending detail; "HALT".
-- Clean run → write JSON to `.aprd/03-grounding/rules-extracted.json` (create `.aprd/03-grounding/` if absent; only output, schema-exact, per-source duplicates + contradictions left intact for RECONCILE, PR2); state "rules extracted, RECONCILE next"; stop. No dedupe, no conflict resolution, no currency check, no client touch.
+- Clean run → write JSON to `.aprd/03-grounding/rules-extracted.json` (create `.aprd/03-grounding/` if absent; schema-valid per `rules-extracted`, per-source duplicates + contradictions left intact for RECONCILE, PR2); state "rules extracted, RECONCILE next"; stop. No dedupe, no conflict resolution, no currency check, no client touch.
