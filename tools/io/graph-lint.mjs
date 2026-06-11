@@ -136,6 +136,9 @@ export function loadFrozenContracts(contractsPath) {
 }
 
 // --- deriveKnownRoles: scan prompts/**/*.md; basename - .md - leading _ -> UPPER -> role id ---
+// PLUS emitter_owned roles from .hld/skeleton/components.json: a Tier-1 role retired to a
+// tools/det/emit/*.mjs emitter (D26/D27) keeps its identity but has NO .md — still a real
+// producer/consumer in the chain. Root derived from promptsDir parent (callers unchanged).
 export function deriveKnownRoles(promptsDir) {
   const roles = new Set();
   const walk = (dir) => {
@@ -148,6 +151,11 @@ export function deriveKnownRoles(promptsDir) {
     }
   };
   walk(promptsDir);
+  // emitter_owned roles: prompt retired, artifact owned by emitter — still known roles (D27)
+  try {
+    const comp = JSON.parse(fs.readFileSync(path.join(path.dirname(promptsDir), ".hld", "skeleton", "components.json"), "utf8"));
+    for (const e of comp.emitter_owned || []) if (e.role) roles.add(String(e.role).toUpperCase());
+  } catch { /* no components.json / no emitter_owned -> prompt scan only */ }
   return roles;
 }
 

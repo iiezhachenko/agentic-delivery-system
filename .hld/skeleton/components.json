@@ -1,7 +1,7 @@
 {
   "artifact": "components.json",
   "class": "self-host",
-  "note": "Role library = the build-DAG nodes of the agentic-delivery-pipeline deliverable. Scanned from prompts/ (the built skeleton). One role = one prompt (D1).",
+  "note": "Role library = build-DAG nodes of agentic-delivery-pipeline deliverable. Scanned from prompts/ (built skeleton). One role = one prompt (D1) — EXCEPT emitter_owned roles (D26/D27): Tier-1 whole-mechanical role whose artifact owned end-to-end by tools/det/emit/*.mjs, prompt retired, role identity survives via sentinel + emitter_owned entry (no .md at unit_path). 39 roles, 2 emitter-owned.",
   "phases": [
     {
       "phase": "00-aprd",
@@ -81,6 +81,22 @@
       ],
       "role_count": 8,
       "unit_path": "prompts/04-build/<ROLE>.md"
+    }
+  ],
+  "emitter_owned": [
+    {
+      "role": "BASELINE-MAP",
+      "phase": "00-aprd",
+      "emitter": "tools/det/emit/baseline-map.mjs",
+      "sentinel": ".aprd/baseline-map.json",
+      "note": "Tier-1 whole-mechanical (D26). Prompt retired W5/CR-002 (D27); artifact owned end-to-end by emitter (id high-water scan + seam catalog + oracle inventory + lock digest, deterministic). Role identity survives via sentinel + this entry (D1). Both-directions selftest: tools/det/emit/baseline-map.selftest.mjs."
+    },
+    {
+      "role": "BUILD-PLAN",
+      "phase": "04-build",
+      "emitter": "tools/det/emit/build-plan.mjs",
+      "sentinel": ".build/skeleton/build-plan.json | .build/slices/<id>/build-plan.json",
+      "note": "Tier-1 whole-mechanical (D26). Prompt retired W5/CR-002 (D27); artifact owned end-to-end by emitter (DAG-filter to build_set + real|mocked membership + coverage, deterministic, both modes). Role identity survives via sentinel + this entry (D1). Both-directions selftest: tools/det/emit/build-plan.selftest.mjs."
     }
   ],
   "component_count": 39
