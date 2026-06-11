@@ -1,31 +1,28 @@
 {
   "artifact": ".build/slices/S4/oracle/",
-  "version": "v1",
-  "content_sha256": "d8e4f1a2b7c3059614e3d2c1b0a9f8e7d6c5b4a3928170f6e5d4c3b2a1908e4d",
+  "version": "v2",
+  "content_sha256": "b2f9e4a17c3d0856e4d3c2b1a0f9e8d7c6b5a4938271f0e9d8c7b6a5948372b1",
   "signer": "test-author:freelancer-time-tracking",
-  "signed_at": "2026-06-09T00:00:00Z",
+  "signed_at": "2026-06-11T00:00:00Z",
   "status": "frozen",
   "starts_red": true,
   "builder_may_not_edit": true,
-  "mode": "slice-build",
-  "class": "greenfield",
+  "mode": "bugfix",
+  "class": "bugfix",
   "slice_id": "S4",
+  "supersedes": ".build/slices/S4/oracle/oracle.lock@v1",
   "built_against": {
-    "skeleton_oracle_lock": ".build/skeleton/oracle/oracle.lock",
+    "slice_oracle_lock": ".build/slices/S4/oracle/oracle.lock",
     "skeleton_lock": ".hld/skeleton.lock",
     "adr_lock": ".adr/adr.lock",
     "aprd_lock": ".aprd/aprd.lock",
-    "slice_build_plan": ".build/slices/S4/build-plan.json"
+    "diagnosis": ".aprd/diagnosis.json",
+    "slice_test_specs": ".hld/slices/S4/test-specs.json"
   },
   "manifest": "oracle.json",
   "test_files": [
-    "contract/test_CT2.py",
-    "contract/test_CT3.py",
-    "contract/test_CT9.py",
-    "flow/test_F4.py",
-    "acceptance/visible/test_AC6.py",
-    "acceptance/held_out/test_AC6.py",
+    "reproduction/test_AC11_null_rate.py",
     "conftest.py"
   ],
-  "mutation_certified": ["OCT-CT3", "OA-AC6"]
+  "mutation_certified": []
 }
