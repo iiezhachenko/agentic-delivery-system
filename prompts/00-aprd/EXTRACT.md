@@ -3,15 +3,8 @@ role: EXTRACT
 phase: 00-aprd
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # pure structural extraction — reads disk, writes disk, stops. No client touch (PR1)
-inputs:
-  # — shared (both classes) —
-  - { path: ".aprd/00-raw-request.md", format: "markdown — verbatim client request + attachment refs; the sole greenfield source-of-truth (client intent = the words)" }
-  - { path: ".aprd/01-classification.json", format: "json — SR* subrequests + classes + escape block; tag each extracted item with its sr_ref" }
-  # — feature-add —
-  - { path: ".aprd/baseline-map.json", format: "json — baseline ID high-water-marks + conventions + seams; ground extraction against it (BF2), mint new IDs above high-water (BF3)" }
-  - { path: ".aprd/change-requests/CR-<id>.md", format: "markdown — the feature ask (feature-add intake); the NEW delta atop the baseline, not a blank-slate request" }
 outputs:
-  - { path: ".aprd/02-extraction.json", format: "json (schema below) — entities, explicit/implied requirements, constraints, unknowns" }
+  - { path: ".aprd/02-extraction.json", schema: "02-extraction" }
 escapes:
   - { when: "01-classification.json needs_confirmation == true", target: "self / HALT — class unconfirmed; extraction must not run on an unresolved classification (wrong source-of-truth risk)" }
   - { when: "any subrequest unplaybooked (escape non-null)", target: "that playbook — not authored yet; HALT and report which SR*" }
@@ -49,82 +42,20 @@ Turn unstructured request into structured raw material: typed inventory of entit
 4. **Unknowns measured vs baseline.** Fact the baseline already answers = NOT an unknown. Unknown = what the CR needs that neither baseline nor CR answers.
 
 ## Task steps
-1. Read `.aprd/01-classification.json` first. Check guards (frontmatter `escapes:`) — any tripped → HALT, report which + offending SR*, write nothing. Else continue: extract across **all** greenfield subrequests, tag each item with its `sr_ref`.
-2. Read `.aprd/00-raw-request.md` in full, including attachment refs. If attachment referenced but not included, note any requirement depending on it as unknown (cannot read → cannot extract).
-3. **Entities** — nouns system stores or manipulates (data-model seeds, §6.1). Stated → `inferred:false`; noun request forces but never names (e.g. exchange-rate source behind "multiple currencies") → `inferred:true` + rationale. Mint `E*`.
-4. **Explicit requirements** — every behavior literally asked for, atomized. Mint `R1, R2, …` in order.
-5. **Implied requirements** — behaviors necessarily entailed by explicit ones. Continue same `R*` numbering after explicit block; each gets `inferred:true` + `rationale`. Conservative: necessary only.
-6. **Stated constraints** — non-behavioral bounds request states (stack/platform, scale, region, compliance, timeline, budget). Map each to `kind` ("web app" → platform; "live in a couple of months" → timeline). Mint `C*`.
-7. **Unknowns** — facts builder must have that request does not answer. Mint `U1, U2, …`. Raw feed for GAP-DETECT — surface, do not resolve.
-8. Write `.aprd/02-extraction.json`. Stop.
+1. Read `.aprd/01-classification.json` first (path → `classification_ref` in output). Check guards (frontmatter `escapes:`) — any tripped → HALT, report which + offending SR*, write nothing. Else continue: extract across **all** greenfield subrequests, tag each item with its `sr_ref` (matches a subrequest id in `01-classification.json`). Set output `class:"greenfield"`.
+2. Read `.aprd/00-raw-request.md` in full (path → `request_ref`), including attachment refs. If attachment referenced but not included, note any requirement depending on it as unknown (cannot read → cannot extract).
+3. **Entities** — nouns system stores or manipulates (data-model seeds, §6.1). Stated → `inferred:false`; noun request forces but never names (e.g. exchange-rate source behind "multiple currencies") → `inferred:true` + `rationale`. Mint `E*`. Each entity item = `{id (E*), name, note (one line: entity identity + role), inferred, source (words in request), sr_ref}`; add `rationale` (string) ONLY when `inferred:true` (omit key entirely when `inferred:false`).
+4. **Explicit requirements** — every behavior literally asked for, atomized. Mint `R1, R2, …` in order. Each item = `{id (R*), text (single atomic behavior), inferred:false, source (verbatim span from request), sr_ref}`.
+5. **Implied requirements** — behaviors necessarily entailed by explicit ones. Continue same `R*` numbering after explicit block — one shared contiguous `R*` space, never reused/renumbered on re-run (P9); each gets `inferred:true` + `rationale`. Conservative: necessary only. Each item = `{id (R*), text, inferred:true, source (the explicit words/req that entails it), rationale (REQUIRED), sr_ref}`.
+6. **Stated constraints** — non-behavioral bounds request states (stack/platform, scale, region, compliance, timeline, budget). Map each to `kind ∈ [platform, stack, scale, region, compliance, timeline, budget]` ("web app" → platform; "live in a couple of months" → timeline). Mint `C*`. Each item = `{id (C*), text, kind, inferred (true if forced-but-unnamed → rationale required), source, sr_ref}`.
+7. **Unknowns** — facts builder must have that request does not answer. Mint `U1, U2, …`. Raw feed for GAP-DETECT — surface, do not resolve. Each item = `{id (U*), text, source (words that raise the question), sr_ref}`.
+8. Write `.aprd/02-extraction.json`. Output object = `{request_ref, classification_ref, class, baseline_map_ref, entities, explicit_requirements, implied_requirements, stated_constraints, unknowns}`: `request_ref` = path of raw request read step 2 (`.aprd/00-raw-request.md`; feature-add: the `CR-<id>.md` path); `classification_ref` = `.aprd/01-classification.json`; `class` = `"greenfield"` (or `"feature-add"` when playbook-dispatched); `baseline_map_ref` = `null` for greenfield; the five array fields = items from steps 3–7. Any array may be `[]` if request yields nothing for it (rarely `[]` for unknowns on a vague greenfield — expect several). All `text`/`note`/`rationale` is caveman prose (PR4). File is what grounding/GAP-DETECT stage reads next (PR2). Stop.
 
 **Feature-add branch** (class == feature-add — supersedes the source order above; entity/req/constraint/unknown typing per the discriminator unchanged):
 1. Read `baseline-map.json` + frozen aPRD + `src/` conventions FIRST (delta Rule 1) → read `CR-<id>.md`.
-2. Extract the DELTA the CR introduces atop the baseline. Each item: tag `baseline_ref` (baseline ID it extends, or null for net-new — delta Rule 2); mint new IDs strictly above `id_high_water` (delta Rule 3).
+2. Extract the DELTA the CR introduces atop the baseline. Each item carries per-item `baseline_ref` (baseline `E*/R*/C*` it extends, or `null` for net-new — delta Rule 2); mint new IDs strictly above `id_high_water` (delta Rule 3).
 3. Unknowns = only what neither baseline nor CR answers (delta Rule 4).
-4. Write `.aprd/02-extraction.json` with `class:"feature-add"` + `baseline_map_ref` + per-item `baseline_ref`. Stop.
-
-## Output schema — `.aprd/02-extraction.json`
-```json
-{
-  "request_ref": ".aprd/00-raw-request.md",            // feature-add: ".aprd/change-requests/CR-<id>.md"
-  "classification_ref": ".aprd/01-classification.json",
-  "class": "greenfield",                                // "feature-add" when playbook-dispatched
-  "baseline_map_ref": null,                             // feature-add ONLY: ".aprd/baseline-map.json" (grounded against, BF2); null for greenfield
-  "entities": [
-    {
-      "id": "E1",                        // E* space — feature-add: strictly above baseline-map id_high_water.E (BF3)
-      "name": "Freelancer",
-      "note": "<one line: entity identity + role>",
-      "inferred": false,                 // true only if the request forces it but never names it → then rationale required
-      "source": "<words in the request — mandatory, must exist in 00-raw-request.md (feature-add: in CR)>",
-      "sr_ref": "SR1",                   // must match an id in 01-classification.json.subrequests
-      "baseline_ref": null               // feature-add ONLY: baseline E* this extends, or null for net-new (delta Rule 2); omit/null for greenfield
-    }
-  ],
-  "explicit_requirements": [             // inferred:false for all; R* numbered first (feature-add: R* above baseline id_high_water.R, BF3)
-    {
-      "id": "R1",
-      "text": "<single atomic behavior>",
-      "inferred": false,
-      "source": "<verbatim span from the request (feature-add: from CR)>",
-      "sr_ref": "SR1",
-      "baseline_ref": null               // feature-add ONLY: baseline R* this extends, or null for net-new (delta Rule 2)
-    }
-  ],
-  "implied_requirements": [              // inferred:true for all; continues R* space after explicit, Rk+1..Rn — one shared contiguous R* space, never reused/renumbered on re-run (P9)
-    {
-      "id": "R7",
-      "text": "<single atomic behavior necessarily entailed by explicit ones>",
-      "inferred": true,
-      "source": "<the explicit words / requirement that entails it>",
-      "rationale": "<why a competent builder cannot avoid this — REQUIRED on every implied item>",
-      "sr_ref": "SR1",
-      "baseline_ref": null               // feature-add ONLY: baseline R* this extends, or null
-    }
-  ],
-  "stated_constraints": [
-    {
-      "id": "C1",
-      "text": "<the constraint>",
-      "kind": "platform | stack | scale | region | compliance | timeline | budget",
-      "inferred": false,                 // true if forced-but-unnamed → rationale required
-      "source": "<words in the request>",
-      "sr_ref": "SR1",
-      "baseline_ref": null               // feature-add ONLY: baseline C* this extends, or null
-    }
-  ],
-  "unknowns": [                          // rarely [] on a vague greenfield request — expect several; feature-add: U* above baseline id_high_water + measured vs baseline (delta Rule 4)
-    {
-      "id": "U1",
-      "text": "<fact a builder needs that neither request/CR nor baseline answers>",
-      "source": "<the words that raise the question>",
-      "sr_ref": "SR1"
-    }
-  ]
-}
-```
-Any array may be `[]` if request yields nothing for it. All `text`/`note`/`rationale` content is caveman prose (caveman governs this too — PR4). Schema match exact; file is what grounding/GAP-DETECT stage reads next (PR2).
+4. Write `.aprd/02-extraction.json` with `class:"feature-add"`, top-level `baseline_map_ref` = `.aprd/baseline-map.json`, and per-item `baseline_ref`. Stop.
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which guard fired + offending SR*, state "HALT", stop.
