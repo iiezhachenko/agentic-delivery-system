@@ -1,106 +1,30 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 5,
+  "roadmap_version": 6,
   "verdict": "re_ranked",
-  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each entry = one remaining PROMPT-BUILD/CR, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). roadmap_version 5 = CR-003 re-rank (operator-directed RE-RANK pass, 2026-06-11): inserts W1b-REGISTRY-ENRICH after W6-REAUTHOR-04BUILD (position 8), shifting W6-REAUTHOR-REST/W7/W9/W8 down one. SCOPED TO THE CR-002 deterministic-spine wave + the CR-003 fix; prior delivered waves (greenfield 10, bugfix 8) live on disk (D20), not re-listed. Disk is source of truth — this ledger is informational ordering, not the truth the loop derives from. W0-CANON-CR shipped; W1-W5 + W6-REAUTHOR-04BUILD sentinels present on disk; derived frontier = W1b-REGISTRY-ENRICH. W1b appended by the CR-003 RE-RANK pass: W6-REAUTHOR-REST clean-room (03-hld) surfaced a value-parity drift (re-authored DERIVE-COMPONENTS 5-box vs golden/original 6-box) rooted in a thin W1 registry (0 description field-docs, violates D24 §1; loose element types let a non-conformant shape validate-clean). W1b enriches the registry to D24 fidelity + re-freezes, re-triggering W6-REAUTHOR-04BUILD re-verify (shipped, same gap) + unblocking W6-REAUTHOR-REST (held scratch at prompts/03-hld/.scratch/, un-promoted, resume-safe). Anti-thrash (RM6): W2-W5 shipped + unaffected by registry descriptions → left in base order; only the dependency-legal insertion of W1b at the frontier moves later entries. Hand-maintained under operator override; the literal greenfield RE-RANK prompt (product-slice projection) does not apply to this wave-build repurposing.",
+  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each entry = one remaining PROMPT-BUILD/CR, not a product slice. done_sentinel = the disk path whose presence+validity+class-discriminator == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). roadmap_version 6 = operator-directed ledger refresh (2026-06-11) after W6-REAUTHOR-REST 03-hld + 02-adr phases shipped + committed (6171502). Refresh moves all shipped CR-002 entries (W0, W1-W5, W6-REAUTHOR-04BUILD, W1b) into completed[]; remaining_sequence now = the genuinely-unshipped builds only. SCOPED to the CR-002 deterministic-spine wave + the CR-003 registry-fidelity fix; prior delivered waves (greenfield 10, bugfix 8) live on disk (D20), not re-listed. Disk is source of truth — this ledger is informational ordering, not the truth the loop derives from. DERIVED FRONTIER = W6-REAUTHOR-REST (in progress): sentinel prompts/00-aprd/SYNTHESIZE.md still pre-CR -> wave not done; per-phase disk scan shows 03-hld + 02-adr re-authored (done), so the NEXT phase = 01-roadmap, then 00-aprd. W1b-REGISTRY-ENRICH shipped (schemas.lock v2: description on every property, element shapes tightened). The example-loss drift class surfaced during 03-hld (a dropped inline-schema EXAMPLE carried derivation value W1b's descriptions did not; relocate to prompt prose, never re-add a schema) is now applied proactively per phase — see memory reauthor-example-loss-drift. OUTSTANDING: W6-REAUTHOR-04BUILD spot-check for the same drift (it shipped before the class was understood).",
   "completed": [
-    { "position": 1, "id": "W0-CANON-CR", "name": "deterministic-machine canon CR (intake)", "status": "shipped", "unit": ".aprd/change-requests/CR-002.md + aprd.v5 + ADRs 0024-0027 + skeleton.lock v5 + all re-signed locks", "done_sentinel": ".aprd/change-requests/CR-002.md" }
+    { "position": 1, "id": "W0-CANON-CR", "name": "deterministic-machine canon CR (intake)", "status": "shipped", "unit": ".aprd/change-requests/CR-002.md + aprd.v5 + ADRs 0024-0027 + skeleton.lock v5 + all re-signed locks", "done_sentinel": ".aprd/change-requests/CR-002.md" },
+    { "position": 2, "id": "W1-SCHEMA-REGISTRY", "name": "schema-registry + validate.mjs + selftest", "status": "shipped", "unit": "schemas/ (registry + _meta.json) + schemas.lock + tools/det/validate.mjs", "done_sentinel": "schemas/schemas.lock", "note": "v1 built THIN (0 description field-docs, loose element types — D24 §1 under-implementation); fixed by W1b." },
+    { "position": 3, "id": "W2-IO-MANIFEST", "name": "io-manifest + resolve.mjs + selftest", "status": "shipped", "unit": "io/ (io-manifest.json) + io.lock + tools/io/resolve.mjs", "done_sentinel": "io/io.lock" },
+    { "position": 4, "id": "W3-GRAPH-LINT", "name": "graph-lint: gen contracts.json, PR2 check", "status": "shipped", "unit": "tools/io/graph-lint.mjs + generated contracts.json", "done_sentinel": "tools/io/graph-lint.mjs" },
+    { "position": 5, "id": "W4-DET-MODULES", "name": "det/ compute modules + selftests", "status": "shipped", "unit": "tools/det/{verdict,route,sequence,idgen,coverage,prefill}.mjs", "done_sentinel": "tools/det/verdict.mjs" },
+    { "position": 6, "id": "W5-TIER1-EMITTERS", "name": "Tier-1 emitters; retire those prompts", "status": "shipped", "unit": "tools/det/emit/*.mjs + Tier-1 prompts retired (sentinel + components.json note kept)", "done_sentinel": "tools/det/emit/build-plan.mjs" },
+    { "position": 7, "id": "W6-REAUTHOR-04BUILD", "name": "re-author 04-build prompts (drop schema+inputs)", "status": "shipped", "unit": "prompts/04-build/*.md re-authored against skeleton v5", "done_sentinel": "prompts/04-build/IMPLEMENT.md", "note": "Shipped + W1b-re-verified. OUTSTANDING: spot-check for the example-loss drift class (surfaced AFTER this shipped) — see memory w6-reauthor-04build-spotcheck-pending." },
+    { "position": 8, "id": "W1b-REGISTRY-ENRICH", "name": "enrich schema registry to D24 fidelity + re-freeze", "status": "shipped", "unit": "schemas/**/*.schema.json (description per property + tightened element shapes) + schemas.lock re-signed v2 + validate.mjs selftest tightened", "done_sentinel": "schemas/schemas.lock", "note": "CR-003. Discriminator confirmed on disk: schemas.lock version v2, every property carries description, supersedes v1. Necessary but NOT sufficient for value-parity (descriptions != examples) — the example-loss drift class still required prompt-prose cue relocation per phase." }
   ],
   "remaining_sequence": [
-    {
-      "position": 2,
-      "id": "W1-SCHEMA-REGISTRY",
-      "name": "schema-registry + validate.mjs + selftest",
-      "value": "high",
-      "retires_risk": "schema-in-prompt-bloat",
-      "unit": "schemas/ (registry + _meta.json) + schemas.lock + tools/det/validate.mjs",
-      "done_sentinel": "schemas/schemas.lock",
-      "rationale": "Compound: schemas/schemas.lock + tools/det/validate.mjs + both-directions selftest green (reference conforms; planted bad-shape fails). Externalizes every output schema (R9/D24); validator enforces conformance (R10). NOTE (CR-003): the v1 registry was built THIN — schemas carry 0 description field-docs (D24 §1 violation) + loose element types; W1b-REGISTRY-ENRICH fixes this.",
-      "coarse_depends_on": ["W0-CANON-CR"],
-      "real_depends_on": ["W0-CANON-CR"]
-    },
-    {
-      "position": 3,
-      "id": "W2-IO-MANIFEST",
-      "name": "io-manifest + resolve.mjs + selftest",
-      "value": "high",
-      "retires_risk": "inputs-drift",
-      "unit": "io/ (io-manifest.json) + io.lock + tools/io/resolve.mjs",
-      "done_sentinel": "io/io.lock",
-      "rationale": "Compound: io/io.lock + tools/io/resolve.mjs + both-directions selftest green (right state->right set; planted-wrong-state caught). Read-graph code-owned (R11/D25); prompts declare no inputs.",
-      "coarse_depends_on": ["W0-CANON-CR"],
-      "real_depends_on": ["W0-CANON-CR"]
-    },
-    {
-      "position": 4,
-      "id": "W3-GRAPH-LINT",
-      "name": "graph-lint: gen contracts.json, PR2 check",
-      "value": "high",
-      "retires_risk": "pr2-eyeballed",
-      "unit": "tools/io/graph-lint.mjs + generated contracts.json",
-      "done_sentinel": "tools/io/graph-lint.mjs",
-      "rationale": "Compound: graph-lint.mjs green + generated contracts.json matches frozen .hld/skeleton/contracts.json. PR2 auto-checked by registry-id equality (R14); chain generated not hand-written. Uses registry IDS (not descriptions) -> unaffected by W1b.",
-      "coarse_depends_on": ["W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST"],
-      "real_depends_on": ["W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST"]
-    },
-    {
-      "position": 5,
-      "id": "W4-DET-MODULES",
-      "name": "det/ compute modules + selftests",
-      "value": "high",
-      "retires_risk": "verdict-route-id-as-tokens",
-      "unit": "tools/det/{verdict,route,sequence,idgen,coverage,prefill}.mjs",
-      "done_sentinel": "tools/det/verdict.mjs",
-      "rationale": "Compound: all 6 modules + per-module both-directions selftests. verdict-from-count / route-from-axes / topo-sort / monotonic-id / set-bijection / mechanical-prefill computed by code (R12/D26).",
-      "coarse_depends_on": ["W1-SCHEMA-REGISTRY"],
-      "real_depends_on": ["W1-SCHEMA-REGISTRY"]
-    },
-    {
-      "position": 6,
-      "id": "W5-TIER1-EMITTERS",
-      "name": "Tier-1 emitters; retire those prompts",
-      "value": "high",
-      "retires_risk": "whole-mechanical-as-llm",
-      "unit": "tools/det/emit/*.mjs + Tier-1 prompts retired (sentinel + components.json note kept)",
-      "done_sentinel": "tools/det/emit/build-plan.mjs",
-      "rationale": "Compound: tools/det/emit/*.mjs (baseline-map, build-plan, derive-tests, verify-output, ...) emitter both-directions vs _fixtures + Tier-1 prompts retired (R13/D26/D27). Role keeps sentinel + components.json ownership note (D1).",
-      "coarse_depends_on": ["W4-DET-MODULES"],
-      "real_depends_on": ["W4-DET-MODULES"]
-    },
-    {
-      "position": 7,
-      "id": "W6-REAUTHOR-04BUILD",
-      "name": "re-author 04-build prompts (drop schema+inputs)",
-      "value": "high",
-      "retires_risk": "canon-prompt-mismatch",
-      "unit": "prompts/04-build/*.md re-authored against skeleton v5",
-      "done_sentinel": "prompts/04-build/IMPLEMENT.md",
-      "rationale": "Discriminator: 04-build prompts carry NO inputs: block + NO ## Output schema section (skeleton v5); outputs[].schema = registry id. Verify clean-room both-directions; VALUE parity vs pre-CR golden (regression-guard). Biggest payoff (26-30 input lines each). SHIPPED, but CR-003 blast radius: carries the same thin-registry gap (build-record.schema.json = 0 descriptions) -> W1b re-verifies VALUE parity against the enriched registry (no re-author needed; prompts already inputs-less).",
-      "coarse_depends_on": ["W2-IO-MANIFEST", "W4-DET-MODULES"],
-      "real_depends_on": ["W2-IO-MANIFEST", "W4-DET-MODULES"]
-    },
-    {
-      "position": 8,
-      "id": "W1b-REGISTRY-ENRICH",
-      "name": "enrich schema registry to D24 fidelity (descriptions + tight constraints) + re-freeze",
-      "value": "high",
-      "retires_risk": "thin-registry-value-parity-loss",
-      "unit": "schemas/**/*.schema.json (description per property + tightened element shapes) + schemas.lock re-signed + tools/det/validate.mjs selftest tightened",
-      "done_sentinel": "schemas/schemas.lock",
-      "rationale": "CR-003 (operator-directed, surfaced by the W6-REAUTHOR-REST clean-room gate). Discriminator: schemas.lock version bumped (>1) AND every schema property carries `description` (ported from the pre-CR prompt inline `## Output schema` // field-docs, P5/B11 — git history, not re-invented) AND loose {type:array|object} on element-bearing fields (seam_realization, requirements_landed, entities_owned, edges, ...) tightened so a non-conformant shape FAILS + validator both-directions selftest green (pre-CR thin schema PASSES a planted bad shape; enriched schema FAILS it). Root cause = W1 under-implemented D24 §1 (NOT a W6 defect — the re-author is mechanically correct, merely exposes the latent gap). Re-triggers W6-REAUTHOR-04BUILD re-verify (shipped, same gap) + unblocks W6-REAUTHOR-REST. NEVER re-add an inline schema to a prompt (violates D24) — the faithful home is the registry.",
-      "coarse_depends_on": ["W1-SCHEMA-REGISTRY"],
-      "real_depends_on": ["W1-SCHEMA-REGISTRY"]
-    },
     {
       "position": 9,
       "id": "W6-REAUTHOR-REST",
       "name": "re-author 03/02/01/00 prompts, per phase",
       "value": "high",
       "retires_risk": "canon-prompt-mismatch",
+      "status": "in_progress",
       "unit": "prompts/{03-hld,02-adr,01-roadmap,00-aprd}/*.md re-authored against skeleton v5",
       "done_sentinel": "prompts/00-aprd/SYNTHESIZE.md",
-      "rationale": "Per-phase, same bar as W6-04build: no inputs:/schema block, outputs[].schema id, clean-room both-directions, VALUE parity. One self-slice pass per phase. HELD (CR-003): 03-hld scratch authored + discriminator-clean at prompts/03-hld/.scratch/ but NOT promoted — clean-room found value-parity drift rooted in the thin registry. Resumes after W1b: re-verify the held 03-hld scratch (both-directions, VALUE parity) against the enriched registry, then gate + promote; then 02/01/00.",
+      "rationale": "Per-phase, same bar: no inputs:/schema block, outputs[].schema id, clean-room value-parity vs _fixtures/greenfield-clean (both directions). One self-slice pass per phase; relocate any derivation-value cue from the dropped inline schema into prose (example-loss drift class — see memory reauthor-example-loss-drift). PROGRESS (2026-06-11, committed 6171502): 03-hld SHIPPED (8 roles; 2 drift fixes — DERIVE-COMPONENTS persistence-store cue, MODEL-FLOWS flow_counts cue), 02-adr SHIPPED (7 roles; 5 exact-parity + 2 judgment-variance DECISION-EXTRACT/TRIAGE proven not-drift via byte-identical logic diff). Derived NEXT PHASE = 01-roadmap (7 prompts pre-CR), then 00-aprd (9 prompts pre-CR). Wave done when the 00-aprd sentinel is re-authored. Economy-audit residue + LOW findings (RECONCILE-CRITIQUE target:none sentinel, RESOLVE-LOCAL brownfield escalations shape) deferred to W9.",
       "coarse_depends_on": ["W6-REAUTHOR-04BUILD"],
       "real_depends_on": ["W6-REAUTHOR-04BUILD", "W1b-REGISTRY-ENRICH"]
     },
@@ -124,7 +48,7 @@
       "retires_risk": "accumulated-economy-debt-ships",
       "unit": "prompts/**/*.md lint-clean + ECONOMY-AUDIT-clean (both-directions) + prompts/_economy-audit.md Rule-2 / lint-profile calibration where a finding is a dual-mode false-positive",
       "done_sentinel": ".roadmap/09-economy-reconcile.json",
-      "rationale": "Terminal sweep. Every prompt's lint + ECONOMY-AUDIT residue deferred per-wave during W6/W7 (defer-not-chase, avoids over-stripping the standalone-PART-A/B dual-mode design) is resolved to EXACTLY ONE of: (a) prompt DELETE/REWRITE — genuine AB1/AB7 debt; (b) prompts/_economy-audit.md Rule-2 calibration — a dual-mode standalone-Part restatement is sanctioned, NOT a duplicate (the auditor mis-fires, fix the auditor not the prompt, routes_to:canon); (c) lint-profile threshold note in the stack profile. done_sentinel .roadmap/09-economy-reconcile.json records per-prompt lint verdict:clean + economy-audit verdict:clean across the whole corpus + a both-directions proof (planted-bloat copy still BLOCKED). Discriminator: zero prompt carries an unresolved blocking lint/audit finding AND the report's both-directions proof holds. NEVER ADD an instruction to silence a finding (AB9 keystone).",
+      "rationale": "Terminal sweep. Every prompt's lint + ECONOMY-AUDIT residue deferred per-wave during W6/W7 (defer-not-chase, avoids over-stripping the standalone-PART-A/B dual-mode design) is resolved to EXACTLY ONE of: (a) prompt DELETE/REWRITE — genuine AB1/AB7 debt; (b) prompts/_economy-audit.md Rule-2 calibration — a dual-mode standalone-Part restatement is sanctioned, NOT a duplicate (the auditor mis-fires, fix the auditor not the prompt, routes_to:canon); (c) lint-profile threshold note in the stack profile. Confirmed mis-fire seen in 03-hld: MODEL-DATA Register-block 'starvation' is a false positive (short Register is corpus convention). done_sentinel .roadmap/09-economy-reconcile.json records per-prompt lint verdict:clean + economy-audit verdict:clean across the whole corpus + a both-directions proof (planted-bloat copy still BLOCKED). Discriminator: zero prompt carries an unresolved blocking lint/audit finding AND the report's both-directions proof holds. NEVER ADD an instruction to silence a finding (AB9 keystone).",
       "coarse_depends_on": ["W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST", "W7-ORCH-SWAP"],
       "real_depends_on": ["W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST", "W7-ORCH-SWAP"]
     },
@@ -150,18 +74,17 @@
   },
   "coverage": {
     "scope_note": "Scoped to the CR-002 deterministic-machine wave + the CR-003 registry-fidelity fix. Prior delivered waves (greenfield, bugfix) are not tracked here; their done-state is on disk (D20).",
-    "completed": ["W0-CANON-CR"],
-    "remaining_ranked": [
-      "W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST", "W3-GRAPH-LINT", "W4-DET-MODULES", "W5-TIER1-EMITTERS", "W6-REAUTHOR-04BUILD", "W1b-REGISTRY-ENRICH", "W6-REAUTHOR-REST", "W7-ORCH-SWAP", "W9-ECON-RECONCILE", "W8-PACK-GATE"
-    ],
+    "completed": ["W0-CANON-CR", "W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST", "W3-GRAPH-LINT", "W4-DET-MODULES", "W5-TIER1-EMITTERS", "W6-REAUTHOR-04BUILD", "W1b-REGISTRY-ENRICH"],
+    "remaining_ranked": ["W6-REAUTHOR-REST", "W7-ORCH-SWAP", "W9-ECON-RECONCILE", "W8-PACK-GATE"],
+    "in_progress_note": "W6-REAUTHOR-REST: 03-hld + 02-adr phases shipped; 01-roadmap + 00-aprd phases remain (derived from disk).",
     "missing": [],
     "duplicated": []
   },
   "rerank_counts": {
-    "completed": 1,
-    "remaining": 11,
+    "completed": 8,
+    "remaining": 4,
     "reordered": 0,
     "deps_removed": 0,
-    "deps_added": 16
+    "deps_added": 0
   }
 }
