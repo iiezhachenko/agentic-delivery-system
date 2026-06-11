@@ -6,12 +6,12 @@
   "required": ["aprd_ref", "extraction_ref", "gaps_ref", "class", "assumptions", "assumption_count"],
   "properties": {
     "aprd_ref": { "type": "string", "description": "path to aPRD draft or frozen version" },
-    "extraction_ref": { "type": "string" },
-    "gaps_ref": { "type": "string" },
+    "extraction_ref": { "type": "string", "description": "path to 02-extraction.json" },
+    "gaps_ref": { "type": "string", "description": "path to 04-gaps.json" },
     "answers_ref": { "type": "string", "description": "path to client answers file" },
-    "class": { "type": "string" },
-    "baseline_aprd_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
-    "aprd_version": { "type": "string" },
+    "class": { "type": "string", "description": "greenfield | feature-add | bugfix" },
+    "baseline_aprd_ref": { "description": "brownfield only: path to aprd.frozen.md extended; null for greenfield", "oneOf": [{"type":"string"},{"type":"null"}] },
+    "aprd_version": { "type": "string", "description": "version emitted; greenfield: v1; brownfield: vN+1" },
     "assumptions": {
       "type": "array",
       "description": "one per gap in 04; A* stable, contiguous",
@@ -19,17 +19,49 @@
         "type": "object",
         "required": ["id", "gap_ref", "text", "source", "chosen_interpretation"],
         "properties": {
-          "id": { "type": "string", "pattern": "^A[0-9]+$" },
-          "gap_ref": { "type": "string", "pattern": "^G[0-9]+$" },
-          "text": { "type": "string" },
-          "source": { "type": "string", "enum": ["client-confirmed","default-applied","client-described","cosmetic-announced"] },
-          "chosen_interpretation": { "type": "string" },
-          "rejected_interpretations": { "type": "array", "items": { "type": "string" } }
+          "id": { "type": "string", "pattern": "^A[0-9]+$", "description": "stable assumption id; A* contiguous, never renumbered" },
+          "gap_ref": { "type": "string", "pattern": "^G[0-9]+$", "description": "gap id from 04-gaps.json this assumption resolves" },
+          "text": { "type": "string", "description": "clean-prose decision, same as the aPRD assumption text" },
+          "source": { "type": "string", "enum": ["client-confirmed","default-applied","client-described","cosmetic-announced"], "description": "provenance: how the assumption was settled" },
+          "chosen_interpretation": { "type": "string", "description": "verbatim chosen interpretation from 04, or client's free text for client-described" },
+          "rejected_interpretations": { "type": "array", "items": { "type": "string", "description": "interpretation from 04 not chosen; becomes an OUT_OF_SCOPE exclusion" }, "description": "each interpretation from 04 not chosen" }
         }
       }
     },
-    "flagged_requirements": { "type": "array", "items": { "type": "string" } },
+    "flagged_requirements": {
+      "type": "array",
+      "description": "empty when every requirement has a testable AC; each entry must have a matching [FLAGGED] marker in the draft",
+      "items": {
+        "type": "object",
+        "required": ["req_ref", "reason"],
+        "properties": {
+          "req_ref": { "type": "string", "description": "requirement id R* that could not get a binary AC" },
+          "reason": { "type": "string", "description": "why no binary AC could be written for this requirement" }
+        }
+      }
+    },
     "assumption_count": { "type": "integer", "minimum": 0, "description": "== assumptions.length", "x-walk": "assumption_count == assumptions.length" },
-    "touch_set": { "type": "array", "description": "brownfield: slices the version bump invalidates" }
+    "touch_set": {
+      "type": "array",
+      "description": "brownfield: slices the version bump invalidates; omit or [] for greenfield",
+      "items": {
+        "type": "object",
+        "required": ["kind"],
+        "properties": {
+          "kind": { "type": "string", "description": "net-new | seam-extended | blast-radius" },
+          "requirements": { "type": "array", "items": { "type": "string", "description": "R* id invalidated" }, "description": "requirement ids this touch-set entry covers" },
+          "slices": { "type": "array", "items": { "type": "string", "description": "S* id invalidated" }, "description": "slice ids this touch-set entry covers" },
+          "seam": {
+            "type": "object",
+            "description": "seam-extended only: the seam being extended",
+            "properties": {
+              "at": { "type": "string", "description": "component id at the seam" },
+              "contract_ref": { "type": "string", "description": "contract id CT* at the seam" }
+            }
+          },
+          "note": { "type": "string", "description": "explanation of why this slice/requirement re-enters remaining_sequence" }
+        }
+      }
+    }
   }
 }

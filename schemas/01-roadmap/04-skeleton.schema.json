@@ -5,72 +5,185 @@
   "type": "object",
   "required": ["verticality_ref", "slices_ref", "aprd_ref", "class", "foundational_seams", "eligible_slices", "rejected_as_skeleton"],
   "properties": {
-    "verticality_ref": { "type": "string" },
-    "slices_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "class": { "type": "string" },
+    "verticality_ref": {
+      "description": "Path to 03-verticality.json this identification is based on.",
+      "type": "string"
+    },
+    "slices_ref": {
+      "description": "Path to 02-slices.json providing candidate slice details.",
+      "type": "string"
+    },
+    "aprd_ref": {
+      "description": "Path to frozen aPRD artifact.",
+      "type": "string"
+    },
+    "class": {
+      "description": "Project class: greenfield or feature-add.",
+      "type": "string"
+    },
     "foundational_seams": {
+      "description": "Four seam categories (or project's actual set) with presence flags and project instances.",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["seam", "present"],
         "properties": {
-          "seam": { "type": "string" },
-          "present": { "type": "boolean" },
-          "instance": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "grounded_in": { "type": "array", "items": { "type": "string" } },
-          "reason": { "type": "string" }
+          "seam": {
+            "description": "Seam category name: ingress, domain, persistence, or primary_external_integration.",
+            "type": "string"
+          },
+          "present": {
+            "description": "True when this seam category genuinely appears in the aPRD; false when absent.",
+            "type": "boolean"
+          },
+          "instance": {
+            "description": "Concrete functional instance for this project; null when present:false. No component/stack/vendor.",
+            "oneOf": [{"type":"string"},{"type":"null"}]
+          },
+          "grounded_in": {
+            "description": "aPRD IDs that exist verbatim and establish this seam; empty when present:false.",
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "reason": {
+            "description": "Why this seam category is absent from the aPRD (present:false only).",
+            "type": "string"
+          }
         }
       }
     },
-    "eligible_slices": { "type": "array", "items": { "type": "string" } },
+    "eligible_slices": {
+      "description": "Exactly the valid[] slice ids from 03-verticality.json.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
     "skeleton": {
-      "description": "null when no single slice crosses all seams",
+      "description": "Designated walking skeleton slice, or null when no single slice crosses all seams.",
       "oneOf": [
         { "type": "null" },
         {
           "type": "object",
           "required": ["id", "name", "kind", "requirements", "acceptance", "qualifying_acceptance", "depends_on", "seam_coverage", "selection_rationale"],
           "properties": {
-            "id": { "type": "string" },
-            "name": { "type": "string" },
-            "kind": { "const": "walking_skeleton" },
-            "requirements": { "type": "array", "items": { "type": "string" } },
-            "acceptance": { "type": "array", "items": { "type": "string" } },
-            "qualifying_acceptance": { "type": "array", "items": { "type": "string" } },
-            "retires_risk": { "oneOf": [{"type":"string"},{"type":"null"}] },
-            "depends_on": { "type": "array" },
-            "seam_coverage": { "type": "array", "items": { "type": "object" } },
-            "minimal_behaviour_rationale": { "type": "string" },
-            "selection_rationale": { "type": "string" }
+            "id": {
+              "description": "Slice S* identifier carried verbatim from 02-slices.json.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Slice name carried verbatim from 02-slices.json.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Always walking_skeleton when present.",
+              "const": "walking_skeleton"
+            },
+            "requirements": {
+              "description": "R* IDs carried verbatim from 02-slices.json.",
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "acceptance": {
+              "description": "AC* IDs carried verbatim from 02-slices.json.",
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "qualifying_acceptance": {
+              "description": "Qualifying AC* IDs carried verbatim from 03-verticality.json.",
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "retires_risk": {
+              "description": "Risk retired by this slice, carried verbatim from 02-slices.json, or null.",
+              "oneOf": [{"type":"string"},{"type":"null"}]
+            },
+            "depends_on": {
+              "description": "Slice-level prerequisites carried verbatim from 02-slices.json.",
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "seam_coverage": {
+              "description": "Maps every present seam to the slice AC/requirement touching it and what it must establish.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["seam", "touched_by", "establishes"],
+                "properties": {
+                  "seam": {
+                    "description": "Seam category name this entry covers.",
+                    "type": "string"
+                  },
+                  "touched_by": {
+                    "description": "AC* or R* ID from the skeleton slice that touches this seam.",
+                    "type": "string"
+                  },
+                  "establishes": {
+                    "description": "Functional touch-point the skeleton must prove at this seam — never design/stack/vendor.",
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "minimal_behaviour_rationale": {
+              "description": "Why this is the thinnest end-to-end slice — what feature depth stays deferred.",
+              "type": "string"
+            },
+            "selection_rationale": {
+              "description": "Why this slice over other eligible ones — dependency root, riskiest seam, risk retirement.",
+              "type": "string"
+            }
           }
         }
       ]
     },
     "skeleton_seams": {
+      "description": "One entry per present foundational seam the skeleton must establish; consumed by FOUNDATION-CUT and Phase 3.",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["seam", "must_establish", "grounded_in"],
         "properties": {
-          "seam": { "type": "string" },
-          "must_establish": { "type": "string" },
-          "grounded_in": { "type": "array", "items": { "type": "string" } }
+          "seam": {
+            "description": "Seam category name.",
+            "type": "string"
+          },
+          "must_establish": {
+            "description": "Foundational capability skeleton must prove at this seam — functional, never component/stack/vendor.",
+            "type": "string"
+          },
+          "grounded_in": {
+            "description": "aPRD IDs that exist verbatim and ground this seam requirement.",
+            "type": "array",
+            "items": { "type": "string" }
+          }
         }
       }
     },
     "rejected_as_skeleton": {
+      "description": "Every eligible slice that is not the skeleton; skeleton + rejected_as_skeleton covers eligible_slices exactly once.",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["id", "name", "reason"],
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "reason": { "type": "string" }
+          "id": {
+            "description": "Slice S* identifier carried verbatim.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Slice name carried verbatim.",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why not selected: misses seam, not dependency root, deeper than needed, does not exercise primary integration.",
+            "type": "string"
+          }
         }
       }
     },
-    "uncovered_seams": { "type": "array" }
+    "uncovered_seams": {
+      "description": "Empty when skeleton found; when skeleton null, lists present seams no single eligible slice crosses.",
+      "type": "array",
+      "items": { "type": "string" }
+    }
   }
 }

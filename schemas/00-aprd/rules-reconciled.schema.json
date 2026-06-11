@@ -5,9 +5,9 @@
   "type": "object",
   "required": ["rules_extracted_ref", "class", "stack", "agreed", "conflicts", "unfetched_sources", "reconcile_meta"],
   "properties": {
-    "rules_extracted_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "stack": { "type": "array", "items": { "type": "string" } },
+    "rules_extracted_ref": { "type": "string", "description": "path to rules-extracted.json" },
+    "class": { "type": "string", "description": "greenfield | feature-add | bugfix" },
+    "stack": { "type": "array", "items": { "type": "string", "description": "stack technology name" }, "description": "technology stack carried from rules-extracted" },
     "agreed": {
       "type": "array",
       "description": "sorted by entry's own lowest contributing RULE* index",
@@ -15,43 +15,98 @@
         "type": "object",
         "required": ["id", "topic", "rule", "kind", "corroboration", "sources"],
         "properties": {
-          "id": { "type": "string", "pattern": "^AGR[0-9]+$" },
-          "topic": { "type": "string" },
-          "rule": { "type": "string" },
-          "setting": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "kind": { "type": "string", "enum": ["config","opinion","mixed"] },
-          "corroboration": { "type": "string", "enum": ["multi-source","single-source"] },
-          "sources": { "type": "array", "items": { "type": "object" } }
+          "id": { "type": "string", "pattern": "^AGR[0-9]+$", "description": "stable agreed id; AGR* contiguous from AGR1, never renumbered" },
+          "topic": { "type": "string", "description": "shared subject slug carried from contributing rules" },
+          "rule": { "type": "string", "description": "canonical prescription, one caveman-prose line, faithful to sources" },
+          "setting": { "description": "verbatim config key+value if >=1 contributor is kind:config; null if every contributor is prose", "oneOf": [{"type":"string"},{"type":"null"}] },
+          "kind": { "type": "string", "enum": ["config","opinion","mixed"], "description": "config if all contributors config; opinion if all prose; mixed if both" },
+          "corroboration": { "type": "string", "enum": ["multi-source","single-source"], "description": "multi-source iff >=2 distinct source_refs back entry; else single-source" },
+          "sources": {
+            "type": "array",
+            "description": "every contributing RULE* with per-source detail carried verbatim",
+            "items": {
+              "type": "object",
+              "required": ["rule_ref", "source_ref", "tier", "tool", "tool_version_pinned", "evidence"],
+              "properties": {
+                "rule_ref": { "type": "string", "description": "RULE* id from rules-extracted.json" },
+                "source_ref": { "type": "string", "description": "SRC* id from sources.json" },
+                "tier": { "type": "integer", "description": "tier of this source; copied verbatim" },
+                "tool": { "type": "string", "description": "tool name; copied verbatim" },
+                "tool_version_pinned": { "type": "string", "description": "pinned version; copied verbatim" },
+                "setting": { "description": "verbatim config key+value or null; carried through", "oneOf": [{"type":"string"},{"type":"null"}] },
+                "evidence": { "type": "string", "description": "verbatim snippet; carried through from rules-extracted.json" }
+              }
+            }
+          }
         }
       }
     },
     "conflicts": {
       "type": "array",
+      "description": "one entry per mutually-exclusive disagreement; sorted by entry's own lowest RULE* index",
       "items": {
         "type": "object",
         "required": ["id", "topic", "question", "positions"],
         "properties": {
-          "id": { "type": "string", "pattern": "^CONF[0-9]+$" },
-          "topic": { "type": "string" },
-          "question": { "type": "string" },
-          "positions": { "type": "array", "items": { "type": "object" }, "minItems": 2 },
-          "recommended_position": { "oneOf": [{"type":"integer"},{"type":"null"}] }
+          "id": { "type": "string", "pattern": "^CONF[0-9]+$", "description": "stable conflict id; CONF* contiguous from CONF1" },
+          "topic": { "type": "string", "description": "shared subject slug" },
+          "question": { "type": "string", "description": "client decision in one line; disagreement framed as choice, not answer" },
+          "positions": {
+            "type": "array",
+            "description": ">=2 mutually-exclusive stances; each with stance prose, setting, and backing sources",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "required": ["stance", "sources"],
+              "properties": {
+                "stance": { "type": "string", "description": "one position, caveman prose" },
+                "setting": { "description": "verbatim config value or null", "oneOf": [{"type":"string"},{"type":"null"}] },
+                "sources": {
+                  "type": "array",
+                  "description": "backing RULE* for this position; per-source detail carried verbatim",
+                  "items": {
+                    "type": "object",
+                    "required": ["rule_ref", "source_ref", "tier", "tool", "tool_version_pinned", "evidence"],
+                    "properties": {
+                      "rule_ref": { "type": "string", "description": "RULE* id from rules-extracted.json" },
+                      "source_ref": { "type": "string", "description": "SRC* id from sources.json" },
+                      "tier": { "type": "integer", "description": "tier of this source" },
+                      "tool": { "type": "string", "description": "tool name" },
+                      "tool_version_pinned": { "type": "string", "description": "pinned version" },
+                      "setting": { "description": "verbatim config key+value or null", "oneOf": [{"type":"string"},{"type":"null"}] },
+                      "evidence": { "type": "string", "description": "verbatim snippet" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "recommended_position": { "description": "integer index of highest-tier stance or null if positions share tier", "oneOf": [{"type":"integer"},{"type":"null"}] }
         }
       }
     },
     "unfetched_sources": {
       "type": "array",
-      "items": { "type": "object" }
+      "description": "carried verbatim from rules-extracted.json; [] if input had none",
+      "items": {
+        "type": "object",
+        "required": ["id", "reason"],
+        "properties": {
+          "id": { "type": "string", "description": "SRC* id not fetched" },
+          "reason": { "type": "string", "description": "reason carried verbatim from rules-extracted" }
+        }
+      }
     },
     "reconcile_meta": {
       "type": "object",
+      "description": "integer tallies; every RULE* must be accounted for",
       "required": ["rules_in", "rules_accounted", "agreed_count", "conflicts_count"],
       "properties": {
-        "rules_in": { "type": "integer" },
-        "rules_accounted": { "type": "integer" },
-        "agreed_count": { "type": "integer" },
-        "conflicts_count": { "type": "integer" },
-        "topics_reconciled": { "type": "integer" }
+        "rules_in": { "type": "integer", "description": "== input rules.length" },
+        "rules_accounted": { "type": "integer", "description": "total rule_refs across all agreed[].sources[] + conflicts[].positions[].sources[]; must equal rules_in" },
+        "agreed_count": { "type": "integer", "description": "== agreed.length" },
+        "conflicts_count": { "type": "integer", "description": "== conflicts.length" },
+        "topics_reconciled": { "type": "integer", "description": "count of distinct input topics" }
       }
     }
   }

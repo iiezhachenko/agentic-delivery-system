@@ -5,49 +5,167 @@
   "type": "object",
   "required": ["aprd_ref", "lock_verified", "class", "project", "slices", "unsliceable", "coverage", "slice_counts"],
   "properties": {
-    "aprd_ref": { "type": "string" },
-    "lock_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "project": { "type": "string" },
+    "aprd_ref": {
+      "description": "Path to frozen aPRD artifact this slicing is derived from.",
+      "type": "string"
+    },
+    "lock_verified": {
+      "description": "Lock file present and names the frozen artifact; verified before slicing begins.",
+      "type": "boolean"
+    },
+    "class": {
+      "description": "Project class: greenfield or feature-add.",
+      "type": "string"
+    },
+    "project": {
+      "description": "Verbatim PROJECT line from the frozen aPRD.",
+      "type": "string"
+    },
     "slices": {
+      "description": "Candidate vertical slices in emission order (lowest contributing R* index). Not priority order.",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["id", "name", "requirements", "acceptance", "value", "value_basis", "depends_on", "candidate"],
         "properties": {
-          "id": { "type": "string", "pattern": "^S[0-9]+$" },
-          "name": { "type": "string" },
-          "requirements": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-          "acceptance": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-          "value": { "type": "string", "enum": ["high","med","low"] },
-          "value_basis": { "type": "string" },
-          "retires_risk": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "depends_on": { "type": "array", "items": { "type": "string" } },
-          "candidate": { "const": true }
+          "id": {
+            "description": "Stable S* identifier, contiguous from S1, in emission order.",
+            "type": "string",
+            "pattern": "^S[0-9]+$"
+          },
+          "name": {
+            "description": "One-line demoable user-visible capability (verb client recognises; never a layer name).",
+            "type": "string"
+          },
+          "requirements": {
+            "description": "Non-empty list of R* IDs verbatim from frozen aPRD that this slice needs to run end-to-end.",
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "acceptance": {
+            "description": "Non-empty list of AC* IDs verbatim from frozen aPRD; at least one must be black-box/user-observable.",
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "value": {
+            "description": "Provisional client-owned value tier: high, med, or low.",
+            "type": "string",
+            "enum": ["high","med","low"]
+          },
+          "value_basis": {
+            "description": "Why this value tier — centrality to PROJECT statement; proposed here, confirmed at SEQUENCE-REVIEW.",
+            "type": "string"
+          },
+          "retires_risk": {
+            "description": "Concrete named unproven decision/integration this slice first exercises, or null if none.",
+            "oneOf": [{"type":"string"},{"type":"null"}]
+          },
+          "depends_on": {
+            "description": "S* IDs of coarse slice-level prerequisites from aPRD; may be empty; must be acyclic.",
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "candidate": {
+            "description": "Always true; SEQUENCE/SKELETON-IDENTIFY enrich later.",
+            "const": true
+          }
         }
       }
     },
-    "unsliceable": { "type": "array" },
+    "unsliceable": {
+      "description": "R*/behaviours that could not be placed into any demoable vertical slice; empty on full coverage.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ref", "reason", "escape"],
+        "properties": {
+          "ref": {
+            "description": "R* or other aPRD ID that cannot be sliced.",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why no demoable vertical slice can carry this requirement.",
+            "type": "string"
+          },
+          "escape": {
+            "description": "Resolution route (e.g. Phase 0 change request).",
+            "type": "string"
+          }
+        }
+      }
+    },
     "coverage": {
+      "description": "Full coverage accounting — requirement_orphans and acceptance_orphans both empty on clean run.",
       "type": "object",
       "required": ["requirements_total", "requirements_covered", "requirement_orphans", "acceptance_total", "acceptance_covered", "acceptance_orphans"],
       "properties": {
-        "requirements_total": { "type": "array", "items": { "type": "string" } },
-        "requirements_covered": { "type": "array", "items": { "type": "string" } },
-        "requirement_orphans": { "type": "array" },
-        "acceptance_total": { "type": "array", "items": { "type": "string" } },
-        "acceptance_covered": { "type": "array", "items": { "type": "string" } },
-        "acceptance_orphans": { "type": "array" }
+        "requirements_total": {
+          "description": "Every R* ID in the frozen aPRD.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "requirements_covered": {
+          "description": "R* IDs that appear in at least one slice's requirements list.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "requirement_orphans": {
+          "description": "R* IDs in requirements_total not covered by any slice; empty on clean run.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "acceptance_total": {
+          "description": "Every AC* ID in the frozen aPRD.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "acceptance_covered": {
+          "description": "AC* IDs that appear in at least one slice's acceptance list.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "acceptance_orphans": {
+          "description": "AC* IDs in acceptance_total not covered by any slice; empty on clean run.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
       }
     },
     "slice_counts": {
+      "description": "Summary counts; total must equal slices.length.",
       "type": "object",
       "required": ["total"],
       "properties": {
-        "total": { "type": "integer", "minimum": 0 }
+        "total": {
+          "description": "Count of candidate slices emitted.",
+          "type": "integer",
+          "minimum": 0
+        }
       }
     },
-    "aprd_version": { "type": "string" },
-    "baseline_completed_slices": { "type": "array" }
+    "aprd_version": {
+      "description": "aPRD version string (feature-add only; from .aprd/aprd.lock).",
+      "type": "string"
+    },
+    "baseline_completed_slices": {
+      "description": "Feature-add only: pinned baseline completed slices from 08-rerank.json for reference and depends_on legality. Never appear in slices[].",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": {
+            "description": "Baseline slice S* identifier.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Baseline slice name carried verbatim.",
+            "type": "string"
+          }
+        }
+      }
+    }
   }
 }

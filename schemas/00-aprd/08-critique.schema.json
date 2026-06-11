@@ -5,26 +5,26 @@
   "type": "object",
   "required": ["aprd_ref", "assumptions_ref", "gaps_ref", "class", "verdict", "issues", "issue_count"],
   "properties": {
-    "aprd_ref": { "type": "string" },
-    "assumptions_ref": { "type": "string" },
-    "gaps_ref": { "type": "string" },
-    "class": { "type": "string" },
+    "aprd_ref": { "type": "string", "description": "path to the aPRD draft or frozen version reviewed" },
+    "assumptions_ref": { "type": "string", "description": "path to 07-assumptions.json reviewed" },
+    "gaps_ref": { "type": "string", "description": "path to 04-gaps.json reviewed" },
+    "class": { "type": "string", "description": "greenfield | feature-add | bugfix" },
     "verdict": { "type": "string", "enum": ["clean","blocked"], "description": "blocked iff issues non-empty; deterministic" },
     "issues": {
       "type": "array",
-      "description": "blocking-grade only; empty array on clean draft",
+      "description": "blocking-grade only; empty array on a clean draft",
       "items": {
         "type": "object",
         "required": ["id", "category", "target_ref", "problem", "fix_hint"],
         "properties": {
-          "id": { "type": "string", "pattern": "^I[0-9]+$" },
-          "category": { "type": "string", "enum": ["ambiguous-requirement","non-binary-ac","unbounded-scope","untraceable-assumption","broken-id-thread"] },
-          "target_ref": { "type": "string" },
-          "problem": { "type": "string" },
-          "fix_hint": { "type": "string" }
+          "id": { "type": "string", "pattern": "^I[0-9]+$", "description": "stable issue id; I* contiguous from I1" },
+          "category": { "type": "string", "enum": ["ambiguous-requirement","non-binary-ac","unbounded-scope","untraceable-assumption","broken-id-thread"], "description": "issue category; exactly one enum value" },
+          "target_ref": { "type": "string", "description": "primary artifact id the issue concerns (R*, AC*, A*, G*, OUT_OF_SCOPE)" },
+          "problem": { "type": "string", "description": "defect and why it blocks freeze; cites concrete ids" },
+          "fix_hint": { "type": "string", "description": "concrete actionable change SYNTHESIZE should make to clear this issue" }
         }
       }
     },
-    "issue_count": { "type": "integer", "minimum": 0, "x-walk": "issue_count == issues.length" }
+    "issue_count": { "type": "integer", "minimum": 0, "description": "== issues.length", "x-walk": "issue_count == issues.length" }
   }
 }

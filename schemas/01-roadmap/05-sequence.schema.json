@@ -5,57 +5,152 @@
   "type": "object",
   "required": ["skeleton_ref", "slices_ref", "verticality_ref", "aprd_ref", "class", "verdict", "sequence", "dependency_check", "coverage", "sequence_counts"],
   "properties": {
-    "skeleton_ref": { "type": "string" },
-    "slices_ref": { "type": "string" },
-    "verticality_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "verdict": { "type": "string", "enum": ["sequenced","dependency_defect"] },
+    "skeleton_ref": {
+      "description": "Path to 04-skeleton.json providing the designated skeleton.",
+      "type": "string"
+    },
+    "slices_ref": {
+      "description": "Path to 02-slices.json providing candidate slice details.",
+      "type": "string"
+    },
+    "verticality_ref": {
+      "description": "Path to 03-verticality.json providing eligible slice set.",
+      "type": "string"
+    },
+    "aprd_ref": {
+      "description": "Path to frozen aPRD artifact.",
+      "type": "string"
+    },
+    "class": {
+      "description": "Project class: greenfield or feature-add.",
+      "type": "string"
+    },
+    "verdict": {
+      "description": "sequenced = legal order produced; dependency_defect = cycle/dangling/skeleton-with-deps blocked it.",
+      "type": "string",
+      "enum": ["sequenced","dependency_defect"]
+    },
     "sequence": {
+      "description": "Ordered slices; positions ascending from 1 with no gaps; position 1 always skeleton:true. Empty when verdict:dependency_defect.",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["position", "id", "name", "skeleton", "value", "depends_on", "cost_proxy", "rationale"],
         "properties": {
-          "position": { "type": "integer", "minimum": 1 },
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "skeleton": { "type": "boolean" },
-          "value": { "type": "string", "enum": ["high","med","low"] },
-          "retires_risk": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "depends_on": { "type": "array", "items": { "type": "string" } },
-          "cost_proxy": { "type": "integer", "minimum": 0 },
-          "rationale": { "type": "string" }
+          "position": {
+            "description": "1-based position in the sequence; ascending, no gaps.",
+            "type": "integer",
+            "minimum": 1
+          },
+          "id": {
+            "description": "Slice S* identifier carried verbatim from 02-slices.json.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Slice name carried verbatim from 02-slices.json.",
+            "type": "string"
+          },
+          "skeleton": {
+            "description": "True only on position 1 (the designated walking skeleton); false elsewhere.",
+            "type": "boolean"
+          },
+          "value": {
+            "description": "Value tier carried verbatim from 02-slices.json; never re-scored.",
+            "type": "string",
+            "enum": ["high","med","low"]
+          },
+          "retires_risk": {
+            "description": "Risk retired, verbatim from 02-slices.json, or null.",
+            "oneOf": [{"type":"string"},{"type":"null"}]
+          },
+          "depends_on": {
+            "description": "S* prerequisites carried verbatim from 02; every listed id must appear at an earlier position.",
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "cost_proxy": {
+            "description": "len(requirements) + len(acceptance) from 02-slices.json; declared feature-depth proxy.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "rationale": {
+            "description": "One line — why this slice sits at this position; caveman.",
+            "type": "string"
+          }
         }
       }
     },
-    "ordering_basis": { "type": "string" },
+    "ordering_basis": {
+      "description": "Short caveman paragraph explaining the sequencing logic: skeleton pinned, dependency legality hard constraint, then value×risk/cost heuristic.",
+      "type": "string"
+    },
     "dependency_check": {
+      "description": "Dependency graph validation results.",
       "type": "object",
       "required": ["acyclic", "skeleton_is_root", "cycles", "dangling_depends_on"],
       "properties": {
-        "acyclic": { "type": "boolean" },
-        "skeleton_is_root": { "type": "boolean" },
-        "cycles": { "type": "array" },
-        "dangling_depends_on": { "type": "array" }
+        "acyclic": {
+          "description": "True when no dependency cycles exist; false triggers dependency_defect verdict.",
+          "type": "boolean"
+        },
+        "skeleton_is_root": {
+          "description": "True when skeleton slice carries no eligible-slice depends_on of its own.",
+          "type": "boolean"
+        },
+        "cycles": {
+          "description": "Cycle paths when acyclic:false; empty on clean run.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dangling_depends_on": {
+          "description": "S* IDs referenced in depends_on but absent from the eligible slice set; empty on clean run.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
       }
     },
     "coverage": {
+      "description": "Coverage accounting: sequenced set must equal eligible set on verdict:sequenced.",
       "type": "object",
       "required": ["eligible_slices", "sequenced", "missing", "duplicated"],
       "properties": {
-        "eligible_slices": { "type": "array", "items": { "type": "string" } },
-        "sequenced": { "type": "array", "items": { "type": "string" } },
-        "missing": { "type": "array" },
-        "duplicated": { "type": "array" }
+        "eligible_slices": {
+          "description": "Eligible slice ids from 04-skeleton.json.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "sequenced": {
+          "description": "Slice ids in emitted position order; equals eligible_slices as a set on verdict:sequenced.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "missing": {
+          "description": "Eligible slices not placed in sequence; empty on verdict:sequenced.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "duplicated": {
+          "description": "Slice ids placed more than once; empty on verdict:sequenced.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
       }
     },
     "sequence_counts": {
+      "description": "Summary counts; total and positions must be equal on clean run.",
       "type": "object",
       "required": ["total", "positions"],
       "properties": {
-        "total": { "type": "integer", "minimum": 0 },
-        "positions": { "type": "integer", "minimum": 0 }
+        "total": {
+          "description": "Total eligible slices.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "positions": {
+          "description": "Number of positions emitted in sequence[].",
+          "type": "integer",
+          "minimum": 0
+        }
       }
     }
   }

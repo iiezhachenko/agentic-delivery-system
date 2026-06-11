@@ -5,75 +5,139 @@
   "type": "object",
   "required": ["class", "mode", "resolutions", "resolved", "re_deferred", "escalated", "drained", "resolve_counts"],
   "properties": {
-    "triage_ref": { "type": "string" },
-    "decision_points_ref": { "type": "string" },
-    "components_ref": { "type": "string" },
-    "contracts_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "adr_log_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "lock_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "skeleton_id": { "type": "string" },
-    "baseline_adr_max": { "type": "string" },
-    "local_queue_in": { "type": "array", "items": { "type": "string" } },
+    "triage_ref": { "type": "string", "description": "Path to 02-triage.json" },
+    "decision_points_ref": { "type": "string", "description": "Path to 01-decision-points.json" },
+    "components_ref": { "type": "string", "description": "Path to HLD components file used for component ownership lookup" },
+    "contracts_ref": { "type": "string", "description": "Path to HLD contracts file" },
+    "aprd_ref": { "type": "string", "description": "Resolved aPRD artifact path" },
+    "adr_lock_ref": { "type": "string", "description": "Path to adr.lock" },
+    "adr_log_ref": { "type": "string", "description": "Path to adr log directory" },
+    "foundation_cut_ref": { "type": "string", "description": "Path to foundation cut file" },
+    "lock_verified": { "type": "boolean", "description": "Lock present + status==frozen + named artifact exists on disk" },
+    "class": { "type": "string", "description": "Project class (greenfield | feature-add)" },
+    "mode": { "type": "string", "description": "Resolution pass mode (skeleton | slice)" },
+    "skeleton_id": { "type": "string", "description": "Skeleton id (e.g. S1)" },
+    "baseline_adr_max": { "type": "string", "description": "Highest existing ADR id before this pass (e.g. ADR-0006)" },
+    "local_queue_in": {
+      "type": "array",
+      "description": "DP ids entering the local resolution queue this pass",
+      "items": { "type": "string" }
+    },
     "resolutions": {
       "type": "array",
+      "description": "One entry per DP in local_queue_in; disposition of each",
       "items": {
         "type": "object",
         "required": ["dp_id", "decision", "category", "forced_by", "owning_component", "disposition", "rationale"],
         "properties": {
-          "dp_id": { "type": "string" },
-          "decision": { "type": "string" },
-          "category": { "type": "string" },
-          "forced_by": { "type": "array" },
-          "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "owning_component": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "disposition": { "type": "string", "enum": ["resolved","re-deferred","escalated"] },
-          "adr_id": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "draft_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "defer_to": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "escalate_to": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "rationale": { "type": "string" }
+          "dp_id": { "type": "string", "description": "DP id being resolved" },
+          "decision": { "type": "string", "description": "Decision text carried verbatim" },
+          "category": { "type": "string", "description": "Taxonomy category carried verbatim" },
+          "forced_by": {
+            "type": "array",
+            "description": "Forcing aPRD ids carried verbatim",
+            "items": { "type": "string" }
+          },
+          "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Cut element reference carried verbatim" },
+          "owning_component": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Component id (C*) that owns this decision concern; null when no single component owns it" },
+          "disposition": { "type": "string", "enum": ["resolved","re-deferred","escalated"], "description": "Outcome: resolved (ADR emitted) | re-deferred (still not ripe) | escalated (needs foundational re-decision)" },
+          "adr_id": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "ADR id assigned when resolved; null otherwise" },
+          "draft_ref": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Path to draft file when resolved; null otherwise" },
+          "defer_to": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Slice or stage deferred to when re-deferred; null otherwise" },
+          "escalate_to": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Stage escalated to when escalated; null otherwise" },
+          "rationale": { "type": "string", "description": "Why this disposition; cites component, seam, or cut evidence" }
         }
       }
     },
-    "resolved": { "type": "array" },
-    "re_deferred": { "type": "array" },
-    "escalated": { "type": "array" },
-    "drained": { "type": "array" },
+    "resolved": {
+      "type": "array",
+      "description": "Summary list of DPs with disposition=resolved; dp_id + adr_id",
+      "items": {
+        "type": "object",
+        "required": ["dp_id", "adr_id"],
+        "properties": {
+          "dp_id": { "type": "string", "description": "DP id resolved" },
+          "adr_id": { "type": "string", "description": "ADR id assigned" }
+        }
+      }
+    },
+    "re_deferred": {
+      "type": "array",
+      "description": "Summary list of DPs with disposition=re-deferred; dp_id + defer_to",
+      "items": {
+        "type": "object",
+        "required": ["dp_id", "defer_to"],
+        "properties": {
+          "dp_id": { "type": "string", "description": "DP id re-deferred" },
+          "defer_to": { "type": "string", "description": "Slice or stage deferred to" }
+        }
+      }
+    },
+    "escalated": {
+      "type": "array",
+      "description": "Summary list of DPs with disposition=escalated; empty on clean run",
+      "items": {
+        "type": "object",
+        "required": ["dp_id", "escalate_to"],
+        "properties": {
+          "dp_id": { "type": "string", "description": "DP id escalated" },
+          "escalate_to": { "type": "string", "description": "Stage escalated to" }
+        }
+      }
+    },
+    "drained": {
+      "type": "array",
+      "description": "All DP ids processed this pass (union of resolved + re_deferred + escalated)",
+      "items": { "type": "string" }
+    },
     "local_adrs": {
       "type": "array",
+      "description": "ADR index entries for each ADR emitted this pass",
       "items": {
         "type": "object",
         "required": ["id", "dp_id", "title", "status", "mode", "scope", "category", "traces", "draft_ref"],
         "properties": {
-          "id": { "type": "string" },
-          "dp_id": { "type": "string" },
-          "title": { "type": "string" },
-          "status": { "type": "string" },
-          "mode": { "type": "string" },
-          "scope": { "type": "string" },
-          "component": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "category": { "type": "string" },
-          "traces": { "type": "array" },
-          "draft_ref": { "type": "string" }
+          "id": { "type": "string", "description": "ADR id assigned" },
+          "dp_id": { "type": "string", "description": "Source DP id this ADR resolves" },
+          "title": { "type": "string", "description": "ADR title summarizing the decision made" },
+          "status": { "type": "string", "description": "ADR status (Proposed this pass)" },
+          "mode": { "type": "string", "description": "foundation | slice" },
+          "scope": { "type": "string", "description": "global | local" },
+          "component": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Owning component id; null for cross-cutting" },
+          "category": { "type": "string", "description": "Taxonomy category" },
+          "traces": {
+            "type": "array",
+            "description": "aPRD/cut ids traced by this ADR",
+            "items": { "type": "string" }
+          },
+          "draft_ref": { "type": "string", "description": "Path to ADR draft file" }
         }
       }
     },
-    "escalations": { "type": "array" },
-    "note": { "oneOf": [{"type":"string"},{"type":"null"}] },
+    "escalations": {
+      "type": "array",
+      "description": "Detailed escalation records; empty when no DPs were escalated",
+      "items": {
+        "type": "object",
+        "required": ["dp_id", "escalate_to", "reason"],
+        "properties": {
+          "dp_id": { "type": "string", "description": "DP id escalated" },
+          "escalate_to": { "type": "string", "description": "Stage escalated to" },
+          "reason": { "type": "string", "description": "Why escalation was needed" }
+        }
+      }
+    },
+    "note": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Optional pass-level note; null when nothing to note" },
     "resolve_counts": {
       "type": "object",
+      "description": "Walk to count; don't estimate",
       "required": ["queue_in", "resolved", "re_deferred", "escalated"],
       "properties": {
-        "queue_in": { "type": "integer" },
-        "resolved": { "type": "integer" },
-        "re_deferred": { "type": "integer" },
-        "escalated": { "type": "integer" },
-        "local_adrs_emitted": { "type": "integer" }
+        "queue_in": { "type": "integer", "description": "== len(local_queue_in)" },
+        "resolved": { "type": "integer", "description": "== len(resolved)" },
+        "re_deferred": { "type": "integer", "description": "== len(re_deferred)" },
+        "escalated": { "type": "integer", "description": "== len(escalated)" },
+        "local_adrs_emitted": { "type": "integer", "description": "== len(local_adrs)" }
       }
     }
   }

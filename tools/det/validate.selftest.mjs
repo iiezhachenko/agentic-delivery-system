@@ -13,7 +13,10 @@ import { fileURLToPath } from "node:url";
 import { validate } from "./validate.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const REGISTRY = path.resolve(here, "..", "..", "schemas");
+// REGISTRY defaults to frozen schemas/; SCHEMA_REGISTRY env overrides (pre-promote scratch verify, W1b/CR-003).
+const REGISTRY = process.env.SCHEMA_REGISTRY
+  ? path.resolve(process.env.SCHEMA_REGISTRY)
+  : path.resolve(here, "..", "..", "schemas");
 const FIXTURES_GF = "/workspace/_fixtures/greenfield-clean";
 const FIXTURES_BF = "/workspace/_fixtures/brownfield-bugfix";
 const FIXTURES_GC = "/workspace/_fixtures/greenfield-canon";
@@ -328,6 +331,17 @@ const dir2Cases = [
     label: "delete class (required key missing in slice components)",
     mutate: (obj) => { delete obj.class; return obj; },
     keyword: "required",
+  },
+  // CR-003 tightening proof: loose seam_realization no longer validate-clean.
+  // Pre-CR thin schema accepted ANY array here (bare {type:array}); enriched schema
+  // requires object items {seam,present,realized_by}. Flattening to a string array
+  // (the divergent DERIVE-COMPONENTS shape the loose validator passed) now FAILS.
+  {
+    id: "components",
+    file: `${FIXTURES_GF}/.hld/skeleton/components.json`,
+    label: "CR-003: seam_realization flattened to string array (loose array tightened → invalid)",
+    mutate: (obj) => { obj.coverage.seam_realization = ["ingress:C6","domain:C2","persistence:C1"]; return obj; },
+    keyword: "type",
   },
   // 04-build phase defects — skeleton mode
   {

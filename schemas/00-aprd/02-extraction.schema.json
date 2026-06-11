@@ -5,24 +5,25 @@
   "type": "object",
   "required": ["request_ref", "classification_ref", "class", "entities", "explicit_requirements", "implied_requirements", "stated_constraints", "unknowns"],
   "properties": {
-    "request_ref": { "type": "string" },
-    "classification_ref": { "type": "string" },
+    "request_ref": { "type": "string", "description": "path to raw request file; feature-add: path to CR file" },
+    "classification_ref": { "type": "string", "description": "path to 01-classification.json" },
     "class": { "type": "string", "description": "greenfield | feature-add" },
     "baseline_map_ref": { "description": "feature-add: path to baseline-map.json; null for greenfield", "oneOf": [{"type":"string"},{"type":"null"}] },
     "entities": {
       "type": "array",
+      "description": "named domain entities; E* space, feature-add strictly above baseline high-water",
       "items": {
         "type": "object",
         "required": ["id", "name", "note", "inferred", "source", "sr_ref"],
         "properties": {
-          "id": { "type": "string", "pattern": "^E[0-9]+$" },
-          "name": { "type": "string" },
-          "note": { "type": "string" },
-          "inferred": { "type": "boolean" },
-          "rationale": { "type": "string", "description": "required when inferred:true" },
-          "source": { "type": "string" },
-          "sr_ref": { "type": "string", "pattern": "^SR[0-9]+$" },
-          "baseline_ref": { "description": "feature-add: baseline E* this extends or null", "oneOf": [{"type":"string"},{"type":"null"}] }
+          "id": { "type": "string", "pattern": "^E[0-9]+$", "description": "stable entity id; E* never renumbered" },
+          "name": { "type": "string", "description": "entity name as used in the domain" },
+          "note": { "type": "string", "description": "one line: entity identity + role" },
+          "inferred": { "type": "boolean", "description": "true only if request forces entity but never names it; rationale required when true" },
+          "rationale": { "type": "string", "description": "required when inferred:true; why a competent builder cannot omit this entity" },
+          "source": { "type": "string", "description": "words in the request that introduce this entity" },
+          "sr_ref": { "type": "string", "pattern": "^SR[0-9]+$", "description": "subrequest id this entity belongs to" },
+          "baseline_ref": { "description": "feature-add: baseline E* this extends or null for net-new; omit for greenfield", "oneOf": [{"type":"string"},{"type":"null"}] }
         }
       }
     },
@@ -33,12 +34,12 @@
         "type": "object",
         "required": ["id", "text", "inferred", "source", "sr_ref"],
         "properties": {
-          "id": { "type": "string", "pattern": "^R[0-9]+$" },
-          "text": { "type": "string" },
-          "inferred": { "const": false },
-          "source": { "type": "string" },
-          "sr_ref": { "type": "string" },
-          "baseline_ref": { "oneOf": [{"type":"string"},{"type":"null"}] }
+          "id": { "type": "string", "pattern": "^R[0-9]+$", "description": "stable requirement id; R* never renumbered" },
+          "text": { "type": "string", "description": "single atomic behavior stated in the request" },
+          "inferred": { "const": false, "description": "always false for explicit requirements" },
+          "source": { "type": "string", "description": "verbatim span from the request proving this requirement exists" },
+          "sr_ref": { "type": "string", "description": "subrequest id this requirement traces to" },
+          "baseline_ref": { "description": "feature-add: baseline R* this extends or null for net-new", "oneOf": [{"type":"string"},{"type":"null"}] }
         }
       }
     },
@@ -49,42 +50,44 @@
         "type": "object",
         "required": ["id", "text", "inferred", "source", "rationale", "sr_ref"],
         "properties": {
-          "id": { "type": "string", "pattern": "^R[0-9]+$" },
-          "text": { "type": "string" },
-          "inferred": { "const": true },
-          "source": { "type": "string" },
-          "rationale": { "type": "string" },
-          "sr_ref": { "type": "string" },
-          "baseline_ref": { "oneOf": [{"type":"string"},{"type":"null"}] }
+          "id": { "type": "string", "pattern": "^R[0-9]+$", "description": "stable requirement id; continues R* sequence after explicit requirements" },
+          "text": { "type": "string", "description": "single atomic behavior necessarily entailed by explicit requirements" },
+          "inferred": { "const": true, "description": "always true for implied requirements" },
+          "source": { "type": "string", "description": "the explicit words or requirement that entails this one" },
+          "rationale": { "type": "string", "description": "why a competent builder cannot avoid this — required on every implied item" },
+          "sr_ref": { "type": "string", "description": "subrequest id this requirement traces to" },
+          "baseline_ref": { "description": "feature-add: baseline R* this extends or null for net-new", "oneOf": [{"type":"string"},{"type":"null"}] }
         }
       }
     },
     "stated_constraints": {
       "type": "array",
+      "description": "platform, stack, scale, compliance, timeline, or budget constraints from the request",
       "items": {
         "type": "object",
         "required": ["id", "text", "kind", "inferred", "source", "sr_ref"],
         "properties": {
-          "id": { "type": "string", "pattern": "^C[0-9]+$" },
-          "text": { "type": "string" },
-          "kind": { "type": "string", "enum": ["platform","stack","scale","region","compliance","timeline","budget"] },
-          "inferred": { "type": "boolean" },
-          "source": { "type": "string" },
-          "sr_ref": { "type": "string" },
-          "baseline_ref": { "oneOf": [{"type":"string"},{"type":"null"}] }
+          "id": { "type": "string", "pattern": "^C[0-9]+$", "description": "stable constraint id; C* never renumbered" },
+          "text": { "type": "string", "description": "the constraint statement" },
+          "kind": { "type": "string", "enum": ["platform","stack","scale","region","compliance","timeline","budget"], "description": "constraint category" },
+          "inferred": { "type": "boolean", "description": "true if forced-but-unnamed in request; rationale required when true" },
+          "source": { "type": "string", "description": "words in the request that establish this constraint" },
+          "sr_ref": { "type": "string", "description": "subrequest id this constraint traces to" },
+          "baseline_ref": { "description": "feature-add: baseline C* this extends or null for net-new", "oneOf": [{"type":"string"},{"type":"null"}] }
         }
       }
     },
     "unknowns": {
       "type": "array",
+      "description": "facts a builder needs that neither request nor baseline answers",
       "items": {
         "type": "object",
         "required": ["id", "text", "source", "sr_ref"],
         "properties": {
-          "id": { "type": "string", "pattern": "^U[0-9]+$" },
-          "text": { "type": "string" },
-          "source": { "type": "string" },
-          "sr_ref": { "type": "string" }
+          "id": { "type": "string", "pattern": "^U[0-9]+$", "description": "stable unknown id; U* never renumbered" },
+          "text": { "type": "string", "description": "fact a builder needs that neither request nor baseline answers" },
+          "source": { "type": "string", "description": "words in the request that raise this question" },
+          "sr_ref": { "type": "string", "description": "subrequest id this unknown belongs to" }
         }
       }
     }

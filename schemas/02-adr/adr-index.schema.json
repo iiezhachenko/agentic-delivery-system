@@ -5,47 +5,58 @@
   "type": "object",
   "required": ["decisions_index_ref", "conflicts_ref", "class", "skeleton_id", "gate", "adrs", "undecided_not_rendered", "adr_counts"],
   "properties": {
-    "decisions_index_ref": { "type": "string" },
-    "conflicts_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "skeleton_id": { "type": "string" },
+    "decisions_index_ref": { "type": "string", "description": "Path to decisions-index.json manifest enumerated" },
+    "conflicts_ref": { "type": "string", "description": "Path to 04-conflicts.json; gate read" },
+    "class": { "type": "string", "description": "Project class (greenfield | feature-add)" },
+    "skeleton_id": { "type": "string", "description": "Skeleton id (e.g. S1)" },
     "gate": {
       "type": "object",
+      "description": "Records reconcile verdict this render was gated on",
       "required": ["reconcile_verdict", "gated_on"],
       "properties": {
-        "reconcile_verdict": { "type": "string" },
-        "gated_on": { "type": "string" }
+        "reconcile_verdict": { "type": "string", "description": "Verdict from RECONCILE (coherent | blocked)" },
+        "gated_on": { "type": "string", "description": "Path to conflicts file gate was read from" }
       }
     },
     "adrs": {
       "type": "array",
+      "description": "One entry per rendered draft, in id order",
       "items": {
         "type": "object",
         "required": ["id", "dp_id", "title", "status", "mode", "scope", "category", "traces", "draft_ref"],
         "properties": {
-          "id": { "type": "string", "pattern": "^ADR-[0-9]+$" },
-          "dp_id": { "type": "string" },
-          "title": { "type": "string" },
-          "status": { "type": "string" },
-          "mode": { "type": "string" },
-          "scope": { "type": "string" },
-          "category": { "type": "string" },
-          "traces": { "type": "array", "items": { "type": "string" } },
-          "supersedes": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "superseded_by": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "degenerate_forced": { "type": "boolean" },
-          "draft_ref": { "type": "string" }
+          "id": { "type": "string", "pattern": "^ADR-[0-9]+$", "description": "ADR id assigned by SYNTHESIZE-ADR (ADR-0001 etc.)" },
+          "dp_id": { "type": "string", "description": "Source decision point id this ADR resolves" },
+          "title": { "type": "string", "description": "ADR title summarizing the decision made" },
+          "status": { "type": "string", "description": "ADR status (Proposed this pass)" },
+          "mode": { "type": "string", "description": "foundation | slice" },
+          "scope": { "type": "string", "description": "global | local" },
+          "category": { "type": "string", "description": "Taxonomy category inherited from DP*" },
+          "traces": {
+            "type": "array",
+            "description": "decision file's traces[] verbatim; aPRD/cut ids",
+            "items": { "type": "string" }
+          },
+          "supersedes": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "ADR id this supersedes; null this pass" },
+          "superseded_by": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "ADR id this is superseded by; null this pass" },
+          "degenerate_forced": { "type": "boolean", "description": "True when decision was degenerate_forced (single compliant option)" },
+          "draft_ref": { "type": "string", "description": "Draft path relative to .adr/ directory" }
         }
       }
     },
-    "undecided_not_rendered": { "type": "array" },
+    "undecided_not_rendered": {
+      "type": "array",
+      "description": "Manifest's undecided[] ids, echoed; no ADR rendered for these",
+      "items": { "type": "string" }
+    },
     "adr_counts": {
       "type": "object",
+      "description": "Walk to count; don't estimate",
       "required": ["rendered", "degenerate_forced", "undecided_skipped"],
       "properties": {
-        "rendered": { "type": "integer" },
-        "degenerate_forced": { "type": "integer" },
-        "undecided_skipped": { "type": "integer" }
+        "rendered": { "type": "integer", "description": "== len(adrs)" },
+        "degenerate_forced": { "type": "integer", "description": "Count of rendered ADRs with degenerate_forced=true" },
+        "undecided_skipped": { "type": "integer", "description": "== len(undecided_not_rendered)" }
       }
     }
   }

@@ -5,28 +5,33 @@
   "type": "object",
   "required": ["built_by", "id_high_water", "conventions", "integration_seams", "existing_oracle", "frozen_locks"],
   "properties": {
-    "built_by": { "type": "string" },
+    "built_by": { "type": "string", "description": "identifier of the pipeline run or spine that produced this baseline map" },
+    "baseline_aprd_ref": { "description": "path to the frozen aPRD this baseline was built from; null if not applicable", "oneOf": [{"type":"string"},{"type":"null"}] },
+    "accepted_slices": { "type": "array", "items": { "type": "string", "description": "S* id of an accepted slice" }, "description": "slice ids accepted in the baseline build" },
+    "built_components": { "type": "array", "items": { "type": "string", "description": "C* id of a built component" }, "description": "component ids built in the baseline" },
     "id_high_water": {
       "type": "object",
       "description": "max index per id space; downstream mints strictly above",
       "properties": {
-        "R": { "type": "integer" },
-        "AC": { "type": "integer" },
-        "S": { "type": "integer" },
-        "ADR": { "type": "integer" },
-        "C": { "type": "integer" },
-        "E": { "type": "integer" },
-        "CT": { "type": "integer" }
+        "R": { "type": "integer", "description": "max R* index minted in baseline" },
+        "AC": { "type": "integer", "description": "max AC* index minted in baseline" },
+        "S": { "type": "integer", "description": "max S* index minted in baseline" },
+        "ADR": { "type": "integer", "description": "max ADR-* index minted in baseline" },
+        "C": { "type": "integer", "description": "max C* index minted in baseline" },
+        "E": { "type": "integer", "description": "max E* index minted in baseline" },
+        "CT": { "type": "integer", "description": "max CT* index minted in baseline" },
+        "A": { "type": "integer", "description": "max A* index minted in baseline" },
+        "F": { "type": "integer", "description": "max F* index minted in baseline" }
       }
     },
     "conventions": {
       "type": "object",
       "description": "explicit enough for IMPLEMENT to conform; cite source files",
       "properties": {
-        "lang": { "type": "string" },
-        "layout": { "type": "string" },
-        "lint": { "type": "string" },
-        "naming": { "type": "string" }
+        "lang": { "type": "string", "description": "language and version (cite ADR if applicable)" },
+        "layout": { "type": "string", "description": "directory and package layout conventions" },
+        "lint": { "type": "string", "description": "linter and formatter configuration conventions" },
+        "naming": { "type": "string", "description": "naming conventions for modules, files, packages" }
       }
     },
     "integration_seams": {
@@ -36,23 +41,27 @@
         "type": "object",
         "required": ["at", "kind", "contract_ref"],
         "properties": {
-          "at": { "type": "string" },
-          "kind": { "type": "string" },
-          "contract_ref": { "type": "string" }
+          "at": { "type": "string", "description": "component id C* where the seam lives" },
+          "kind": { "type": "string", "description": "seam kind: persistence | domain | ingress | primary_external_integration | etc." },
+          "contract_ref": { "type": "string", "description": "contract id CT* governing this seam" }
         }
       }
     },
     "existing_oracle": {
       "type": "object",
+      "description": "oracle inventory that must stay green",
       "required": ["suites", "must_stay_green"],
       "properties": {
-        "suites": { "type": "array", "items": { "type": "string" } },
-        "must_stay_green": { "type": "boolean" }
+        "suites": { "type": "array", "items": { "type": "string", "description": "path to an oracle suite directory" }, "description": "oracle suite paths that must stay green" },
+        "inherited_tests": { "type": "array", "items": { "type": "string", "description": "test id from an existing oracle suite" }, "description": "specific inherited test ids that must stay green" },
+        "must_stay_green": { "type": "boolean", "description": "true when any suite is listed; downstream regression guard reads this" }
       }
     },
     "frozen_locks": {
       "type": "object",
-      "description": "lock path → status; don't recompute hashes"
-    }
+      "description": "lock path → status; don't recompute hashes",
+      "additionalProperties": { "type": "string", "description": "lock status string, e.g. frozen" }
+    },
+    "note": { "type": "string", "description": "human-readable context about what this baseline covers and why" }
   }
 }

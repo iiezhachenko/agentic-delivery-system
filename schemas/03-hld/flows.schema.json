@@ -5,32 +5,144 @@
   "type": "object",
   "required": ["class", "mode", "flows"],
   "properties": {
-    "components_ref": { "type": "string" },
-    "contracts_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "lock_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "skeleton_id": { "type": "string" },
+    "components_ref": { "type": "string", "description": "Path to components.json" },
+    "contracts_ref": { "type": "string", "description": "Path to contracts.json" },
+    "aprd_ref": { "type": "string", "description": "Resolved path to frozen aPRD artifact" },
+    "foundation_cut_ref": { "type": "string", "description": "Path to foundation-cut artifact" },
+    "adr_lock_ref": { "type": "string", "description": "Path to adr.lock" },
+    "adr_log_ref": { "type": "string", "description": "Path to ADR log directory" },
+    "lock_verified": { "type": "boolean", "description": "True if lock present and names frozen artifact" },
+    "class": { "type": "string", "description": "Project class: greenfield or brownfield" },
+    "mode": { "type": "string", "description": "skeleton = walking-skeleton flow; increment = per-slice flow" },
+    "skeleton_id": { "type": "string", "description": "Skeleton slice id (e.g. S1)" },
+    "skeleton_lock_ref": { "type": "string", "description": "Path to skeleton.lock (increment mode)" },
+    "base_flows_ref": { "type": "string", "description": "Path to frozen skeleton flows.json (increment mode)" },
+    "base_contracts_ref": { "type": "string", "description": "Path to frozen skeleton contracts.json (increment mode)" },
+    "slice_components_ref": { "type": "string", "description": "Path to slice components.json (increment mode)" },
+    "slice_contracts_ref": { "type": "string", "description": "Path to slice contracts.json (increment mode)" },
+    "skeleton_frozen_verified": { "type": "boolean", "description": "True if skeleton.lock present and status==frozen" },
+    "slice_id": { "type": "string", "description": "Target slice id (increment mode)" },
+    "slice_name": { "type": "string", "description": "Slice name carried verbatim (increment mode)" },
+    "introduced_components": {
+      "type": "array",
+      "description": "C* ids slice first activates (increment mode)",
+      "items": { "type": "string", "pattern": "^C[0-9]+$" }
+    },
+    "touched_components": {
+      "type": "array",
+      "description": "Introduced plus reused components on slice path (increment mode)",
+      "items": { "type": "string" }
+    },
+    "composes_against_contracts": { "type": "boolean", "description": "True if every inter-component hop maps to existing CT* and every foundational seam is crossed (skeleton mode)" },
+    "composes_against_frozen_contracts": { "type": "boolean", "description": "True if every inter-component hop maps to CT* present in slice touched_contracts (increment mode)" },
     "flows": {
       "type": "array",
+      "description": "Skeleton: exactly one walking-skeleton flow. Increment: exactly one flow per slice",
       "items": {
         "type": "object",
         "required": ["id", "slice", "name", "trigger", "path", "steps"],
         "properties": {
-          "id": { "type": "string", "pattern": "^F[0-9]+$" },
-          "slice": { "type": "string" },
-          "name": { "type": "string" },
-          "trigger": { "type": "string" },
-          "path": { "type": "array", "items": { "type": "string" } },
-          "steps": { "type": "array", "items": { "type": "object" } }
+          "id": { "type": "string", "pattern": "^F[0-9]+$", "description": "Flow id; F1 for skeleton, F<slice_ordinal> for increment" },
+          "slice": { "type": "string", "description": "Slice id this flow realizes" },
+          "name": { "type": "string", "description": "One-line flow name" },
+          "trigger": { "type": "string", "description": "What initiates this path" },
+          "path": {
+            "type": "array",
+            "description": "Ordered C* ids happy path traverses; ingress to persistence",
+            "items": { "type": "string", "pattern": "^C[0-9]+$" }
+          },
+          "steps": {
+            "type": "array",
+            "description": "One step per hop in traversal order; executes contract on paper",
+            "items": {
+              "type": "object",
+              "required": ["from", "to", "seam", "external", "action"],
+              "properties": {
+                "from": { "type": "string", "description": "Source component id" },
+                "to": { "type": "string", "description": "Target component id or EXTERNAL:<name>" },
+                "via": { "description": "CT* id for this hop; null for external boundary", "oneOf": [{"type": "string"},{"type": "null"}] },
+                "seam": { "type": "string", "description": "Foundational seam(s) this hop crosses" },
+                "external": { "type": "boolean", "description": "True if crossing to external system with no modeled CT*" },
+                "action": { "type": "string", "description": "What crosses this seam" }
+              }
+            }
+          },
+          "via": {
+            "type": "array",
+            "description": "All inter-component CT* happy path composes against; externals excluded",
+            "items": { "type": "string" }
+          },
+          "failure_path": {
+            "type": "object",
+            "description": "Load-bearing failure variant drawn from a touched CT* declared failure_mode",
+            "properties": {
+              "trigger": { "type": "string", "description": "Unhappy variant trigger" },
+              "exercises": { "type": "string", "description": "CT*:<declared failure_mode> from contracts.json" },
+              "arrives_at": { "type": "string", "description": "Terminal failure state path arrives at" }
+            }
+          },
+          "traces": {
+            "type": "array",
+            "description": "R*/AC* ids this flow realizes; R* = full slice requirement set; AC* = aPRD oracles happy path demonstrably reaches",
+            "items": { "type": "string" }
+          },
+          "honors_inv": {
+            "type": "array",
+            "description": "Cross-slice invariants the drawn path stays inside",
+            "items": { "type": "string" }
+          }
         }
       }
     },
-    "coverage": { "type": "object" },
-    "structural_defects": { "type": "array" },
-    "flow_counts": { "type": "object" }
+    "seam_coverage": {
+      "type": "array",
+      "description": "One entry per foundational seam in skeleton_seams[] array order; skeleton mode only",
+      "items": {
+        "type": "object",
+        "required": ["seam", "crossed"],
+        "properties": {
+          "seam": { "type": "string", "description": "Foundation-cut seam name (e.g. ingress, domain, persistence, primary_external_integration)" },
+          "crossed": { "type": "boolean", "description": "False = uncovered seam → structural_defects" },
+          "by_component": { "type": "string", "description": "On-path C* realizing this seam" },
+          "in_flow": { "type": "string", "description": "F* id this seam is crossed in" },
+          "via": { "description": "CT* path reaches this seam through; null for entry seam or external boundary", "oneOf": [{"type": "string"},{"type": "null"}] }
+        }
+      }
+    },
+    "skeleton_fidelity": {
+      "type": "object",
+      "description": "H14 — increment composes against frozen contracts, never reshapes (increment mode)",
+      "properties": {
+        "reused_contracts_walked": { "type": "array", "items": { "type": "string" }, "description": "Frozen CT* ids this flow composes against" },
+        "reshaped_contracts": { "type": "array", "items": { "type": "string" }, "description": "Frozen CT* reshaped; MUST be empty" },
+        "redrawn_flows": { "type": "array", "items": { "type": "string" }, "description": "Frozen F* re-walked/redrawn; MUST be empty" },
+        "verdict": { "type": "string", "description": "composes-against-frozen on clean run" }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "description": "Flow coverage summary",
+      "additionalProperties": true
+    },
+    "structural_defects": {
+      "type": "array",
+      "description": "Flow can't be drawn: missing/wrong CT* or uncovered seam; each {flow, gap, missing_or_wrong_ct, route}; empty on clean run",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "frame_conflicts": {
+      "type": "array",
+      "description": "Flow reveals bad foundational decision; each {flow, finding, breaks_adr, route}; empty on clean run",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "aprd_defects": {
+      "type": "array",
+      "description": "Flow reveals ambiguous/contradictory WHAT; each {flow, finding, ref, route}; empty on clean run",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "flow_counts": {
+      "type": "object",
+      "description": "Counts derived by walking actual flow",
+      "additionalProperties": true
+    }
   }
 }

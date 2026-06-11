@@ -5,71 +5,269 @@
   "type": "object",
   "required": ["class", "mode", "verification_method", "ladder", "verdict", "verification_counts"],
   "properties": {
-    "integration_record_ref": { "type": "string" },
-    "build_record_ref": { "type": "string" },
-    "oracle_lock_ref": { "type": "string" },
-    "oracle_ref": { "type": "string" },
-    "nfr_mechanisms_ref": { "type": "string" },
-    "components_ref": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "aprd_lock_ref": { "type": "string" },
-    "locks_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "slice": { "type": "string" },
-    "verification_method": { "type": "string" },
+    "integration_record_ref": { "type": "string", "description": "Path to integration-record.json (status:integrated required)" },
+    "build_record_ref": { "type": "string", "description": "Path to build-record.json (all green required)" },
+    "oracle_lock_ref": { "type": "string", "description": "Path to oracle.lock (frozen + builder_may_not_edit)" },
+    "oracle_ref": { "type": "string", "description": "Path to oracle.json (the suite to run)" },
+    "nfr_mechanisms_ref": { "type": "string", "description": "Path to nfr-mechanisms.json (M* wiring checks)" },
+    "components_ref": { "type": "string", "description": "Path to components.json" },
+    "skeleton_lock_ref": { "type": "string", "description": "Path to skeleton.lock" },
+    "adr_lock_ref": { "type": "string", "description": "Path to adr.lock" },
+    "aprd_lock_ref": { "type": "string", "description": "Path to aprd.lock" },
+    "locks_verified": { "type": "boolean", "description": "All locks confirmed frozen before verification" },
+    "class": { "type": "string", "description": "Project class: greenfield | feature-add | bugfix" },
+    "mode": { "type": "string", "description": "Build mode: skeleton-build" },
+    "slice": { "type": "string", "description": "Skeleton id" },
+    "verification_method": { "type": "string", "description": "How tests were run: executed | static-trace (runtime unavailable; outcome authoritative-by-trace)" },
     "ladder": {
       "type": "object",
+      "description": "Verification ladder: 5 discriminator layers; each re-derived, not copied from build-record",
       "required": ["contract", "flow", "acceptance"],
       "properties": {
         "contract": {
           "type": "object",
+          "description": "Discriminator 1: contract layer — all CT* shape + failure tests re-derived",
           "required": ["layer_verdict", "tests"],
           "properties": {
-            "layer_verdict": { "type": "string", "enum": ["pass","fail","n/a"] },
-            "tests": { "type": "array" }
+            "layer_verdict": { "type": "string", "enum": ["pass","fail","n/a"], "description": "Contract layer outcome" },
+            "tests": {
+              "type": "array",
+              "description": "Per-oracle-contract-test results with trace",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "description": "Oracle test id (OCT-CT*)" },
+                  "target": { "type": "string", "description": "Contract id" },
+                  "provider": { "type": "string", "description": "Provider component id" },
+                  "caller": { "type": "string", "description": "Caller component id" },
+                  "module": { "type": "string", "description": "Provider module namespace" },
+                  "shape": {
+                    "type": "object",
+                    "description": "Shape test result",
+                    "properties": {
+                      "test": { "type": "string", "description": "Shape test function name" },
+                      "result": { "type": "string", "description": "pass | fail" },
+                      "trace": { "type": "string", "description": "Per-assertion trace" }
+                    }
+                  },
+                  "failures": {
+                    "type": "array",
+                    "description": "Failure test results (one per failure_mode)",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "test": { "type": "string", "description": "Failure test function name" },
+                        "result": { "type": "string", "description": "pass | fail" },
+                        "trace": { "type": "string", "description": "Static trace" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "flow": {
           "type": "object",
+          "description": "Discriminator 2: flow layer — re-derived against composition root",
           "required": ["layer_verdict", "tests"],
           "properties": {
-            "layer_verdict": { "type": "string", "enum": ["pass","fail","n/a"] },
-            "tests": { "type": "array" }
+            "layer_verdict": { "type": "string", "enum": ["pass","fail","n/a"], "description": "Flow layer outcome" },
+            "tests": {
+              "type": "array",
+              "description": "Per-flow-test results with happy + failure trace",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "description": "Oracle flow test id (OF-F*)" },
+                  "target": { "type": "string", "description": "Flow id" },
+                  "path": { "type": "array", "items": { "type": "string" }, "description": "Component path" },
+                  "wsgi_entry": { "type": "string", "description": "WSGI entry point" },
+                  "happy": {
+                    "type": "object",
+                    "description": "Happy path result",
+                    "properties": {
+                      "test": { "type": "string", "description": "Happy path test function name" },
+                      "asserts_ac": { "type": "array", "items": { "type": "string" }, "description": "AC ids asserted" },
+                      "result": { "type": "string", "description": "pass | fail" },
+                      "assertions": {
+                        "type": "array",
+                        "description": "Per-assertion results",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string", "description": "Assertion id" },
+                            "result": { "type": "string", "description": "pass | fail" },
+                            "trace": { "type": "string", "description": "Static trace" }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "failure": {
+                    "type": "object",
+                    "description": "Failure variant result",
+                    "properties": {
+                      "test": { "type": "string", "description": "Failure test function name" },
+                      "exercises": { "type": "string", "description": "Failure mode exercised" },
+                      "result": { "type": "string", "description": "pass | fail" },
+                      "assertions": {
+                        "type": "array",
+                        "description": "Per-assertion results",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string", "description": "Assertion id" },
+                            "result": { "type": "string", "description": "pass | fail" },
+                            "trace": { "type": "string", "description": "Static trace" }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "trace": { "type": "string", "description": "Overall flow trace summary" }
+                }
+              }
+            }
           }
         },
         "acceptance": {
           "type": "object",
+          "description": "Discriminator 3: acceptance layer — visible + held_out per AC (VERIFY-OUTPUT runs this first; held_out is gate-only)",
           "required": ["layer_verdict", "per_ac"],
           "properties": {
-            "layer_verdict": { "type": "string", "enum": ["pass","fail","n/a"] },
-            "per_ac": { "type": "array" }
+            "layer_verdict": { "type": "string", "enum": ["pass","fail","n/a"], "description": "Acceptance layer outcome" },
+            "per_ac": {
+              "type": "array",
+              "description": "Per-AC results: visible + held_out",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "ac": { "type": "string", "description": "AC id" },
+                  "req_ref": { "type": "string", "description": "Requirement id" },
+                  "visible": {
+                    "type": "object",
+                    "description": "Visible test result",
+                    "properties": {
+                      "file": { "type": "string", "description": "Visible test file path" },
+                      "result": { "type": "string", "description": "pass | fail" },
+                      "trace": { "type": "string", "description": "Trace of visible test passing" }
+                    }
+                  },
+                  "held_out": {
+                    "type": "object",
+                    "description": "Held-out test result (gate-only; different unguessable input, B7)",
+                    "properties": {
+                      "file": { "type": "string", "description": "Held-out test file path" },
+                      "result": { "type": "string", "description": "pass | fail" },
+                      "trace": { "type": "string", "description": "Trace proving not overfit to visible set" }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
-        "class_ext": { "type": "object" },
-        "nfr": { "type": "object" }
+        "class_ext": {
+          "type": "object",
+          "description": "Discriminator 4: class extension layer (regression/benchmark/parity); n/a when oracle class_ext=[]",
+          "properties": {
+            "layer_verdict": { "type": "string", "enum": ["pass","fail","n/a"], "description": "Class ext layer outcome" },
+            "kinds": {
+              "type": "array",
+              "description": "Extension kinds run with results",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": { "type": "string", "description": "regression | benchmark | parity" },
+                  "result": { "type": "string", "description": "pass | fail" }
+                }
+              }
+            },
+            "note": { "type": "string", "description": "Reasoning (e.g. greenfield skeleton — no class extension)" }
+          }
+        },
+        "nfr": {
+          "type": "object",
+          "description": "Discriminator 5: NFR wiring layer; each M* in mechanisms[] verified wired",
+          "properties": {
+            "layer_verdict": { "type": "string", "enum": ["pass","fail","n/a"], "description": "NFR layer outcome; vacuous pass when mechanisms=[]" },
+            "mechanisms_checked": {
+              "type": "array",
+              "description": "Per-M* wiring check results",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "description": "Mechanism id (M*)" },
+                  "realized_by": { "type": "array", "items": { "type": "string" }, "description": "Component ids realizing this mechanism" },
+                  "wired_in": { "type": "string", "description": "Source file where mechanism is wired" },
+                  "result": { "type": "string", "description": "pass | fail" },
+                  "trace": { "type": "string", "description": "Wiring trace" }
+                }
+              }
+            },
+            "note": { "type": "string", "description": "Reasoning (e.g. all NFRs satisfied-by-frame, no M* required)" }
+          }
+        }
       }
     },
-    "per_ac_summary": { "type": "array" },
-    "verdict": { "type": "string", "enum": ["verified","failed","blocked"] },
-    "escape": { "oneOf": [{"type":"string"},{"type":"null"}] },
-    "provenance": { "type": "object" },
+    "per_ac_summary": {
+      "type": "array",
+      "description": "Flattened per-AC summary for DEMO-GEN consumption",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ac": { "type": "string", "description": "AC id" },
+          "visible": { "type": "string", "description": "pass | fail" },
+          "held_out": { "type": "string", "description": "pass | fail" }
+        }
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["verified","failed","blocked"],
+      "description": "Verification outcome: verified (every applicable layer green + every M* wired) | failed | blocked"
+    },
+    "escape": {
+      "oneOf": [{"type":"string"},{"type":"null"}],
+      "description": "Null on verified; on blocked: failing layers + failure_signature + classification + route"
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Provenance: verifier role (distinct from builder/integrator, B1) + frozen artifact refs",
+      "properties": {
+        "verifier_role": { "type": "string", "description": "Role: verifier (runs oracle; defines nothing, B1)" },
+        "built_against": {
+          "type": "object",
+          "description": "Frozen artifact refs pinned at verification time",
+          "properties": {
+            "oracle_lock": { "type": "string", "description": "Oracle lock path" },
+            "skeleton_lock": { "type": "string", "description": "Skeleton lock path" },
+            "adr_lock": { "type": "string", "description": "ADR lock path" },
+            "aprd_lock": { "type": "string", "description": "APRD lock path" },
+            "build_plan": { "type": "string", "description": "Build plan path" },
+            "build_record": { "type": "string", "description": "Build record path" },
+            "integration_record": { "type": "string", "description": "Integration record path" }
+          }
+        }
+      }
+    },
     "verification_counts": {
       "type": "object",
+      "description": "Verification summary counts; walk to count, don't estimate",
       "required": ["layers_applicable", "layers_passed", "layers_failed"],
       "properties": {
-        "contract_tests": { "type": "integer" },
-        "contract_assertions": { "type": "integer" },
-        "flow_assertions": { "type": "integer" },
-        "acceptance_acs": { "type": "integer" },
-        "acceptance_visible_passed": { "type": "integer" },
-        "acceptance_held_out_passed": { "type": "integer" },
-        "class_ext_layers": { "type": "integer" },
-        "mechanisms_checked": { "type": "integer" },
-        "layers_applicable": { "type": "integer" },
-        "layers_passed": { "type": "integer" },
-        "layers_failed": { "type": "integer" }
+        "contract_tests": { "type": "integer", "description": "Oracle contract_tests[] entries" },
+        "contract_assertions": { "type": "integer", "description": "Shape + failure tests across contract tests" },
+        "flow_assertions": { "type": "integer", "description": "F* happy + failure assertions" },
+        "acceptance_acs": { "type": "integer", "description": "Distinct AC* entries in acceptance layer" },
+        "acceptance_visible_passed": { "type": "integer", "description": "Acceptance visible tests passed" },
+        "acceptance_held_out_passed": { "type": "integer", "description": "Acceptance held-out tests passed" },
+        "class_ext_layers": { "type": "integer", "description": "Class extension layers run (0 for greenfield skeleton)" },
+        "mechanisms_checked": { "type": "integer", "description": "NFR M* entries checked" },
+        "layers_applicable": { "type": "integer", "description": "Layers not n/a (out of contract/flow/acceptance/class_ext/nfr)" },
+        "layers_passed": { "type": "integer", "description": "Applicable layers passed" },
+        "layers_failed": { "type": "integer", "description": "Applicable layers failed" }
       }
     }
   }

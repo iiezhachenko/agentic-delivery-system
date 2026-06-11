@@ -5,49 +5,73 @@
   "type": "object",
   "required": ["aprd_ref", "foundation_cut_ref", "lock_verified", "class", "skeleton_id", "decision_points", "checklist_coverage", "aprd_defects", "decision_point_counts"],
   "properties": {
-    "aprd_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "lock_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "skeleton_id": { "type": "string" },
+    "aprd_ref": { "type": "string", "description": "Resolved aPRD artifact path (e.g. .aprd/aprd.frozen.md)" },
+    "foundation_cut_ref": { "type": "string", "description": "Path to foundation cut file (.roadmap/06-foundation-cut.json)" },
+    "lock_verified": { "type": "boolean", "description": "Lock present + status==frozen + named artifact exists on disk" },
+    "class": { "type": "string", "description": "Project class read from aPRD body (greenfield | feature-add)" },
+    "skeleton_id": { "type": "string", "description": "Skeleton id (e.g. S1) from aPRD" },
     "decision_points": {
       "type": "array",
+      "description": "All extracted DP* entries; emission order = checklist order, ties by lowest forced_by id position",
       "items": {
         "type": "object",
         "required": ["id", "decision", "category", "forced_by", "candidate_blast_radius", "blast_rationale", "fork_evidence"],
         "properties": {
-          "id": { "type": "string", "pattern": "^DP[0-9]+$" },
-          "decision": { "type": "string" },
-          "category": { "type": "string" },
-          "forced_by": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-          "candidate_blast_radius": { "type": "string", "enum": ["foundational","local"] },
-          "blast_rationale": { "type": "string" },
-          "fork_evidence": { "type": "string" },
-          "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}] }
+          "id": { "type": "string", "pattern": "^DP[0-9]+$", "description": "Stable DP* id; contiguous from DP1 in emission order" },
+          "decision": { "type": "string", "description": "Open question/fork that must be chosen; never answered; no vendor/stack pinned" },
+          "category": { "type": "string", "description": "Exactly one taxonomy label (Architectural style | Tech stack | Persistence | Sync vs async | Boundary strategy | API style | Cross-cutting | Deployment topology | Build/test strategy | Conformance)" },
+          "forced_by": {
+            "type": "array",
+            "description": "Non-empty array of frozen-aPRD ids that force this fork; removing any id weakens fork",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "candidate_blast_radius": { "type": "string", "enum": ["foundational","local"], "description": "DECISION-EXTRACT's proposal; TRIAGE owns binding call" },
+          "blast_rationale": { "type": "string", "description": "One-line grounding: pre-draw/cross-box (foundational) or inside-one-box (local)" },
+          "fork_evidence": { "type": "string", "description": "One line: ≥2 real compliant resolutions exist — genuineness proof for discriminator clause" },
+          "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Cut element traced to (FD* | seam:<name> | deferred:<slice>), or null when cut did not name it" }
         }
       }
     },
     "checklist_coverage": {
       "type": "array",
+      "description": "Every taxonomy category appears exactly once — full accounting of all categories",
       "items": {
         "type": "object",
         "required": ["category", "fired", "decision_points", "note"],
         "properties": {
-          "category": { "type": "string" },
-          "fired": { "type": "boolean" },
-          "decision_points": { "type": "array" },
-          "note": { "type": "string" }
+          "category": { "type": "string", "description": "Taxonomy category label" },
+          "fired": { "type": "boolean", "description": "True if at least one DP was extracted for this category" },
+          "decision_points": {
+            "type": "array",
+            "description": "DP ids assigned to this category; empty array when fired=false",
+            "items": { "type": "string" }
+          },
+          "note": { "type": "string", "description": "Why fired or why closed; cites forcing aPRD ids" }
         }
       }
     },
-    "aprd_defects": { "type": "array" },
+    "aprd_defects": {
+      "type": "array",
+      "description": "Forces that cannot be framed (contradictory/underspecified); empty on clean run",
+      "items": {
+        "type": "object",
+        "required": ["force", "reason", "escape"],
+        "properties": {
+          "force": { "type": "string", "description": "Contradictory or underspecified force text" },
+          "reason": { "type": "string", "description": "Why no decision point can be framed from this force" },
+          "escape": { "type": "string", "description": "Escape route (e.g. Phase 0 change request)" }
+        }
+      }
+    },
     "decision_point_counts": {
       "type": "object",
+      "description": "Tally of extracted decision points by blast-radius; walk to count, do not estimate",
       "required": ["total", "foundational", "local"],
       "properties": {
-        "total": { "type": "integer" },
-        "foundational": { "type": "integer" },
-        "local": { "type": "integer" }
+        "total": { "type": "integer", "description": "== decision_points.length" },
+        "foundational": { "type": "integer", "description": "Count of foundational candidate_blast_radius DPs" },
+        "local": { "type": "integer", "description": "Count of local candidate_blast_radius DPs; foundational + local == total" }
       }
     }
   }

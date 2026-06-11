@@ -5,44 +5,59 @@
   "type": "object",
   "required": ["class", "mode", "verdict", "issues", "issue_count", "critique_counts"],
   "properties": {
-    "components_ref": { "type": "string" },
-    "contracts_ref": { "type": "string" },
-    "data_model_ref": { "type": "string" },
-    "nfr_mechanisms_ref": { "type": "string" },
-    "flows_ref": { "type": "string" },
-    "test_specs_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "deferred_decisions_ref": { "type": "string" },
-    "lock_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "skeleton_id": { "type": "string" },
-    "artifacts_reviewed": { "type": "array", "items": { "type": "string" } },
-    "verdict": { "type": "string", "enum": ["clean","blocked"] },
+    "components_ref": { "type": "string", "description": "Path to skeleton components.json reviewed" },
+    "contracts_ref": { "type": "string", "description": "Path to skeleton contracts.json reviewed" },
+    "data_model_ref": { "type": "string", "description": "Path to skeleton data-model.json reviewed" },
+    "nfr_mechanisms_ref": { "type": "string", "description": "Path to skeleton nfr-mechanisms.json reviewed" },
+    "flows_ref": { "type": "string", "description": "Path to skeleton flows.json reviewed" },
+    "test_specs_ref": { "type": "string", "description": "Path to skeleton test-specs.json reviewed" },
+    "aprd_ref": { "type": "string", "description": "Resolved path to frozen aPRD artifact" },
+    "adr_lock_ref": { "type": "string", "description": "Path to adr.lock" },
+    "foundation_cut_ref": { "type": "string", "description": "Path to foundation-cut artifact" },
+    "deferred_decisions_ref": { "type": "string", "description": "Path to deferred-decisions.json" },
+    "lock_verified": { "type": "boolean", "description": "True if lock present and status==frozen and names frozen artifact" },
+    "class": { "type": "string", "description": "Project class: greenfield or brownfield" },
+    "mode": { "type": "string", "description": "skeleton for skeleton critique pass" },
+    "skeleton_id": { "type": "string", "description": "Skeleton slice id (e.g. S1)" },
+    "artifacts_reviewed": {
+      "type": "array",
+      "description": "Names of the six skeleton artifact files read by this critique",
+      "items": { "type": "string" }
+    },
+    "verdict": { "type": "string", "enum": ["clean","blocked"], "description": "clean iff issues empty; blocked iff issues non-empty (deterministic from issues)" },
     "issues": {
       "type": "array",
+      "description": "Blocking-grade issues only; empty on clean skeleton",
       "items": {
         "type": "object",
         "required": ["id", "category", "target", "finding", "fix_hint"],
         "properties": {
-          "id": { "type": "string" },
-          "category": { "type": "string", "enum": ["coverage-gap","ownership-defect","unmechanized-nfr","frame-violation","untestable-contract","incomplete-flow","undrained-queue"] },
-          "target": { "type": "string" },
-          "finding": { "type": "string" },
-          "fix_hint": { "type": "string" }
+          "id": { "type": "string", "description": "Contiguous issue id I1, I2, ..." },
+          "category": {
+            "type": "string",
+            "enum": ["coverage-gap","ownership-defect","unmechanized-nfr","frame-violation","untestable-contract","incomplete-flow","undrained-queue"],
+            "description": "Exactly one of seven blocking categories"
+          },
+          "target": { "type": "string", "description": "Concrete artifact id concerned (C*/CT*/E*/F*/M*/R*/DP*)" },
+          "finding": { "type": "string", "description": "What is wrong and why it blocks freeze; cite concrete artifact id" },
+          "fix_hint": { "type": "string", "description": "Concrete actionable change the routed stage should make" },
+          "routes_to": { "type": "string", "description": "Stage where fix belongs (e.g. DERIVE-COMPONENTS, DEFINE-CONTRACTS, Phase 0, Phase 2)" }
         }
       }
     },
-    "issue_count": { "type": "integer", "minimum": 0 },
+    "issue_count": { "type": "integer", "minimum": 0, "description": "Integer equal to length of issues array" },
     "critique_counts": {
       "type": "object",
+      "description": "Summary tallies derived by walking issues array",
       "required": ["artifacts_reviewed", "issues"],
       "properties": {
-        "artifacts_reviewed": { "type": "integer" },
-        "issues": { "type": "integer" },
-        "by_category": { "type": "object" }
+        "artifacts_reviewed": { "type": "integer", "minimum": 0, "description": "Count of artifacts reviewed (6 for skeleton)" },
+        "issues": { "type": "integer", "minimum": 0, "description": "Count of issues; equals issue_count" },
+        "by_category": {
+          "type": "object",
+          "description": "Issue count per category; sums to issue_count",
+          "additionalProperties": true
+        }
       }
     }
   }

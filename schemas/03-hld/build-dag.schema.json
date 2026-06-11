@@ -5,27 +5,84 @@
   "type": "object",
   "required": ["class", "mode", "nodes"],
   "properties": {
-    "components_ref": { "type": "string" },
-    "lock_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "skeleton_id": { "type": "string" },
-    "edge_semantics": { "type": "string" },
+    "components_ref": { "type": "string", "description": "Path to components.json whose edges this DAG encodes" },
+    "lock_verified": { "type": "boolean", "description": "True if lock present and names frozen artifact" },
+    "class": { "type": "string", "description": "Project class: greenfield or brownfield" },
+    "mode": { "type": "string", "description": "skeleton (emitted once; no increment DAG)" },
+    "skeleton_id": { "type": "string", "description": "Skeleton slice id (e.g. S1)" },
+    "edge_semantics": { "type": "string", "description": "Human-readable explanation of edge direction semantics" },
     "nodes": {
       "type": "array",
+      "description": "One node per component in components.json; topologically ordered",
       "items": {
         "type": "object",
         "required": ["id", "name", "depends_on"],
         "properties": {
-          "id": { "type": "string", "pattern": "^C[0-9]+$" },
-          "name": { "type": "string" },
-          "depends_on": { "type": "array", "items": { "type": "string" } }
+          "id": { "type": "string", "pattern": "^C[0-9]+$", "description": "Component id" },
+          "name": { "type": "string", "description": "Component name carried from components.json" },
+          "depends_on": {
+            "type": "array",
+            "description": "C* ids this node depends on (to of every edge whose from == this node); empty = leaf",
+            "items": { "type": "string", "pattern": "^C[0-9]+$" }
+          }
         }
       }
     },
-    "acyclic": { "type": "boolean" },
-    "cycles": { "type": "array" },
-    "node_count": { "type": "integer" },
-    "edge_count": { "type": "integer" }
+    "build_waves": {
+      "type": "array",
+      "description": "Nodes grouped by build wave; wave = 1 + max(wave of depends_on); ascending C* within wave",
+      "items": {
+        "type": "object",
+        "required": ["wave", "components", "rationale"],
+        "properties": {
+          "wave": { "type": "integer", "minimum": 0, "description": "Wave index (0 = leaf nodes)" },
+          "components": {
+            "type": "array",
+            "description": "C* ids in this wave, ascending",
+            "items": { "type": "string", "pattern": "^C[0-9]+$" }
+          },
+          "rationale": { "type": "string", "description": "One-line explanation of why nodes land in this wave" }
+        }
+      }
+    },
+    "build_order": {
+      "type": "array",
+      "description": "Waves concatenated, ascending C* within wave — valid topological order",
+      "items": { "type": "string", "pattern": "^C[0-9]+$" }
+    },
+    "acyclic": { "type": "boolean", "description": "True if graph has no cycles" },
+    "cycles": {
+      "type": "array",
+      "description": "Dependency cycles found; each {nodes:[C*], route}; empty on clean run",
+      "items": {
+        "type": "object",
+        "required": ["nodes"],
+        "properties": {
+          "nodes": { "type": "array", "items": { "type": "string", "pattern": "^C[0-9]+$" }, "description": "C* ids forming the cycle" },
+          "route": { "type": "string", "description": "Routing for fix (e.g. DERIVE-COMPONENTS)" }
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "description": "Counts verifying all nodes placed in build_order",
+      "properties": {
+        "nodes": { "type": "integer", "minimum": 0, "description": "Total node count; equals components.json component count" },
+        "edges": { "type": "integer", "minimum": 0, "description": "Total edge count; equals components.json edge count" },
+        "nodes_ordered": { "type": "integer", "minimum": 0, "description": "Nodes placed in build_order" },
+        "all_nodes_ordered": { "type": "boolean", "description": "False if cycle left a node unplaceable" }
+      }
+    },
+    "dag_counts": {
+      "type": "object",
+      "description": "Counts derived by walking actual lists",
+      "properties": {
+        "nodes": { "type": "integer", "minimum": 0, "description": "Count of nodes array" },
+        "edges": { "type": "integer", "minimum": 0, "description": "Total edge count across all depends_on" },
+        "waves": { "type": "integer", "minimum": 0, "description": "Count of build_waves" }
+      }
+    },
+    "node_count": { "type": "integer", "minimum": 0, "description": "Alias for dag_counts.nodes" },
+    "edge_count": { "type": "integer", "minimum": 0, "description": "Alias for dag_counts.edges" }
   }
 }

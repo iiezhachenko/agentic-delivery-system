@@ -5,50 +5,77 @@
   "type": "object",
   "required": ["id", "decision", "category", "forced_by", "options_ref", "grounding_source", "evaluation", "decision_made", "rationale", "rejected", "consequences", "traces", "degenerate_forced"],
   "properties": {
-    "id": { "type": "string", "pattern": "^DP[0-9]+$" },
-    "decision": { "type": "string" },
-    "category": { "type": "string" },
-    "forced_by": { "type": "array", "items": { "type": "string" } },
-    "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
-    "options_ref": { "type": "string" },
-    "grounding_source": { "type": "string" },
+    "id": { "type": "string", "pattern": "^DP[0-9]+$", "description": "DP id carried verbatim from option file; never re-minted" },
+    "decision": { "type": "string", "description": "Decision text carried verbatim from option file; never re-authored" },
+    "category": { "type": "string", "description": "Category carried verbatim from option file; never re-categorized" },
+    "forced_by": {
+      "type": "array",
+      "description": "Forcing aPRD ids carried verbatim from option file",
+      "items": { "type": "string" }
+    },
+    "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Cut element reference carried verbatim from option file" },
+    "options_ref": { "type": "string", "description": "Option file this decision was made from (03-options/DP*.json)" },
+    "grounding_source": { "type": "string", "description": "Carried from option file's grounding.source (existing_system | canon | reasoned)" },
     "evaluation": {
       "type": "array",
+      "description": "One entry per option; len == option_count; proof alternatives were live (D1, D3)",
       "items": {
         "type": "object",
         "required": ["option", "assessment", "decisive_factors"],
         "properties": {
-          "option": { "type": "string" },
-          "assessment": { "type": "string" },
-          "decisive_factors": { "type": "array", "items": { "type": "string" } }
+          "option": { "type": "string", "description": "Option name verbatim from option file" },
+          "assessment": { "type": "string", "description": "Neutral assessment of how this option fares against forces; written as property of option, before any pick; cites real ids" },
+          "decisive_factors": {
+            "type": "array",
+            "description": "aPRD/cut ids most driving this option's standing",
+            "items": { "type": "string" }
+          }
         }
       }
     },
-    "decision_made": { "type": "string" },
-    "rationale": { "type": "string" },
+    "decision_made": { "type": "string", "description": "Chosen option's option string verbatim; must match one evaluation entry" },
+    "rationale": { "type": "string", "description": "Why this option's trade-off profile best satisfies contract; names forces that tip it + weighting" },
     "rejected": {
       "type": "array",
+      "description": "One entry per non-picked option; empty when degenerate_forced",
       "items": {
         "type": "object",
         "required": ["option", "why_rejected"],
         "properties": {
-          "option": { "type": "string" },
-          "why_rejected": { "type": "string" }
+          "option": { "type": "string", "description": "Non-picked option's name verbatim" },
+          "why_rejected": { "type": "string", "description": "Concrete consequence ruling it out, traced to specific force (C*/AC*/A*/INV*/forced_by id)" }
         }
       }
     },
     "consequences": {
       "type": "object",
+      "description": "Forward-looking outcomes; tells Phase 3 what HLD must honor",
       "required": ["positive", "accepted_cost", "follow_on"],
       "properties": {
-        "positive": { "type": "array", "items": { "type": "string" } },
-        "accepted_cost": { "type": "array", "items": { "type": "string" } },
-        "follow_on": { "type": "array", "items": { "type": "string" } }
+        "positive": {
+          "type": "array",
+          "description": "What pick buys, traced to force it satisfies",
+          "items": { "type": "string" }
+        },
+        "accepted_cost": {
+          "type": "array",
+          "description": "Downside knowingly taken on — trade-off accepted by this pick",
+          "items": { "type": "string" }
+        },
+        "follow_on": {
+          "type": "array",
+          "description": "Decisions this pick enables or constrains; may reference DP id, INV id, or deferred item",
+          "items": { "type": "string" }
+        }
       }
     },
-    "traces": { "type": "array", "items": { "type": "string" } },
-    "degenerate_forced": { "type": "boolean" },
-    "degenerate_reason": { "oneOf": [{"type":"string"},{"type":"null"}] },
-    "lane_note": { "type": "string" }
+    "traces": {
+      "type": "array",
+      "description": "forced_by ∪ additional aPRD/cut ids cited as decisive; real ids only, no padding",
+      "items": { "type": "string" }
+    },
+    "degenerate_forced": { "type": "boolean", "description": "True only when option file was degenerate: true (single compliant option)" },
+    "degenerate_reason": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Carried from option file when degenerate_forced; null otherwise" },
+    "lane_note": { "type": "string", "description": "Fixed reminder of lane boundaries for downstream roles" }
   }
 }

@@ -3,66 +3,623 @@
   "$id": "test-specs",
   "title": "DERIVE-TESTS output — design-layer test spec (contract tests + flow tests + build-dag)",
   "type": "object",
-  "required": ["class", "mode"],
+  "required": [
+    "class",
+    "mode"
+  ],
   "allOf": [
     {
-      "if": { "properties": { "mode": { "const": "skeleton" } }, "required": ["mode"] },
-      "then": { "required": ["contract_tests", "flow_tests", "coverage", "test_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "skeleton",
+            "description": "discriminator guard: mode==\"skeleton\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "contract_tests",
+          "flow_tests",
+          "coverage",
+          "test_counts"
+        ]
+      }
     },
     {
-      "if": { "properties": { "mode": { "const": "increment" } }, "required": ["mode"] },
-      "then": { "required": ["flow_tests", "inherited_contract_tests", "new_contract_tests", "coverage", "test_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "increment",
+            "description": "discriminator guard: mode==\"increment\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "flow_tests",
+          "inherited_contract_tests",
+          "new_contract_tests",
+          "coverage",
+          "test_counts"
+        ]
+      }
     }
   ],
   "properties": {
-    "contracts_ref": { "type": "string" },
-    "flows_ref": { "type": "string" },
-    "components_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "lock_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "skeleton_id": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "base_test_specs_ref": { "type": "string" },
-    "base_contracts_ref": { "type": "string" },
-    "slice_flows_ref": { "type": "string" },
-    "slice_contracts_ref": { "type": "string" },
-    "skeleton_frozen_verified": { "type": "boolean" },
-    "slice_id": { "type": "string" },
-    "slice_name": { "type": "string" },
-    "layer": { "type": "string" },
-    "inherited_contract_tests": { "type": "array" },
-    "new_contract_tests": { "type": "array" },
-    "skeleton_fidelity": { "type": "object" },
-    "increment_counts": { "type": "object" },
-    "contract_tests": {
+    "contracts_ref": {
+      "type": "string",
+      "description": "Path to contracts.json"
+    },
+    "flows_ref": {
+      "type": "string",
+      "description": "Path to flows.json"
+    },
+    "components_ref": {
+      "type": "string",
+      "description": "Path to components.json"
+    },
+    "aprd_ref": {
+      "type": "string",
+      "description": "Resolved path to frozen aPRD artifact"
+    },
+    "foundation_cut_ref": {
+      "type": "string",
+      "description": "Path to foundation-cut artifact"
+    },
+    "adr_lock_ref": {
+      "type": "string",
+      "description": "Path to adr.lock"
+    },
+    "lock_verified": {
+      "type": "boolean",
+      "description": "True if lock present and status==frozen and names frozen artifact"
+    },
+    "class": {
+      "type": "string",
+      "description": "Project class: greenfield or brownfield"
+    },
+    "mode": {
+      "type": "string",
+      "description": "skeleton = full contract+flow+dag oracle; increment = per-slice flow test + inherited contract tests"
+    },
+    "skeleton_id": {
+      "type": "string",
+      "description": "Skeleton slice id (e.g. S1)"
+    },
+    "skeleton_lock_ref": {
+      "type": "string",
+      "description": "Path to skeleton.lock (increment mode)"
+    },
+    "base_test_specs_ref": {
+      "type": "string",
+      "description": "Path to frozen skeleton test-specs.json (increment mode)"
+    },
+    "base_contracts_ref": {
+      "type": "string",
+      "description": "Path to frozen skeleton contracts.json (increment mode)"
+    },
+    "slice_flows_ref": {
+      "type": "string",
+      "description": "Path to slice flows.json (increment mode)"
+    },
+    "slice_contracts_ref": {
+      "type": "string",
+      "description": "Path to slice contracts.json (increment mode)"
+    },
+    "skeleton_frozen_verified": {
+      "type": "boolean",
+      "description": "True if skeleton.lock present and status==frozen"
+    },
+    "slice_id": {
+      "type": "string",
+      "description": "Target slice id (increment mode)"
+    },
+    "slice_name": {
+      "type": "string",
+      "description": "Slice name carried verbatim (increment mode)"
+    },
+    "layer": {
+      "type": "string",
+      "description": "Design-layer oracle description distinguishing from aPRD black-box acceptance oracle"
+    },
+    "inherited_contract_tests": {
       "type": "array",
+      "description": "Frozen T-CT* inherited by reference for each touched CT*; shape/failure assertions cited, never copied",
       "items": {
         "type": "object",
-        "required": ["id", "target", "between", "contract_kind"],
+        "required": [
+          "id",
+          "target",
+          "between",
+          "contract_kind"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "target": { "type": "string" },
-          "between": { "type": "array" },
-          "contract_kind": { "type": "string" },
-          "file": { "type": "string" },
-          "mocked_deps": { "type": "array" },
-          "shape_test": { "type": "string" },
-          "failure_tests": { "type": "array", "items": { "type": "string" } },
-          "failure_modes": { "type": "array", "items": { "type": "string" } },
-          "traces": { "type": "array" }
+          "id": {
+            "type": "string",
+            "description": "T-CT* id verbatim from frozen test-specs.json"
+          },
+          "target": {
+            "type": "string",
+            "description": "CT* id the test targets"
+          },
+          "between": {
+            "type": "array",
+            "description": "Component ids from contract",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2
+          },
+          "contract_kind": {
+            "type": "string",
+            "description": "sync_api, shared_data, or async_event; carried from contract"
+          },
+          "source_ref": {
+            "type": "string",
+            "description": "Path to frozen test-specs.json where this test is defined"
+          }
         }
       }
     },
-    "flow_tests": { "type": "array" },
-    "acceptance_tests": { "type": "array" },
-    "coverage": { "type": "object" },
-    "aprd_defects": { "type": "array" },
-    "frame_conflicts": { "type": "array" },
-    "structural_defects": { "type": "array" },
-    "test_counts": { "type": "object" }
+    "new_contract_tests": {
+      "type": "array",
+      "description": "Contract tests for new_contracts (new edges minted this slice); empty in greenfield",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "target",
+          "between",
+          "contract_kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "New test id T-CT*"
+          },
+          "target": {
+            "type": "string",
+            "description": "CT* id the test targets"
+          },
+          "between": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "description": "Component ids"
+          },
+          "contract_kind": {
+            "type": "string",
+            "description": "Contract kind"
+          },
+          "shape_assertion": {
+            "type": "string",
+            "description": "One-line seam shape assertion"
+          },
+          "failure_assertions": {
+            "type": "array",
+            "description": "One assertion per declared failure_mode",
+            "items": {
+              "type": "object",
+              "required": [
+                "failure_mode",
+                "expected_behavior"
+              ],
+              "properties": {
+                "failure_mode": {
+                  "type": "string",
+                  "description": "Verbatim failure_mode from contract"
+                },
+                "expected_behavior": {
+                  "type": "string",
+                  "description": "Seam behavior under this failure"
+                }
+              }
+            }
+          },
+          "traces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "R* ids carried from contract"
+          }
+        }
+      }
+    },
+    "skeleton_fidelity": {
+      "type": "object",
+      "description": "H14 — increment inherits frozen oracle, never re-authors (increment mode)",
+      "properties": {
+        "inherited_contract_tests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "T-CT* ids inherited by reference"
+        },
+        "re_authored_contract_tests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frozen T-CT* re-authored; MUST be empty"
+        },
+        "re_tested_flows": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frozen F* re-tested; MUST be empty"
+        },
+        "build_dag_re_emitted": {
+          "type": "boolean",
+          "description": "True if build-dag re-emitted; MUST be false (emitted once)"
+        },
+        "verdict": {
+          "type": "string",
+          "description": "inherits-frozen-oracle on clean run"
+        }
+      }
+    },
+    "increment_counts": {
+      "type": "object",
+      "description": "Counts derived by walking actual lists",
+      "properties": {
+        "flow_tests": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of flow_tests"
+        },
+        "inherited_contract_tests": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of inherited_contract_tests"
+        },
+        "new_contract_tests": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of new_contract_tests"
+        }
+      }
+    },
+    "contract_tests": {
+      "type": "array",
+      "description": "One test per CT* in skeleton contracts.json, CT* id order (bijection)",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "target",
+          "between",
+          "contract_kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Test id T-CT1..T-CTn in contracts.json CT* order"
+          },
+          "target": {
+            "type": "string",
+            "description": "CT* id this test targets"
+          },
+          "between": {
+            "type": "array",
+            "description": "Component ids [from, to] carried from contract",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2
+          },
+          "contract_kind": {
+            "type": "string",
+            "description": "sync_api, shared_data, or async_event; carried from contract"
+          },
+          "shape_assertion": {
+            "type": "string",
+            "description": "One-line: seam carries declared shape (E*-set + responsibility); named not designed"
+          },
+          "failure_assertions": {
+            "type": "array",
+            "description": "One assertion per declared failure_mode in contract's failure_modes array order",
+            "items": {
+              "type": "object",
+              "required": [
+                "failure_mode",
+                "expected_behavior"
+              ],
+              "properties": {
+                "failure_mode": {
+                  "type": "string",
+                  "description": "Verbatim failure_mode from contract"
+                },
+                "expected_behavior": {
+                  "type": "string",
+                  "description": "One-line seam behavior under this failure; derived from failure_mode consequence"
+                }
+              }
+            }
+          },
+          "traces": {
+            "type": "array",
+            "description": "R* ids carried from contract",
+            "items": {
+              "type": "string"
+            }
+          },
+          "file": {
+            "type": "string",
+            "description": "Test file path (optional; Phase 4 materializes)"
+          },
+          "mocked_deps": {
+            "type": "array",
+            "description": "Dependencies mocked in this test",
+            "items": {
+              "type": "string"
+            }
+          },
+          "shape_test": {
+            "type": "string",
+            "description": "Legacy alias for shape_assertion"
+          },
+          "failure_tests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Legacy alias for failure_assertions"
+          },
+          "failure_modes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Failure mode ids tested"
+          }
+        }
+      }
+    },
+    "flow_tests": {
+      "type": "array",
+      "description": "One flow test per F*; skeleton: F1 (walking skeleton); increment: F<slice_ordinal>",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "target",
+          "slice"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Test id T-F* matching flow id"
+          },
+          "target": {
+            "type": "string",
+            "description": "F* id this test targets"
+          },
+          "slice": {
+            "type": "string",
+            "description": "Slice id this flow realizes"
+          },
+          "path": {
+            "type": "array",
+            "description": "C* ids ordered traversal; carried from flow",
+            "items": {
+              "type": "string",
+              "pattern": "^C[0-9]+$"
+            }
+          },
+          "via": {
+            "type": "array",
+            "description": "CT* ids happy path composes against; carried from flow",
+            "items": {
+              "type": "string"
+            }
+          },
+          "happy_path": {
+            "type": "object",
+            "description": "Happy path assertion and arrival oracle",
+            "properties": {
+              "assertion": {
+                "type": "string",
+                "description": "One-line: walking-skeleton path traverses CT* and arrives at acceptance oracle"
+              },
+              "asserts_ac": {
+                "type": "array",
+                "description": "AC* ids referenced as arrival oracle (NOT re-authored; Phase 0 owns AC text)",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "failure_path": {
+            "type": "object",
+            "description": "Failure variant reused from flow's declared failure_path",
+            "properties": {
+              "exercises": {
+                "type": "string",
+                "description": "CT*:<declared failure_mode> from flow"
+              },
+              "expected_terminal_state": {
+                "type": "string",
+                "description": "Flow's failure_path.arrives_at — terminal failure state path must reach"
+              }
+            }
+          },
+          "traces": {
+            "type": "array",
+            "description": "R*/AC* ids carried verbatim from flow",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "acceptance_tests": {
+      "type": "array",
+      "description": "Acceptance-level tests if present; typically empty at design layer",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "description": "Bijection checks: every CT* tested, every F* tested, failure modes covered",
+      "properties": {
+        "contracts_in_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Every CT* in contracts.json"
+        },
+        "contracts_tested": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Every CT* with contract_tests entry"
+        },
+        "contract_orphans": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "CT* with no test; empty on clean run"
+        },
+        "flows_in_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "F* ids in scope"
+        },
+        "flows_tested": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "F* ids with flow_tests entry"
+        },
+        "flow_orphans": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "F* with no test; empty on clean run"
+        },
+        "failure_modes_total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sum of declared failure_modes across all contracts"
+        },
+        "failure_modes_covered": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sum of failure_assertions emitted; equals failure_modes_total on clean run"
+        },
+        "touched_contracts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Touched CT* ids (increment mode)"
+        },
+        "contracts_covered": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Covered CT* ids (increment mode)"
+        },
+        "slice_flow": {
+          "type": "string",
+          "description": "F* id for this slice (increment mode)"
+        },
+        "flow_tested": {
+          "type": "string",
+          "description": "F* id tested (increment mode)"
+        },
+        "asserted_acs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "AC* ids asserted by flow test (increment mode)"
+        }
+      }
+    },
+    "aprd_defects": {
+      "type": "array",
+      "description": "F* tracing no AC* (no arrival oracle); each {target, gap, route}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "frame_conflicts": {
+      "type": "array",
+      "description": "Frame conflicts found during test derivation; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "structural_defects": {
+      "type": "array",
+      "description": "CT* with empty failure_modes (no failure test authorable); each {target, gap, route}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "test_counts": {
+      "type": "object",
+      "description": "Counts derived by walking actual lists",
+      "properties": {
+        "contract_tests": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of contract_tests; equals contracts_in_scope on clean run"
+        },
+        "flow_tests": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of flow_tests"
+        },
+        "shape_assertions": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "One per contract_tests entry"
+        },
+        "failure_assertions": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Equals failure_modes_covered"
+        },
+        "inherited_contract_tests": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of inherited_contract_tests (increment mode)"
+        },
+        "new_contract_tests": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of new_contract_tests (increment mode)"
+        }
+      }
+    }
   }
 }

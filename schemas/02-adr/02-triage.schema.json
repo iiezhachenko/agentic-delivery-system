@@ -5,46 +5,82 @@
   "type": "object",
   "required": ["decision_points_ref", "foundation_cut_ref", "class", "skeleton_id", "triage", "resolution_queue", "slice_deferred", "deferred_queue", "conventions", "cut_gaps", "triage_counts"],
   "properties": {
-    "decision_points_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "skeleton_id": { "type": "string" },
+    "decision_points_ref": { "type": "string", "description": "Path to 01-decision-points.json" },
+    "foundation_cut_ref": { "type": "string", "description": "Path to foundation cut file" },
+    "class": { "type": "string", "description": "Project class (greenfield | feature-add)" },
+    "skeleton_id": { "type": "string", "description": "Skeleton id (e.g. S1)" },
     "triage": {
       "type": "array",
+      "description": "One entry per DP*; blast-radius binding + queue routing for each point",
       "items": {
         "type": "object",
         "required": ["id", "decision", "category", "candidate_blast_radius", "blast_radius", "blast_decision", "cut_status", "route"],
         "properties": {
-          "id": { "type": "string", "pattern": "^DP[0-9]+$" },
-          "decision": { "type": "string" },
-          "category": { "type": "string" },
-          "candidate_blast_radius": { "type": "string" },
-          "blast_radius": { "type": "string", "enum": ["foundational","local","trivial"] },
-          "blast_decision": { "type": "string", "enum": ["confirmed","overridden"] },
-          "blast_rationale": { "type": "string" },
-          "cut_status": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "cut_gap": { "type": "boolean" },
-          "defer_to": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "route": { "type": "string", "enum": ["resolution_queue","slice_deferred","deferred_queue","convention"] },
-          "route_rationale": { "type": "string" }
+          "id": { "type": "string", "pattern": "^DP[0-9]+$", "description": "DP id carried verbatim from 01-decision-points; never re-minted" },
+          "decision": { "type": "string", "description": "Decision text carried verbatim from 01; never re-authored" },
+          "category": { "type": "string", "description": "Category carried verbatim from 01; never re-categorized" },
+          "candidate_blast_radius": { "type": "string", "description": "DECISION-EXTRACT's proposal (foundational | local), carried for audit" },
+          "blast_radius": { "type": "string", "enum": ["foundational","local","trivial"], "description": "BINDING call: exactly foundational | local | trivial" },
+          "blast_decision": { "type": "string", "enum": ["confirmed","overridden"], "description": "confirmed (matches candidate) | overridden (differs); downgrade to trivial always overridden" },
+          "blast_rationale": { "type": "string", "description": "One line: discriminator reason for binding tag; required when overridden" },
+          "cut_status": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "in-cut | not-yet for foundational; null for local/trivial" },
+          "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Cut element reference carried verbatim from 01" },
+          "cut_gap": { "type": "boolean", "description": "True only for in-cut foundational point whose cut_ref is null or deferred:<slice>" },
+          "defer_to": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Slice id (e.g. S3) for not-yet foundational; null otherwise" },
+          "route": { "type": "string", "enum": ["resolution_queue","slice_deferred","deferred_queue","convention"], "description": "Exactly one queue assignment: deterministic from blast_radius × cut_status axes" },
+          "route_rationale": { "type": "string", "description": "One line: why this queue, from blast_radius + cut_status axes" }
         }
       }
     },
-    "resolution_queue": { "type": "array", "items": { "type": "string" } },
-    "slice_deferred": { "type": "array", "items": { "type": "object" } },
-    "deferred_queue": { "type": "array", "items": { "type": "string" } },
-    "conventions": { "type": "array", "items": { "type": "object" } },
-    "cut_gaps": { "type": "array", "items": { "type": "string" } },
+    "resolution_queue": {
+      "type": "array",
+      "description": "DP ids routed resolution_queue (foundational + in-cut), in triage[] order",
+      "items": { "type": "string" }
+    },
+    "slice_deferred": {
+      "type": "array",
+      "description": "Foundational + not-yet DPs; each carries defer_to slice id",
+      "items": {
+        "type": "object",
+        "required": ["id", "defer_to"],
+        "properties": {
+          "id": { "type": "string", "description": "DP id" },
+          "defer_to": { "type": "string", "description": "Slice id this DP is deferred to (e.g. S3)" }
+        }
+      }
+    },
+    "deferred_queue": {
+      "type": "array",
+      "description": "DP ids routed to Phase 3 (local), in triage[] order",
+      "items": { "type": "string" }
+    },
+    "conventions": {
+      "type": "array",
+      "description": "Trivial points; no architectural fork, left to standard convention, no ADR owed",
+      "items": {
+        "type": "object",
+        "required": ["id", "note"],
+        "properties": {
+          "id": { "type": "string", "description": "DP id of trivial point" },
+          "note": { "type": "string", "description": "One line: no architectural fork; left to standard convention, no ADR owed" }
+        }
+      }
+    },
+    "cut_gaps": {
+      "type": "array",
+      "description": "DP ids with cut_gap: true; empty when cut named every in-cut foundational point",
+      "items": { "type": "string" }
+    },
     "triage_counts": {
       "type": "object",
+      "description": "Walk to count, don't estimate; four sub-counts sum to total",
       "required": ["total", "foundational_in_cut", "foundational_not_yet", "local", "trivial"],
       "properties": {
-        "total": { "type": "integer" },
-        "foundational_in_cut": { "type": "integer" },
-        "foundational_not_yet": { "type": "integer" },
-        "local": { "type": "integer" },
-        "trivial": { "type": "integer" }
+        "total": { "type": "integer", "description": "== len(triage) == len(01.decision_points)" },
+        "foundational_in_cut": { "type": "integer", "description": "Foundational DPs with cut_status=in-cut" },
+        "foundational_not_yet": { "type": "integer", "description": "Foundational DPs with cut_status=not-yet" },
+        "local": { "type": "integer", "description": "DPs with blast_radius=local" },
+        "trivial": { "type": "integer", "description": "DPs with blast_radius=trivial (conventions)" }
       }
     }
   }

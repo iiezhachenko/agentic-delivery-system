@@ -5,86 +5,190 @@
   "type": "object",
   "required": ["skeleton_ref", "sequence_ref", "aprd_ref", "class", "skeleton_id", "foundation_cut", "deferred", "coverage", "cut_counts"],
   "properties": {
-    "skeleton_ref": { "type": "string" },
-    "sequence_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "skeleton_id": { "type": "string" },
+    "skeleton_ref": {
+      "description": "Path to 04-skeleton.json providing the walking skeleton and seams.",
+      "type": "string"
+    },
+    "sequence_ref": {
+      "description": "Path to 05-sequence.json providing the ordered slice list.",
+      "type": "string"
+    },
+    "aprd_ref": {
+      "description": "Path to frozen aPRD artifact.",
+      "type": "string"
+    },
+    "class": {
+      "description": "Project class: greenfield or feature-add.",
+      "type": "string"
+    },
+    "skeleton_id": {
+      "description": "04-skeleton.json skeleton id, carried verbatim.",
+      "type": "string"
+    },
     "foundation_cut": {
+      "description": "The three lists comprising the foundational cut: decisions, seams, and cross-slice invariants.",
       "type": "object",
       "required": ["foundational_decisions", "skeleton_seams", "cross_slice_invariants"],
       "properties": {
         "foundational_decisions": {
+          "description": "Decision categories Phase 2 must resolve; each needed before skeleton or first dependent slice can be built.",
           "type": "array",
           "items": {
             "type": "object",
             "required": ["id", "category", "needed_by", "why_foundational", "grounded_in"],
             "properties": {
-              "id": { "type": "string", "pattern": "^FD[0-9]+$" },
-              "category": { "type": "string" },
-              "needed_by": { "type": "array", "items": { "type": "string" } },
-              "why_foundational": { "type": "string" },
-              "grounded_in": { "type": "array", "items": { "type": "string" } }
+              "id": {
+                "description": "FD* identifier for this foundational decision.",
+                "type": "string",
+                "pattern": "^FD[0-9]+$"
+              },
+              "category": {
+                "description": "What Phase 2 must resolve — named but not decided; no vendor/stack/library named.",
+                "type": "string"
+              },
+              "needed_by": {
+                "description": "S* IDs of slices that require this decision to be resolved first.",
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "why_foundational": {
+                "description": "Why decided once before slicing — skeleton or every slice needs it; cannot be deferred.",
+                "type": "string"
+              },
+              "grounded_in": {
+                "description": "aPRD IDs that exist verbatim and ground this decision.",
+                "type": "array",
+                "items": { "type": "string" }
+              }
             }
           }
         },
         "skeleton_seams": {
+          "description": "Carried from 04-skeleton.json, one per present seam, wording refinable; no seam added or dropped.",
           "type": "array",
           "items": {
             "type": "object",
             "required": ["seam", "must_establish", "grounded_in"],
             "properties": {
-              "seam": { "type": "string" },
-              "must_establish": { "type": "string" },
-              "grounded_in": { "type": "array", "items": { "type": "string" } }
+              "seam": {
+                "description": "Seam category name.",
+                "type": "string"
+              },
+              "must_establish": {
+                "description": "Functional touch-point skeleton must prove; named-not-designed, no component/stack/vendor.",
+                "type": "string"
+              },
+              "grounded_in": {
+                "description": "aPRD IDs carried from 04-skeleton.json.",
+                "type": "array",
+                "items": { "type": "string" }
+              }
             }
           }
         },
         "cross_slice_invariants": {
+          "description": "Cross-cutting properties holding across all slices; first entry always INV-ECON engine default; rest aPRD-derived only.",
           "type": "array",
           "items": {
             "type": "object",
             "required": ["id", "invariant", "applies_to", "grounded_in"],
             "properties": {
-              "id": { "type": "string" },
-              "invariant": { "type": "string" },
-              "applies_to": { "type": "string" },
-              "grounded_in": { "type": "array", "items": { "type": "string" } }
+              "id": {
+                "description": "INV-ECON (engine default) or INV* identifier for this invariant.",
+                "type": "string"
+              },
+              "invariant": {
+                "description": "Cross-slice aPRD-fixed property decided once; restates aPRD, never invented.",
+                "type": "string"
+              },
+              "applies_to": {
+                "description": "Why this invariant holds across slices and which slices inherit it.",
+                "type": "string"
+              },
+              "grounded_in": {
+                "description": "aPRD IDs (C*/A*/E* or engine canon) that ground this invariant.",
+                "type": "array",
+                "items": { "type": "string" }
+              }
             }
           }
         }
       }
     },
     "deferred": {
+      "description": "HOW-decisions deliberately not in the cut; thinness evidence; every post-skeleton slice should be represented.",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["item", "defer_to", "reason", "grounded_in"],
         "properties": {
-          "item": { "type": "string" },
-          "defer_to": { "type": "string" },
-          "reason": { "type": "string" },
-          "grounded_in": { "type": "array", "items": { "type": "string" } }
+          "item": {
+            "description": "HOW-decision deliberately not in the foundation cut.",
+            "type": "string"
+          },
+          "defer_to": {
+            "description": "S* identifier of the slice that will own this decision.",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why deferring is safe — only this slice needs it; not cross-slice, not on skeleton path.",
+            "type": "string"
+          },
+          "grounded_in": {
+            "description": "aPRD IDs that ground the deferral.",
+            "type": "array",
+            "items": { "type": "string" }
+          }
         }
       }
     },
     "coverage": {
+      "description": "Coverage accounting: seams carried from 04, post-skeleton slices, and slices represented in deferred[].",
       "type": "object",
       "required": ["skeleton_seams_carried", "post_skeleton_slices", "deferred_slices"],
       "properties": {
-        "skeleton_seams_carried": { "type": "array", "items": { "type": "string" } },
-        "post_skeleton_slices": { "type": "array", "items": { "type": "string" } },
-        "deferred_slices": { "type": "array", "items": { "type": "string" } }
+        "skeleton_seams_carried": {
+          "description": "Present seam names carried from 04-skeleton.json.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "post_skeleton_slices": {
+          "description": "Slice ids after position 1 in the 05-sequence.json order.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "deferred_slices": {
+          "description": "Distinct defer_to S* ids in deferred[]; should cover post_skeleton_slices.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
       }
     },
     "cut_counts": {
+      "description": "Integer counts of each cut list for quick verification.",
       "type": "object",
       "required": ["foundational_decisions", "skeleton_seams", "cross_slice_invariants", "deferred"],
       "properties": {
-        "foundational_decisions": { "type": "integer", "minimum": 0 },
-        "skeleton_seams": { "type": "integer", "minimum": 0 },
-        "cross_slice_invariants": { "type": "integer", "minimum": 0 },
-        "deferred": { "type": "integer", "minimum": 0 }
+        "foundational_decisions": {
+          "description": "Count of entries in foundation_cut.foundational_decisions.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "skeleton_seams": {
+          "description": "Count of entries in foundation_cut.skeleton_seams.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "cross_slice_invariants": {
+          "description": "Count of entries in foundation_cut.cross_slice_invariants.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "deferred": {
+          "description": "Count of entries in deferred[].",
+          "type": "integer",
+          "minimum": 0
+        }
       }
     }
   }

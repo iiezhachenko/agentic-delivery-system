@@ -3,75 +3,289 @@
   "$id": "demo",
   "title": "DEMO-GEN output — client-facing demo record with acceptance evidence",
   "type": "object",
-  "required": ["class", "mode", "demonstrated_acs", "status", "demo_counts"],
+  "required": [
+    "class",
+    "mode",
+    "demonstrated_acs",
+    "status",
+    "demo_counts"
+  ],
   "allOf": [
     {
-      "if": { "properties": { "mode": { "const": "skeleton-build" } }, "required": ["mode"] },
-      "then": { "required": ["verification_ref", "slice", "flow_demonstrated"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "skeleton-build",
+            "description": "discriminator guard: mode==\"skeleton-build\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "verification_ref",
+          "slice",
+          "flow_demonstrated"
+        ]
+      }
     },
     {
-      "if": { "properties": { "mode": { "const": "slice-build" } }, "required": ["mode"] },
-      "then": { "required": ["verify_output_ref", "slice_id", "slice_name", "builds_on", "flow_demonstrated"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "slice-build",
+            "description": "discriminator guard: mode==\"slice-build\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "verify_output_ref",
+          "slice_id",
+          "slice_name",
+          "builds_on",
+          "flow_demonstrated"
+        ]
+      }
     }
   ],
   "properties": {
-    "verification_ref": { "type": "string" },
-    "verify_output_ref": { "type": "string" },
-    "critique_ref": { "type": "string" },
-    "integration_record_ref": { "type": "string" },
-    "build_record_ref": { "type": "string" },
-    "flows_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "aprd_lock_ref": { "type": "string" },
-    "locks_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "slice": { "type": "string" },
-    "slice_id": { "type": "string" },
-    "slice_name": { "type": "string" },
-    "builds_on": { "type": "array", "items": { "type": "string" } },
-    "demo_artifact": { "type": "string" },
-    "demo_modality": { "type": "string" },
-    "flow_demonstrated": { "type": "string" },
+    "verification_ref": {
+      "type": "string",
+      "description": "Path to verification.json (skeleton-build)"
+    },
+    "verify_output_ref": {
+      "type": "string",
+      "description": "Path to verify-output.json (slice-build)"
+    },
+    "critique_ref": {
+      "type": "string",
+      "description": "Path to critique.json (verdict:clean required)"
+    },
+    "integration_record_ref": {
+      "type": "string",
+      "description": "Path to integration-record.json"
+    },
+    "build_record_ref": {
+      "type": "string",
+      "description": "Path to build-record.json"
+    },
+    "flows_ref": {
+      "type": "string",
+      "description": "Path to flows.json (narrative spine source)"
+    },
+    "aprd_ref": {
+      "type": "string",
+      "description": "Path to frozen aPRD (AC text oracle)"
+    },
+    "skeleton_lock_ref": {
+      "type": "string",
+      "description": "Path to skeleton.lock"
+    },
+    "adr_lock_ref": {
+      "type": "string",
+      "description": "Path to adr.lock"
+    },
+    "aprd_lock_ref": {
+      "type": "string",
+      "description": "Path to aprd.lock"
+    },
+    "locks_verified": {
+      "type": "boolean",
+      "description": "All locks + verification verdict + critique verdict confirmed before demo"
+    },
+    "class": {
+      "type": "string",
+      "description": "Project class: greenfield | feature-add | bugfix"
+    },
+    "mode": {
+      "type": "string",
+      "description": "Build mode: skeleton-build | slice-build"
+    },
+    "slice": {
+      "type": "string",
+      "description": "Skeleton id (skeleton-build)"
+    },
+    "slice_id": {
+      "type": "string",
+      "description": "Slice identifier (slice-build)"
+    },
+    "slice_name": {
+      "type": "string",
+      "description": "Human-readable slice name (slice-build)"
+    },
+    "builds_on": {
+      "type": "array",
+      "description": "Accepted prior slice ids this slice demo builds on (slice-build)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "demo_artifact": {
+      "type": "string",
+      "description": "Path to the client-facing demo.md rendered in Phase A"
+    },
+    "demo_modality": {
+      "type": "string",
+      "description": "Demo presentation style: ui-click-through | api-trace | benchmark-chart"
+    },
+    "flow_demonstrated": {
+      "type": "string",
+      "description": "Flow id (F*) the demo narrates"
+    },
     "demonstrated_acs": {
       "type": "array",
+      "description": "ACs demonstrated: slice-new ACs only (prior accepted ACs not re-demoed, H14)",
       "items": {
         "type": "object",
-        "required": ["ac", "req_ref", "plain_outcome", "route", "evidence"],
+        "required": [
+          "ac",
+          "req_ref",
+          "plain_outcome",
+          "route",
+          "evidence"
+        ],
         "properties": {
-          "ac": { "type": "string" },
-          "req_ref": { "type": "string" },
-          "plain_outcome": { "type": "string" },
-          "route": { "type": "string" },
+          "ac": {
+            "type": "string",
+            "description": "AC id (AC*)"
+          },
+          "req_ref": {
+            "type": "string",
+            "description": "Requirement id (R*) the AC belongs to"
+          },
+          "plain_outcome": {
+            "type": "string",
+            "description": "Client-language description of what this AC proves"
+          },
+          "route": {
+            "type": "string",
+            "description": "Real composition route/view that produces this outcome"
+          },
           "evidence": {
             "type": "object",
-            "required": ["visible", "held_out"],
+            "description": "Verification evidence: visible + held_out pass/fail from per_ac_summary",
+            "required": [
+              "visible",
+              "held_out"
+            ],
             "properties": {
-              "visible": { "type": "string", "enum": ["pass","fail"] },
-              "held_out": { "type": "string", "enum": ["pass","fail"] }
+              "visible": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "fail"
+                ],
+                "description": "Visible acceptance test result"
+              },
+              "held_out": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "fail"
+                ],
+                "description": "Held-out acceptance test result (gate-only, B7)"
+              }
             }
           }
         }
       }
     },
-    "client_response": { "type": "string", "enum": ["accepted","rejected","deferred","pending"] },
-    "accepted_by": { "type": "string" },
-    "accepted_at": { "type": "string" },
-    "rejection": { "oneOf": [{"type":"string"},{"type":"null"},{"type":"object"}] },
-    "learnings": { "type": "array", "items": { "type": "string" } },
-    "signoff": { "type": "string" },
-    "next": { "type": "string" },
-    "status": { "type": "string", "enum": ["accepted","rejected","pending"] },
+    "client_response": {
+      "type": "string",
+      "enum": [
+        "accepted",
+        "rejected",
+        "deferred",
+        "pending"
+      ],
+      "description": "Client verdict: accepted | rejected | deferred | pending"
+    },
+    "accepted_by": {
+      "type": "string",
+      "description": "Party who accepted; null if not accepted"
+    },
+    "accepted_at": {
+      "type": "string",
+      "description": "ISO-8601 timestamp of acceptance; null if not accepted; immutable once written"
+    },
+    "rejection": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": ["reason","routes_to"],
+          "properties": {
+            "reason": {
+              "type": "string",
+              "description": "Client's rejection reason verbatim or faithfully paraphrased"
+            },
+            "routes_to": {
+              "type": "string",
+              "description": "Phase to route to: Phase 1 | Phase 0"
+            }
+          }
+        }
+      ],
+      "description": "Null on accept; on not-quite: {reason, routes_to} faithfully captured; never patched"
+    },
+    "learnings": {
+      "type": "array",
+      "description": "Captured learnings for Phase 1 re-rank (B10); flat strings, never objects; [] if none",
+      "items": {
+        "type": "string"
+      }
+    },
+    "signoff": {
+      "type": "string",
+      "description": "Client verdict verbatim or faithfully paraphrased"
+    },
+    "next": {
+      "type": "string",
+      "description": "Next step: Phase 1 re-rank | DONE | routes_to phase on not-quite"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "accepted",
+        "rejected",
+        "pending"
+      ],
+      "description": "Acceptance status; immutable once accepted"
+    },
     "demo_counts": {
       "type": "object",
-      "required": ["demonstrated_acs"],
+      "description": "Summary counts for the demo record",
+      "required": [
+        "demonstrated_acs"
+      ],
       "properties": {
-        "demonstrated_acs": { "type": "integer" },
-        "acs_visible_passed": { "type": "integer" },
-        "acs_held_out_passed": { "type": "integer" },
-        "learnings": { "type": "integer" }
+        "demonstrated_acs": {
+          "type": "integer",
+          "description": "Number of ACs demonstrated (== len(demonstrated_acs))"
+        },
+        "acs_visible_passed": {
+          "type": "integer",
+          "description": "Demonstrated ACs with visible==pass"
+        },
+        "acs_held_out_passed": {
+          "type": "integer",
+          "description": "Demonstrated ACs with held_out==pass"
+        },
+        "learnings": {
+          "type": "integer",
+          "description": "Number of learnings captured"
+        }
       }
     }
   }

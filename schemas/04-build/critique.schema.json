@@ -5,49 +5,96 @@
   "type": "object",
   "required": ["class", "mode", "verdict", "issues", "issue_count", "critique_counts"],
   "properties": {
-    "verification_ref": { "type": "string" },
-    "build_record_ref": { "type": "string" },
-    "integration_record_ref": { "type": "string" },
-    "build_plan_ref": { "type": "string" },
-    "contracts_ref": { "type": "string" },
-    "oracle_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "components_ref": { "type": "string" },
-    "oracle_lock_ref": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "aprd_lock_ref": { "type": "string" },
-    "locks_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "slice": { "type": "string" },
-    "components_reviewed": { "type": "array" },
-    "files_reviewed": { "type": "array" },
-    "verdict": { "type": "string", "enum": ["clean","blocked"] },
+    "verification_ref": { "type": "string", "description": "Path to verification.json or verify-output.json (must be verdict:verified)" },
+    "build_record_ref": { "type": "string", "description": "Path to build-record.json reviewed" },
+    "integration_record_ref": { "type": "string", "description": "Path to integration-record.json reviewed" },
+    "build_plan_ref": { "type": "string", "description": "Path to build-plan.json (trace oracle)" },
+    "contracts_ref": { "type": "string", "description": "Path to contracts.json (honor oracle)" },
+    "oracle_ref": { "type": "string", "description": "Path to oracle.json (fixture-literal oracle)" },
+    "aprd_ref": { "type": "string", "description": "Path to frozen aPRD (requirements oracle)" },
+    "components_ref": { "type": "string", "description": "Path to components.json" },
+    "oracle_lock_ref": { "type": "string", "description": "Path to oracle.lock" },
+    "skeleton_lock_ref": { "type": "string", "description": "Path to skeleton.lock" },
+    "adr_lock_ref": { "type": "string", "description": "Path to adr.lock" },
+    "aprd_lock_ref": { "type": "string", "description": "Path to aprd.lock" },
+    "locks_verified": { "type": "boolean", "description": "All locks confirmed frozen before critique" },
+    "class": { "type": "string", "description": "Project class: greenfield | feature-add | bugfix" },
+    "mode": { "type": "string", "description": "Build mode: skeleton-build | slice-build" },
+    "slice": { "type": "string", "description": "Skeleton id or slice id reviewed" },
+    "components_reviewed": {
+      "type": "array",
+      "description": "Component ids in scope (= build_set; prior-built not re-attacked in slice mode)",
+      "items": { "type": "string" }
+    },
+    "files_reviewed": {
+      "type": "array",
+      "description": "Every source file actually read during critique (build_units[].files ∪ composition.files)",
+      "items": { "type": "string" }
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["clean","blocked"],
+      "description": "Critique outcome: clean (no issues) | blocked (issues found); deterministic from issues array"
+    },
     "issues": {
       "type": "array",
+      "description": "Blocking-grade anti-cheat issues only; [] on an honest diff",
       "items": {
         "type": "object",
         "required": ["id", "category", "finding", "fix_hint"],
         "properties": {
-          "id": { "type": "string" },
-          "category": { "type": "string", "enum": ["hardcoded-fixture","swallowed-failure","stub-branch","under-complexity","gold-plating"] },
-          "target_component": { "type": "string" },
-          "target_file": { "type": "string" },
-          "finding": { "type": "string" },
-          "fix_hint": { "type": "string" }
+          "id": { "type": "string", "description": "Contiguous issue id: I1, I2, …" },
+          "category": {
+            "type": "string",
+            "enum": ["hardcoded-fixture","swallowed-failure","stub-branch","under-complexity","gold-plating"],
+            "description": "Anti-cheat category (exactly one of five)"
+          },
+          "target_component": { "type": "string", "description": "Component id the issue is found in" },
+          "target_file": { "type": "string", "description": "Concrete file:symbol where the cheat lives" },
+          "finding": {
+            "type": "string",
+            "description": "The cheat + which frozen test/contract it defrauds + why a hostile reviewer blocks the demo. Cites concrete file:symbol + CT*/AC*/R* defrauded"
+          },
+          "fix_hint": {
+            "type": "string",
+            "description": "Concrete actionable change the routed stage should make to clear the cheat"
+          }
         }
       }
     },
-    "issue_count": { "type": "integer", "minimum": 0 },
+    "issue_count": { "type": "integer", "minimum": 0, "description": "Length of issues array" },
     "critique_counts": {
       "type": "object",
+      "description": "Tallies of components reviewed, files reviewed, and issues by category",
       "required": ["components_reviewed", "files_reviewed", "issues"],
       "properties": {
-        "components_reviewed": { "type": "integer" },
-        "files_reviewed": { "type": "integer" },
-        "issues": { "type": "integer" },
-        "by_category": { "type": "object" }
+        "components_reviewed": { "type": "integer", "description": "Count of components reviewed (== len(build_set))" },
+        "files_reviewed": { "type": "integer", "description": "Count of source files actually read" },
+        "issues": { "type": "integer", "description": "Total issue count (== issue_count)" },
+        "by_category": {
+          "type": "object",
+          "description": "Per-category issue tallies; sums to issue_count",
+          "properties": {
+            "hardcoded-fixture": { "type": "integer", "description": "Hardcoded fixture issue count" },
+            "swallowed-failure": { "type": "integer", "description": "Swallowed failure issue count" },
+            "stub-branch": { "type": "integer", "description": "Stub branch issue count" },
+            "under-complexity": { "type": "integer", "description": "Under-complexity issue count" },
+            "gold-plating": { "type": "integer", "description": "Gold-plating issue count" }
+          }
+        }
+      }
+    },
+    "skeleton_fidelity": {
+      "type": "object",
+      "description": "Slice-build only: confirms slice diff is additive and no frozen skeleton artifact was reshaped (H14/B8)",
+      "properties": {
+        "breached": { "type": "boolean", "description": "True = slice edited a frozen skeleton artifact → blocking issue routed Phase 2/INTEGRATE" },
+        "skeleton_artifacts_checked": {
+          "type": "array",
+          "description": "Frozen skeleton artifacts inspected during fidelity check",
+          "items": { "type": "string" }
+        },
+        "note": { "type": "string", "description": "Reasoning for breach/no-breach verdict" }
       }
     }
   }

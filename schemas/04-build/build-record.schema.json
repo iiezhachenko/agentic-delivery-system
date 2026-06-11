@@ -3,65 +3,532 @@
   "$id": "build-record",
   "title": "IMPLEMENT output — component build record with files and contract test results",
   "type": "object",
-  "required": ["class", "mode", "build_units"],
+  "required": [
+    "class",
+    "mode",
+    "build_units"
+  ],
   "allOf": [
     {
-      "if": { "properties": { "mode": { "const": "skeleton-build" } }, "required": ["mode"] },
-      "then": { "required": ["build_set", "oracle", "verification", "provenance", "commits", "build_record_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "skeleton-build",
+            "description": "discriminator guard: mode==\"skeleton-build\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "build_set",
+          "oracle",
+          "verification",
+          "provenance",
+          "commits",
+          "build_record_counts"
+        ]
+      }
     },
     {
-      "if": { "properties": { "mode": { "const": "slice-build" } }, "required": ["mode"] },
-      "then": { "required": ["slice_id", "slice_name", "build_set", "oracle", "verification", "provenance", "commits", "build_record_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "slice-build",
+            "description": "discriminator guard: mode==\"slice-build\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "slice_id",
+          "slice_name",
+          "build_set",
+          "oracle",
+          "verification",
+          "provenance",
+          "commits",
+          "build_record_counts"
+        ]
+      }
     }
   ],
   "properties": {
-    "build_plan_ref": { "type": "string" },
-    "oracle_lock_ref": { "type": "string" },
-    "oracle_ref": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "aprd_lock_ref": { "type": "string" },
-    "locks_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "slice": { "type": "string" },
-    "slice_id": { "type": "string" },
-    "slice_name": { "type": "string" },
-    "build_set": { "type": "array", "items": { "type": "string" } },
-    "prior_built_components": { "type": "array", "items": { "type": "string" } },
+    "build_plan_ref": {
+      "type": "string",
+      "description": "Path to build-plan.json input"
+    },
+    "oracle_lock_ref": {
+      "type": "string",
+      "description": "Path to oracle.lock (frozen, builder_may_not_edit)"
+    },
+    "oracle_ref": {
+      "type": "string",
+      "description": "Path to oracle.json input"
+    },
+    "skeleton_lock_ref": {
+      "type": "string",
+      "description": "Path to skeleton.lock"
+    },
+    "adr_lock_ref": {
+      "type": "string",
+      "description": "Path to adr.lock"
+    },
+    "aprd_lock_ref": {
+      "type": "string",
+      "description": "Path to aprd.lock"
+    },
+    "locks_verified": {
+      "type": "boolean",
+      "description": "All locks confirmed frozen; hashes not recomputed"
+    },
+    "class": {
+      "type": "string",
+      "description": "Project class: greenfield | feature-add | bugfix"
+    },
+    "mode": {
+      "type": "string",
+      "description": "Build mode: skeleton-build | slice-build | bugfix"
+    },
+    "slice": {
+      "type": "string",
+      "description": "Skeleton id or slice label (skeleton-build)"
+    },
+    "slice_id": {
+      "type": "string",
+      "description": "Slice identifier (slice-build)"
+    },
+    "slice_name": {
+      "type": "string",
+      "description": "Human-readable slice name (slice-build)"
+    },
+    "build_set": {
+      "type": "array",
+      "description": "Component ids built this run (carried from build-plan)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "prior_built_components": {
+      "type": "array",
+      "description": "Components built in prior runs; real on disk, never rebuilt",
+      "items": {
+        "type": "string"
+      }
+    },
     "build_units": {
       "type": "array",
+      "description": "Per-component build records; one per component built this run",
       "items": {
         "type": "object",
-        "required": ["component", "name", "status"],
+        "required": [
+          "component",
+          "name",
+          "status"
+        ],
         "properties": {
-          "component": { "type": "string" },
-          "name": { "type": "string" },
-          "module_namespace": { "type": "string" },
-          "implements_contracts": { "type": "array" },
-          "mocked_deps": { "type": "array" },
-          "traces": { "type": "array" },
-          "files": { "type": "array", "items": { "type": "string" } },
-          "contract_tests_greened": { "type": "array" },
-          "lld_notes": { "type": "string" },
-          "status": { "type": "string", "enum": ["green","red","locked","planned"] },
-          "escape": { "oneOf": [{"type":"string"},{"type":"null"}] }
+          "component": {
+            "type": "string",
+            "description": "Component id (C*)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Component name from components.json"
+          },
+          "module_namespace": {
+            "type": "string",
+            "description": "Python module namespace for this component (e.g. freelancer_app.data_store)"
+          },
+          "implements_contracts": {
+            "type": "array",
+            "description": "Contract ids (CT*) this component provides as callee surface",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mocked_deps": {
+            "type": "array",
+            "description": "Dependency component ids mocked via frozen conftest for this unit's obligation tests",
+            "items": {
+              "type": "string"
+            }
+          },
+          "traces": {
+            "type": "array",
+            "description": "Requirement/AC ids this build unit closes (R*/AC*)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "files": {
+            "type": "array",
+            "description": "Every source file this unit wrote",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contract_tests_greened": {
+            "type": "array",
+            "description": "Obligation test function names made green this run",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lld_notes": {
+            "type": "string",
+            "description": "Low-level design notes: framework, internals, ADR rationale, patterns used"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "green",
+              "red",
+              "locked",
+              "planned"
+            ],
+            "description": "Build outcome: green | red (blocked; carries escape{}) | locked | planned"
+          },
+          "escape": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null on green; on blocked: failure_signature + classification + route"
+          }
         }
       }
     },
-    "oracle": { "type": "object" },
-    "verification": { "type": "object" },
-    "provenance": { "type": "object" },
-    "commits": { "type": "array" },
-    "build_record_counts": { "type": "object" },
-    "build_counts": { "type": "object" },
-    "inherited_oracle": { "type": "object" },
-    "carried": { "type": "object" },
-    "diagnosis_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "aprd_version": { "type": "string" },
-    "blast_radius": { "type": "object" },
-    "reproduction": { "type": "object" },
-    "regression": { "type": "object" }
+    "oracle": {
+      "type": "object",
+      "description": "Oracle lock metadata: confirms builder_may_not_edit honored and suite starts_red",
+      "properties": {
+        "lock": {
+          "type": "string",
+          "description": "Path to oracle.lock"
+        },
+        "builder_may_not_edit": {
+          "type": "boolean",
+          "description": "True = no test or oracle file was edited by builder (B4)"
+        },
+        "starts_red": {
+          "type": "boolean",
+          "description": "Suite was frozen red; this build greens only the contract layer"
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "description": "Verification status at IMPLEMENT stage: contract only; flow/acceptance deferred",
+      "properties": {
+        "contract": {
+          "type": "string",
+          "description": "Contract layer result: pass | partial | not-run"
+        },
+        "method": {
+          "type": "string",
+          "description": "How contract tests were run: executed | static-trace"
+        },
+        "static_trace_notes": {
+          "type": "string",
+          "description": "Per-assertion static trace when method==static-trace; empty string when executed"
+        },
+        "flow": {
+          "type": "string",
+          "description": "Flow test status at IMPLEMENT stage; always not-run (INTEGRATE stage)"
+        },
+        "acceptance": {
+          "type": "string",
+          "description": "Acceptance test status at IMPLEMENT stage; always not-run (VERIFY-OUTPUT stage)"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Provenance: who built, against which locked artifacts",
+      "properties": {
+        "builder_role": {
+          "type": "string",
+          "description": "Role: builder (distinct from test-author, B4)"
+        },
+        "built_against": {
+          "type": "object",
+          "description": "Frozen artifact refs pinned at build time",
+          "properties": {
+            "oracle_lock": {
+              "type": "string",
+              "description": "Oracle lock path"
+            },
+            "skeleton_oracle_lock": {
+              "type": "string",
+              "description": "Inherited frozen skeleton oracle lock (slice-build)"
+            },
+            "skeleton_lock": {
+              "type": "string",
+              "description": "Skeleton lock path"
+            },
+            "adr_lock": {
+              "type": "string",
+              "description": "ADR lock path"
+            },
+            "aprd_lock": {
+              "type": "string",
+              "description": "APRD lock path"
+            },
+            "build_plan": {
+              "type": "string",
+              "description": "Build plan path"
+            },
+            "slice_build_plan": {
+              "type": "string",
+              "description": "Slice build plan path (slice-build)"
+            }
+          }
+        }
+      }
+    },
+    "commits": {
+      "type": "array",
+      "description": "Commits made this run; each cites R/AC traces (untraceable code = drift)",
+      "items": {
+        "type": "object",
+        "required": [
+          "message",
+          "traces"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Commit message summarizing the component built"
+          },
+          "traces": {
+            "type": "array",
+            "description": "R*/AC* ids satisfied by this commit",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "build_record_counts": {
+      "type": "object",
+      "description": "Build outcome counts; walk to count, don't estimate",
+      "properties": {
+        "build_units_green": {
+          "type": "integer",
+          "description": "Number of green build units this run"
+        },
+        "build_units_blocked": {
+          "type": "integer",
+          "description": "Number of blocked build units"
+        },
+        "build_units_total_in_set": {
+          "type": "integer",
+          "description": "Total build_set size"
+        },
+        "contract_tests_greened": {
+          "type": "integer",
+          "description": "Total contract tests greened across all units"
+        }
+      }
+    },
+    "build_counts": {
+      "type": "object",
+      "description": "Alias for build_record_counts (some modes use this key)",
+      "properties": {
+        "repair_units": {
+          "type": "integer",
+          "description": "Repair units (bugfix mode)"
+        },
+        "reproduction_flipped": {
+          "type": "integer",
+          "description": "Reproduction tests flipped red→green (bugfix)"
+        },
+        "regression_asserts_green": {
+          "type": "integer",
+          "description": "Regression assertions staying green (bugfix)"
+        },
+        "baseline_files_edited": {
+          "type": "integer",
+          "description": "Baseline files edited (bugfix — sanctioned scope)"
+        }
+      }
+    },
+    "inherited_oracle": {
+      "type": "object",
+      "description": "Frozen skeleton oracle inherited by reference (slice-build); never re-run",
+      "properties": {
+        "skeleton_oracle_lock_ref": {
+          "type": "string",
+          "description": "Path to frozen skeleton oracle.lock"
+        },
+        "skeleton_build_record_ref": {
+          "type": "string",
+          "description": "Path to skeleton build-record.json"
+        },
+        "inherited_green_tests": {
+          "type": "array",
+          "description": "Skeleton contract test names inherited green; not re-run (H14)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "frozen_verified": {
+          "type": "boolean",
+          "description": "Skeleton oracle.lock status==frozen + builder_may_not_edit confirmed"
+        }
+      }
+    },
+    "carried": {
+      "type": "object",
+      "description": "Carried state from prior runs — lock refs and slice metadata for brownfield builds",
+      "properties": {
+        "slice_oracle_lock_ref": {
+          "type": "string",
+          "description": "Path to slice oracle.lock carried from prior run"
+        },
+        "slice_oracle_ref": {
+          "type": "string",
+          "description": "Path to slice oracle.json carried from prior run"
+        },
+        "skeleton_lock_ref": {
+          "type": "string",
+          "description": "Path to skeleton.lock carried from prior run"
+        },
+        "adr_lock_ref": {
+          "type": "string",
+          "description": "Path to adr.lock carried from prior run"
+        },
+        "aprd_lock_ref": {
+          "type": "string",
+          "description": "Path to aprd.lock carried from prior run"
+        },
+        "locks_verified": {
+          "type": "boolean",
+          "description": "Locks confirmed frozen in carried state"
+        },
+        "slice_id": {
+          "type": "string",
+          "description": "Slice identifier from prior run"
+        },
+        "slice_name": {
+          "type": "string",
+          "description": "Human-readable slice name from prior run"
+        }
+      },
+      "additionalProperties": true
+    },
+    "diagnosis_ref": {
+      "type": "string",
+      "description": "Path to diagnosis.json (bugfix mode)"
+    },
+    "aprd_ref": {
+      "type": "string",
+      "description": "Path to resolved aPRD artifact (feature-add / bugfix)"
+    },
+    "aprd_version": {
+      "type": "string",
+      "description": "aPRD version string (feature-add / bugfix)"
+    },
+    "blast_radius": {
+      "type": "object",
+      "description": "Bugfix blast radius: module + symbol + source ref scoping the fix",
+      "properties": {
+        "module": {
+          "type": "string",
+          "description": "Module path of the defect"
+        },
+        "symbol": {
+          "type": "string",
+          "description": "Symbol (class.method) of the defect site"
+        },
+        "source": {
+          "type": "string",
+          "description": "aPRD ref for BLAST_RADIUS definition"
+        }
+      }
+    },
+    "reproduction": {
+      "type": "object",
+      "description": "Bugfix reproduction result: OREPRO-1 flip red→green",
+      "properties": {
+        "test_id": {
+          "type": "string",
+          "description": "Reproduction oracle test id (OREPRO-1)"
+        },
+        "file": {
+          "type": "string",
+          "description": "Reproduction test file path"
+        },
+        "was": {
+          "type": "string",
+          "description": "State before fix: red"
+        },
+        "now": {
+          "type": "string",
+          "description": "State after fix: green"
+        },
+        "flipped_by": {
+          "type": "string",
+          "description": "One-line description of the fix"
+        },
+        "traces": {
+          "type": "array",
+          "description": "R*/AC* ids satisfied by the reproduction flip",
+          "items": {
+            "type": "string"
+          }
+        },
+        "baseline_ref": {
+          "type": "string",
+          "description": "Regression-guard AC id (AC6 etc)"
+        }
+      }
+    },
+    "regression": {
+      "type": "object",
+      "description": "Bugfix regression guard: scoped regression stays green",
+      "properties": {
+        "asserts": {
+          "type": "array",
+          "description": "AC ids asserted green by regression layer",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_suites": {
+          "type": "array",
+          "description": "Oracle suite paths used for regression check",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scope": {
+          "type": "string",
+          "description": "Scope description: touched-surface + seams"
+        },
+        "scope_basis": {
+          "type": "string",
+          "description": "Rationale for scope (REGRESSION_GUARD ref + BLAST_RADIUS symbol)"
+        },
+        "status": {
+          "type": "string",
+          "description": "Regression result: green"
+        },
+        "baseline_tests_edited": {
+          "type": "boolean",
+          "description": "False = no baseline test edited (BF1/BF4)"
+        }
+      }
+    }
   }
 }

@@ -5,9 +5,9 @@
   "type": "object",
   "required": ["rules_reconciled_ref", "class", "stack", "agreed", "conflicts", "unfetched_sources", "verify_meta"],
   "properties": {
-    "rules_reconciled_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "stack": { "type": "array", "items": { "type": "string" } },
+    "rules_reconciled_ref": { "type": "string", "description": "path to rules-reconciled.json" },
+    "class": { "type": "string", "description": "greenfield | feature-add | bugfix" },
+    "stack": { "type": "array", "items": { "type": "string", "description": "stack technology name" }, "description": "technology stack carried verbatim from rules-reconciled" },
     "agreed": {
       "type": "array",
       "description": "same entries as reconciled, each carries exactly one verification block",
@@ -15,23 +15,40 @@
         "type": "object",
         "required": ["id", "topic", "rule", "kind", "corroboration", "sources", "verification"],
         "properties": {
-          "id": { "type": "string", "pattern": "^AGR[0-9]+$" },
-          "topic": { "type": "string" },
-          "rule": { "type": "string" },
-          "setting": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "kind": { "type": "string" },
-          "corroboration": { "type": "string" },
-          "sources": { "type": "array" },
+          "id": { "type": "string", "pattern": "^AGR[0-9]+$", "description": "stable agreed id; carried verbatim from reconciled, never renumbered" },
+          "topic": { "type": "string", "description": "shared subject slug; carried verbatim" },
+          "rule": { "type": "string", "description": "canonical prescription; carried verbatim" },
+          "setting": { "description": "verbatim config key+value or null; carried verbatim", "oneOf": [{"type":"string"},{"type":"null"}] },
+          "kind": { "type": "string", "description": "config | opinion | mixed; carried verbatim" },
+          "corroboration": { "type": "string", "description": "multi-source | single-source; carried verbatim" },
+          "sources": {
+            "type": "array",
+            "description": "contributing RULE* with per-source detail carried verbatim from reconciled",
+            "items": {
+              "type": "object",
+              "required": ["rule_ref", "source_ref", "tier", "tool", "tool_version_pinned", "evidence"],
+              "properties": {
+                "rule_ref": { "type": "string", "description": "RULE* id; carried verbatim" },
+                "source_ref": { "type": "string", "description": "SRC* id; carried verbatim" },
+                "tier": { "type": "integer", "description": "tier; carried verbatim" },
+                "tool": { "type": "string", "description": "tool name; carried verbatim" },
+                "tool_version_pinned": { "type": "string", "description": "pinned version; carried verbatim" },
+                "setting": { "description": "verbatim config key+value or null", "oneOf": [{"type":"string"},{"type":"null"}] },
+                "evidence": { "type": "string", "description": "verbatim snippet; carried through" }
+              }
+            }
+          },
           "verification": {
             "type": "object",
+            "description": "exactly one verification block per agreed entry",
             "required": ["status", "source_of_truth", "confidence"],
             "properties": {
-              "status": { "type": "string", "enum": ["current","deprecated","renamed","superseded","unknown-flag","not-version-bound","unverifiable"] },
-              "checked": { "oneOf": [{"type":"object"},{"type":"null"}] },
-              "finding": { "type": "string" },
-              "replacement": { "oneOf": [{"type":"string"},{"type":"null"}] },
-              "source_of_truth": { "type": "string", "enum": ["llm-knowledge","fetched-doc"] },
-              "confidence": { "type": "string", "enum": ["high","low"] }
+              "status": { "type": "string", "enum": ["current","deprecated","renamed","superseded","unknown-flag","not-version-bound","unverifiable"], "description": "currency status; not-version-bound iff setting is null (prose); unverifiable when currency cannot be confidently established" },
+              "checked": { "description": "the {tool, tool_version_pinned, setting} checked; null when status is not-version-bound", "oneOf": [{"type":"object","properties":{"tool":{"type":"string","description":"tool checked"},"tool_version_pinned":{"type":"string","description":"version checked"},"setting":{"type":"string","description":"setting checked"}}},{"type":"null"}] },
+              "finding": { "type": "string", "description": "one caveman prose line on what the check found" },
+              "replacement": { "description": "current correct flag/setting when status in {deprecated, renamed, superseded, unknown-flag}; null otherwise", "oneOf": [{"type":"string"},{"type":"null"}] },
+              "source_of_truth": { "type": "string", "enum": ["llm-knowledge","fetched-doc"], "description": "fetched-doc if versioned docs were consulted; else llm-knowledge" },
+              "confidence": { "type": "string", "enum": ["high","low"], "description": "low mandatory when status is unverifiable" }
             }
           }
         }
@@ -39,29 +56,87 @@
     },
     "conflicts": {
       "type": "array",
+      "description": "same conflicts as reconciled; each position carries exactly one verification block",
       "items": {
         "type": "object",
         "required": ["id", "topic", "question", "positions"],
         "properties": {
-          "id": { "type": "string" },
-          "topic": { "type": "string" },
-          "question": { "type": "string" },
-          "positions": { "type": "array", "items": { "type": "object" } },
-          "recommended_position": { "oneOf": [{"type":"integer"},{"type":"null"}] }
+          "id": { "type": "string", "description": "CONF* id; carried verbatim" },
+          "topic": { "type": "string", "description": "shared subject slug; carried verbatim" },
+          "question": { "type": "string", "description": "client decision framing; carried verbatim" },
+          "positions": {
+            "type": "array",
+            "description": "mutually-exclusive stances; each with verification block",
+            "items": {
+              "type": "object",
+              "required": ["stance", "sources", "verification"],
+              "properties": {
+                "stance": { "type": "string", "description": "position text; carried verbatim" },
+                "setting": { "description": "verbatim config value or null", "oneOf": [{"type":"string"},{"type":"null"}] },
+                "sources": {
+                  "type": "array",
+                  "description": "backing RULE* for this position; carried verbatim",
+                  "items": {
+                    "type": "object",
+                    "required": ["rule_ref", "source_ref", "tier", "tool", "tool_version_pinned", "evidence"],
+                    "properties": {
+                      "rule_ref": { "type": "string", "description": "RULE* id" },
+                      "source_ref": { "type": "string", "description": "SRC* id" },
+                      "tier": { "type": "integer", "description": "tier" },
+                      "tool": { "type": "string", "description": "tool name" },
+                      "tool_version_pinned": { "type": "string", "description": "pinned version" },
+                      "setting": { "description": "verbatim config key+value or null", "oneOf": [{"type":"string"},{"type":"null"}] },
+                      "evidence": { "type": "string", "description": "verbatim snippet" }
+                    }
+                  }
+                },
+                "verification": {
+                  "type": "object",
+                  "description": "exactly one verification block per position",
+                  "required": ["status", "source_of_truth", "confidence"],
+                  "properties": {
+                    "status": { "type": "string", "enum": ["current","deprecated","renamed","superseded","unknown-flag","not-version-bound","unverifiable"], "description": "currency status of this position's setting" },
+                    "checked": { "description": "the {tool, tool_version_pinned, setting} checked; null when not-version-bound", "oneOf": [{"type":"object","properties":{"tool":{"type":"string","description":"tool checked"},"tool_version_pinned":{"type":"string","description":"version checked"},"setting":{"type":"string","description":"setting checked"}}},{"type":"null"}] },
+                    "finding": { "type": "string", "description": "one caveman prose line on what the check found" },
+                    "replacement": { "description": "current correct flag/setting when deprecated/renamed/superseded; null otherwise", "oneOf": [{"type":"string"},{"type":"null"}] },
+                    "source_of_truth": { "type": "string", "enum": ["llm-knowledge","fetched-doc"], "description": "source of currency check" },
+                    "confidence": { "type": "string", "enum": ["high","low"], "description": "low mandatory when unverifiable" }
+                  }
+                }
+              }
+            }
+          },
+          "recommended_position": { "description": "integer index of highest-tier stance or null; carried verbatim, never changed", "oneOf": [{"type":"integer"},{"type":"null"}] }
         }
       }
     },
-    "unfetched_sources": { "type": "array" },
+    "unfetched_sources": {
+      "type": "array",
+      "description": "carried through verbatim from rules-reconciled.json; [] if input had none",
+      "items": {
+        "type": "object",
+        "required": ["id", "reason"],
+        "properties": {
+          "id": { "type": "string", "description": "SRC* id not fetched" },
+          "reason": { "type": "string", "description": "reason; carried verbatim" }
+        }
+      }
+    },
     "verify_meta": {
       "type": "object",
+      "description": "integer tallies; re-counted from the arrays",
       "required": ["agreed_in", "agreed_verified", "conflicts_in", "positions_verified"],
       "properties": {
-        "agreed_in": { "type": "integer" },
-        "agreed_verified": { "type": "integer" },
-        "conflicts_in": { "type": "integer" },
-        "positions_verified": { "type": "integer" },
-        "status_counts": { "type": "object" },
-        "flagged_count": { "type": "integer" }
+        "agreed_in": { "type": "integer", "description": "== input agreed.length" },
+        "agreed_verified": { "type": "integer", "description": "== output agreed.length; must equal agreed_in" },
+        "conflicts_in": { "type": "integer", "description": "== input conflicts.length" },
+        "positions_verified": { "type": "integer", "description": "total positions across all conflicts; each annotated once" },
+        "status_counts": {
+          "type": "object",
+          "description": "count per status value; total == agreed_verified + positions_verified",
+          "additionalProperties": { "type": "integer", "description": "count of entries/positions with this status" }
+        },
+        "flagged_count": { "type": "integer", "description": "== deprecated + renamed + superseded + unknown-flag" }
       }
     }
   }

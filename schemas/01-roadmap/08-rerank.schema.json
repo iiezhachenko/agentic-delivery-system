@@ -5,96 +5,435 @@
   "type": "object",
   "required": ["class", "roadmap_version", "verdict", "completed", "introduction_map", "remaining_sequence", "dependency_check", "changes", "coverage", "rerank_counts"],
   "properties": {
-    "base_ref": { "type": "string" },
-    "build_dag_ref": { "type": "string" },
-    "components_ref": { "type": "string" },
-    "slices_ref": { "type": "string" },
-    "completed_demo_refs": { "type": "array", "items": { "type": "string" } },
-    "class": { "type": "string" },
-    "roadmap_version": { "type": "integer", "minimum": 1 },
-    "verdict": { "type": "string", "enum": ["re_ranked","unchanged","dependency_defect"] },
+    "base_ref": {
+      "description": "Path to 07-sequence-reviewed.json (or previous 08-rerank.json) serving as the base order.",
+      "type": "string"
+    },
+    "build_dag_ref": {
+      "description": "Path to build-dag.json providing the real component dependency graph.",
+      "type": "string"
+    },
+    "components_ref": {
+      "description": "Path to components.json used to map slices to components.",
+      "type": "string"
+    },
+    "slices_ref": {
+      "description": "Path to 02-slices.json providing slice details.",
+      "type": "string"
+    },
+    "completed_demo_refs": {
+      "description": "Paths to every accepted demo record read for this re-rank.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "class": {
+      "description": "Project class: greenfield or feature-add.",
+      "type": "string"
+    },
+    "roadmap_version": {
+      "description": "Version counter; base 07 = v1; each re-rank increments.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "verdict": {
+      "description": "re_ranked = at least one remaining slice moved or value/risk changed; unchanged = no material info; dependency_defect = real-DAG cycle/dangling.",
+      "type": "string",
+      "enum": ["re_ranked","unchanged","dependency_defect"]
+    },
     "completed": {
+      "description": "Accepted slices, pinned in order — never re-ranked. One row per accepted demo record.",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["position", "id", "name", "status", "demo_ref"],
         "properties": {
-          "position": { "type": "integer" },
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "status": { "const": "accepted" },
-          "demo_ref": { "type": "string" }
+          "position": {
+            "description": "Original sequence position of this completed slice.",
+            "type": "integer"
+          },
+          "id": {
+            "description": "Slice S* identifier.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Slice name carried verbatim.",
+            "type": "string"
+          },
+          "status": {
+            "description": "Always accepted for completed slices.",
+            "const": "accepted"
+          },
+          "demo_ref": {
+            "description": "Path to the demo record that accepted this slice.",
+            "type": "string"
+          }
         }
       }
     },
-    "introduction_map": { "type": "object" },
+    "introduction_map": {
+      "description": "Projection basis — maps the skeleton and each remaining slice to the components it introduces.",
+      "type": "object",
+      "required": ["skeleton_built", "remaining"],
+      "properties": {
+        "skeleton_built": {
+          "description": "Component C* ids introduced by the completed skeleton slice.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "remaining": {
+          "description": "Map of remaining slice S* id to the component C* ids it introduces.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
     "remaining_sequence": {
+      "description": "Re-ranked remaining slices; positions continue after completed set, ascending, no gaps. Empty when verdict:dependency_defect.",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["position", "id", "name", "value", "cost_proxy", "rationale"],
         "properties": {
-          "position": { "type": "integer" },
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "value": { "type": "string" },
-          "retires_risk": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "components": { "type": "array" },
-          "coarse_depends_on": { "type": "array" },
-          "real_depends_on": { "type": "array" },
-          "depends_on": { "type": "array" },
-          "depends_on_delta": { "type": "object" },
-          "cost_proxy": { "type": "integer" },
-          "moved": { "oneOf": [{"type":"null"},{"type":"object"}] },
-          "value_risk_change": { "oneOf": [{"type":"null"},{"type":"object"}] },
-          "rationale": { "type": "string" }
+          "position": {
+            "description": "Position in the re-ranked sequence; continues after completed set.",
+            "type": "integer"
+          },
+          "id": {
+            "description": "Slice S* identifier carried verbatim from base.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Slice name carried verbatim from base.",
+            "type": "string"
+          },
+          "value": {
+            "description": "Value tier verbatim from base; never re-scored unless a logged value_risk_change.",
+            "type": "string"
+          },
+          "retires_risk": {
+            "description": "Risk retired verbatim from base, or null.",
+            "oneOf": [{"type":"string"},{"type":"null"}]
+          },
+          "components": {
+            "description": "Component C* ids this slice introduces, from introduction_map.",
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "coarse_depends_on": {
+            "description": "S* coarse dependencies from the base 07-sequence-reviewed order (aPRD-derived).",
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "real_depends_on": {
+            "description": "S* dependencies projected from the build-dag (discriminator 3); includes completed prerequisites.",
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "depends_on": {
+            "description": "S* dependencies (alias or copy; carried for downstream consumers).",
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "depends_on_delta": {
+            "description": "Audit of coarse-to-real dependency refinement.",
+            "type": "object",
+            "required": ["confirmed", "removed", "added"],
+            "properties": {
+              "confirmed": {
+                "description": "Coarse deps the real DAG also yields.",
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "removed": {
+                "description": "Coarse deps the real DAG does NOT yield — genuine refinement.",
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "added": {
+                "description": "Real deps absent from the coarse graph.",
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          },
+          "cost_proxy": {
+            "description": "len(requirements) + len(acceptance) from 02-slices.json.",
+            "type": "integer"
+          },
+          "moved": {
+            "description": "Null if unmoved; otherwise records the position change and basis for it.",
+            "oneOf": [
+              {"type":"null"},
+              {
+                "type": "object",
+                "required": ["from_position", "to_position", "basis"],
+                "properties": {
+                  "from_position": {
+                    "description": "Position in the base remaining order before re-rank.",
+                    "type": "integer"
+                  },
+                  "to_position": {
+                    "description": "New position after re-rank.",
+                    "type": "integer"
+                  },
+                  "basis": {
+                    "description": "Material change that licensed the move — removed/added real dep or value/risk change.",
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          },
+          "value_risk_change": {
+            "description": "Null, or logged change to retires_risk or value with from/to and specific learning basis.",
+            "oneOf": [
+              {"type":"null"},
+              {
+                "type": "object",
+                "required": ["field", "from", "to", "basis"],
+                "properties": {
+                  "field": {
+                    "description": "Which field changed: retires_risk or value.",
+                    "type": "string",
+                    "enum": ["retires_risk","value"]
+                  },
+                  "from": {
+                    "description": "Previous field value.",
+                    "type": "string"
+                  },
+                  "to": {
+                    "description": "New field value, or null when retires_risk cleared.",
+                    "oneOf": [{"type":"string"},{"type":"null"}]
+                  },
+                  "basis": {
+                    "description": "Specific learning that justified this change.",
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          },
+          "rationale": {
+            "description": "One line — which real dep freed/held this slice, its value, risk retired; caveman.",
+            "type": "string"
+          }
         }
       }
     },
     "dependency_check": {
+      "description": "Dependency validation of re-ranked order against real component DAG.",
       "type": "object",
       "required": ["acyclic", "legal"],
       "properties": {
-        "acyclic": { "type": "boolean" },
-        "legal": { "type": "boolean" },
-        "against": { "type": "string" },
-        "cycles": { "type": "array" },
-        "dangling_real_depends_on": { "type": "array" }
+        "acyclic": {
+          "description": "True when no dependency cycles in real DAG.",
+          "type": "boolean"
+        },
+        "legal": {
+          "description": "Every remaining slice placed after all its real deps and completed prerequisites.",
+          "type": "boolean"
+        },
+        "against": {
+          "description": "What the re-rank was validated against (real_component_dag).",
+          "type": "string"
+        },
+        "cycles": {
+          "description": "Cycle paths when acyclic:false; empty on clean run.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dangling_real_depends_on": {
+          "description": "Real deps referencing slices absent from base sequence; empty on clean run.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
       }
     },
     "changes": {
+      "description": "Material-change ledger for anti-thrash audit.",
       "type": "object",
       "required": ["reordered", "dependency_refinements", "value_risk_changes"],
       "properties": {
-        "reordered": { "type": "array" },
-        "dependency_refinements": { "type": "array" },
-        "value_risk_changes": { "type": "array" },
-        "thrash_avoided": { "type": "string" }
+        "reordered": {
+          "description": "S* ids whose position changed vs base remaining order.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dependency_refinements": {
+          "description": "Every non-empty coarse-to-real dependency delta.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["slice", "removed", "added"],
+            "properties": {
+              "slice": {
+                "description": "S* identifier of the slice with refined deps.",
+                "type": "string"
+              },
+              "removed": {
+                "description": "Coarse deps removed by real DAG.",
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "added": {
+                "description": "Real deps added beyond coarse graph.",
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        "value_risk_changes": {
+          "description": "Every logged value_risk_change entry; empty when no changes.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["field", "from", "to", "basis"],
+            "properties": {
+              "field": {
+                "description": "Which field changed: retires_risk or value.",
+                "type": "string",
+                "enum": ["retires_risk", "value"]
+              },
+              "from": {
+                "description": "Previous field value.",
+                "type": "string"
+              },
+              "to": {
+                "description": "New field value, or null when retires_risk cleared.",
+                "oneOf": [{"type": "string"}, {"type": "null"}]
+              },
+              "basis": {
+                "description": "Specific learning that justified this change.",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "thrash_avoided": {
+          "description": "One line: slices left in base order with no material change.",
+          "type": "string"
+        }
       }
     },
     "coverage": {
+      "description": "Coverage accounting: base_slices split into completed + remaining_ranked.",
       "type": "object",
       "required": ["base_slices", "completed", "remaining_ranked", "missing", "duplicated"],
       "properties": {
-        "base_slices": { "type": "array" },
-        "completed": { "type": "array" },
-        "remaining_ranked": { "type": "array" },
-        "missing": { "type": "array" },
-        "duplicated": { "type": "array" }
+        "base_slices": {
+          "description": "All S* ids in the base sequence.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "completed": {
+          "description": "Accepted S* ids.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "remaining_ranked": {
+          "description": "Remaining S* ids in emitted re-ranked order.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "missing": {
+          "description": "Base ids neither completed nor ranked; empty on clean run.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "duplicated": {
+          "description": "S* ids appearing more than once across completed + remaining; empty on clean run.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
       }
     },
-    "structural_defects": { "type": "array" },
-    "aprd_defects": { "type": "array" },
-    "foundation_gaps": { "type": "array" },
+    "structural_defects": {
+      "description": "Cycle/dangling detail when verdict:dependency_defect; empty on clean run.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "One cycle or dangling-dep record; keys determined by defect type.",
+        "additionalProperties": { "type": "string" }
+      }
+    },
+    "aprd_defects": {
+      "description": "Bad WHAT learning exposed through implementation; each entry routes to Phase 0.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["slice", "defect", "route"],
+        "properties": {
+          "slice": {
+            "description": "S* id of the slice whose build exposed the aPRD defect.",
+            "type": "string"
+          },
+          "defect": {
+            "description": "Learning that revealed bad WHAT — ambiguous or wrong aPRD contract.",
+            "type": "string"
+          },
+          "route": {
+            "description": "Always Phase 0 — routes to Phase 0 change request.",
+            "type": "string",
+            "const": "Phase 0"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "foundation_gaps": {
+      "description": "Foundational surprises revealed by slice build; each entry routes to FOUNDATION-CUT.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["slice", "gap", "route"],
+        "properties": {
+          "slice": {
+            "description": "S* id of the slice whose build revealed the foundation gap.",
+            "type": "string"
+          },
+          "gap": {
+            "description": "Foundational surprise — un-built foundation component needed by this slice.",
+            "type": "string"
+          },
+          "route": {
+            "description": "Always FOUNDATION-CUT — routes to widen foundation cut.",
+            "type": "string",
+            "const": "FOUNDATION-CUT"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "rerank_counts": {
+      "description": "Summary counts of this re-rank operation.",
       "type": "object",
       "required": ["completed", "remaining", "reordered", "deps_removed", "deps_added"],
       "properties": {
-        "completed": { "type": "integer" },
-        "remaining": { "type": "integer" },
-        "reordered": { "type": "integer" },
-        "deps_removed": { "type": "integer" },
-        "deps_added": { "type": "integer" }
+        "completed": {
+          "description": "Count of accepted completed slices.",
+          "type": "integer"
+        },
+        "remaining": {
+          "description": "Count of remaining ranked slices.",
+          "type": "integer"
+        },
+        "reordered": {
+          "description": "Count of remaining slices that moved position.",
+          "type": "integer"
+        },
+        "deps_removed": {
+          "description": "Total coarse dependencies removed by real DAG across all slices.",
+          "type": "integer"
+        },
+        "deps_added": {
+          "description": "Total real dependencies added beyond coarse graph across all slices.",
+          "type": "integer"
+        }
       }
     }
   }

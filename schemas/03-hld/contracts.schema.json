@@ -3,84 +3,570 @@
   "$id": "contracts",
   "title": "DEFINE-CONTRACTS output — one contract per component edge CT*",
   "type": "object",
-  "required": ["class", "mode"],
+  "required": [
+    "class",
+    "mode"
+  ],
   "allOf": [
     {
-      "if": { "properties": { "mode": { "const": "skeleton" } }, "required": ["mode"] },
-      "then": { "required": ["contracts", "coverage", "contract_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "skeleton",
+            "description": "discriminator guard: mode==\"skeleton\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "contracts",
+          "coverage",
+          "contract_counts"
+        ]
+      }
     },
     {
-      "if": { "properties": { "mode": { "const": "increment" } }, "required": ["mode"] },
-      "then": { "required": ["introduced_components", "new_contracts", "slice_coverage", "increment_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "increment",
+            "description": "discriminator guard: mode==\"increment\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "introduced_components",
+          "new_contracts",
+          "slice_coverage",
+          "increment_counts"
+        ]
+      }
     }
   ],
   "properties": {
-    "components_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "lock_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string", "enum": ["skeleton","increment"] },
-    "skeleton_id": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "base_skeleton_contracts_ref": { "type": "string" },
-    "skeleton_frozen_verified": { "type": "boolean" },
-    "slice_components_ref": { "type": "string" },
-    "slice_id": { "type": "string" },
-    "slice_name": { "type": "string" },
-    "introduced_components": { "type": "array", "items": { "type": "string" } },
-    "touched_contracts": { "type": "array" },
-    "new_contracts": { "type": "array" },
-    "slice_coverage": { "type": "object" },
-    "skeleton_fidelity": { "type": "object" },
-    "increment_counts": { "type": "object" },
-    "contracts": {
+    "components_ref": {
+      "type": "string",
+      "description": "Path to components.json this contracts artifact extends"
+    },
+    "aprd_ref": {
+      "type": "string",
+      "description": "Resolved path to frozen aPRD artifact"
+    },
+    "adr_lock_ref": {
+      "type": "string",
+      "description": "Path to adr.lock"
+    },
+    "adr_log_ref": {
+      "type": "string",
+      "description": "Path to ADR log directory"
+    },
+    "foundation_cut_ref": {
+      "type": "string",
+      "description": "Path to foundation-cut artifact"
+    },
+    "lock_verified": {
+      "type": "boolean",
+      "description": "True if lock present and names frozen artifact"
+    },
+    "class": {
+      "type": "string",
+      "description": "Project class: greenfield or brownfield"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "skeleton",
+        "increment"
+      ],
+      "description": "skeleton = full initial contracts; increment = per-slice extension"
+    },
+    "skeleton_id": {
+      "type": "string",
+      "description": "Skeleton slice id (e.g. S1)"
+    },
+    "skeleton_lock_ref": {
+      "type": "string",
+      "description": "Path to skeleton.lock (increment mode)"
+    },
+    "base_skeleton_contracts_ref": {
+      "type": "string",
+      "description": "Path to frozen skeleton contracts.json this increment extends"
+    },
+    "skeleton_frozen_verified": {
+      "type": "boolean",
+      "description": "True if skeleton.lock present and status==frozen"
+    },
+    "slice_components_ref": {
+      "type": "string",
+      "description": "Path to slice components.json (increment mode)"
+    },
+    "slice_id": {
+      "type": "string",
+      "description": "Target slice id auto-selected from remaining_sequence"
+    },
+    "slice_name": {
+      "type": "string",
+      "description": "Slice name carried verbatim from 02-slices/08-rerank"
+    },
+    "introduced_components": {
       "type": "array",
+      "description": "C* ids slice first activates; carried from slice components.json",
+      "items": {
+        "type": "string",
+        "pattern": "^C[0-9]+$"
+      }
+    },
+    "touched_contracts": {
+      "type": "array",
+      "description": "Established contracts for introduced box seams; carried verbatim from frozen skeleton in CT* order",
       "items": {
         "type": "object",
-        "required": ["id", "between", "kind", "shape", "failure_modes", "traces", "honors_adr"],
+        "required": [
+          "id",
+          "between",
+          "kind",
+          "shape",
+          "failure_modes",
+          "traces",
+          "honors_adr"
+        ],
         "properties": {
-          "id": { "type": "string", "pattern": "^CT[0-9]+$" },
-          "between": { "type": "array", "items": { "type": "string" }, "minItems": 2 },
-          "kind": { "type": "string", "enum": ["sync_api","shared_data","async_event"] },
-          "shape": { "type": "string" },
-          "failure_modes": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-          "traces": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-          "honors_adr": { "type": "array", "items": { "type": "string" } },
-          "honors_inv": { "type": "array", "items": { "type": "string" } }
+          "id": {
+            "type": "string",
+            "pattern": "^CT[0-9]+$",
+            "description": "Contract id, verbatim from frozen contracts.json"
+          },
+          "between": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "description": "[from, to] verbatim from frozen contract"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "sync_api",
+              "shared_data",
+              "async_event"
+            ],
+            "description": "Contract kind; NEVER re-derived for established seam"
+          },
+          "shape": {
+            "type": "string",
+            "description": "Logical payload crossing this seam; carried VERBATIM from frozen contract"
+          },
+          "failure_modes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Ways this seam fails; verbatim from frozen contract"
+          },
+          "traces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "R* ids seam serves; verbatim from frozen contract"
+          },
+          "honors_adr": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "ADR ids contract respects; verbatim from frozen contract"
+          },
+          "honors_inv": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "INV* ids contract honors; verbatim from frozen contract"
+          },
+          "role": {
+            "type": "string",
+            "description": "introduced-seam = edge incident to introduced component"
+          },
+          "status": {
+            "type": "string",
+            "description": "established = already in frozen skeleton; new = minted this slice"
+          },
+          "realizes_slice_requirements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Slice R* this contract serves (subset of traces intersected with slice requirements)"
+          }
+        }
+      }
+    },
+    "new_contracts": {
+      "type": "array",
+      "description": "Contracts frozen skeleton lacks — one per new_edge; empty in greenfield",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "between",
+          "kind",
+          "shape",
+          "failure_modes",
+          "traces",
+          "honors_adr"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^CT[0-9]+$",
+            "description": "New contract id continuing sequence after frozen max"
+          },
+          "between": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "description": "[from, to] component ids"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "sync_api",
+              "shared_data",
+              "async_event"
+            ],
+            "description": "Contract kind derived from frame discriminator"
+          },
+          "shape": {
+            "type": "string",
+            "description": "Logical payload crossing this seam"
+          },
+          "failure_modes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Ways this seam fails"
+          },
+          "traces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "R* ids seam serves"
+          },
+          "honors_adr": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "ADR ids contract respects"
+          },
+          "honors_inv": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "INV* ids contract honors"
+          }
+        }
+      }
+    },
+    "slice_coverage": {
+      "type": "object",
+      "description": "Coverage of introduced seam edges and slice requirements by contracts",
+      "properties": {
+        "introduced_seam_edges": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frozen edges incident to introduced component as from->to strings"
+        },
+        "edges_contracted": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Each has exactly one touched/new contract (bijection over introduced surface)"
+        },
+        "edge_orphans": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Introduced-seam edge with no contract; empty on clean run"
+        },
+        "slice_requirements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "02-slices requirements for target slice, verbatim"
+        },
+        "requirements_traced": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Each served by at least one touched/new contract"
+        },
+        "requirement_orphans": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Unhomed requirements; empty on clean run"
+        }
+      }
+    },
+    "skeleton_fidelity": {
+      "type": "object",
+      "description": "H14 — increment extends, never re-shapes frozen contracts",
+      "properties": {
+        "reshaped_contracts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frozen CT* slice changed; MUST be empty"
+        },
+        "verdict": {
+          "type": "string",
+          "description": "extends-not-reshapes on clean run"
+        }
+      }
+    },
+    "increment_counts": {
+      "type": "object",
+      "description": "Counts derived by walking actual lists",
+      "properties": {
+        "touched_contracts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of touched_contracts"
+        },
+        "new_contracts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of new_contracts"
+        },
+        "introduced_seam_edges": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of slice_coverage.introduced_seam_edges"
+        }
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "description": "One contract per edge in CT* id order (bijection with edge set)",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "between",
+          "kind",
+          "shape",
+          "failure_modes",
+          "traces",
+          "honors_adr"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^CT[0-9]+$",
+            "description": "Contract id CT1..CTn in components.json edge-array order"
+          },
+          "between": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "description": "[from, to] verbatim from edge; both ids must exist in components.json"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "sync_api",
+              "shared_data",
+              "async_event"
+            ],
+            "description": "Exactly one of sync_api, shared_data, async_event derived from frame"
+          },
+          "shape": {
+            "type": "string",
+            "description": "Schema reference — logical payload/entity-set crossing this seam; no invented columns/endpoints"
+          },
+          "failure_modes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Non-empty list of ways this seam genuinely fails given frame"
+          },
+          "traces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Non-empty frozen aPRD R* ids seam serves"
+          },
+          "honors_adr": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Frozen ADR ids whose decision this contract's kind/shape respects"
+          },
+          "honors_inv": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "INV* ids contract honors (esp. INV6 for kind)"
+          }
         }
       }
     },
     "coverage": {
       "type": "object",
-      "required": ["edges_in_scope", "edges_contracted", "edge_orphans", "contracts_without_edge", "kind_distribution"],
+      "description": "Both-direction coverage: edges contracted and contracts without edge",
+      "required": [
+        "edges_in_scope",
+        "edges_contracted",
+        "edge_orphans",
+        "contracts_without_edge",
+        "kind_distribution"
+      ],
       "properties": {
-        "edges_in_scope": { "type": "array", "items": { "type": "string" } },
-        "edges_contracted": { "type": "array", "items": { "type": "string" } },
-        "edge_orphans": { "type": "array" },
-        "contracts_without_edge": { "type": "array" },
+        "edges_in_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Every edge from components.json as from->to strings"
+        },
+        "edges_contracted": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Each edge with exactly one contract"
+        },
+        "edge_orphans": {
+          "type": "array",
+          "description": "Edge with no contract; empty on clean run",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contracts_without_edge": {
+          "type": "array",
+          "description": "Contract mapping to no real edge; empty on clean run",
+          "items": {
+            "type": "string"
+          }
+        },
         "kind_distribution": {
           "type": "object",
-          "required": ["sync_api", "shared_data", "async_event"],
+          "description": "Count per contract kind; three values must sum to total contracts",
+          "required": [
+            "sync_api",
+            "shared_data",
+            "async_event"
+          ],
           "properties": {
-            "sync_api": { "type": "integer", "minimum": 0 },
-            "shared_data": { "type": "integer", "minimum": 0 },
-            "async_event": { "type": "integer", "minimum": 0 }
+            "sync_api": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Count of sync_api contracts"
+            },
+            "shared_data": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Count of shared_data contracts"
+            },
+            "async_event": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Count of async_event contracts"
+            }
           }
         }
       }
     },
-    "frame_conflicts": { "type": "array" },
-    "structural_defects": { "type": "array" },
+    "frame_conflicts": {
+      "type": "array",
+      "description": "Seams needing frame-forbidden kind; each {edge, needed_kind, adrs, invs, reason, escape}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "structural_defects": {
+      "type": "array",
+      "description": "Contract mapping to no real edge or bijection broken; each {kind, detail}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "aprd_defects": {
+      "type": "array",
+      "description": "Slice requirements with no framable contract home; each {requirement, reason, escape}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
     "contract_counts": {
       "type": "object",
-      "required": ["contracts", "edges_in_scope", "with_failure_mode", "with_trace"],
+      "description": "Counts derived by walking actual lists",
+      "required": [
+        "contracts",
+        "edges_in_scope",
+        "with_failure_mode",
+        "with_trace"
+      ],
       "properties": {
-        "contracts": { "type": "integer" },
-        "edges_in_scope": { "type": "integer" },
-        "with_failure_mode": { "type": "integer" },
-        "with_trace": { "type": "integer" }
+        "contracts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of contracts array; equals edges_in_scope on clean run"
+        },
+        "edges_in_scope": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of components.json edges"
+        },
+        "with_failure_mode": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of contracts with non-empty failure_modes; equals contracts on clean run"
+        },
+        "with_trace": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of contracts with non-empty traces; equals contracts on clean run"
+        }
       }
     }
   }

@@ -3,74 +3,622 @@
   "$id": "data-model",
   "title": "MODEL-DATA output — logical data model with persistence strategy + entity ownership",
   "type": "object",
-  "required": ["class", "mode"],
+  "required": [
+    "class",
+    "mode"
+  ],
   "allOf": [
     {
-      "if": { "properties": { "mode": { "const": "skeleton" } }, "required": ["mode"] },
-      "then": { "required": ["persistence", "entities", "ownership", "coverage", "data_model_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "skeleton",
+            "description": "discriminator guard: mode==\"skeleton\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "persistence",
+          "entities",
+          "ownership",
+          "coverage",
+          "data_model_counts"
+        ]
+      }
     },
     {
-      "if": { "properties": { "mode": { "const": "increment" } }, "required": ["mode"] },
-      "then": { "required": ["introduced_components", "slice_entities", "slice_coverage", "increment_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "increment",
+            "description": "discriminator guard: mode==\"increment\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "introduced_components",
+          "slice_entities",
+          "slice_coverage",
+          "increment_counts"
+        ]
+      }
     }
   ],
   "properties": {
-    "aprd_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "adr_log_ref": { "type": "string" },
-    "components_ref": { "type": "string" },
-    "contracts_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "lock_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "skeleton_id": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "base_data_model_ref": { "type": "string" },
-    "slice_components_ref": { "type": "string" },
-    "slice_contracts_ref": { "type": "string" },
-    "skeleton_frozen_verified": { "type": "boolean" },
-    "slice_id": { "type": "string" },
-    "slice_name": { "type": "string" },
-    "introduced_components": { "type": "array", "items": { "type": "string" } },
-    "touched_components": { "type": "array", "items": { "type": "string" } },
-    "slice_entities": { "type": "array" },
-    "new_entities": { "type": "array" },
-    "slice_coverage": { "type": "object" },
-    "ownership_fidelity": { "type": "object" },
-    "ownership_defects": { "type": "array" },
-    "increment_counts": { "type": "object" },
-    "ownership": { "type": "object" },
+    "aprd_ref": {
+      "type": "string",
+      "description": "Resolved path to frozen aPRD artifact"
+    },
+    "adr_lock_ref": {
+      "type": "string",
+      "description": "Path to adr.lock"
+    },
+    "adr_log_ref": {
+      "type": "string",
+      "description": "Path to ADR log directory"
+    },
+    "components_ref": {
+      "type": "string",
+      "description": "Path to components.json"
+    },
+    "contracts_ref": {
+      "type": "string",
+      "description": "Path to contracts.json"
+    },
+    "foundation_cut_ref": {
+      "type": "string",
+      "description": "Path to foundation-cut artifact"
+    },
+    "lock_verified": {
+      "type": "boolean",
+      "description": "True if lock present and names frozen artifact"
+    },
+    "class": {
+      "type": "string",
+      "description": "Project class: greenfield or brownfield"
+    },
+    "mode": {
+      "type": "string",
+      "description": "skeleton = full initial model; increment = per-slice data scope"
+    },
+    "skeleton_id": {
+      "type": "string",
+      "description": "Skeleton slice id (e.g. S1)"
+    },
+    "skeleton_lock_ref": {
+      "type": "string",
+      "description": "Path to skeleton.lock (increment mode)"
+    },
+    "base_data_model_ref": {
+      "type": "string",
+      "description": "Path to frozen skeleton data-model.json this increment extends"
+    },
+    "slice_components_ref": {
+      "type": "string",
+      "description": "Path to slice components.json (increment mode)"
+    },
+    "slice_contracts_ref": {
+      "type": "string",
+      "description": "Path to slice contracts.json (increment mode)"
+    },
+    "skeleton_frozen_verified": {
+      "type": "boolean",
+      "description": "True if skeleton.lock present and status==frozen"
+    },
+    "slice_id": {
+      "type": "string",
+      "description": "Target slice id"
+    },
+    "slice_name": {
+      "type": "string",
+      "description": "Slice name carried verbatim"
+    },
+    "introduced_components": {
+      "type": "array",
+      "description": "C* ids slice first activates; carried from slice components.json",
+      "items": {
+        "type": "string",
+        "pattern": "^C[0-9]+$"
+      }
+    },
+    "touched_components": {
+      "type": "array",
+      "description": "Introduced plus reused components on slice path",
+      "items": {
+        "type": "string"
+      }
+    },
+    "slice_entities": {
+      "type": "array",
+      "description": "Entities in scope for this slice: owned-introduced (introduced box owns) + referenced-read (introduced box reads, reused box owns)",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "owner"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^E[0-9]+$",
+            "description": "Entity id"
+          },
+          "name": {
+            "type": "string",
+            "description": "Entity name verbatim from aPRD"
+          },
+          "owner": {
+            "type": "string",
+            "pattern": "^C[0-9]+$",
+            "description": "Owning component id; sole writer"
+          },
+          "persisted": {
+            "type": "boolean",
+            "description": "True = has shared_data store-write seam; false = derived/on-demand"
+          },
+          "role": {
+            "type": "string",
+            "description": "owned-introduced = introduced box owns; referenced-read = introduced box reads, owned by reused box"
+          },
+          "status": {
+            "type": "string",
+            "description": "established = entity in frozen skeleton; new = genuinely new (brownfield/thin-skeleton)"
+          },
+          "via_contracts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "CT* ids through which introduced box accesses this entity"
+          },
+          "relationships": {
+            "type": "array",
+            "description": "Logical entity relationships carried verbatim from frozen data model",
+            "items": {
+              "type": "object",
+              "required": [
+                "to",
+                "cardinality",
+                "basis"
+              ],
+              "properties": {
+                "to": {
+                  "type": "string",
+                  "description": "Target entity id"
+                },
+                "cardinality": {
+                  "type": "string",
+                  "description": "one-to-many, many-to-one, one-to-one, etc."
+                },
+                "basis": {
+                  "type": "string",
+                  "description": "Logical association plus grounding; no FK column names"
+                }
+              }
+            }
+          },
+          "field_schema_deferred_to": {
+            "type": "string",
+            "description": "Slice id where field layout is authored"
+          },
+          "field_schema_owned_here": {
+            "type": "boolean",
+            "description": "True if this slice is on hook for the deferred field schema"
+          },
+          "honors_inv": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "INV* ids this entity honors"
+          },
+          "traces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "R* ids this entity serves"
+          },
+          "in_scope_basis": {
+            "type": "string",
+            "description": "One-line reason entity is in scope for this slice"
+          }
+        }
+      }
+    },
+    "new_entities": {
+      "type": "array",
+      "description": "aPRD E* not in frozen skeleton model; empty in greenfield",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "slice_coverage": {
+      "type": "object",
+      "description": "Coverage of slice requirements by entities in scope",
+      "properties": {
+        "slice_requirements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "02-slices requirements for target slice"
+        },
+        "requirements_with_data": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Slice requirements that have at least one entity in scope"
+        },
+        "requirements_no_data_footprint": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Slice requirements with no entity data footprint"
+        },
+        "requirement_orphans": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Unhomed requirements not framable as new entity; empty on clean run"
+        }
+      }
+    },
+    "ownership_fidelity": {
+      "type": "object",
+      "description": "H14 — increment extends, never re-models frozen entity ownership",
+      "properties": {
+        "re_owned_entities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frozen E* slice re-owned; MUST be empty"
+        },
+        "remodeled_entities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frozen E* slice re-modeled; MUST be empty"
+        },
+        "verdict": {
+          "type": "string",
+          "description": "extends-not-re-models on clean run"
+        }
+      }
+    },
+    "ownership_defects": {
+      "type": "array",
+      "description": "Entities with ambiguous or missing owner; each {entity, kind, components, finding, route}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "increment_counts": {
+      "type": "object",
+      "description": "Counts derived by walking actual lists",
+      "properties": {
+        "slice_entities": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of slice_entities"
+        },
+        "owned_introduced": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of owned-introduced entities"
+        },
+        "referenced_read": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of referenced-read entities"
+        },
+        "new_entities": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of new_entities"
+        },
+        "field_schemas_owned_here": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of entities with field_schema_owned_here:true"
+        }
+      }
+    },
+    "ownership": {
+      "type": "object",
+      "description": "Authoritative {E*: C*} map; ambiguous entity omitted and in ownership_defects",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^C[0-9]+$"
+      }
+    },
     "persistence": {
       "type": "object",
+      "description": "Persistence strategy header",
       "properties": {
-        "adr_refs": { "type": "array" },
-        "store": { "type": "string" },
-        "persistence_component": { "type": "string" },
-        "model_basis": { "type": "string" }
+        "adr_refs": {
+          "type": "array",
+          "description": "Persistence ADR ids, verbatim",
+          "items": {
+            "type": "string"
+          }
+        },
+        "store": {
+          "type": "string",
+          "description": "Store technology named by persistence ADR"
+        },
+        "persistence_component": {
+          "type": "string",
+          "description": "C* realizing persistence seam, or null if folded into domain components"
+        },
+        "model_basis": {
+          "type": "string",
+          "description": "One line: single store; each entity one owning sole-writer; field schemas deferred"
+        },
+        "inherited_from": {
+          "type": "string",
+          "description": "Path to skeleton artifact persistence inherited from (increment mode)"
+        },
+        "note": {
+          "type": "string",
+          "description": "One-line note on persistence inheritance for this slice"
+        }
       }
     },
     "entities": {
       "type": "array",
+      "description": "One entry per aPRD E* in E* id order (bijection)",
       "items": {
         "type": "object",
-        "required": ["id", "name", "owner"],
+        "required": [
+          "id",
+          "name",
+          "owner"
+        ],
         "properties": {
-          "id": { "type": "string", "pattern": "^E[0-9]+$" },
-          "name": { "type": "string" },
-          "logical_description": { "type": "string" },
-          "owner": { "type": "string" },
-          "owner_basis": { "type": "string" },
-          "persisted": { "type": "boolean" },
-          "accessed_by": { "type": "array" }
+          "id": {
+            "type": "string",
+            "pattern": "^E[0-9]+$",
+            "description": "Entity id verbatim from aPRD"
+          },
+          "name": {
+            "type": "string",
+            "description": "Entity name verbatim from aPRD ENTITIES"
+          },
+          "logical_description": {
+            "type": "string",
+            "description": "One-line logical description; no field layout"
+          },
+          "owner": {
+            "type": "string",
+            "pattern": "^C[0-9]+$",
+            "description": "Exactly one C* formalized from owns_entities; must exist in components.json"
+          },
+          "owner_basis": {
+            "type": "string",
+            "description": "One-line: component responsibility governs this entity"
+          },
+          "persisted": {
+            "type": "boolean",
+            "description": "True = has shared_data store-write seam; false = derived/on-demand"
+          },
+          "accessed_by": {
+            "type": "array",
+            "description": "Access records strictly from contracts.json; exactly one read-write entry (owner)",
+            "items": {
+              "type": "object",
+              "required": [
+                "component",
+                "access",
+                "via"
+              ],
+              "properties": {
+                "component": {
+                  "type": "string",
+                  "pattern": "^C[0-9]+$",
+                  "description": "Accessing component id"
+                },
+                "access": {
+                  "type": "string",
+                  "description": "read-write (owner) or read (reader)"
+                },
+                "via": {
+                  "type": "string",
+                  "description": "CT* id of the contract through which access occurs"
+                }
+              }
+            }
+          },
+          "relationships": {
+            "type": "array",
+            "description": "Logical entity relationships; reciprocal for persisted-persisted pairs; empty if standalone",
+            "items": {
+              "type": "object",
+              "required": [
+                "to",
+                "cardinality",
+                "basis"
+              ],
+              "properties": {
+                "to": {
+                  "type": "string",
+                  "description": "Target entity id"
+                },
+                "cardinality": {
+                  "type": "string",
+                  "description": "one-to-many, many-to-one, one-to-one, etc."
+                },
+                "basis": {
+                  "type": "string",
+                  "description": "Logical association plus grounding; no FK column names"
+                }
+              }
+            }
+          },
+          "field_schema_deferred_to": {
+            "type": "string",
+            "description": "Owning slice from cut deferred[] or S1 for skeleton seam"
+          },
+          "field_schema_note": {
+            "type": "string",
+            "description": "One line: which slice/seam owns schema and that it is not modeled here"
+          },
+          "honors_inv": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Data-bearing INV* ids this entity honors"
+          },
+          "traces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Non-empty frozen aPRD R* ids served"
+          }
         }
       }
     },
-    "coverage": { "type": "object" },
-    "relationships": { "type": "array" },
-    "structural_defects": { "type": "array" },
-    "aprd_defects": { "type": "array" },
-    "data_model_counts": { "type": "object" },
-    "model_counts": { "type": "object" }
+    "coverage": {
+      "type": "object",
+      "description": "Entity coverage: all entities modeled, owners identified, persistence/derived partitioned",
+      "properties": {
+        "entities_in_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Every aPRD E* id"
+        },
+        "entities_modeled": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Every entity given an entry"
+        },
+        "entity_orphans": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "E* with no owner; empty on clean run"
+        },
+        "owning_components": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Distinct C* owning at least one entity"
+        },
+        "persisted_entities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Entities with persisted:true"
+        },
+        "derived_entities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Entities with persisted:false"
+        },
+        "single_owner_verified": {
+          "type": "boolean",
+          "description": "True if every entity has exactly one owner and one writer"
+        },
+        "shared_write_check": {
+          "type": "string",
+          "description": "pass if no entity has non-owner writer"
+        }
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "description": "Top-level relationships list (alternative location); may be empty if relationships are inline on entities",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "structural_defects": {
+      "type": "array",
+      "description": "Modeled entity not in aPRD or dropped in-scope entity; each {kind, detail}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "aprd_defects": {
+      "type": "array",
+      "description": "Requirements with no entity data home; each {requirement, reason, escape}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "frame_conflicts": {
+      "type": "array",
+      "description": "Frame tensions at data level; each {nfr_ref, demand, forbidden_by, route}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "data_model_counts": {
+      "type": "object",
+      "description": "Counts derived by walking actual lists",
+      "properties": {
+        "entities": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of entities array; equals aPRD ENTITIES count"
+        },
+        "owned": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Entities with exactly one owner"
+        },
+        "owners": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Distinct owning components"
+        },
+        "with_relationship": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Entities with at least one relationship"
+        },
+        "field_schemas_deferred": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Entities with field_schema_deferred_to set; equals entities on clean run"
+        }
+      }
+    },
+    "model_counts": {
+      "type": "object",
+      "description": "Alias for data_model_counts in some emit variants",
+      "additionalProperties": true
+    }
   }
 }

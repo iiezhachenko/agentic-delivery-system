@@ -5,36 +5,53 @@
   "type": "object",
   "required": ["options_index_ref", "class", "skeleton_id", "decisions", "undecided", "decision_counts"],
   "properties": {
-    "options_index_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "skeleton_id": { "type": "string" },
+    "options_index_ref": { "type": "string", "description": "Path to option-index (03-options/index.json)" },
+    "aprd_ref": { "type": "string", "description": "Resolved aPRD artifact path" },
+    "foundation_cut_ref": { "type": "string", "description": "Path to foundation cut file" },
+    "class": { "type": "string", "description": "Project class (greenfield | feature-add)" },
+    "skeleton_id": { "type": "string", "description": "Skeleton id (e.g. S1)" },
     "decisions": {
       "type": "array",
+      "description": "One entry per decided DP id; traces echoed for RECONCILE's coverage scan",
       "items": {
         "type": "object",
         "required": ["id", "category", "decision_made", "options_ref", "decision_ref", "option_count", "degenerate_forced", "traces"],
         "properties": {
-          "id": { "type": "string" },
-          "category": { "type": "string" },
-          "decision_made": { "type": "string" },
-          "options_ref": { "type": "string" },
-          "decision_ref": { "type": "string" },
-          "option_count": { "type": "integer" },
-          "degenerate_forced": { "type": "boolean" },
-          "traces": { "type": "array", "items": { "type": "string" } }
+          "id": { "type": "string", "description": "DP id decided" },
+          "category": { "type": "string", "description": "Taxonomy category carried verbatim" },
+          "decision_made": { "type": "string", "description": "Chosen option name verbatim" },
+          "options_ref": { "type": "string", "description": "Path to option file for this DP" },
+          "decision_ref": { "type": "string", "description": "Path to decision file for this DP" },
+          "option_count": { "type": "integer", "description": "Number of options in the option file" },
+          "degenerate_forced": { "type": "boolean", "description": "True when decision was degenerate_forced" },
+          "traces": {
+            "type": "array",
+            "description": "Traces from decision file; echoed for RECONCILE coverage scan",
+            "items": { "type": "string" }
+          }
         }
       }
     },
-    "undecided": { "type": "array" },
+    "undecided": {
+      "type": "array",
+      "description": "id + reason for any option-file id that could not be decided; empty on clean run",
+      "items": {
+        "type": "object",
+        "required": ["id", "reason"],
+        "properties": {
+          "id": { "type": "string", "description": "DP id that could not be decided" },
+          "reason": { "type": "string", "description": "Why decision could not be made (missing file | all-non-compliant | aPRD-defect)" }
+        }
+      }
+    },
     "decision_counts": {
       "type": "object",
+      "description": "len(decisions) + len(undecided) == len(option_files)",
       "required": ["decisions_made", "degenerate_forced", "undecided"],
       "properties": {
-        "decisions_made": { "type": "integer" },
-        "degenerate_forced": { "type": "integer" },
-        "undecided": { "type": "integer" }
+        "decisions_made": { "type": "integer", "description": "== len(decisions)" },
+        "degenerate_forced": { "type": "integer", "description": "Count of decided files with degenerate_forced=true" },
+        "undecided": { "type": "integer", "description": "== len(undecided)" }
       }
     }
   }

@@ -5,51 +5,193 @@
   "type": "object",
   "required": ["decisions_index_ref", "class", "skeleton_id", "decisions_checked", "conflicts", "constraint_violations", "coverage", "verdict", "blocking_count", "reconcile_counts"],
   "properties": {
-    "decisions_index_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "skeleton_id": { "type": "string" },
-    "decisions_checked": { "type": "array", "items": { "type": "string" } },
-    "undecided_carried": { "type": "array" },
+    "decisions_index_ref": { "type": "string", "description": "Path to decisions-index.json manifest enumerated" },
+    "aprd_ref": { "type": "string", "description": "Resolved aPRD artifact path; trace/coverage oracle" },
+    "foundation_cut_ref": { "type": "string", "description": "Path to foundation cut; INV/deferred oracle" },
+    "class": { "type": "string", "description": "Project class (greenfield | feature-add)" },
+    "skeleton_id": { "type": "string", "description": "Skeleton id (e.g. S1)" },
+    "decisions_checked": {
+      "type": "array",
+      "description": "Exactly the manifest's decisions[] ids, once each",
+      "items": { "type": "string" }
+    },
+    "undecided_carried": {
+      "type": "array",
+      "description": "decisions-index.json's undecided[] verbatim; folded into coverage (covers nothing)",
+      "items": {
+        "type": "object",
+        "required": ["id", "reason"],
+        "properties": {
+          "id": { "type": "string", "description": "DP id that could not be decided" },
+          "reason": { "type": "string", "description": "Why decision could not be made" }
+        }
+      }
+    },
     "conflicts": {
       "type": "array",
+      "description": "One entry per grounded cross-decision conflict; empty on coherent set",
       "items": {
         "type": "object",
         "required": ["id", "between", "picks", "finding", "exposed_by", "evidence", "routes_to"],
         "properties": {
-          "id": { "type": "string", "pattern": "^CF[0-9]+$" },
-          "between": { "type": "array", "items": { "type": "string" }, "minItems": 2 },
-          "picks": { "type": "array", "items": { "type": "string" } },
-          "finding": { "type": "string" },
-          "exposed_by": { "type": "array" },
-          "evidence": { "type": "string" },
-          "routes_to": { "type": "string" }
+          "id": { "type": "string", "pattern": "^CF[0-9]+$", "description": "Conflict id CF1, CF2, …" },
+          "between": {
+            "type": "array",
+            "description": "Two DP ids involved in conflict",
+            "items": { "type": "string" },
+            "minItems": 2
+          },
+          "picks": {
+            "type": "array",
+            "description": "decision_made verbatim for each DP in between[]",
+            "items": { "type": "string" }
+          },
+          "finding": { "type": "string", "description": "Contradiction: condition under which both picks cannot hold, plain terms" },
+          "exposed_by": {
+            "type": "array",
+            "description": "C*/INV*/follow_on basis ids exposing the conflict",
+            "items": { "type": "string" }
+          },
+          "evidence": { "type": "string", "description": "Follow_on note or paradigm clash grounding it — cite ids" },
+          "routes_to": { "type": "string", "description": "Stage to route conflict resolution to (e.g. EVALUATE-DECIDE)" }
         }
       }
     },
-    "constraint_violations": { "type": "array" },
-    "coverage": {
-      "type": "object",
-      "required": ["adr_to_aprd", "aprd_to_adr"],
-      "properties": {
-        "adr_to_aprd": { "type": "object" },
-        "aprd_to_adr": { "type": "object" }
+    "constraint_violations": {
+      "type": "array",
+      "description": "One per pick breaching hard C*/INV*; empty normally",
+      "items": {
+        "type": "object",
+        "required": ["id", "decision", "decision_made", "violates", "finding", "routes_to"],
+        "properties": {
+          "id": { "type": "string", "description": "Violation id CV1, CV2, …" },
+          "decision": { "type": "string", "description": "DP id of violating decision" },
+          "decision_made": { "type": "string", "description": "Verbatim pick that breaches constraint" },
+          "violates": { "type": "string", "description": "Constraint id breached (C* | INV*)" },
+          "finding": { "type": "string", "description": "How pick breaches constraint, grounded in id + pick semantics" },
+          "routes_to": { "type": "string", "description": "Stage to route fix to" }
+        }
       }
     },
-    "structural_defects": { "type": "array" },
-    "verdict": { "type": "string", "enum": ["coherent","blocked"] },
-    "blocking_count": { "type": "integer", "minimum": 0 },
+    "coverage": {
+      "type": "object",
+      "description": "ADR↔aPRD traceability and constraint coverage",
+      "required": ["adr_to_aprd", "aprd_to_adr"],
+      "properties": {
+        "adr_to_aprd": {
+          "type": "object",
+          "description": "Checks every decision has traceable aPRD ids",
+          "required": ["all_traceable", "untraceable"],
+          "properties": {
+            "all_traceable": { "type": "boolean", "description": "True when all decisions have valid traces[]" },
+            "untraceable": {
+              "type": "array",
+              "description": "Decisions with empty or phantom traces; empty when all_traceable=true",
+              "items": {
+                "type": "object",
+                "required": ["decision", "issue", "routes_to"],
+                "properties": {
+                  "decision": { "type": "string", "description": "DP id with trace problem" },
+                  "issue": { "type": "string", "description": "empty traces | phantom id description" },
+                  "routes_to": { "type": "string", "description": "Stage to route fix to" }
+                }
+              }
+            }
+          }
+        },
+        "aprd_to_adr": {
+          "type": "object",
+          "description": "Checks every in-scope C* constraint is covered by at least one decision",
+          "required": ["in_scope_constraints", "covered", "deferred", "premise", "gaps"],
+          "properties": {
+            "in_scope_constraints": {
+              "type": "array",
+              "description": "aPRD CONSTRAINTS (C*) only; each appears in exactly one coverage bucket",
+              "items": { "type": "string" }
+            },
+            "covered": {
+              "type": "array",
+              "description": "Constraints addressed by at least one decision; by[] lists only decisions whose traces[] contains the id",
+              "items": {
+                "type": "object",
+                "required": ["constraint", "by"],
+                "properties": {
+                  "constraint": { "type": "string", "description": "C* id covered" },
+                  "by": {
+                    "type": "array",
+                    "description": "DP ids whose traces[] contains this constraint id",
+                    "items": { "type": "string" }
+                  }
+                }
+              }
+            },
+            "deferred": {
+              "type": "array",
+              "description": "Constraints explicitly deferred per cut deferred[]; deferred ≠ gap",
+              "items": {
+                "type": "object",
+                "required": ["constraint", "defer_to", "evidence"],
+                "properties": {
+                  "constraint": { "type": "string", "description": "C* id deferred" },
+                  "defer_to": { "type": "string", "description": "Slice or stage deferred to" },
+                  "evidence": { "type": "string", "description": "Cut/aPRD evidence for deferral" }
+                }
+              }
+            },
+            "premise": {
+              "type": "array",
+              "description": "Constraints satisfied by project class fact; no decision needed",
+              "items": {
+                "type": "object",
+                "required": ["constraint", "why"],
+                "properties": {
+                  "constraint": { "type": "string", "description": "C* id satisfied as premise" },
+                  "why": { "type": "string", "description": "Why constraint is satisfied by project class, not a decision" }
+                }
+              }
+            },
+            "gaps": {
+              "type": "array",
+              "description": "In-scope C* with no decision, no deferral, no premise (D5 coverage-gap list)",
+              "items": {
+                "type": "object",
+                "required": ["constraint", "issue"],
+                "properties": {
+                  "constraint": { "type": "string", "description": "C* id with no coverage" },
+                  "issue": { "type": "string", "description": "Why constraint has no coverage" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "structural_defects": {
+      "type": "array",
+      "description": "decision/decision_ref/issue for any decision file missing or unparseable; empty normally",
+      "items": {
+        "type": "object",
+        "required": ["decision", "decision_ref", "issue"],
+        "properties": {
+          "decision": { "type": "string", "description": "DP id of defective file" },
+          "decision_ref": { "type": "string", "description": "Expected path of defective decision file" },
+          "issue": { "type": "string", "description": "What's wrong with the file (missing | unparseable)" }
+        }
+      }
+    },
+    "verdict": { "type": "string", "enum": ["coherent","blocked"], "description": "blocked iff blocking_count > 0, else coherent" },
+    "blocking_count": { "type": "integer", "minimum": 0, "description": "len(conflicts) + len(constraint_violations) + len(gaps) + len(untraceable) + len(structural_defects)" },
     "reconcile_counts": {
       "type": "object",
+      "description": "Tallied by walking each list; walk to count, don't estimate",
       "required": ["decisions_checked", "conflicts", "constraint_violations", "coverage_gaps", "untraceable", "structural_defects"],
       "properties": {
-        "decisions_checked": { "type": "integer" },
-        "conflicts": { "type": "integer" },
-        "constraint_violations": { "type": "integer" },
-        "coverage_gaps": { "type": "integer" },
-        "untraceable": { "type": "integer" },
-        "structural_defects": { "type": "integer" }
+        "decisions_checked": { "type": "integer", "description": "== len(decisions_checked)" },
+        "conflicts": { "type": "integer", "description": "== len(conflicts)" },
+        "constraint_violations": { "type": "integer", "description": "== len(constraint_violations)" },
+        "coverage_gaps": { "type": "integer", "description": "== len(aprd_to_adr.gaps)" },
+        "untraceable": { "type": "integer", "description": "== len(adr_to_aprd.untraceable)" },
+        "structural_defects": { "type": "integer", "description": "== len(structural_defects)" }
       }
     }
   }

@@ -5,48 +5,123 @@
   "type": "object",
   "required": ["slices_ref", "aprd_ref", "class", "verdict", "valid", "rejected", "slice_counts"],
   "properties": {
-    "slices_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "verdict": { "type": "string", "enum": ["all_vertical","horizontal_found"] },
+    "slices_ref": {
+      "description": "Path to 02-slices.json this check is based on.",
+      "type": "string"
+    },
+    "aprd_ref": {
+      "description": "Path to frozen aPRD artifact.",
+      "type": "string"
+    },
+    "class": {
+      "description": "Project class: greenfield or feature-add.",
+      "type": "string"
+    },
+    "verdict": {
+      "description": "all_vertical iff rejected[] empty; horizontal_found otherwise. Deterministic — never set by feel.",
+      "type": "string",
+      "enum": ["all_vertical","horizontal_found"]
+    },
     "valid": {
+      "description": "Slices that passed verticality check — each has at least one black-box user-observable AC.",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["id", "name", "vertical", "qualifying_acceptance", "reason"],
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "vertical": { "const": true },
-          "qualifying_acceptance": { "type": "array", "items": { "type": "string" } },
-          "reason": { "type": "string" }
+          "id": {
+            "description": "Slice S* identifier carried verbatim from candidate slices.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Slice name carried verbatim from candidate slices.",
+            "type": "string"
+          },
+          "vertical": {
+            "description": "Always true in valid[].",
+            "const": true
+          },
+          "qualifying_acceptance": {
+            "description": "Non-empty subset of slice's acceptance that passed black-box + user-observable test.",
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "reason": {
+            "description": "One line: which AC is black-box + user-observable, and what a client watches pass.",
+            "type": "string"
+          }
         }
       }
     },
     "rejected": {
+      "description": "Slices that failed verticality check — no AC is black-box + user-observable.",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["id", "name", "vertical", "qualifying_acceptance", "category", "reason", "remedy", "remedy_detail"],
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "vertical": { "const": false },
-          "qualifying_acceptance": { "type": "array", "maxItems": 0 },
-          "category": { "type": "string", "enum": ["horizontal_cut","no_acceptance","unresolved_acceptance"] },
-          "reason": { "type": "string" },
-          "remedy": { "type": "string", "enum": ["re-cut","merge"] },
-          "remedy_detail": { "type": "string" }
+          "id": {
+            "description": "Slice S* identifier carried verbatim.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Slice name carried verbatim.",
+            "type": "string"
+          },
+          "vertical": {
+            "description": "Always false in rejected[].",
+            "const": false
+          },
+          "qualifying_acceptance": {
+            "description": "Always empty in rejected[] — no AC qualified.",
+            "type": "array",
+            "maxItems": 0,
+            "items": {
+              "type": "string",
+              "description": "AC* id of a qualifying acceptance criterion (never present in rejected[])."
+            }
+          },
+          "category": {
+            "description": "Rejection reason category: horizontal_cut, no_acceptance, or unresolved_acceptance.",
+            "type": "string",
+            "enum": ["horizontal_cut","no_acceptance","unresolved_acceptance"]
+          },
+          "reason": {
+            "description": "Why no AC is black-box + user-observable — names each AC and why it fails.",
+            "type": "string"
+          },
+          "remedy": {
+            "description": "Recommended fix: re-cut into vertical capabilities, or merge into a vertical neighbour.",
+            "type": "string",
+            "enum": ["re-cut","merge"]
+          },
+          "remedy_detail": {
+            "description": "Specific re-cut targets or named vertical neighbour to merge into.",
+            "type": "string"
+          }
         }
       }
     },
     "slice_counts": {
+      "description": "Count totals: total == slices.length; valid + rejected == total.",
       "type": "object",
       "required": ["total", "valid", "rejected"],
       "properties": {
-        "total": { "type": "integer", "minimum": 0 },
-        "valid": { "type": "integer", "minimum": 0 },
-        "rejected": { "type": "integer", "minimum": 0 }
+        "total": {
+          "description": "Total candidate slices checked.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "valid": {
+          "description": "Count of slices that passed verticality check.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "rejected": {
+          "description": "Count of slices rejected as horizontal.",
+          "type": "integer",
+          "minimum": 0
+        }
       }
     }
   }

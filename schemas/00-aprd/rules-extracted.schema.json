@@ -5,48 +5,55 @@
   "type": "object",
   "required": ["sources_ref", "class", "stack", "rules", "unfetched_sources", "extraction_meta"],
   "properties": {
-    "sources_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "stack": { "type": "array", "items": { "type": "string" } },
+    "sources_ref": { "type": "string", "description": "path to sources.json listing the tool manifest files" },
+    "class": { "type": "string", "description": "greenfield | feature-add | bugfix" },
+    "stack": { "type": "array", "items": { "type": "string", "description": "stack technology name" }, "description": "technology stack items extracted rules apply to" },
     "rules": {
       "type": "array",
+      "description": "per-source atomic rules; duplicates and contradictions kept intact for RECONCILE",
       "items": {
         "type": "object",
         "required": ["id", "source_ref", "tier", "tool", "tool_version_pinned", "kind", "topic", "rule", "evidence"],
         "properties": {
-          "id": { "type": "string", "pattern": "^RULE[0-9]+$" },
-          "source_ref": { "type": "string", "pattern": "^SRC[0-9]+$" },
-          "tier": { "type": "integer" },
-          "tool": { "type": "string" },
-          "tool_version_pinned": { "type": "string" },
-          "kind": { "type": "string", "enum": ["config","opinion"] },
-          "topic": { "type": "string" },
-          "rule": { "type": "string" },
-          "setting": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "evidence": { "type": "string" }
+          "id": { "type": "string", "pattern": "^RULE[0-9]+$", "description": "stable rule id; RULE* contiguous from RULE1, never renumbered" },
+          "source_ref": { "type": "string", "pattern": "^SRC[0-9]+$", "description": "SRC* id from sources.json; exactly one per rule — the provenance link" },
+          "tier": { "type": "integer", "description": "tier copied verbatim from sources.json; 1 = highest authority" },
+          "tool": { "type": "string", "description": "tool name copied verbatim from sources.json" },
+          "tool_version_pinned": { "type": "string", "description": "pinned version copied verbatim from sources.json; never invented or altered" },
+          "kind": { "type": "string", "enum": ["config","opinion"], "description": "config for parsed machine-readable settings; opinion for prose prescriptions" },
+          "topic": { "type": "string", "description": "short subject slug enabling RECONCILE to group candidates; not unique" },
+          "rule": { "type": "string", "description": "one atomic prescription, caveman prose" },
+          "setting": { "description": "verbatim key+value from config; null for kind:opinion", "oneOf": [{"type":"string"},{"type":"null"}] },
+          "evidence": { "type": "string", "description": "verbatim snippet from the manifest proving this rule exists; non-empty" }
         }
       }
     },
     "unfetched_sources": {
       "type": "array",
+      "description": "every SRC* whose file is missing on disk; [] if all fetched",
       "items": {
         "type": "object",
         "required": ["id", "reason"],
         "properties": {
-          "id": { "type": "string" },
-          "reason": { "type": "string" }
+          "id": { "type": "string", "description": "SRC* id that was not fetched" },
+          "reason": { "type": "string", "description": "why this source was not extracted; e.g. file absent on disk" }
         }
       }
     },
     "extraction_meta": {
       "type": "object",
+      "description": "integer tallies; walk to count, do not estimate",
       "required": ["sources_total", "sources_extracted", "sources_unfetched", "rules_total"],
       "properties": {
-        "sources_total": { "type": "integer" },
-        "sources_extracted": { "type": "integer" },
-        "sources_unfetched": { "type": "integer" },
-        "rules_total": { "type": "integer", "x-walk": "rules_total == rules.length" },
-        "by_tier": { "type": "object" }
+        "sources_total": { "type": "integer", "description": "total sources listed in sources.json" },
+        "sources_extracted": { "type": "integer", "description": "sources whose rules were extracted; sources_extracted + sources_unfetched == sources_total" },
+        "sources_unfetched": { "type": "integer", "description": "sources skipped due to missing files" },
+        "rules_total": { "type": "integer", "description": "== rules.length", "x-walk": "rules_total == rules.length" },
+        "by_tier": {
+          "type": "object",
+          "description": "rule count per tier; tier keys as strings; sums to rules_total",
+          "additionalProperties": { "type": "integer", "description": "count of rules at this tier" }
+        }
       }
     }
   }

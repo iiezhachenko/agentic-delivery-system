@@ -5,27 +5,76 @@
   "type": "object",
   "required": ["class", "mode", "slice_id", "verdict", "issues", "issue_count", "critique_counts"],
   "properties": {
-    "slice_components_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "skeleton_frozen_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "slice_id": { "type": "string" },
-    "slice_name": { "type": "string" },
-    "artifacts_reviewed": { "type": "array", "items": { "type": "string" } },
-    "verdict": { "type": "string", "enum": ["clean","blocked"] },
-    "issues": { "type": "array" },
-    "issue_count": { "type": "integer", "minimum": 0 },
-    "skeleton_fidelity": { "type": "object" },
+    "slice_components_ref": { "type": "string", "description": "Path to slice components.json reviewed" },
+    "slice_contracts_ref": { "type": "string", "description": "Path to slice contracts.json reviewed" },
+    "slice_data_model_ref": { "type": "string", "description": "Path to slice data-model.json reviewed" },
+    "slice_nfr_mechanisms_ref": { "type": "string", "description": "Path to slice nfr-mechanisms.json reviewed" },
+    "slice_flows_ref": { "type": "string", "description": "Path to slice flows.json reviewed" },
+    "slice_test_specs_ref": { "type": "string", "description": "Path to slice test-specs.json reviewed" },
+    "slice_deferred_decisions_ref": { "type": "string", "description": "Path to slice deferred-decisions.json reviewed" },
+    "aprd_ref": { "type": "string", "description": "Resolved path to frozen aPRD artifact" },
+    "adr_lock_ref": { "type": "string", "description": "Path to adr.lock" },
+    "foundation_cut_ref": { "type": "string", "description": "Path to foundation-cut artifact" },
+    "skeleton_lock_ref": { "type": "string", "description": "Path to skeleton.lock" },
+    "rerank_ref": { "type": "string", "description": "Path to 08-rerank.json" },
+    "skeleton_frozen_verified": { "type": "boolean", "description": "True if skeleton.lock present and status==frozen" },
+    "class": { "type": "string", "description": "Project class: greenfield or brownfield" },
+    "mode": { "type": "string", "description": "increment for slice reconcile pass" },
+    "slice_id": { "type": "string", "description": "Target slice id auto-selected from remaining_sequence" },
+    "slice_name": { "type": "string", "description": "Slice name carried verbatim from slice artifacts" },
+    "artifacts_reviewed": {
+      "type": "array",
+      "description": "Names of the slice artifact files read by this reconcile (six slice files plus deferred-decisions)",
+      "items": { "type": "string" }
+    },
+    "verdict": { "type": "string", "enum": ["clean","blocked"], "description": "clean iff issues empty; blocked iff issues non-empty" },
+    "issues": {
+      "type": "array",
+      "description": "Blocking-grade issues only; empty on clean slice",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "target", "finding", "fix_hint"],
+        "properties": {
+          "id": { "type": "string", "description": "Contiguous issue id I1, I2, ..." },
+          "category": {
+            "type": "string",
+            "enum": ["coverage-gap","ownership-defect","unmechanized-nfr","frame-violation","untestable-contract","incomplete-flow","undrained-queue","skeleton-fidelity"],
+            "description": "Exactly one of eight blocking categories (seven shared + skeleton-fidelity increment-only)"
+          },
+          "target": { "type": "string", "description": "Concrete slice artifact id concerned (C*/CT*/E*/F*/M*/R*/DP*)" },
+          "finding": { "type": "string", "description": "What is wrong and why it blocks slice freeze; cite concrete slice id" },
+          "fix_hint": { "type": "string", "description": "Concrete actionable change the routed slice stage should make" },
+          "routes_to": { "type": "string", "description": "Stage where fix belongs" }
+        }
+      }
+    },
+    "issue_count": { "type": "integer", "minimum": 0, "description": "Integer equal to length of issues array" },
+    "skeleton_fidelity": {
+      "type": "object",
+      "description": "H14 verdict: slice extends, never redraws, frozen skeleton",
+      "properties": {
+        "redrawn_components": { "type": "array", "items": { "type": "string" }, "description": "Frozen C* slice changed; MUST be empty" },
+        "reshaped_contracts": { "type": "array", "items": { "type": "string" }, "description": "Frozen CT* slice reshaped; MUST be empty" },
+        "re_owned_entities": { "type": "array", "items": { "type": "string" }, "description": "Frozen E* slice re-owned/re-modeled; MUST be empty" },
+        "re_disposed_nfrs": { "type": "array", "items": { "type": "string" }, "description": "Frozen NFR slice re-disposed/re-realized; MUST be empty" },
+        "re_authored_contract_tests": { "type": "array", "items": { "type": "string" }, "description": "Frozen T-CT* re-authored vs inherited by reference; MUST be empty" },
+        "re_tested_flows": { "type": "array", "items": { "type": "string" }, "description": "Frozen F* re-walked/redrawn; MUST be empty" },
+        "build_dag_re_emitted": { "type": "boolean", "description": "True if build-dag re-emitted; MUST be false (emitted once in skeleton)" },
+        "verdict": { "type": "string", "description": "extends-not-redraws on clean slice" }
+      }
+    },
     "critique_counts": {
       "type": "object",
+      "description": "Summary tallies derived by walking issues array",
       "required": ["artifacts_reviewed", "issues"],
       "properties": {
-        "artifacts_reviewed": { "type": "integer" },
-        "issues": { "type": "integer" },
-        "by_category": { "type": "object" }
+        "artifacts_reviewed": { "type": "integer", "minimum": 0, "description": "Count of slice artifact files reviewed (7 for increment)" },
+        "issues": { "type": "integer", "minimum": 0, "description": "Count of issues; equals issue_count" },
+        "by_category": {
+          "type": "object",
+          "description": "Issue count per category; sums to issue_count",
+          "additionalProperties": true
+        }
       }
     }
   }

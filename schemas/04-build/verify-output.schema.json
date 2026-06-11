@@ -5,47 +5,461 @@
   "type": "object",
   "required": ["class", "mode", "slice_id", "verification_method", "ladder", "verdict"],
   "properties": {
-    "integration_record_ref": { "type": "string" },
-    "build_record_ref": { "type": "string" },
-    "slice_oracle_lock_ref": { "type": "string" },
-    "slice_oracle_ref": { "type": "string" },
-    "slice_nfr_mechanisms_ref": { "type": "string" },
-    "slice_components_ref": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "aprd_lock_ref": { "type": "string" },
-    "locks_verified": { "type": "boolean" },
-    "diagnosis_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "aprd_version": { "type": "string" },
-    "regression_guard_ref": { "type": "string" },
-    "reproduction": { "type": "object" },
-    "regression": { "type": "object" },
-    "skeleton_fidelity": { "type": "object" },
-    "per_ac_summary": { "type": "array" },
-    "provenance": { "type": "object" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "slice_id": { "type": "string" },
-    "slice_name": { "type": "string" },
-    "flow": { "type": "string" },
-    "slice_path": { "type": "array" },
-    "prior_built_components": { "type": "array" },
-    "verification_method": { "type": "string" },
-    "inherited_oracle": { "type": "object" },
-    "ladder": {
+    "integration_record_ref": { "type": "string", "description": "Path to slice integration-record.json (status:integrated required)" },
+    "build_record_ref": { "type": "string", "description": "Path to slice build-record.json" },
+    "slice_oracle_lock_ref": { "type": "string", "description": "Path to slice oracle.lock (frozen + builder_may_not_edit)" },
+    "slice_oracle_ref": { "type": "string", "description": "Path to slice oracle.json" },
+    "slice_nfr_mechanisms_ref": { "type": "string", "description": "Path to slice nfr-mechanisms.json" },
+    "slice_components_ref": { "type": "string", "description": "Path to slice components.json" },
+    "skeleton_lock_ref": { "type": "string", "description": "Path to skeleton.lock" },
+    "adr_lock_ref": { "type": "string", "description": "Path to adr.lock" },
+    "aprd_lock_ref": { "type": "string", "description": "Path to aprd.lock" },
+    "locks_verified": { "type": "boolean", "description": "All locks confirmed frozen before verification" },
+    "diagnosis_ref": { "type": "string", "description": "Path to diagnosis.json (bugfix mode)" },
+    "aprd_ref": { "type": "string", "description": "Path to resolved aPRD (bugfix/feature-add; lock-resolved)" },
+    "aprd_version": { "type": "string", "description": "aPRD version string (bugfix/feature-add)" },
+    "regression_guard_ref": { "type": "string", "description": "Path/ref to REGRESSION_GUARD in aPRD (bugfix/feature-add)" },
+    "reproduction": {
       "type": "object",
-      "required": ["contract", "flow", "acceptance"],
+      "description": "Bugfix reproduction re-derivation: confirms OREPRO-1 flipped red→green",
       "properties": {
-        "contract": { "type": "object" },
-        "flow": { "type": "object" },
-        "acceptance": { "type": "object" },
-        "class_ext": { "type": "object" },
-        "nfr": { "type": "object" }
+        "ran": { "type": "boolean", "description": "True = reproduction test was run/traced" },
+        "test_id": { "type": "string", "description": "Reproduction oracle test id (OREPRO-1)" },
+        "target": { "type": "string", "description": "AC id the repro asserts (AC11 etc)" },
+        "req_ref": { "type": "string", "description": "Requirement id" },
+        "file": { "type": "string", "description": "Reproduction test file path" },
+        "was": { "type": "string", "description": "State before fix: red" },
+        "now": { "type": "string", "description": "State after fix: green" },
+        "flips_green_when": { "type": "string", "description": "One-line correct behavior" },
+        "trace": { "type": "string", "description": "Static trace of reproduction flip" },
+        "baseline_ref": { "type": "string", "description": "Regression-guard AC id (AC6 etc)" }
       }
     },
-    "verdict": { "type": "string", "enum": ["verified","failed","blocked"] },
-    "escape": { "oneOf": [{"type":"string"},{"type":"null"},{"type":"object"}] },
-    "verification_counts": { "type": "object" }
+    "regression": {
+      "type": "object",
+      "description": "Scoped regression check: previously-green tests stay green after feature/bugfix",
+      "properties": {
+        "ran": { "type": "boolean", "description": "True = regression layer was run/traced" },
+        "scope": { "type": "string", "description": "Scope: touched-surface + seams" },
+        "scope_basis": { "type": "string", "description": "Scope rationale citing REGRESSION_GUARD + BLAST_RADIUS" },
+        "suites_run": {
+          "type": "array",
+          "description": "Oracle suite paths run for regression check",
+          "items": { "type": "string" }
+        },
+        "asserts": {
+          "type": "array",
+          "description": "AC ids asserted green by regression layer",
+          "items": { "type": "string" }
+        },
+        "results": {
+          "type": "array",
+          "description": "Per-AC regression results",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ref": { "type": "string", "description": "AC id" },
+              "result": { "type": "string", "description": "pass | fail" },
+              "trace": { "type": "string", "description": "Regression trace" }
+            }
+          }
+        },
+        "verdict": { "type": "string", "description": "Regression verdict: green | red" },
+        "reds": {
+          "type": "array",
+          "description": "Previously-green tests that went red (should be empty on green verdict)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ref": { "type": "string", "description": "AC id or test id that regressed" },
+              "was": { "type": "string", "description": "Prior state: green" },
+              "now": { "type": "string", "description": "Current state: red" },
+              "what": { "type": "string", "description": "Description of the regression" }
+            }
+          }
+        },
+        "baseline_tests_edited": { "type": "boolean", "description": "False = no baseline test edited (BF1/BF4)" }
+      }
+    },
+    "skeleton_fidelity": {
+      "type": "object",
+      "description": "Slice-build: confirms verifying the slice did not require editing/re-running frozen skeleton artifacts (H14)",
+      "properties": {
+        "breached": { "type": "boolean", "description": "True = ladder can only pass by touching frozen skeleton → escape Phase 2" },
+        "inherited_tests": {
+          "type": "array",
+          "description": "Frozen skeleton test ids inherited; not re-run (delta Rule 2)",
+          "items": { "type": "string" }
+        },
+        "note": { "type": "string", "description": "Fidelity reasoning" }
+      }
+    },
+    "per_ac_summary": {
+      "type": "array",
+      "description": "Per-AC summary for DEMO-GEN consumption; slice-new ACs only",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Oracle AC test id (OA-AC*)" },
+          "ac": { "type": "string", "description": "AC id" },
+          "req_ref": { "type": "string", "description": "Requirement id" },
+          "visible": { "type": "string", "description": "pass | fail" },
+          "held_out": { "type": "string", "description": "pass | fail" },
+          "visible_passed": { "type": "boolean", "description": "True = visible test passed" },
+          "held_out_passed": { "type": "boolean", "description": "True = held-out test passed" },
+          "overfit": { "type": "boolean", "description": "False = no overfit to visible set" },
+          "verdict": { "type": "string", "description": "green | red" },
+          "reproduction": { "type": "string", "description": "Reproduction result (bugfix: green/red)" },
+          "regression": { "type": "string", "description": "Regression result (bugfix: green/red)" },
+          "note": { "type": "string", "description": "Notes on this AC summary entry" }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Provenance: verifier role + frozen artifact refs",
+      "properties": {
+        "verifier_role": { "type": "string", "description": "Role: verifier or VERIFY-OUTPUT (distinct from builder/integrator, B1)" },
+        "built_against": {
+          "type": "object",
+          "description": "Frozen artifact refs pinned at verification time",
+          "properties": {
+            "slice_oracle_lock": { "type": "string", "description": "Slice oracle lock path" },
+            "skeleton_oracle_lock": { "type": "string", "description": "Frozen skeleton oracle lock (inherited)" },
+            "skeleton_oracle": { "type": "string", "description": "Skeleton oracle path" },
+            "skeleton_integration": { "type": "string", "description": "Skeleton integration record path" },
+            "skeleton_lock": { "type": "string", "description": "Skeleton lock path" },
+            "adr_lock": { "type": "string", "description": "ADR lock path" },
+            "aprd_lock": { "type": "string", "description": "APRD lock path" },
+            "build_record": { "type": "string", "description": "Slice build record path" },
+            "integration_record": { "type": "string", "description": "Slice integration record path" },
+            "diagnosis": { "type": "string", "description": "Diagnosis path (bugfix mode)" },
+            "slice_build_record": { "type": "string", "description": "Slice build record alias" },
+            "slice_integration_record": { "type": "string", "description": "Slice integration record alias" }
+          }
+        }
+      }
+    },
+    "class": { "type": "string", "description": "Project class: greenfield | feature-add | bugfix" },
+    "mode": { "type": "string", "description": "Build mode: slice-build | bugfix" },
+    "slice_id": { "type": "string", "description": "Slice identifier (auto-selected, resumable)" },
+    "slice_name": { "type": "string", "description": "Human-readable slice name" },
+    "flow": { "type": "string", "description": "Slice flow id (F*) verified" },
+    "slice_path": {
+      "type": "array",
+      "description": "Component ids on the slice flow path",
+      "items": { "type": "string" }
+    },
+    "prior_built_components": {
+      "type": "array",
+      "description": "Prior-built component ids; frozen-green from own oracle; exercised only as slice oracle requires",
+      "items": { "type": "string" }
+    },
+    "verification_method": { "type": "string", "description": "How tests were run: executed | static-trace (runtime unavailable; authoritative-by-trace)" },
+    "inherited_oracle": {
+      "type": "object",
+      "description": "Frozen skeleton oracle inherited by reference; tests NOT re-run (H14 — THE load-bearing slice delta)",
+      "properties": {
+        "skeleton_oracle_ref": { "type": "string", "description": "Path to frozen skeleton oracle.json" },
+        "skeleton_oracle_lock_ref": { "type": "string", "description": "Path to frozen skeleton oracle.lock" },
+        "skeleton_integration_ref": { "type": "string", "description": "Path to skeleton integration-record.json" },
+        "slice_oracle_ref": { "type": "string", "description": "Path to baseline slice oracle (bugfix)" },
+        "inherited_tests": {
+          "type": "array",
+          "description": "Oracle test ids inherited; not re-run",
+          "items": { "type": "string" }
+        },
+        "frozen_verified": { "type": "boolean", "description": "Skeleton greens frozen-verified; not re-run here" },
+        "re_run": { "type": "boolean", "description": "False = inherited tests not re-run (H14)" },
+        "note": { "type": "string", "description": "Fidelity note" }
+      }
+    },
+    "ladder": {
+      "type": "object",
+      "description": "Slice verification ladder: contract/flow/acceptance (slice-new tests only) + class_ext + nfr",
+      "required": ["contract", "flow", "acceptance"],
+      "properties": {
+        "contract": {
+          "type": "object",
+          "description": "Contract layer results for slice-new CT* tests",
+          "properties": {
+            "layer_verdict": { "type": "string", "description": "pass | fail | n/a | green" },
+            "note": { "type": "string", "description": "Layer note (n/a for bugfix mode)" },
+            "tests": {
+              "type": "array",
+              "description": "Per-contract-test results",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "description": "Oracle test id" },
+                  "file": { "type": "string", "description": "Test file path" },
+                  "target": { "type": "string", "description": "Contract id" },
+                  "caller": { "type": "string", "description": "Caller component id" },
+                  "provider": { "type": "string", "description": "Provider component id" },
+                  "assertions": {
+                    "type": "array",
+                    "description": "Per-assertion results",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "description": "Assertion id" },
+                        "test": { "type": "string", "description": "Test function name" },
+                        "result": { "type": "string", "description": "pass | fail" },
+                        "trace": { "type": "string", "description": "Static trace" }
+                      }
+                    }
+                  },
+                  "layer_verdict": { "type": "string", "description": "green | fail" }
+                }
+              }
+            }
+          }
+        },
+        "flow": {
+          "type": "object",
+          "description": "Flow layer results for slice flow F*",
+          "properties": {
+            "layer_verdict": { "type": "string", "description": "pass | fail | n/a | green" },
+            "note": { "type": "string", "description": "Layer note (n/a for bugfix mode)" },
+            "tests": {
+              "type": "array",
+              "description": "Per-flow-test results",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "description": "Oracle flow test id" },
+                  "file": { "type": "string", "description": "Flow test file" },
+                  "target": { "type": "string", "description": "Flow id" },
+                  "path": { "type": "array", "items": { "type": "string" }, "description": "Component path" },
+                  "via": { "type": "array", "items": { "type": "string" }, "description": "Contract ids" },
+                  "happy": {
+                    "type": "object",
+                    "description": "Happy path result: test name + pass/fail + per-assertion traces",
+                    "properties": {
+                      "test": { "type": "string", "description": "Happy path test function name" },
+                      "result": { "type": "string", "description": "pass | fail" },
+                      "assertions": {
+                        "type": "array",
+                        "description": "Per-assertion results with trace",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string", "description": "Assertion id" },
+                            "assert": { "type": "string", "description": "Assertion expression" },
+                            "result": { "type": "string", "description": "pass | fail" },
+                            "trace": { "type": "string", "description": "Static trace of why assertion holds" }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "failure": {
+                    "type": "object",
+                    "description": "Failure variant result: test name + pass/fail + per-assertion traces",
+                    "properties": {
+                      "test": { "type": "string", "description": "Failure variant test function name" },
+                      "result": { "type": "string", "description": "pass | fail" },
+                      "assertions": {
+                        "type": "array",
+                        "description": "Per-assertion results with trace",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string", "description": "Assertion id" },
+                            "assert": { "type": "string", "description": "Assertion expression" },
+                            "result": { "type": "string", "description": "pass | fail" },
+                            "trace": { "type": "string", "description": "Static trace of why assertion holds" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "acceptance": {
+          "type": "object",
+          "description": "Acceptance layer results for slice-new AC* tests",
+          "properties": {
+            "layer_verdict": { "type": "string", "description": "pass | fail | n/a | green" },
+            "note": { "type": "string", "description": "Layer note (n/a for bugfix mode)" },
+            "per_ac": {
+              "type": "array",
+              "description": "Per-AC visible + held_out results",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "description": "Oracle AC test id" },
+                  "target": { "type": "string", "description": "AC id" },
+                  "req_ref": { "type": "string", "description": "Requirement id" },
+                  "visible": {
+                    "type": "object",
+                    "description": "Visible test result: file + result + per-test traces",
+                    "properties": {
+                      "file": { "type": "string", "description": "Visible test file path" },
+                      "result": { "type": "string", "description": "pass | fail" },
+                      "tests": {
+                        "type": "array",
+                        "description": "Per-test results with trace",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string", "description": "Oracle test id" },
+                            "test": { "type": "string", "description": "Test function name" },
+                            "result": { "type": "string", "description": "pass | fail" },
+                            "trace": { "type": "string", "description": "Static trace of why test passes" }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "held_out": {
+                    "type": "object",
+                    "description": "Held-out test result (gate-only, B7): file + result + per-test traces",
+                    "properties": {
+                      "file": { "type": "string", "description": "Held-out test file path" },
+                      "result": { "type": "string", "description": "pass | fail" },
+                      "tests": {
+                        "type": "array",
+                        "description": "Per-test results with trace",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string", "description": "Oracle test id" },
+                            "test": { "type": "string", "description": "Test function name" },
+                            "result": { "type": "string", "description": "pass | fail" },
+                            "trace": { "type": "string", "description": "Static trace of why test passes" }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "overfit_check": { "type": "string", "description": "Anti-overfit reasoning" },
+                  "ac_verdict": { "type": "string", "description": "green | fail" }
+                }
+              }
+            }
+          }
+        },
+        "class_ext": {
+          "type": "object",
+          "description": "Class extension layer: regression (feature-add/bugfix) or n/a (greenfield)",
+          "properties": {
+            "layer_verdict": { "type": "string", "description": "pass | fail | n/a" },
+            "kinds": {
+              "type": "array",
+              "description": "Extension layer results by kind",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": { "type": "string", "description": "regression | benchmark | parity" },
+                  "scope": { "type": "string", "description": "Scope of regression layer" },
+                  "scope_basis": { "type": "string", "description": "Scope rationale" },
+                  "asserts": { "type": "array", "items": { "type": "string" }, "description": "AC ids asserted" },
+                  "source_suites": { "type": "array", "items": { "type": "string" }, "description": "Suite paths" },
+                  "result": { "type": "string", "description": "pass | fail" }
+                }
+              }
+            },
+            "note": { "type": "string", "description": "Layer note" }
+          }
+        },
+        "nfr": {
+          "type": "object",
+          "description": "NFR wiring layer: each M* in slice mechanisms checked; vacuous pass when mechanisms=[]",
+          "properties": {
+            "layer_verdict": { "type": "string", "description": "pass | pass-vacuous | fail" },
+            "mechanisms_checked": {
+              "type": "array",
+              "description": "Per-M* results: one entry per M* in mechanisms[]",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "description": "Mechanism id (M*)" },
+                  "realized_by": {
+                    "type": "array",
+                    "description": "Component ids realizing this mechanism",
+                    "items": { "type": "string" }
+                  },
+                  "wired_in": { "type": "string", "description": "src/ path where mechanism wiring is confirmed" },
+                  "result": { "type": "string", "description": "pass | fail" },
+                  "trace": { "type": "string", "description": "Reasoning for pass/fail verdict" }
+                }
+              }
+            },
+            "note": { "type": "string", "description": "NFR layer reasoning" }
+          }
+        }
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["verified","failed","blocked"],
+      "description": "Verification outcome: verified | failed | blocked"
+    },
+    "escape": {
+      "oneOf": [
+        {"type":"string"},
+        {"type":"null"},
+        {
+          "type": "object",
+          "required": ["failing","failure_signature","classification","route"],
+          "properties": {
+            "failing": {
+              "type": "array",
+              "description": "List of failing layer/AC/subcase entries",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "layer": { "type": "string", "description": "Layer name: contract | flow | acceptance | class_ext | nfr" },
+                  "id": { "type": "string", "description": "Test or AC id that failed" },
+                  "subcase": { "type": "string", "description": "Subcase: visible | held_out | shape | failure-mode name" },
+                  "what": { "type": "string", "description": "Description of the failure" }
+                }
+              }
+            },
+            "failure_signature": {
+              "type": "string",
+              "description": "Exact error message / assertion text from the failing test"
+            },
+            "classification": {
+              "type": "string",
+              "description": "Provisional defect class (DIAGNOSE re-derives): my-code | contract | decision | WHAT | missing-foundation"
+            },
+            "route": {
+              "type": "string",
+              "description": "Route: self-heal → DIAGNOSE"
+            }
+          }
+        }
+      ],
+      "description": "Null on verified; on blocked: failing layers + failure_signature + classification + route"
+    },
+    "verification_counts": {
+      "type": "object",
+      "description": "Verification summary counts; walk to count, don't estimate",
+      "properties": {
+        "contract_tests": { "type": "integer", "description": "Slice contract tests run" },
+        "contract_assertions": { "type": "integer", "description": "Shape + failure assertions run" },
+        "flow_assertions": { "type": "integer", "description": "Flow happy + failure assertions" },
+        "acceptance_acs": { "type": "integer", "description": "Acceptance AC entries" },
+        "acceptance_visible_passed": { "type": "integer", "description": "Visible tests passed" },
+        "acceptance_held_out_passed": { "type": "integer", "description": "Held-out tests passed" },
+        "class_ext_layers": { "type": "integer", "description": "Class extension layers run" },
+        "mechanisms_checked": { "type": "integer", "description": "NFR M* entries checked" },
+        "inherited_tests_not_run": { "type": "integer", "description": "Frozen skeleton tests inherited but not re-run (H14)" },
+        "layers_applicable": { "type": "integer", "description": "Layers not n/a" },
+        "layers_passed": { "type": "integer", "description": "Applicable layers passed" },
+        "layers_failed": { "type": "integer", "description": "Applicable layers failed" },
+        "reproduction_flipped": { "type": "integer", "description": "Reproduction tests flipped red→green (bugfix)" },
+        "regression_asserts": { "type": "integer", "description": "Regression assertions checked (bugfix)" },
+        "regression_asserts_passed": { "type": "integer", "description": "Regression assertions passed (bugfix)" },
+        "contract_assertions_run": { "type": "integer", "description": "Contract assertions run (bugfix=0)" },
+        "flow_assertions_run": { "type": "integer", "description": "Flow assertions run (bugfix=0)" },
+        "acceptance_acs_run": { "type": "integer", "description": "Acceptance ACs run (bugfix=0)" }
+      }
+    }
   }
 }

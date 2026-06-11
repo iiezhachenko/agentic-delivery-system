@@ -5,58 +5,91 @@
   "type": "object",
   "required": ["defect_report_ref", "locks_verified", "class", "defect", "reproduction", "localization", "root_cause", "verdict", "classification"],
   "properties": {
-    "defect_report_ref": { "type": "string" },
-    "baseline_refs": { "type": "object" },
-    "locks_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
+    "defect_report_ref": { "type": "string", "description": "path to the defect report or CR file" },
+    "baseline_refs": {
+      "type": "object",
+      "description": "paths to frozen baseline artifacts read during localization",
+      "additionalProperties": { "type": "string", "description": "path to a frozen baseline artifact" }
+    },
+    "locks_verified": { "type": "boolean", "description": "true if all referenced lock files were verified before diagnosis" },
+    "class": { "type": "string", "description": "bugfix" },
+    "mode": { "type": "string", "description": "localization mode used; e.g. bugfix-localize" },
     "defect": {
       "type": "object",
+      "description": "defect description from the report",
       "required": ["summary", "repro_steps", "expected_behavior"],
       "properties": {
-        "summary": { "type": "string" },
-        "repro_steps": { "type": "array", "items": { "type": "string" } },
-        "expected_behavior": { "type": "string" },
-        "expected_behavior_source": { "type": "string" }
+        "summary": { "type": "string", "description": "one-line defect description" },
+        "repro_steps": { "type": "array", "items": { "type": "string", "description": "one ordered step to reproduce the defect" }, "description": "ordered steps to trip the defect" },
+        "expected_behavior": { "type": "string", "description": "what correct behavior looks like per AC/oracle" },
+        "expected_behavior_source": { "type": "string", "description": "reference to the AC or oracle entry defining expected behavior" }
       }
     },
     "reproduction": {
       "type": "object",
+      "description": "reproduction attempt and result",
       "required": ["method", "confirmed", "observed", "expected"],
       "properties": {
-        "method": { "type": "string" },
-        "trace": { "type": "string" },
-        "confirmed": { "type": "boolean" },
-        "observed": { "type": "string" },
-        "expected": { "type": "string" },
-        "note": { "type": "string" }
+        "method": { "type": "string", "description": "reproduction method: static-trace | runtime | etc." },
+        "trace": { "type": "string", "description": "static-trace path from entry point to failure site" },
+        "confirmed": { "type": "boolean", "description": "true if reproduction confirmed the defect" },
+        "observed": { "type": "string", "description": "observed behavior when reproducing" },
+        "expected": { "type": "string", "description": "expected behavior per the AC" },
+        "note": { "type": "string", "description": "additional context about reproduction method or environment" }
       }
     },
     "localization": {
       "type": "object",
+      "description": "defect localized to a specific component, module, symbol, and site",
       "required": ["component", "module", "symbol", "site", "surface"],
       "properties": {
-        "component": { "type": "string" },
-        "module": { "type": "string" },
-        "symbol": { "type": "string" },
-        "site": { "type": "string" },
-        "surface": { "type": "string" }
+        "component": { "type": "string", "description": "component id C* containing the defect" },
+        "module": { "type": "string", "description": "source file path of the defect" },
+        "symbol": { "type": "string", "description": "fully-qualified symbol (class.method) containing the defect" },
+        "site": { "type": "string", "description": "exact code site; verbatim line or expression causing the defect" },
+        "surface": { "type": "string", "description": "scope of the blast radius; usually single method or function" }
       }
     },
     "root_cause": {
       "type": "object",
+      "description": "root cause analysis: cause, mechanism, and symptom vs cause distinction",
       "required": ["cause", "mechanism", "symptom_vs_cause"],
       "properties": {
-        "cause": { "type": "string" },
-        "mechanism": { "type": "string" },
-        "symptom_vs_cause": { "type": "string" }
+        "cause": { "type": "string", "description": "precise root cause statement; references module, symbol, and failing invariant" },
+        "mechanism": { "type": "string", "description": "how the cause produces the observed symptom; the failure chain" },
+        "symptom_vs_cause": { "type": "string", "description": "one line distinguishing symptom from root cause" }
       }
     },
-    "verdict": { "type": "string", "enum": ["defect-localized","cannot-localize"] },
-    "classification": { "type": "string" },
-    "repair_disposition": { "type": "string" },
-    "regression_surface": { "type": "object" },
-    "repair_behavior_gap": { "type": "object" },
-    "diagnosis_counts": { "type": "object" }
+    "verdict": { "type": "string", "enum": ["defect-localized","cannot-localize"], "description": "defect-localized if cause found; cannot-localize if insufficient evidence" },
+    "classification": { "type": "string", "description": "defect classification: my-code | dependency | environment | etc." },
+    "repair_disposition": { "type": "string", "description": "repair approach: repair-in-place | requires-spec-change | etc." },
+    "regression_surface": {
+      "type": "object",
+      "description": "ACs and oracle suites that must stay green after repair",
+      "properties": {
+        "baseline_ac_must_stay_green": { "type": "array", "items": { "type": "string", "description": "AC id that must stay green" }, "description": "baseline AC ids on the touched surface that must stay green" },
+        "oracle_suites": { "type": "array", "items": { "type": "string", "description": "path to an oracle suite" }, "description": "oracle suite paths scoped to the blast radius" },
+        "note": { "type": "string", "description": "scoping note: why these ACs and suites, not the whole inherited suite" }
+      }
+    },
+    "repair_behavior_gap": {
+      "type": "object",
+      "description": "optional: unresolved behavior question the repair raises; GAP-DETECT hunts it",
+      "properties": {
+        "underspecified": { "type": "boolean", "description": "true if correct replacement behavior is not specified in the baseline" },
+        "question": { "type": "string", "description": "the open behavior question" },
+        "owner": { "type": "string", "description": "which role resolves this; typically GAP-DETECT" },
+        "note": { "type": "string", "description": "additional context about the behavior gap" }
+      }
+    },
+    "diagnosis_counts": {
+      "type": "object",
+      "description": "summary tallies of diagnosis process",
+      "properties": {
+        "frozen_inputs_reread": { "type": "integer", "description": "count of frozen input artifacts re-read during diagnosis" },
+        "reproduction_method": { "type": "string", "description": "method used to reproduce" },
+        "localized_to_single_surface": { "type": "boolean", "description": "true if defect localized to exactly one surface" }
+      }
+    }
   }
 }

@@ -3,78 +3,766 @@
   "$id": "oracle",
   "title": "MATERIALIZE-ORACLE output — test oracle: contract tests + flow tests + acceptance tests",
   "type": "object",
-  "required": ["class", "mode"],
+  "required": [
+    "class",
+    "mode"
+  ],
   "allOf": [
     {
-      "if": { "properties": { "mode": { "const": "skeleton-build" } }, "required": ["mode"] },
-      "then": { "required": ["skeleton_id", "build_set", "high_blast_components", "contract_tests", "flow_tests", "acceptance_tests", "oracle_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "skeleton-build",
+            "description": "discriminator guard: mode==\"skeleton-build\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "skeleton_id",
+          "build_set",
+          "high_blast_components",
+          "contract_tests",
+          "flow_tests",
+          "acceptance_tests",
+          "oracle_counts"
+        ]
+      }
     },
     {
-      "if": { "properties": { "mode": { "const": "slice-build" } }, "required": ["mode"] },
-      "then": { "required": ["slice_id", "slice_name", "build_set", "contract_tests", "flow_tests", "acceptance_tests", "oracle_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "slice-build",
+            "description": "discriminator guard: mode==\"slice-build\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "slice_id",
+          "slice_name",
+          "build_set",
+          "contract_tests",
+          "flow_tests",
+          "acceptance_tests",
+          "oracle_counts"
+        ]
+      }
     }
   ],
   "properties": {
-    "build_plan_ref": { "type": "string" },
-    "slice_build_plan_ref": { "type": "string" },
-    "test_specs_ref": { "type": "string" },
-    "slice_test_specs_ref": { "type": "string" },
-    "base_test_specs_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "aprd_version": { "type": "string" },
-    "diagnosis_ref": { "type": "string" },
-    "regression_guard_ref": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "aprd_lock_ref": { "type": "string" },
-    "locks_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "skeleton_id": { "type": "string" },
-    "slice_id": { "type": "string" },
-    "slice_name": { "type": "string" },
-    "slice_flow": { "type": "string" },
-    "role": { "type": "string" },
-    "starts_red": { "type": "boolean" },
-    "stack": { "type": "object" },
-    "build_set": { "type": "array", "items": { "type": "string" } },
-    "prior_built_components": { "type": "array", "items": { "type": "string" } },
-    "high_blast_components": { "type": "array" },
-    "oracle_layers": { "type": "array" },
-    "inherited_oracle": { "type": "object" },
-    "reproduction_test": { "type": "object" },
-    "inherited_contract_tests": { "type": "array" },
-    "class_ext": { "type": "array" },
-    "contract_tests": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "target"],
-        "properties": {
-          "id": { "type": "string" },
-          "target": { "type": "string" },
-          "provider": { "type": "string" },
-          "caller": { "type": "string" },
-          "kind": { "type": "string" },
-          "file": { "type": "string" },
-          "mocked_deps": { "type": "array" },
-          "shape_test": { "type": "string" },
-          "failure_tests": { "type": "array" },
-          "failure_modes": { "type": "array" },
-          "traces": { "type": "array" }
+    "build_plan_ref": {
+      "type": "string",
+      "description": "Path to skeleton build-plan.json (skeleton-build)"
+    },
+    "slice_build_plan_ref": {
+      "type": "string",
+      "description": "Path to slice build-plan.json (slice-build)"
+    },
+    "test_specs_ref": {
+      "type": "string",
+      "description": "Path to test-specs.json (skeleton-build)"
+    },
+    "slice_test_specs_ref": {
+      "type": "string",
+      "description": "Path to slice test-specs.json (slice-build)"
+    },
+    "base_test_specs_ref": {
+      "type": "string",
+      "description": "Path to base test-specs.json (bugfix/feature-add)"
+    },
+    "aprd_ref": {
+      "type": "string",
+      "description": "Path to resolved aPRD artifact (lock-resolved, not hardcoded)"
+    },
+    "aprd_version": {
+      "type": "string",
+      "description": "aPRD version string (feature-add / bugfix)"
+    },
+    "diagnosis_ref": {
+      "type": "string",
+      "description": "Path to diagnosis.json (bugfix mode)"
+    },
+    "regression_guard_ref": {
+      "type": "string",
+      "description": "Path/ref to REGRESSION_GUARD in aPRD (bugfix/feature-add)"
+    },
+    "skeleton_lock_ref": {
+      "type": "string",
+      "description": "Path to skeleton.lock"
+    },
+    "adr_lock_ref": {
+      "type": "string",
+      "description": "Path to adr.lock"
+    },
+    "aprd_lock_ref": {
+      "type": "string",
+      "description": "Path to aprd.lock"
+    },
+    "locks_verified": {
+      "type": "boolean",
+      "description": "All locks confirmed frozen before materialization"
+    },
+    "class": {
+      "type": "string",
+      "description": "Project class: greenfield | feature-add | bugfix"
+    },
+    "mode": {
+      "type": "string",
+      "description": "Build mode: skeleton-build | slice-build | bugfix"
+    },
+    "skeleton_id": {
+      "type": "string",
+      "description": "Walking skeleton id (skeleton-build)"
+    },
+    "slice_id": {
+      "type": "string",
+      "description": "Slice identifier (slice-build)"
+    },
+    "slice_name": {
+      "type": "string",
+      "description": "Human-readable slice name (slice-build)"
+    },
+    "slice_flow": {
+      "type": "string",
+      "description": "Flow id this slice demonstrates (slice-build)"
+    },
+    "role": {
+      "type": "string",
+      "description": "Materializer role: test-author (distinct from builder, B4)"
+    },
+    "starts_red": {
+      "type": "boolean",
+      "description": "True = suite frozen red; builder's job to green it"
+    },
+    "stack": {
+      "type": "object",
+      "description": "Test stack metadata: language + runner + ADR grounding",
+      "properties": {
+        "language": {
+          "type": "string",
+          "description": "Test language (e.g. Python); from frozen ADR"
+        },
+        "test_runner": {
+          "type": "string",
+          "description": "Test runner (e.g. pytest)"
+        },
+        "grounded_in": {
+          "type": "array",
+          "description": "ADR ids that mandate this stack",
+          "items": {
+            "type": "string"
+          }
+        },
+        "target": {
+          "type": "string",
+          "description": "What the tests target (contract interfaces + WSGI entry)"
         }
       }
     },
-    "flow_tests": { "type": "array" },
-    "acceptance_tests": { "type": "array" },
-    "class_ext_tests": { "type": "array" },
-    "held_out_split": { "type": "object" },
-    "mutation_certification": { "type": "object" },
-    "conftest": {},
-    "coverage": { "type": "object" },
-    "skeleton_fidelity": { "type": "object" },
-    "oracle_lock_ref": { "type": "string" },
-    "materialization_gaps": { "type": "array" },
-    "oracle_counts": { "type": "object" }
+    "build_set": {
+      "type": "array",
+      "description": "Component ids covered by this oracle (carried from build-plan)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "prior_built_components": {
+      "type": "array",
+      "description": "Components built in prior runs; oracle inherits their tests by reference",
+      "items": {
+        "type": "string"
+      }
+    },
+    "high_blast_components": {
+      "type": "array",
+      "description": "Component ids requiring mutation certification (auth/money/data-integrity)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "oracle_layers": {
+      "type": "array",
+      "description": "Oracle layer types materialized: [contract,flow,acceptance] | [reproduction,regression] (bugfix)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "inherited_oracle": {
+      "type": "object",
+      "description": "Frozen skeleton oracle inherited by reference (slice-build); never re-materialized (H14)",
+      "properties": {
+        "skeleton_oracle_lock_ref": {
+          "type": "string",
+          "description": "Path to frozen skeleton oracle.lock"
+        },
+        "skeleton_build_record_ref": {
+          "type": "string",
+          "description": "Path to skeleton build-record.json"
+        },
+        "inherited_tests": {
+          "type": "array",
+          "description": "Skeleton oracle test ids inherited; not re-materialized",
+          "items": {
+            "type": "string"
+          }
+        },
+        "frozen_verified": {
+          "type": "boolean",
+          "description": "Skeleton oracle.lock status==frozen + builder_may_not_edit"
+        }
+      }
+    },
+    "reproduction_test": {
+      "type": "object",
+      "description": "Bugfix reproduction test metadata (bugfix mode only)",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Oracle id: OREPRO-1"
+        },
+        "file": {
+          "type": "string",
+          "description": "Reproduction test file path"
+        },
+        "target": {
+          "type": "string",
+          "description": "AC id the repro asserts"
+        },
+        "req_ref": {
+          "type": "string",
+          "description": "Requirement id"
+        },
+        "defect_site": {
+          "type": "string",
+          "description": "Defect symbol from diagnosis localization"
+        },
+        "flips_green_when": {
+          "type": "string",
+          "description": "One-line correct behavior the fix implements"
+        },
+        "starts_red": {
+          "type": "boolean",
+          "description": "True = frozen red on buggy code"
+        },
+        "traces": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "R*/AC* ids"
+        },
+        "baseline_ref": {
+          "type": "string",
+          "description": "Regression-guard AC id"
+        }
+      }
+    },
+    "inherited_contract_tests": {
+      "type": "array",
+      "description": "Contract tests inherited by reference from frozen oracle (slice-build — seams already materialized)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Oracle test id"
+          },
+          "target": {
+            "type": "string",
+            "description": "Contract id (CT*)"
+          },
+          "source_ref": {
+            "type": "string",
+            "description": "Source test-specs ref"
+          }
+        }
+      }
+    },
+    "class_ext": {
+      "type": "array",
+      "description": "Class extension oracle layers: regression (feature-add) or reproduction+regression (bugfix)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "layer": {
+            "type": "string",
+            "description": "Layer type: regression | benchmark | parity"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Scope: touched-surface + seams"
+          },
+          "scope_basis": {
+            "type": "string",
+            "description": "Scope rationale citing REGRESSION_GUARD + BLAST_RADIUS"
+          },
+          "asserts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "AC ids asserted"
+          },
+          "source_suites": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Oracle suite paths"
+          },
+          "rematerialized": {
+            "type": "boolean",
+            "description": "False = existing tests referenced, not re-authored (BF1/H14)"
+          },
+          "baseline_tests_edited": {
+            "type": "boolean",
+            "description": "False = no baseline test edited"
+          }
+        }
+      }
+    },
+    "contract_tests": {
+      "type": "array",
+      "description": "Contract tests: one per real seam (provides_contracts ∪ consumes_seams[real]) not already in frozen oracle",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "target"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Oracle contract test id (e.g. OCT-CT1)"
+          },
+          "target": {
+            "type": "string",
+            "description": "Contract id (CT*) this test exercises"
+          },
+          "provider": {
+            "type": "string",
+            "description": "Provider component id"
+          },
+          "caller": {
+            "type": "string",
+            "description": "Caller component id"
+          },
+          "kind": {
+            "type": "string",
+            "description": "Contract kind: shared_data | sync_api | async_event"
+          },
+          "file": {
+            "type": "string",
+            "description": "Contract test file path"
+          },
+          "mocked_deps": {
+            "type": "array",
+            "description": "Dependency component ids mocked at the contract layer",
+            "items": {
+              "type": "string"
+            }
+          },
+          "shape_test": {
+            "type": "string",
+            "description": "Shape test function name"
+          },
+          "failure_tests": {
+            "type": "array",
+            "description": "Failure test function names (one per declared failure_mode)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failure_modes": {
+            "type": "array",
+            "description": "Failure mode names exercised",
+            "items": {
+              "type": "string"
+            }
+          },
+          "traces": {
+            "type": "array",
+            "description": "R*/AC* ids this contract test closes",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mutation_certified": {
+            "type": "boolean",
+            "description": "True = caller or provider is high-blast → mutation-certified"
+          },
+          "status": {
+            "type": "string",
+            "description": "Oracle status: red (frozen suite starts red)"
+          }
+        }
+      }
+    },
+    "flow_tests": {
+      "type": "array",
+      "description": "Flow tests: one per slice flow F* (happy path + failure variant)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Oracle flow test id (e.g. OF-F1)"
+          },
+          "target": {
+            "type": "string",
+            "description": "Flow id (F*)"
+          },
+          "slice": {
+            "type": "string",
+            "description": "Slice id this flow belongs to"
+          },
+          "path": {
+            "type": "array",
+            "description": "Component ids on flow path in compose order",
+            "items": {
+              "type": "string"
+            }
+          },
+          "via": {
+            "type": "array",
+            "description": "Contract ids (CT*) traversed along the path",
+            "items": {
+              "type": "string"
+            }
+          },
+          "file": {
+            "type": "string",
+            "description": "Flow test file path"
+          },
+          "happy": {
+            "type": "object",
+            "description": "Happy path test",
+            "properties": {
+              "asserts_ac": {
+                "type": "array",
+                "description": "AC ids asserted by happy path (referenced, never re-authored)",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "failure": {
+            "type": "object",
+            "description": "Failure variant test",
+            "properties": {
+              "exercises": {
+                "type": "string",
+                "description": "Failure mode exercised: CT*:failure-mode-name"
+              },
+              "arrives_at": {
+                "type": "string",
+                "description": "Expected failure arrival state"
+              }
+            }
+          },
+          "traces": {
+            "type": "array",
+            "description": "R*/AC* ids this flow test closes",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "Oracle status: red"
+          }
+        }
+      }
+    },
+    "acceptance_tests": {
+      "type": "array",
+      "description": "Acceptance tests: one per flow-traced AC* (visible + held_out split, B7)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Oracle acceptance test id (e.g. OA-AC1)"
+          },
+          "target": {
+            "type": "string",
+            "description": "AC id tested"
+          },
+          "req_ref": {
+            "type": "string",
+            "description": "Requirement id (R*) the AC belongs to"
+          },
+          "visible": {
+            "type": "object",
+            "description": "Visible acceptance test (builder may see)",
+            "properties": {
+              "file": {
+                "type": "string",
+                "description": "Visible test file path"
+              },
+              "asserts": {
+                "type": "string",
+                "description": "Property asserted by visible test"
+              }
+            }
+          },
+          "held_out": {
+            "type": "object",
+            "description": "Held-out acceptance test (gate-only, builder never sees, B7)",
+            "properties": {
+              "file": {
+                "type": "string",
+                "description": "Held-out test file path"
+              },
+              "asserts": {
+                "type": "string",
+                "description": "Same property, different unguessable input"
+              }
+            }
+          },
+          "mutation_certified": {
+            "type": "boolean",
+            "description": "True = AC involves high-blast component → mutation-certified"
+          },
+          "traces": {
+            "type": "array",
+            "description": "R*/AC* ids this acceptance test closes",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "Oracle status: red"
+          }
+        }
+      }
+    },
+    "class_ext_tests": {
+      "type": "array",
+      "description": "Class extension test entries (regression / parity / bugfix reproduction)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "layer": {
+            "type": "string",
+            "description": "Layer type: regression | benchmark | parity"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Scope: touched-surface + seams (Risk R4 — NOT the full inherited suite)"
+          },
+          "scope_basis": {
+            "type": "string",
+            "description": "Scope rationale citing REGRESSION_GUARD + BLAST_RADIUS symbol"
+          },
+          "asserts": {
+            "type": "array",
+            "description": "AC ids that must stay green",
+            "items": {"type": "string"}
+          },
+          "source_suites": {
+            "type": "array",
+            "description": "Baseline oracle suite paths referenced (never re-authored)",
+            "items": {"type": "string"}
+          },
+          "rematerialized": {
+            "type": "boolean",
+            "description": "False = existing tests referenced, not re-authored (BF1/H14 analog)"
+          },
+          "baseline_tests_edited": {
+            "type": "boolean",
+            "description": "False = no baseline test edited (BF1/BF4)"
+          }
+        }
+      }
+    },
+    "held_out_split": {
+      "type": "object",
+      "description": "Held-out split rule and directory structure",
+      "properties": {
+        "rule": {
+          "type": "string",
+          "description": "Split rule: same property, different unguessable input (B7)"
+        },
+        "visible_dir": {
+          "type": "string",
+          "description": "Directory for visible acceptance tests"
+        },
+        "held_out_dir": {
+          "type": "string",
+          "description": "Directory for held-out acceptance tests (gate-only)"
+        }
+      }
+    },
+    "mutation_certification": {
+      "type": "object",
+      "description": "Mutation certification summary referencing mutation-certification.json",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "Path to mutation-certification.json"
+        },
+        "certified_tests": {
+          "type": "array",
+          "description": "Oracle test ids mutation-certified",
+          "items": {
+            "type": "string"
+          }
+        },
+        "verdict": {
+          "type": "string",
+          "description": "kill-strong | kill-weak | inconclusive | n/a"
+        }
+      }
+    },
+    "conftest": {
+      "description": "Conftest file path (string) or conftest structure"
+    },
+    "coverage": {
+      "type": "object",
+      "description": "Coverage summary: contracts, flows, ACs materialized vs to-materialize",
+      "properties": {
+        "contracts_to_materialize": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "CT* ids to materialize (real seams in build_set)"
+        },
+        "contracts_materialized": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "CT* ids actually materialized"
+        },
+        "contract_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "CT* ids not materialized (spec gap)"
+        },
+        "flows_to_materialize": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Flow ids to materialize"
+        },
+        "flows_materialized": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Flow ids materialized"
+        },
+        "acs_to_materialize": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "AC ids to materialize"
+        },
+        "acs_materialized": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "AC ids materialized"
+        },
+        "failure_assertions_total": {
+          "type": "integer",
+          "description": "Total declared failure modes across in-scope contract tests"
+        },
+        "failure_assertions_materialized": {
+          "type": "integer",
+          "description": "Failure modes actually materialized"
+        }
+      }
+    },
+    "skeleton_fidelity": {
+      "type": "object",
+      "description": "Fidelity check: slice oracle doesn't re-materialize frozen skeleton tests (H14)",
+      "properties": {
+        "breached": {
+          "type": "boolean",
+          "description": "True = frozen oracle test re-materialized → escape Phase 2"
+        },
+        "note": {
+          "type": "string",
+          "description": "Fidelity reasoning"
+        }
+      }
+    },
+    "oracle_lock_ref": {
+      "type": "string",
+      "description": "Path to oracle.lock (relative to oracle dir)"
+    },
+    "materialization_gaps": {
+      "type": "array",
+      "description": "Spec gaps found (spec too thin, CT* without failure, flow without AC); [] on clean run",
+      "items": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "CT*/AC*/flow id with the gap"
+          },
+          "gap": {
+            "type": "string",
+            "description": "Gap description"
+          },
+          "route": {
+            "type": "string",
+            "description": "Phase to route the fix to"
+          }
+        }
+      }
+    },
+    "oracle_counts": {
+      "type": "object",
+      "description": "Oracle summary counts; walk to count, don't estimate",
+      "properties": {
+        "contract_tests": {
+          "type": "integer",
+          "description": "Number of contract tests materialized"
+        },
+        "flow_tests": {
+          "type": "integer",
+          "description": "Number of flow tests materialized"
+        },
+        "acceptance_tests": {
+          "type": "integer",
+          "description": "Number of distinct AC* tests (visible+held_out files = 2x)"
+        },
+        "held_out_files": {
+          "type": "integer",
+          "description": "Number of held-out test files"
+        },
+        "mutation_certified_tests": {
+          "type": "integer",
+          "description": "Number of mutation-certified oracle test entries"
+        },
+        "test_files": {
+          "type": "integer",
+          "description": "Total test files (contract+flow+visible+held_out; conftest not counted)"
+        },
+        "regression_tests": {
+          "type": "integer",
+          "description": "Number of regression tests (feature-add class_ext)"
+        }
+      }
+    }
   }
 }

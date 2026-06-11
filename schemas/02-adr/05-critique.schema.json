@@ -5,36 +5,46 @@
   "type": "object",
   "required": ["adr_index_ref", "class", "skeleton_id", "adrs_reviewed", "verdict", "issues", "issue_count", "critique_counts"],
   "properties": {
-    "adr_index_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "conflicts_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "skeleton_id": { "type": "string" },
-    "adrs_reviewed": { "type": "array", "items": { "type": "string" } },
-    "verdict": { "type": "string", "enum": ["clean","blocked"] },
+    "adr_index_ref": { "type": "string", "description": "Path to adr-index.json reviewed" },
+    "aprd_ref": { "type": "string", "description": "Resolved aPRD artifact path; constraint oracle" },
+    "conflicts_ref": { "type": "string", "description": "Path to 04-conflicts.json; coherence baseline" },
+    "foundation_cut_ref": { "type": "string", "description": "Path to foundation cut; deferred oracle" },
+    "class": { "type": "string", "description": "Project class (greenfield | feature-add)" },
+    "skeleton_id": { "type": "string", "description": "Skeleton id (e.g. S1)" },
+    "adrs_reviewed": {
+      "type": "array",
+      "description": "Every ADR-NNNN from adr-index.adrs[], in id order; len == len(adr-index.adrs[])",
+      "items": { "type": "string" }
+    },
+    "verdict": { "type": "string", "enum": ["clean","blocked"], "description": "Exactly clean | blocked; blocked iff issues non-empty, else clean" },
     "issues": {
       "type": "array",
+      "description": "Blocking-grade issues only; empty on clean set",
       "items": {
         "type": "object",
         "required": ["id", "category", "target_adr", "finding", "fix_hint"],
         "properties": {
-          "id": { "type": "string", "pattern": "^I[0-9]+$" },
-          "category": { "type": "string", "enum": ["strawman-alternative","untraceable-adr","uncovered-constraint","contradictory-adrs","over-decided","unforced-decision","not-yet"] },
-          "target_adr": { "type": "string" },
-          "finding": { "type": "string" },
-          "fix_hint": { "type": "string" }
+          "id": { "type": "string", "pattern": "^I[0-9]+$", "description": "Contiguous issue id I1, I2, …" },
+          "category": { "type": "string", "enum": ["strawman-alternative","untraceable-adr","uncovered-constraint","contradictory-adrs","over-decided","unforced-decision","not-yet"], "description": "Exactly one of seven blocking categories" },
+          "target_adr": { "type": "string", "description": "ADR-NNNN concerned; 'none' for uncovered-constraint when ADR is absent" },
+          "finding": { "type": "string", "description": "What is wrong and why it blocks freeze; cites concrete ADR + aPRD/cut ids" },
+          "fix_hint": { "type": "string", "description": "Concrete actionable change to clear this issue; not 'make it better'" }
         }
       }
     },
-    "issue_count": { "type": "integer", "minimum": 0 },
+    "issue_count": { "type": "integer", "minimum": 0, "description": "Integer = length of issues" },
     "critique_counts": {
       "type": "object",
+      "description": "Walk issues to count; don't estimate",
       "required": ["adrs_reviewed", "issues"],
       "properties": {
-        "adrs_reviewed": { "type": "integer" },
-        "issues": { "type": "integer" },
-        "by_category": { "type": "object" }
+        "adrs_reviewed": { "type": "integer", "description": "Number of ADRs reviewed" },
+        "issues": { "type": "integer", "description": "== issue_count" },
+        "by_category": {
+          "type": "object",
+          "description": "Tallies issues per category; sums to issue_count",
+          "additionalProperties": { "type": "integer" }
+        }
       }
     }
   }

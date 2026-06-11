@@ -3,65 +3,594 @@
   "$id": "nfr-mechanisms",
   "title": "MAP-NFR output — NFR mechanisms M* mapped to components and contracts",
   "type": "object",
-  "required": ["class", "mode"],
+  "required": [
+    "class",
+    "mode"
+  ],
   "allOf": [
     {
-      "if": { "properties": { "mode": { "const": "skeleton" } }, "required": ["mode"] },
-      "then": { "required": ["nfr_inventory", "mechanisms", "coverage", "nfr_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "skeleton",
+            "description": "discriminator guard: mode==\"skeleton\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "nfr_inventory",
+          "mechanisms",
+          "coverage",
+          "nfr_counts"
+        ]
+      }
     },
     {
-      "if": { "properties": { "mode": { "const": "increment" } }, "required": ["mode"] },
-      "then": { "required": ["introduced_components", "resolutions", "new_mechanisms", "slice_coverage", "increment_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "increment",
+            "description": "discriminator guard: mode==\"increment\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "introduced_components",
+          "resolutions",
+          "new_mechanisms",
+          "slice_coverage",
+          "increment_counts"
+        ]
+      }
     }
   ],
   "properties": {
-    "aprd_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "adr_log_ref": { "type": "string" },
-    "components_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "lock_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "skeleton_id": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "base_nfr_ref": { "type": "string" },
-    "slice_components_ref": { "type": "string" },
-    "slice_contracts_ref": { "type": "string" },
-    "skeleton_frozen_verified": { "type": "boolean" },
-    "slice_id": { "type": "string" },
-    "slice_name": { "type": "string" },
-    "introduced_components": { "type": "array", "items": { "type": "string" } },
-    "touched_components": { "type": "array", "items": { "type": "string" } },
-    "inherited_nfrs": { "type": "array" },
-    "slice_nfr_queue": { "type": "array" },
-    "resolutions": { "type": "array" },
-    "new_mechanisms": { "type": "array" },
-    "slice_coverage": { "type": "object" },
-    "frame_fidelity": { "type": "object" },
-    "unmet": { "type": "array" },
-    "increment_counts": { "type": "object" },
-    "nfr_inventory": {
+    "aprd_ref": {
+      "type": "string",
+      "description": "Resolved path to frozen aPRD artifact"
+    },
+    "adr_lock_ref": {
+      "type": "string",
+      "description": "Path to adr.lock"
+    },
+    "adr_log_ref": {
+      "type": "string",
+      "description": "Path to ADR log directory"
+    },
+    "components_ref": {
+      "type": "string",
+      "description": "Path to components.json"
+    },
+    "foundation_cut_ref": {
+      "type": "string",
+      "description": "Path to foundation-cut artifact"
+    },
+    "lock_verified": {
+      "type": "boolean",
+      "description": "True if lock present and status==frozen and names frozen artifact"
+    },
+    "class": {
+      "type": "string",
+      "description": "Project class: greenfield or brownfield"
+    },
+    "mode": {
+      "type": "string",
+      "description": "skeleton = full NFR map; increment = per-slice NFR scope"
+    },
+    "skeleton_id": {
+      "type": "string",
+      "description": "Skeleton slice id (e.g. S1)"
+    },
+    "skeleton_lock_ref": {
+      "type": "string",
+      "description": "Path to skeleton.lock (increment mode)"
+    },
+    "base_nfr_ref": {
+      "type": "string",
+      "description": "Path to frozen skeleton nfr-mechanisms.json this increment extends"
+    },
+    "slice_components_ref": {
+      "type": "string",
+      "description": "Path to slice components.json (increment mode)"
+    },
+    "slice_contracts_ref": {
+      "type": "string",
+      "description": "Path to slice contracts.json (increment mode)"
+    },
+    "skeleton_frozen_verified": {
+      "type": "boolean",
+      "description": "True if skeleton.lock present and status==frozen"
+    },
+    "slice_id": {
+      "type": "string",
+      "description": "Target slice id (increment mode)"
+    },
+    "slice_name": {
+      "type": "string",
+      "description": "Slice name carried verbatim (increment mode)"
+    },
+    "introduced_components": {
       "type": "array",
+      "description": "C* ids slice first activates; carried from slice components.json",
+      "items": {
+        "type": "string",
+        "pattern": "^C[0-9]+$"
+      }
+    },
+    "touched_components": {
+      "type": "array",
+      "description": "Introduced plus reused components on slice path",
+      "items": {
+        "type": "string"
+      }
+    },
+    "inherited_nfrs": {
+      "type": "array",
+      "description": "Frame NFRs governing this slice's boxes; carried by reference from frozen NFR map",
       "items": {
         "type": "object",
-        "required": ["nfr_ref", "category", "statement", "disposition"],
+        "required": [
+          "nfr_ref",
+          "category",
+          "disposition"
+        ],
         "properties": {
-          "nfr_ref": { "type": "string" },
-          "category": { "type": "string" },
-          "statement": { "type": "string" },
-          "disposition": { "type": "string", "enum": ["mechanism","satisfied-by-frame","not-applicable","deferred"] },
-          "mechanism_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "frame_basis": { "type": "array" },
-          "realized_by": { "type": "array" },
-          "defer_to": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "rationale": { "type": "string" }
+          "nfr_ref": {
+            "type": "string",
+            "description": "Verbatim C*/A*/INV* id or bare category label"
+          },
+          "category": {
+            "type": "string",
+            "description": "NFR category (scale, latency, security, compliance, etc.)"
+          },
+          "disposition": {
+            "type": "string",
+            "description": "satisfied-by-frame, mechanized, deferred, or not-applicable"
+          },
+          "mechanism_ref": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "M* id if mechanized, else null"
+          },
+          "frame_basis": {
+            "type": "array",
+            "description": "ADR-*/INV* ids satisfying this NFR; carried verbatim from frozen map",
+            "items": {
+              "type": "string"
+            }
+          },
+          "realized_by": {
+            "type": "array",
+            "description": "C* ids realizing frame property or M*; empty for topology-wide property",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scope_role": {
+            "type": "string",
+            "description": "inherited-governing for frame NFR governing this slice's boxes"
+          },
+          "governs_basis": {
+            "type": "string",
+            "description": "One line: which touched box it governs and via which touched seam, or topology-wide frame property"
+          }
         }
       }
     },
-    "coverage": { "type": "object" },
-    "mechanisms": { "type": "array" },
-    "structural_defects": { "type": "array" },
-    "nfr_counts": { "type": "object" }
+    "slice_nfr_queue": {
+      "type": "array",
+      "description": "Frozen NFRs with disposition deferred and defer_to == this slice; drained here",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "resolutions": {
+      "type": "array",
+      "description": "Resolution records for slice_nfr_queue items; empty in greenfield",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "new_mechanisms": {
+      "type": "array",
+      "description": "New frame-permitted structural mechanisms added by this slice; empty in greenfield",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "nfr_ref",
+          "mechanism",
+          "realized_by",
+          "frame_permitted",
+          "traces"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Mechanism id M* continuing monotonically after frozen max"
+          },
+          "nfr_ref": {
+            "type": "string",
+            "description": "C*/A*/category the mechanism serves"
+          },
+          "mechanism": {
+            "type": "string",
+            "description": "Concrete structural mechanism named not designed"
+          },
+          "realized_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "C* ids from components.json"
+          },
+          "frame_permitted": {
+            "type": "boolean",
+            "description": "MUST be true; INV6/A13-forbidden mechanism never emitted"
+          },
+          "traces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "aPRD R*/C*/A* mechanism serves"
+          }
+        }
+      }
+    },
+    "slice_coverage": {
+      "type": "object",
+      "description": "Coverage of slice requirements by NFRs",
+      "properties": {
+        "slice_requirements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "02-slices requirements for target slice"
+        },
+        "requirements_with_nfr": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Slice requirements with NFR footprint"
+        },
+        "requirements_no_nfr_footprint": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Slice requirements with no NFR footprint"
+        },
+        "requirement_orphans": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Unhomed requirements; empty on clean run"
+        }
+      }
+    },
+    "frame_fidelity": {
+      "type": "object",
+      "description": "H14 — increment extends, never re-disposes frozen NFRs",
+      "properties": {
+        "re_disposed_nfrs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frozen NFR slice re-disposed; MUST be empty"
+        },
+        "re_realized_nfrs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frozen NFR slice re-realized; MUST be empty"
+        },
+        "verdict": {
+          "type": "string",
+          "description": "extends-not-re-disposes on clean run"
+        }
+      }
+    },
+    "unmet": {
+      "type": "array",
+      "description": "H5: NFR with no mechanism, not frame-satisfied, not deferrable; each {nfr_ref, finding, why_not_frame_satisfied}; empty on clean run",
+      "items": {
+        "type": "object",
+        "required": [
+          "nfr_ref",
+          "finding"
+        ],
+        "properties": {
+          "nfr_ref": {
+            "type": "string",
+            "description": "Unmet NFR id"
+          },
+          "finding": {
+            "type": "string",
+            "description": "Why NFR is unmet"
+          },
+          "why_not_frame_satisfied": {
+            "type": "string",
+            "description": "Why frame does not satisfy this NFR"
+          }
+        }
+      }
+    },
+    "increment_counts": {
+      "type": "object",
+      "description": "Counts derived by walking actual lists",
+      "properties": {
+        "inherited_nfrs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of inherited_nfrs"
+        },
+        "slice_nfr_queue": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of slice_nfr_queue items"
+        },
+        "new_mechanisms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of new_mechanisms"
+        },
+        "unmet": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of unmet NFRs"
+        }
+      }
+    },
+    "nfr_inventory": {
+      "type": "array",
+      "description": "One entry per in-scope NFR in category-checklist emission order",
+      "items": {
+        "type": "object",
+        "required": [
+          "nfr_ref",
+          "category",
+          "statement",
+          "disposition"
+        ],
+        "properties": {
+          "nfr_ref": {
+            "type": "string",
+            "description": "Verbatim C*/A*/INV* id, or bare category label when no governing id"
+          },
+          "category": {
+            "type": "string",
+            "description": "scale, latency, availability, security, compliance, data-residency, delivery-medium, or timeline"
+          },
+          "statement": {
+            "type": "string",
+            "description": "Faithful one-line of NFR from aPRD"
+          },
+          "disposition": {
+            "type": "string",
+            "enum": [
+              "mechanism",
+              "satisfied-by-frame",
+              "not-applicable",
+              "deferred"
+            ],
+            "description": "Exactly one of four dispositions"
+          },
+          "mechanism_ref": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "M* id if mechanized, else null"
+          },
+          "frame_basis": {
+            "type": "array",
+            "description": "ADR-*/INV* ids satisfying this NFR (satisfied-by-frame or not-applicable-by-waiver); empty otherwise",
+            "items": {
+              "type": "string"
+            }
+          },
+          "realized_by": {
+            "type": "array",
+            "description": "C* ids realizing frame property or M*; empty for topology-wide property with no single box",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defer_to": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Slice id if deferred, else null"
+          },
+          "rationale": {
+            "type": "string",
+            "description": "One line: why this disposition; for not-applicable, why no NFR exists or where waived"
+          }
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "description": "NFR coverage: four disposition buckets cover nfrs_in_scope exactly once",
+      "properties": {
+        "nfrs_in_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Every NFR inventoried (equals nfr_inventory ids)"
+        },
+        "mechanized": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "nfr_refs with M*"
+        },
+        "satisfied_by_frame": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "nfr_refs frame already satisfies"
+        },
+        "deferred": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Deferred NFRs; each {nfr_ref, defer_to} or bare string"
+        },
+        "not_applicable": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "nfr_refs aPRD waives or never states"
+        },
+        "all_nfrs_dispositioned": {
+          "type": "boolean",
+          "description": "True if four buckets plus unmet[] cover nfrs_in_scope exactly once"
+        }
+      }
+    },
+    "mechanisms": {
+      "type": "array",
+      "description": "Skeleton-mode new frame-permitted structural mechanisms; often empty under INV6",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "nfr_ref",
+          "mechanism",
+          "realized_by",
+          "frame_permitted",
+          "traces"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Mechanism id M*"
+          },
+          "nfr_ref": {
+            "type": "string",
+            "description": "C*/A*/category the mechanism serves"
+          },
+          "mechanism": {
+            "type": "string",
+            "description": "Concrete structural mechanism named not designed"
+          },
+          "realized_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "C* ids from components.json"
+          },
+          "frame_permitted": {
+            "type": "boolean",
+            "description": "MUST be true"
+          },
+          "traces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "aPRD R*/C*/A* mechanism serves"
+          }
+        }
+      }
+    },
+    "structural_defects": {
+      "type": "array",
+      "description": "NFR mapping defects; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "frame_conflicts": {
+      "type": "array",
+      "description": "NFR requiring frame-forbidden mechanism; each {nfr_ref, demand, forbidden_by, route}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "aprd_defects": {
+      "type": "array",
+      "description": "Slice NFR with no aPRD grounding; each {requirement, reason, escape}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "nfr_counts": {
+      "type": "object",
+      "description": "Counts derived by walking actual lists; mechanized+satisfied_by_frame+deferred+not_applicable+unmet == in_scope",
+      "properties": {
+        "in_scope": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of nfr_inventory; equals coverage.nfrs_in_scope.length"
+        },
+        "mechanized": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of mechanized NFRs"
+        },
+        "satisfied_by_frame": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of frame-satisfied NFRs"
+        },
+        "deferred": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of deferred NFRs"
+        },
+        "not_applicable": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of not-applicable NFRs"
+        },
+        "unmet": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of unmet NFRs; equals unmet.length"
+        }
+      }
+    }
   }
 }

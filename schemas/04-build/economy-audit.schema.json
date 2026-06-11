@@ -5,37 +5,54 @@
   "type": "object",
   "required": ["target", "type", "oracle", "verdict", "issues", "issue_count", "by_category"],
   "properties": {
-    "target": { "type": "string" },
-    "type": { "type": "string" },
-    "lint_ref": { "type": "string" },
-    "oracle": { "type": "array", "items": { "type": "string" } },
-    "verdict": { "type": "string", "enum": ["clean","blocked"] },
+    "target": { "type": "string", "description": "Path to the artifact being audited" },
+    "type": { "type": "string", "description": "Artifact type being audited (e.g. prompt)" },
+    "lint_ref": { "type": "string", "description": "Path to Layer-1 lint.json (must be verdict:clean — guard)" },
+    "oracle": {
+      "type": "array",
+      "description": "Economy oracle rules audited against (e.g. AB1-AB9, P13, A-ECON)",
+      "items": { "type": "string" }
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["clean","blocked"],
+      "description": "Audit outcome: clean (no issues) | blocked (issues found); deterministic from issues"
+    },
     "issues": {
       "type": "array",
+      "description": "Blocking-grade economy issues only; [] on a tight artifact",
       "items": {
         "type": "object",
         "required": ["id", "category", "target", "finding", "routes_to", "fix"],
         "properties": {
-          "id": { "type": "string", "pattern": "^I[0-9]+$" },
-          "category": { "type": "string", "enum": ["duplicate-fact","no-objective","mandate-narration","ambiguous","re-spec","starvation"] },
-          "target": { "type": "string" },
-          "finding": { "type": "string" },
-          "routes_to": { "type": "string" },
-          "fix": { "type": "string", "enum": ["DELETE","REWRITE"] }
+          "id": { "type": "string", "pattern": "^I[0-9]+$", "description": "Contiguous issue id: I1, I2, …" },
+          "category": {
+            "type": "string",
+            "enum": ["duplicate-fact","no-objective","mandate-narration","ambiguous","re-spec","starvation"],
+            "description": "Economy category (exactly one of six)"
+          },
+          "target": { "type": "string", "description": "Concrete file:line of the defect; for starvation the section where the missing fact belongs" },
+          "finding": {
+            "type": "string",
+            "description": "The defect + which home the fact belongs in + which AB it breaks"
+          },
+          "routes_to": { "type": "string", "description": "Producing stage to route fix to (default RE-AUTHOR)" },
+          "fix": { "type": "string", "enum": ["DELETE","REWRITE"], "description": "Required action: DELETE (duplicates, no-objective) | REWRITE (ambiguity, starvation). Never ADD (AB9)" }
         }
       }
     },
-    "issue_count": { "type": "integer", "minimum": 0 },
+    "issue_count": { "type": "integer", "minimum": 0, "description": "Length of issues array" },
     "by_category": {
       "type": "object",
+      "description": "Per-category issue tallies; sums to issue_count",
       "required": ["duplicate-fact", "no-objective", "mandate-narration", "ambiguous", "re-spec", "starvation"],
       "properties": {
-        "duplicate-fact": { "type": "integer", "minimum": 0 },
-        "no-objective": { "type": "integer", "minimum": 0 },
-        "mandate-narration": { "type": "integer", "minimum": 0 },
-        "ambiguous": { "type": "integer", "minimum": 0 },
-        "re-spec": { "type": "integer", "minimum": 0 },
-        "starvation": { "type": "integer", "minimum": 0 }
+        "duplicate-fact": { "type": "integer", "minimum": 0, "description": "Duplicate-fact issue count" },
+        "no-objective": { "type": "integer", "minimum": 0, "description": "No-objective issue count" },
+        "mandate-narration": { "type": "integer", "minimum": 0, "description": "Mandate-narration issue count" },
+        "ambiguous": { "type": "integer", "minimum": 0, "description": "Ambiguous wording issue count" },
+        "re-spec": { "type": "integer", "minimum": 0, "description": "Re-spec issue count" },
+        "starvation": { "type": "integer", "minimum": 0, "description": "Starvation (dropped load-bearing fact) issue count" }
       }
     }
   }

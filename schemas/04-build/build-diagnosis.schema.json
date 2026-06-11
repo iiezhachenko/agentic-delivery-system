@@ -5,56 +5,242 @@
   "type": "object",
   "required": ["locks_verified", "class", "mode", "red_under_diagnosis", "flaky_check", "stall_analysis", "verdict", "classification", "diagnosis_counts"],
   "properties": {
-    "blocked_record_ref": { "type": "string" },
-    "locks_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "slice": { "type": "string" },
-    "slice_id": { "type": "string" },
+    "blocked_record_ref": {
+      "type": "string",
+      "description": "Path to blocked build-record.json or integration-record.json under diagnosis"
+    },
+    "locks_verified": {
+      "type": "boolean",
+      "description": "All relevant locks (skeleton/adr/aprd/oracle) confirmed frozen; hashes not recomputed"
+    },
+    "class": {
+      "type": "string",
+      "description": "Project class: greenfield | feature-add | bugfix"
+    },
+    "mode": {
+      "type": "string",
+      "description": "Build mode: skeleton-build | slice-build"
+    },
+    "slice": {
+      "type": "string",
+      "description": "Skeleton id (skeleton-build) or slice id (slice-build)"
+    },
+    "slice_id": {
+      "type": "string",
+      "description": "Slice identifier (slice-build mode)"
+    },
     "red_under_diagnosis": {
       "type": "object",
+      "description": "Identity of the failing test/component/flow being diagnosed",
       "required": ["from_role", "target", "failing_tests", "failure_signature"],
       "properties": {
-        "from_role": { "type": "string" },
-        "target": { "type": "string" },
-        "failing_tests": { "type": "array", "items": { "type": "string" } },
-        "failure_signature": { "type": "string" },
-        "provisional_hint": { "type": "object" }
+        "from_role": {
+          "type": "string",
+          "description": "Role that escalated: IMPLEMENT | INTEGRATE | VERIFY-OUTPUT"
+        },
+        "target": {
+          "type": "string",
+          "description": "Component (IMPLEMENT) or flow F* (INTEGRATE) under build"
+        },
+        "failing_tests": {
+          "type": "array",
+          "description": "Names of failing test functions",
+          "items": { "type": "string" }
+        },
+        "failure_signature": {
+          "type": "string",
+          "description": "Exact error message / assertion text from the failing test"
+        },
+        "provisional_hint": {
+          "type": "object",
+          "description": "Producer's escape classification hint — HINT only, re-derived below, never trusted",
+          "properties": {
+            "classification": { "type": "string", "description": "Provisional defect classification from the escalating role" },
+            "route": { "type": "string", "description": "Provisional route suggested by escalating role" }
+          }
+        }
       }
     },
     "flaky_check": {
       "type": "object",
+      "description": "Discriminator 1: whether failure is flaky (non-deterministic) or deterministic",
       "required": ["deterministic", "evidence"],
       "properties": {
-        "deterministic": { "type": "boolean" },
-        "evidence": { "type": "string" },
-        "action": { "oneOf": [{"type":"string"},{"type":"null"}] }
+        "deterministic": {
+          "type": "boolean",
+          "description": "True = deterministic failure; false = flaky → flaky-quarantine verdict"
+        },
+        "evidence": {
+          "type": "string",
+          "description": "Reasoning for deterministic/flaky classification"
+        },
+        "action": {
+          "oneOf": [{"type":"string"},{"type":"null"}],
+          "description": "When flaky: re-run/quarantine/harness-fix action. Null when deterministic"
+        }
       }
     },
     "stall_analysis": {
       "type": "object",
+      "description": "Discriminator 2: whether build is progressing or stalled (K=3 same-signature + 0 net-new = stall)",
       "required": ["basis", "progressing", "stall_confirmed"],
       "properties": {
-        "basis": { "type": "string" },
-        "same_signature_attempts": { "type": "integer" },
-        "net_new_passes_trend": { "type": "string" },
-        "progressing": { "type": "boolean" },
-        "stall_confirmed": { "type": "boolean" }
+        "basis": {
+          "type": "string",
+          "description": "Stall basis: attempts-trajectory | producer-asserted"
+        },
+        "same_signature_attempts": {
+          "type": "integer",
+          "description": "Count of attempts with the same failure signature"
+        },
+        "net_new_passes_trend": {
+          "type": "string",
+          "description": "Trend in net-new passes across attempts: flat | rising"
+        },
+        "progressing": {
+          "type": "boolean",
+          "description": "True = net-new passes rising; build still progressing → self-heal"
+        },
+        "stall_confirmed": {
+          "type": "boolean",
+          "description": "True = K=3 same-signature + 0 net-new (incl. oscillation) → stall confirmed"
+        }
       }
     },
-    "reflection_pass": { "type": "object" },
-    "skeleton_fidelity": { "type": "object" },
-    "verdict": { "type": "string", "enum": ["self-heal","escape","flaky-quarantine"] },
-    "classification": { "type": "string" },
-    "routable_diagnosis": { "oneOf": [{"type":"null"},{"type":"object"}] },
-    "self_heal": { "oneOf": [{"type":"null"},{"type":"object"}] },
-    "quarantine": { "oneOf": [{"type":"null"},{"type":"object"}] },
+    "reflection_pass": {
+      "type": "object",
+      "description": "Discriminator 3: mandatory re-read of frozen inputs; determines misread vs genuinely-wrong frozen artifact",
+      "properties": {
+        "frozen_inputs_reread": {
+          "type": "array",
+          "description": "Frozen artifact paths/refs re-read before verdict",
+          "items": { "type": "string" }
+        },
+        "finding": {
+          "type": "string",
+          "description": "What the re-read revealed: misread vs genuine contract/decision defect"
+        },
+        "misread": {
+          "type": "boolean",
+          "description": "True = implementation misread a correct frozen artifact → self-heal; false = frozen artifact is genuinely wrong → escape"
+        }
+      }
+    },
+    "skeleton_fidelity": {
+      "type": "object",
+      "description": "Slice-build only: whether greening the red requires editing a frozen skeleton artifact (H14)",
+      "properties": {
+        "breached": { "type": "boolean", "description": "True = defect is at shared baseline, not slice-local → escape Phase 2/3" },
+        "skeleton_artifacts_checked": {
+          "type": "array",
+          "description": "Frozen skeleton artifacts inspected during fidelity check",
+          "items": { "type": "string" }
+        },
+        "finding": { "type": "string", "description": "Reasoning for breach/no-breach verdict" }
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["self-heal","escape","flaky-quarantine"],
+      "description": "Diagnosis outcome: self-heal (misread/progressing) | escape (genuine frozen-artifact defect) | flaky-quarantine"
+    },
+    "classification": {
+      "type": "string",
+      "description": "Confirmed defect class: my-code | contract | decision | WHAT | missing-foundation"
+    },
+    "routable_diagnosis": {
+      "oneOf": [
+        {"type":"null"},
+        {
+          "type": "object",
+          "required": ["classification","target_phase","frozen_ref","change_request","routable"],
+          "properties": {
+            "classification": {
+              "type": "string",
+              "description": "Defect class: contract | decision | WHAT | missing-foundation"
+            },
+            "target_phase": {
+              "type": "string",
+              "description": "Phase to route to: Phase 0 | Phase 1 | Phase 2 | Phase 3"
+            },
+            "frozen_ref": {
+              "type": "string",
+              "description": "Path + anchor of the frozen artifact containing the defect"
+            },
+            "change_request": {
+              "type": "string",
+              "description": "Concrete change request routable to the target phase"
+            },
+            "routable": {
+              "type": "boolean",
+              "description": "True = frozen_ref + change_request named; false = insufficient to route"
+            }
+          }
+        }
+      ],
+      "description": "Present iff verdict==escape; null otherwise. Names frozen_ref + change_request routable to a phase"
+    },
+    "self_heal": {
+      "oneOf": [
+        {"type":"null"},
+        {
+          "type": "object",
+          "required": ["route_back_to","corrected_understanding"],
+          "properties": {
+            "route_back_to": {
+              "type": "string",
+              "description": "Role to route back to: IMPLEMENT | INTEGRATE"
+            },
+            "corrected_understanding": {
+              "type": "string",
+              "description": "Corrected reading of the frozen artifact that resolves the misread"
+            },
+            "misread_artifact": {
+              "type": "string",
+              "description": "Path + anchor of the frozen artifact that was misread"
+            }
+          }
+        }
+      ],
+      "description": "Present iff verdict==self-heal; null otherwise. route_back_to + corrected_understanding"
+    },
+    "quarantine": {
+      "oneOf": [
+        {"type":"null"},
+        {
+          "type": "object",
+          "required": ["rerun_count","harness_fix","note"],
+          "properties": {
+            "rerun_count": {
+              "type": "integer",
+              "description": "Number of re-runs attempted to confirm flaky behaviour"
+            },
+            "harness_fix": {
+              "type": "string",
+              "description": "Action to fix the flaky harness or quarantine the test"
+            },
+            "note": {
+              "type": "string",
+              "description": "Reasoning for quarantine classification"
+            }
+          }
+        }
+      ],
+      "description": "Present iff verdict==flaky-quarantine; null otherwise. rerun_count + harness_fix + note"
+    },
     "diagnosis_counts": {
       "type": "object",
+      "description": "Counts of discriminator gates fired and frozen inputs re-read",
       "required": ["frozen_inputs_reread", "gates_to_verdict"],
       "properties": {
-        "frozen_inputs_reread": { "type": "integer" },
-        "gates_to_verdict": { "type": "integer" }
+        "frozen_inputs_reread": {
+          "type": "integer",
+          "description": "Number of frozen artifact paths re-read in reflection_pass"
+        },
+        "gates_to_verdict": {
+          "type": "integer",
+          "description": "Discriminator gates fired before verdict (1=flaky, 2=progress, 3=misread, 4/5=escape)"
+        }
       }
     }
   }

@@ -5,47 +5,66 @@
   "type": "object",
   "required": ["id", "decision", "category", "forced_by", "grounding", "options", "option_count", "degenerate"],
   "properties": {
-    "id": { "type": "string", "pattern": "^DP[0-9]+$" },
-    "decision": { "type": "string" },
-    "category": { "type": "string" },
-    "forced_by": { "type": "array", "items": { "type": "string" } },
-    "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
+    "id": { "type": "string", "pattern": "^DP[0-9]+$", "description": "DP id carried verbatim from 01-decision-points; never re-minted" },
+    "decision": { "type": "string", "description": "Decision text carried verbatim from 01; never re-authored" },
+    "category": { "type": "string", "description": "Category carried verbatim from 01; never re-categorized" },
+    "forced_by": {
+      "type": "array",
+      "description": "Forcing aPRD ids carried verbatim from 01",
+      "items": { "type": "string" }
+    },
+    "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Cut element reference carried verbatim from 01" },
     "grounding": {
       "type": "object",
+      "description": "Provenance of option set: existing system, canon, or reasoned from first principles",
       "required": ["existing_system", "canon_status", "source", "note"],
       "properties": {
-        "existing_system": { "type": "string" },
-        "canon_status": { "type": "string" },
-        "source": { "type": "string" },
-        "note": { "type": "string" }
+        "existing_system": { "type": "string", "description": "Existing system constraint text; n/a for greenfield" },
+        "canon_status": { "type": "string", "description": "absent | canon version when arch-canon.json present" },
+        "source": { "type": "string", "description": "existing_system | canon | reasoned; source actually used" },
+        "note": { "type": "string", "description": "One line: where option set came from; if reasoned, canon absent + first principles used" }
       }
     },
     "options": {
       "type": "array",
+      "description": "≥2 real, distinct, compliant, unranked alternatives; order NOT preference order",
       "minItems": 1,
       "items": {
         "type": "object",
         "required": ["option", "summary", "source", "reason_to_consider", "tradeoffs", "bears_on"],
         "properties": {
-          "option": { "type": "string" },
-          "summary": { "type": "string" },
-          "source": { "type": "string" },
-          "reason_to_consider": { "type": "string" },
+          "option": { "type": "string", "description": "Concrete candidate name (e.g. 'Modular monolith with enforced module boundaries')" },
+          "summary": { "type": "string", "description": "One line: what this approach is" },
+          "source": { "type": "string", "description": "Per-option provenance: canon | reasoned | existing_system" },
+          "reason_to_consider": { "type": "string", "description": "One line: why competent team genuinely weighs it here — anti-strawman proof" },
           "tradeoffs": {
             "type": "object",
+            "description": "Neutral bidirectional tradeoffs; every option carries both; never verdict, weight, ranking, or recommendation",
             "required": ["strengths", "costs"],
             "properties": {
-              "strengths": { "type": "array", "items": { "type": "string" } },
-              "costs": { "type": "array", "items": { "type": "string" } }
+              "strengths": {
+                "type": "array",
+                "description": "Neutral strengths relative to this decision's forces",
+                "items": { "type": "string" }
+              },
+              "costs": {
+                "type": "array",
+                "description": "Neutral costs / downsides",
+                "items": { "type": "string" }
+              }
             }
           },
-          "bears_on": { "type": "array", "items": { "type": "string" } }
+          "bears_on": {
+            "type": "array",
+            "description": "aPRD/cut ids whose forces these tradeoffs touch; eval hooks for EVALUATE-DECIDE; not score",
+            "items": { "type": "string" }
+          }
         }
       }
     },
-    "option_count": { "type": "integer", "minimum": 1 },
-    "degenerate": { "type": "boolean" },
-    "degenerate_reason": { "oneOf": [{"type":"string"},{"type":"null"}] },
-    "no_pick_note": { "type": "string" }
+    "option_count": { "type": "integer", "minimum": 1, "description": "== len(options)" },
+    "degenerate": { "type": "boolean", "description": "True only when exactly one compliant real option survives honestly; then degenerate_reason set" },
+    "degenerate_reason": { "oneOf": [{"type":"string"},{"type":"null"}], "description": "Why fork collapsed to one when degenerate; null otherwise" },
+    "no_pick_note": { "type": "string", "description": "Fixed reminder: OPTION-GEN does not recommend; EVALUATE-DECIDE picks" }
   }
 }

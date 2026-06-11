@@ -3,96 +3,406 @@
   "$id": "build-plan",
   "title": "BUILD-PLAN output — component build order with wave grouping and mock map",
   "type": "object",
-  "required": ["class", "mode", "build_units", "mock_map", "build_plan_counts"],
+  "required": [
+    "class",
+    "mode",
+    "build_units",
+    "mock_map",
+    "build_plan_counts"
+  ],
   "allOf": [
     {
-      "if": { "properties": { "mode": { "const": "skeleton-build" } }, "required": ["mode"] },
-      "then": { "required": ["skeleton_id", "walking_skeleton_flow", "build_set", "build_order", "parallel_groups"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "skeleton-build",
+            "description": "discriminator guard: mode==\"skeleton-build\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "skeleton_id",
+          "walking_skeleton_flow",
+          "build_set",
+          "build_order",
+          "parallel_groups"
+        ]
+      }
     },
     {
-      "if": { "properties": { "mode": { "const": "slice-build" } }, "required": ["mode"] },
-      "then": { "required": ["slice_id", "slice_name", "slice_flow", "build_set", "build_order", "parallel_groups"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "slice-build",
+            "description": "discriminator guard: mode==\"slice-build\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "slice_id",
+          "slice_name",
+          "slice_flow",
+          "build_set",
+          "build_order",
+          "parallel_groups"
+        ]
+      }
     }
   ],
   "properties": {
-    "skeleton_lock_ref": { "type": "string" },
-    "build_dag_ref": { "type": "string" },
-    "flows_ref": { "type": "string" },
-    "components_ref": { "type": "string" },
-    "contracts_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "aprd_lock_ref": { "type": "string" },
-    "locks_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "skeleton_id": { "type": "string" },
-    "slice_id": { "type": "string" },
-    "slice_name": { "type": "string" },
-    "slice_flow": { "type": "string" },
-    "walking_skeleton_flow": { "type": "string" },
-    "build_set": { "type": "array", "items": { "type": "string" } },
-    "prior_built_components": { "type": "array", "items": { "type": "string" } },
-    "later_slice_components": { "type": "array", "items": { "type": "string" } },
-    "build_order": { "type": "array", "items": { "type": "string" } },
+    "skeleton_lock_ref": {
+      "type": "string",
+      "description": "Path to skeleton.lock"
+    },
+    "build_dag_ref": {
+      "type": "string",
+      "description": "Path to build-dag.json used as input"
+    },
+    "flows_ref": {
+      "type": "string",
+      "description": "Path to flows.json input"
+    },
+    "components_ref": {
+      "type": "string",
+      "description": "Path to components.json input"
+    },
+    "contracts_ref": {
+      "type": "string",
+      "description": "Path to contracts.json input"
+    },
+    "adr_lock_ref": {
+      "type": "string",
+      "description": "Path to adr.lock"
+    },
+    "aprd_lock_ref": {
+      "type": "string",
+      "description": "Path to aprd.lock"
+    },
+    "locks_verified": {
+      "type": "boolean",
+      "description": "All locks confirmed frozen before planning"
+    },
+    "class": {
+      "type": "string",
+      "description": "Project class: greenfield | feature-add | bugfix"
+    },
+    "mode": {
+      "type": "string",
+      "description": "Build mode: skeleton-build | slice-build"
+    },
+    "skeleton_id": {
+      "type": "string",
+      "description": "Walking skeleton id (skeleton-build)"
+    },
+    "slice_id": {
+      "type": "string",
+      "description": "Slice identifier (slice-build)"
+    },
+    "slice_name": {
+      "type": "string",
+      "description": "Human-readable slice name (slice-build)"
+    },
+    "slice_flow": {
+      "type": "string",
+      "description": "Flow id this slice demonstrates (slice-build)"
+    },
+    "walking_skeleton_flow": {
+      "type": "string",
+      "description": "Walking skeleton flow id (skeleton-build)"
+    },
+    "build_set": {
+      "type": "array",
+      "description": "Component ids to build this run",
+      "items": {
+        "type": "string"
+      }
+    },
+    "prior_built_components": {
+      "type": "array",
+      "description": "Components already built in prior runs; never rebuilt",
+      "items": {
+        "type": "string"
+      }
+    },
+    "later_slice_components": {
+      "type": "array",
+      "description": "Components deferred to later slices; mocked in this build",
+      "items": {
+        "type": "string"
+      }
+    },
+    "build_order": {
+      "type": "array",
+      "description": "Topological build order of component ids",
+      "items": {
+        "type": "string"
+      }
+    },
     "parallel_groups": {
       "type": "array",
+      "description": "Wave-grouped parallel build groups; components in same wave may build concurrently",
       "items": {
         "type": "object",
-        "required": ["wave", "components"],
+        "required": [
+          "wave",
+          "components"
+        ],
         "properties": {
-          "wave": { "type": "integer" },
-          "components": { "type": "array", "items": { "type": "string" } }
+          "wave": {
+            "type": "integer",
+            "description": "Wave index (0-based)"
+          },
+          "components": {
+            "type": "array",
+            "description": "Component ids buildable in parallel within this wave",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
     },
     "build_units": {
       "type": "array",
+      "description": "Per-component build metadata: seams, traces, status",
       "items": {
         "type": "object",
-        "required": ["component", "name", "wave", "traces", "status"],
+        "required": [
+          "component",
+          "name",
+          "wave",
+          "traces",
+          "status"
+        ],
         "properties": {
-          "component": { "type": "string" },
-          "name": { "type": "string" },
-          "wave": { "type": "integer" },
-          "traces": { "type": "array" },
-          "provides_contracts": { "type": "array" },
-          "consumes_seams": { "type": "array" },
-          "mocked_deps": { "type": "array" },
-          "status": { "type": "string", "enum": ["planned","green","locked"] }
+          "component": {
+            "type": "string",
+            "description": "Component id (C*)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Component name from components.json"
+          },
+          "wave": {
+            "type": "integer",
+            "description": "Build wave this component belongs to"
+          },
+          "traces": {
+            "type": "array",
+            "description": "Requirement/AC ids this component closes (R*/AC*)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "provides_contracts": {
+            "type": "array",
+            "description": "Contract ids (CT*) this component provides as callee surface",
+            "items": {
+              "type": "string"
+            }
+          },
+          "consumes_seams": {
+            "type": "array",
+            "description": "Seams this component calls, with real/mocked status",
+            "items": {
+              "type": "object",
+              "required": [
+                "via",
+                "dep",
+                "status"
+              ],
+              "properties": {
+                "via": {
+                  "type": "string",
+                  "description": "Contract id of the seam"
+                },
+                "dep": {
+                  "type": "string",
+                  "description": "Dependency component id"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "real",
+                    "mocked"
+                  ],
+                  "description": "Wiring status: real (both ends built) or mocked (dep not yet built)"
+                }
+              }
+            }
+          },
+          "mocked_deps": {
+            "type": "array",
+            "description": "Component ids mocked for this build unit (later-slice or unbuilt)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "green",
+              "locked"
+            ],
+            "description": "Build status of this unit"
+          }
         }
       }
     },
-    "mock_map": { "type": "object" },
-    "lock_set": { "type": "array" },
-    "coverage": {
+    "mock_map": {
       "type": "object",
-      "required": ["components_planned"],
-      "properties": {
-        "path_components": { "type": "array" },
-        "components_planned": { "type": "array" },
-        "unplanned_path_components": { "type": "array" },
-        "slice_flow": { "type": "string" },
-        "slice_path_components": { "type": "array" },
-        "build_set_components": { "type": "array" },
-        "prior_built_on_path": { "type": "array" },
-        "unplanned_build_set_components": { "type": "array" },
-        "provided_seams": { "type": "array" },
-        "consumed_seams_total": { "type": "integer" },
-        "consumed_seams_classified": { "type": "integer" },
-        "real_seams": { "type": "array" },
-        "mocked_seams": { "type": "array" }
+      "description": "Map of component id → array of mocked dependency component ids",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       }
     },
-    "structural_defects": { "type": "array" },
+    "lock_set": {
+      "type": "array",
+      "description": "Lock file paths relevant to this build plan",
+      "items": {
+        "type": "string"
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "description": "Coverage summary: seams classified, components planned vs path",
+      "required": [
+        "components_planned"
+      ],
+      "properties": {
+        "path_components": {
+          "type": "array",
+          "description": "Components on the walking-skeleton or slice flow path",
+          "items": {
+            "type": "string"
+          }
+        },
+        "components_planned": {
+          "type": "array",
+          "description": "Component ids included in this build plan",
+          "items": {
+            "type": "string"
+          }
+        },
+        "unplanned_path_components": {
+          "type": "array",
+          "description": "Path components absent from build_set (coverage gap)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "slice_flow": {
+          "type": "string",
+          "description": "Slice flow id (slice-build)"
+        },
+        "slice_path_components": {
+          "type": "array",
+          "description": "Components on the slice flow path (slice-build)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "build_set_components": {
+          "type": "array",
+          "description": "Alias for build_set in coverage context",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prior_built_on_path": {
+          "type": "array",
+          "description": "Prior-built components that lie on the flow path",
+          "items": {
+            "type": "string"
+          }
+        },
+        "unplanned_build_set_components": {
+          "type": "array",
+          "description": "Build-set components absent from flow path (not on critical route)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "provided_seams": {
+          "type": "array",
+          "description": "Seam (CT*) ids provided by in-set components",
+          "items": {
+            "type": "string"
+          }
+        },
+        "consumed_seams_total": {
+          "type": "integer",
+          "description": "Total seams consumed by in-set components"
+        },
+        "consumed_seams_classified": {
+          "type": "integer",
+          "description": "Seams classified as real or mocked"
+        },
+        "real_seams": {
+          "type": "array",
+          "description": "CT* ids wired real (both ends in build_set)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mocked_seams": {
+          "type": "array",
+          "description": "CT* ids left mocked (dep not in build_set)",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "structural_defects": {
+      "type": "array",
+      "description": "Structural planning defects found (coverage gaps, unclassified seams); [] on clean run",
+      "items": {
+        "type": "string"
+      }
+    },
     "build_plan_counts": {
       "type": "object",
-      "required": ["build_units", "real_seams", "mocked_seams", "active_waves"],
+      "description": "Summary counts: units, seams, waves",
+      "required": [
+        "build_units",
+        "real_seams",
+        "mocked_seams",
+        "active_waves"
+      ],
       "properties": {
-        "build_units": { "type": "integer" },
-        "real_seams": { "type": "integer" },
-        "mocked_seams": { "type": "integer" },
-        "active_waves": { "type": "integer" },
-        "locks": { "type": "integer" }
+        "build_units": {
+          "type": "integer",
+          "description": "Number of components in build_units array"
+        },
+        "real_seams": {
+          "type": "integer",
+          "description": "Count of real (both-ends-built) seams"
+        },
+        "mocked_seams": {
+          "type": "integer",
+          "description": "Count of mocked (dep-not-built) seams"
+        },
+        "active_waves": {
+          "type": "integer",
+          "description": "Number of distinct build waves"
+        },
+        "locks": {
+          "type": "integer",
+          "description": "Number of lock files in lock_set"
+        }
       }
     }
   }

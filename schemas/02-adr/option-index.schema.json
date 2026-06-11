@@ -5,35 +5,56 @@
   "type": "object",
   "required": ["triage_ref", "class", "skeleton_id", "resolution_queue", "option_files", "degenerate", "skipped", "option_set_counts"],
   "properties": {
-    "triage_ref": { "type": "string" },
-    "decision_points_ref": { "type": "string" },
-    "aprd_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "skeleton_id": { "type": "string" },
-    "canon_status": { "type": "string" },
-    "resolution_queue": { "type": "array", "items": { "type": "string" } },
+    "triage_ref": { "type": "string", "description": "Path to 02-triage.json" },
+    "decision_points_ref": { "type": "string", "description": "Path to 01-decision-points.json" },
+    "aprd_ref": { "type": "string", "description": "Resolved aPRD artifact path" },
+    "foundation_cut_ref": { "type": "string", "description": "Path to foundation cut file" },
+    "class": { "type": "string", "description": "Project class (greenfield | feature-add)" },
+    "skeleton_id": { "type": "string", "description": "Skeleton id (e.g. S1)" },
+    "canon_status": { "type": "string", "description": "absent | arch-canon version when arch-canon.json present on disk" },
+    "resolution_queue": {
+      "type": "array",
+      "description": "DP ids from triage resolution_queue; echoed for audit",
+      "items": { "type": "string" }
+    },
     "option_files": {
       "type": "array",
+      "description": "One entry per grounded DP (resolution_queue minus skipped); len(option_files) + len(skipped) == len(resolution_queue)",
       "items": {
         "type": "object",
         "required": ["id", "path", "option_count"],
         "properties": {
-          "id": { "type": "string" },
-          "path": { "type": "string" },
-          "option_count": { "type": "integer" }
+          "id": { "type": "string", "description": "DP id for this option file" },
+          "path": { "type": "string", "description": "Relative path to option file (03-options/DP*.json)" },
+          "option_count": { "type": "integer", "description": "Number of options in the file" }
         }
       }
     },
-    "degenerate": { "type": "array" },
-    "skipped": { "type": "array" },
+    "degenerate": {
+      "type": "array",
+      "description": "DP ids whose option file has degenerate=true (single compliant option)",
+      "items": { "type": "string" }
+    },
+    "skipped": {
+      "type": "array",
+      "description": "id + reason for any queued DP with no body in 01-decision-points; empty on clean run",
+      "items": {
+        "type": "object",
+        "required": ["id", "reason"],
+        "properties": {
+          "id": { "type": "string", "description": "DP id skipped" },
+          "reason": { "type": "string", "description": "Why this DP was skipped (broken upstream contract)" }
+        }
+      }
+    },
     "option_set_counts": {
       "type": "object",
+      "description": "Walk to count; don't estimate",
       "required": ["decisions_grounded", "total_options", "min_options_per_decision"],
       "properties": {
-        "decisions_grounded": { "type": "integer" },
-        "total_options": { "type": "integer" },
-        "min_options_per_decision": { "type": "integer" }
+        "decisions_grounded": { "type": "integer", "description": "== len(option_files)" },
+        "total_options": { "type": "integer", "description": "Sum of every file's option_count" },
+        "min_options_per_decision": { "type": "integer", "description": "Smallest option_count across grounded files; must be ≥2 unless degenerate file present" }
       }
     }
   }

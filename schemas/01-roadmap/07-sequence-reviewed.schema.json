@@ -5,66 +5,204 @@
   "type": "object",
   "required": ["sequence_ref", "class", "verdict", "review", "sequence", "dependency_check", "coverage", "sequence_counts"],
   "properties": {
-    "sequence_ref": { "type": "string" },
-    "class": { "type": "string" },
-    "verdict": { "type": "string", "enum": ["confirmed","reordered"] },
+    "sequence_ref": {
+      "description": "Path to 05-sequence.json whose order was presented to the client.",
+      "type": "string"
+    },
+    "class": {
+      "description": "Project class: greenfield or feature-add.",
+      "type": "string"
+    },
+    "verdict": {
+      "description": "confirmed = client accepts proposed order; reordered = at least one dependency-legal override applied.",
+      "type": "string",
+      "enum": ["confirmed","reordered"]
+    },
     "review": {
+      "description": "Client review session record — what was presented, how client responded, what overrides applied.",
       "type": "object",
       "required": ["presented_order", "client_response", "skeleton_pinned", "overrides", "blocked_overrides", "needs_followup", "signoff"],
       "properties": {
-        "presented_order": { "type": "array", "items": { "type": "string" } },
-        "client_response": { "type": "string", "enum": ["confirmed","reordered","deferred","blocked"] },
-        "skeleton_pinned": { "type": "string" },
-        "electable_slices": { "type": "array" },
-        "overrides": { "type": "array" },
-        "blocked_overrides": { "type": "array" },
-        "needs_followup": { "type": "boolean" },
-        "signoff": { "type": "string" }
+        "presented_order": {
+          "description": "Proposed order's slice ids in 05-sequence.json position order — what the client saw.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "client_response": {
+          "description": "Client response type: confirmed, reordered, deferred, or blocked.",
+          "type": "string",
+          "enum": ["confirmed","reordered","deferred","blocked"]
+        },
+        "skeleton_pinned": {
+          "description": "Position-1 skeleton slice id; always pinned by RM4.",
+          "type": "string"
+        },
+        "electable_slices": {
+          "description": "Non-skeleton slice ids offered as build-earlier options (had ordering slack); empty when order is dependency-forced.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "overrides": {
+          "description": "Applied legal reorders; each entry records the slice, from_position, to_position, and client rationale; empty on plain confirm.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["slice", "from_position", "to_position", "client_rationale"],
+            "properties": {
+              "slice": {
+                "description": "S* identifier of the reordered slice.",
+                "type": "string"
+              },
+              "from_position": {
+                "description": "Original position in proposed order.",
+                "type": "integer"
+              },
+              "to_position": {
+                "description": "New position after client override.",
+                "type": "integer"
+              },
+              "client_rationale": {
+                "description": "Client's stated reason for the reorder.",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "blocked_overrides": {
+          "description": "Requested reorders refused for breaking dependency or moving skeleton; each records the request and reason; empty when none.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["request", "reason"],
+            "properties": {
+              "request": {
+                "description": "What the client requested.",
+                "type": "string"
+              },
+              "reason": {
+                "description": "Why the request was blocked — conflicting depends_on edge or RM4 violation.",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "needs_followup": {
+          "description": "True iff any blocked override recorded; client asked for something dependencies forbid.",
+          "type": "boolean"
+        },
+        "signoff": {
+          "description": "One line capturing client's confirmation or instruction verbatim or faithfully paraphrased.",
+          "type": "string"
+        }
       }
     },
     "sequence": {
+      "description": "Confirmed order; same fields as 05-sequence carried verbatim; position renumbered 1..N after any reorder.",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["position", "id", "name", "skeleton", "value", "depends_on", "cost_proxy", "rationale"],
         "properties": {
-          "position": { "type": "integer", "minimum": 1 },
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "skeleton": { "type": "boolean" },
-          "value": { "type": "string" },
-          "retires_risk": { "oneOf": [{"type":"string"},{"type":"null"}] },
-          "depends_on": { "type": "array" },
-          "cost_proxy": { "type": "integer" },
-          "rationale": { "type": "string" }
+          "position": {
+            "description": "1-based position in confirmed sequence.",
+            "type": "integer",
+            "minimum": 1
+          },
+          "id": {
+            "description": "Slice S* identifier carried verbatim from 05-sequence.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Slice name carried verbatim from 05-sequence.",
+            "type": "string"
+          },
+          "skeleton": {
+            "description": "True only on position 1; false elsewhere.",
+            "type": "boolean"
+          },
+          "value": {
+            "description": "Value tier carried verbatim from 05-sequence; never re-scored.",
+            "type": "string"
+          },
+          "retires_risk": {
+            "description": "Risk retired, carried verbatim from 05-sequence, or null.",
+            "oneOf": [{"type":"string"},{"type":"null"}]
+          },
+          "depends_on": {
+            "description": "S* prerequisites carried verbatim from 05-sequence.",
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "cost_proxy": {
+            "description": "Feature-depth proxy carried verbatim from 05-sequence.",
+            "type": "integer"
+          },
+          "rationale": {
+            "description": "Carried from 05; rewritten only if reorder changed why this slice sits here.",
+            "type": "string"
+          }
         }
       }
     },
     "dependency_check": {
+      "description": "Dependency validation of the confirmed order.",
       "type": "object",
       "required": ["acyclic", "legal", "skeleton_first"],
       "properties": {
-        "acyclic": { "type": "boolean" },
-        "legal": { "type": "boolean" },
-        "skeleton_first": { "type": "boolean" }
+        "acyclic": {
+          "description": "Always true here — defect order never reaches review.",
+          "type": "boolean"
+        },
+        "legal": {
+          "description": "Confirmed order is a valid topological sort of depends_on.",
+          "type": "boolean"
+        },
+        "skeleton_first": {
+          "description": "Position 1 is the skeleton slice.",
+          "type": "boolean"
+        }
       }
     },
     "coverage": {
+      "description": "Set coverage: confirmed order permutes but never changes the presented slice set.",
       "type": "object",
       "required": ["presented", "confirmed", "missing", "added"],
       "properties": {
-        "presented": { "type": "array" },
-        "confirmed": { "type": "array" },
-        "missing": { "type": "array" },
-        "added": { "type": "array" }
+        "presented": {
+          "description": "Slice ids in 05-sequence.json (what was presented).",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "confirmed": {
+          "description": "Emitted confirmed order's slice ids; equals presented as a set.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "missing": {
+          "description": "Presented ids absent from confirmed; empty on clean run.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "added": {
+          "description": "Confirmed ids absent from presented; empty on clean run.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
       }
     },
     "sequence_counts": {
+      "description": "Summary counts.",
       "type": "object",
       "required": ["total", "positions"],
       "properties": {
-        "total": { "type": "integer" },
-        "positions": { "type": "integer" }
+        "total": {
+          "description": "Total slices in confirmed sequence.",
+          "type": "integer"
+        },
+        "positions": {
+          "description": "Number of positions emitted.",
+          "type": "integer"
+        }
       }
     }
   }

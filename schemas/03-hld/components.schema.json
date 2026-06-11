@@ -3,101 +3,551 @@
   "$id": "components",
   "title": "DERIVE-COMPONENTS output — component graph with responsibility, entities, edges",
   "type": "object",
-  "required": ["class", "mode"],
+  "required": [
+    "class",
+    "mode"
+  ],
   "allOf": [
     {
-      "if": { "properties": { "mode": { "const": "skeleton" } }, "required": ["mode"] },
-      "then": { "required": ["components", "edges", "coverage", "component_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "skeleton",
+            "description": "discriminator guard: mode==\"skeleton\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "components",
+          "edges",
+          "coverage",
+          "component_counts"
+        ]
+      }
     },
     {
-      "if": { "properties": { "mode": { "const": "increment" } }, "required": ["mode"] },
-      "then": { "required": ["introduced_components", "new_edges", "slice_coverage", "increment_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "increment",
+            "description": "discriminator guard: mode==\"increment\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "introduced_components",
+          "new_edges",
+          "slice_coverage",
+          "increment_counts"
+        ]
+      }
     }
   ],
   "properties": {
-    "aprd_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "adr_log_ref": { "type": "string" },
-    "foundation_cut_ref": { "type": "string" },
-    "lock_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string", "enum": ["skeleton","increment"] },
-    "skeleton_id": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "base_skeleton_ref": { "type": "string" },
-    "rerank_ref": { "type": "string" },
-    "slices_ref": { "type": "string" },
-    "skeleton_frozen_verified": { "type": "boolean" },
-    "slice_id": { "type": "string" },
-    "slice_name": { "type": "string" },
-    "introduced_components": { "type": "array", "items": { "type": "string" } },
-    "touched_components": { "type": "array" },
-    "new_components": { "type": "array" },
-    "new_edges": { "type": "array" },
-    "new_entities_owned": { "type": "array" },
-    "slice_coverage": { "type": "object" },
-    "skeleton_fidelity": { "type": "object" },
-    "increment_counts": { "type": "object" },
+    "aprd_ref": {
+      "type": "string",
+      "description": "Resolved path to frozen aPRD artifact"
+    },
+    "adr_lock_ref": {
+      "type": "string",
+      "description": "Path to adr.lock"
+    },
+    "adr_log_ref": {
+      "type": "string",
+      "description": "Path to ADR log directory"
+    },
+    "foundation_cut_ref": {
+      "type": "string",
+      "description": "Path to foundation-cut artifact driving boundary decisions"
+    },
+    "lock_verified": {
+      "type": "boolean",
+      "description": "True if lock present and names frozen artifact"
+    },
+    "class": {
+      "type": "string",
+      "description": "Project class: greenfield or brownfield"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "skeleton",
+        "increment"
+      ],
+      "description": "skeleton = full initial graph; increment = per-slice extension"
+    },
+    "skeleton_id": {
+      "type": "string",
+      "description": "Skeleton slice id (e.g. S1)"
+    },
+    "skeleton_lock_ref": {
+      "type": "string",
+      "description": "Path to skeleton.lock (increment mode)"
+    },
+    "base_skeleton_ref": {
+      "type": "string",
+      "description": "Path to frozen skeleton components.json this increment extends"
+    },
+    "rerank_ref": {
+      "type": "string",
+      "description": "Path to 08-rerank.json supplying remaining_sequence"
+    },
+    "slices_ref": {
+      "type": "string",
+      "description": "Path to 02-slices.json"
+    },
+    "skeleton_frozen_verified": {
+      "type": "boolean",
+      "description": "True if skeleton.lock present and status==frozen"
+    },
+    "slice_id": {
+      "type": "string",
+      "description": "Target slice id auto-selected from remaining_sequence"
+    },
+    "slice_name": {
+      "type": "string",
+      "description": "Slice name carried verbatim from 02-slices/08-rerank"
+    },
+    "introduced_components": {
+      "type": "array",
+      "description": "C* ids this slice first activates (fleshed_this_slice:true boxes)",
+      "items": {
+        "type": "string",
+        "pattern": "^C[0-9]+$"
+      }
+    },
+    "touched_components": {
+      "type": "array",
+      "description": "Introduced boxes plus reused frozen boxes on slice path",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "role"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^C[0-9]+$",
+            "description": "Component id"
+          },
+          "name": {
+            "type": "string",
+            "description": "Component name carried verbatim from frozen graph"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "introduced",
+              "reused"
+            ],
+            "description": "introduced = first fleshed this slice; reused = already built"
+          },
+          "realizes_slice_requirements": {
+            "type": "array",
+            "description": "Slice R* this box traces (subset of frozen traces intersected with slice requirements)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "owns_entities": {
+            "type": "array",
+            "description": "E* this box owns; carried verbatim from frozen graph",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fleshed_this_slice": {
+            "type": "boolean",
+            "description": "True for introduced box being built this slice"
+          },
+          "built_in": {
+            "type": "string",
+            "description": "Completed slice that already built this reused box"
+          },
+          "why_on_path": {
+            "type": "string",
+            "description": "One-line structural reason slice leans on this reused box"
+          }
+        }
+      }
+    },
+    "new_components": {
+      "type": "array",
+      "description": "Boxes frozen graph lacks; empty in greenfield",
+      "items": {
+        "type": "string"
+      }
+    },
+    "new_edges": {
+      "type": "array",
+      "description": "Edges introduced with new boxes; acyclic; empty in greenfield",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "reason"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Dependent component id"
+          },
+          "to": {
+            "type": "string",
+            "description": "Dependency component id"
+          },
+          "reason": {
+            "type": "string",
+            "description": "One-line structural reason for dependency"
+          }
+        }
+      }
+    },
+    "new_entities_owned": {
+      "type": "array",
+      "description": "E* new box owns; empty in greenfield",
+      "items": {
+        "type": "string"
+      }
+    },
+    "slice_coverage": {
+      "type": "object",
+      "description": "Coverage of slice requirements by touched/new components",
+      "properties": {
+        "slice_requirements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "02-slices requirements for target slice, verbatim"
+        },
+        "requirements_landed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Each traced by touched-or-new component"
+        },
+        "requirement_orphans": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Unhomed requirements; empty on clean run"
+        }
+      }
+    },
+    "skeleton_fidelity": {
+      "type": "object",
+      "description": "H14 — increment extends, never redraws frozen skeleton",
+      "properties": {
+        "redrawn_components": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frozen C* slice changed; MUST be empty"
+        },
+        "modified_edges": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frozen edges altered; MUST be empty"
+        },
+        "verdict": {
+          "type": "string",
+          "description": "extends-not-redraws on clean run"
+        }
+      }
+    },
+    "increment_counts": {
+      "type": "object",
+      "description": "Counts derived by walking actual lists",
+      "properties": {
+        "touched": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of touched_components"
+        },
+        "introduced": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of introduced_components"
+        },
+        "new_components": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of new_components"
+        },
+        "new_edges": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of new_edges"
+        }
+      }
+    },
     "boundary_strategy": {
       "type": "object",
+      "description": "Architectural boundary cut — ADR refs, style, cut basis",
       "properties": {
-        "adr_refs": { "type": "array", "items": { "type": "string" } },
-        "style": { "type": "string" },
-        "cut_basis": { "type": "string" }
+        "adr_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "ADR ids that decided the cut, verbatim"
+        },
+        "style": {
+          "type": "string",
+          "description": "Architectural style/boundary cut named by ADR"
+        },
+        "cut_basis": {
+          "type": "string",
+          "description": "One line: how ADR says to cut plus frame constraint"
+        }
       }
     },
     "components": {
       "type": "array",
+      "description": "Component definitions in topological build order (most-depended-upon first)",
       "items": {
         "type": "object",
-        "required": ["id", "name", "responsibility", "owns_entities", "traces", "realizes_seam", "honors_adr"],
+        "required": [
+          "id",
+          "name",
+          "responsibility",
+          "owns_entities",
+          "traces",
+          "realizes_seam",
+          "honors_adr"
+        ],
         "properties": {
-          "id": { "type": "string", "pattern": "^C[0-9]+$" },
-          "name": { "type": "string" },
-          "responsibility": { "type": "string" },
-          "owns_entities": { "type": "array", "items": { "type": "string" } },
-          "traces": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-          "realizes_seam": { "type": "array", "items": { "type": "string" } },
-          "honors_adr": { "type": "array", "items": { "type": "string" } }
+          "id": {
+            "type": "string",
+            "pattern": "^C[0-9]+$",
+            "description": "Component id, minted C1..Cn in topological order"
+          },
+          "name": {
+            "type": "string",
+            "description": "Short responsibility label; names responsibility not implementation"
+          },
+          "responsibility": {
+            "type": "string",
+            "description": "One-line single responsibility; caveman prose"
+          },
+          "owns_entities": {
+            "type": "array",
+            "description": "E* this component owns (single-owner per entity); empty only for pure ingress/infra box",
+            "items": {
+              "type": "string"
+            }
+          },
+          "traces": {
+            "type": "array",
+            "description": "Non-empty frozen aPRD R* ids this component realizes",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "realizes_seam": {
+            "type": "array",
+            "description": "Foundation-cut seam names this component realizes; empty if later-slice capability box",
+            "items": {
+              "type": "string"
+            }
+          },
+          "honors_adr": {
+            "type": "array",
+            "description": "Frozen ADR ids this box must respect",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
     },
     "edges": {
       "type": "array",
+      "description": "Directed dependency edges; from depends on to; acyclic",
       "items": {
         "type": "object",
-        "required": ["from", "to", "reason"],
+        "required": [
+          "from",
+          "to",
+          "reason"
+        ],
         "properties": {
-          "from": { "type": "string" },
-          "to": { "type": "string" },
-          "reason": { "type": "string" }
+          "from": {
+            "type": "string",
+            "description": "Dependent component id"
+          },
+          "to": {
+            "type": "string",
+            "description": "Dependency component id"
+          },
+          "reason": {
+            "type": "string",
+            "description": "One-line structural dependency reason; not contract shape"
+          }
         }
       }
     },
     "coverage": {
       "type": "object",
-      "required": ["requirements_in_scope", "requirements_landed", "requirement_orphans", "entities_in_scope", "entities_owned", "entity_orphans", "components_without_requirement", "seam_realization"],
+      "description": "Both-direction coverage: requirements landed, entities owned, seams realized",
+      "required": [
+        "requirements_in_scope",
+        "requirements_landed",
+        "requirement_orphans",
+        "entities_in_scope",
+        "entities_owned",
+        "entity_orphans",
+        "components_without_requirement",
+        "seam_realization"
+      ],
       "properties": {
-        "requirements_in_scope": { "type": "array" },
-        "requirements_landed": { "type": "array" },
-        "requirement_orphans": { "type": "array" },
-        "entities_in_scope": { "type": "array" },
-        "entities_owned": { "type": "array" },
-        "entity_orphans": { "type": "array" },
-        "components_without_requirement": { "type": "array" },
-        "seam_realization": { "type": "array" }
+        "requirements_in_scope": {
+          "type": "array",
+          "description": "Every in-scope R* id from foundation cut",
+          "items": {
+            "type": "string"
+          }
+        },
+        "requirements_landed": {
+          "type": "array",
+          "description": "R* ids traced by at least one component",
+          "items": {
+            "type": "string"
+          }
+        },
+        "requirement_orphans": {
+          "type": "array",
+          "description": "R* with no component; empty on clean run",
+          "items": {
+            "type": "string"
+          }
+        },
+        "entities_in_scope": {
+          "type": "array",
+          "description": "Every aPRD E* id",
+          "items": {
+            "type": "string"
+          }
+        },
+        "entities_owned": {
+          "type": "array",
+          "description": "E* ids with exactly one owning component",
+          "items": {
+            "type": "string"
+          }
+        },
+        "entity_orphans": {
+          "type": "array",
+          "description": "E* with no owner; empty on clean run",
+          "items": {
+            "type": "string"
+          }
+        },
+        "components_without_requirement": {
+          "type": "array",
+          "description": "C* ids tracing no requirement; empty on clean run",
+          "items": {
+            "type": "string"
+          }
+        },
+        "seam_realization": {
+          "type": "array",
+          "description": "Every foundation-cut seam mapped to its realizing component(s)",
+          "items": {
+            "type": "object",
+            "required": [
+              "seam",
+              "present",
+              "realized_by"
+            ],
+            "properties": {
+              "seam": {
+                "type": "string",
+                "description": "Foundation-cut seam name (e.g. ingress, domain, persistence)"
+              },
+              "present": {
+                "type": "boolean",
+                "description": "True if at least one component realizes this seam"
+              },
+              "realized_by": {
+                "type": "array",
+                "description": "C* ids realizing this seam",
+                "items": {
+                  "type": "string",
+                  "pattern": "^C[0-9]+$"
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "structural_defects": { "type": "array" },
-    "frame_conflicts": { "type": "array" },
-    "aprd_defects": { "type": "array" },
+    "structural_defects": {
+      "type": "array",
+      "description": "Cycle in edge graph or present seam with no realizer; each {kind, detail}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "frame_conflicts": {
+      "type": "array",
+      "description": "Foundational ADRs no structure can jointly honor; each {adrs, reason, escape}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "aprd_defects": {
+      "type": "array",
+      "description": "Requirements with no framable home; each {requirement, reason, escape}; empty on clean run",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
     "component_counts": {
       "type": "object",
-      "required": ["components", "edges", "entities_owned"],
+      "description": "Counts derived by walking actual lists",
+      "required": [
+        "components",
+        "edges",
+        "entities_owned"
+      ],
       "properties": {
-        "components": { "type": "integer" },
-        "edges": { "type": "integer" },
-        "entities_owned": { "type": "integer" }
+        "components": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of components array"
+        },
+        "edges": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of edges array"
+        },
+        "entities_owned": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total distinct E* across all owns_entities"
+        }
       }
     }
   }

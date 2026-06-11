@@ -3,55 +3,557 @@
   "$id": "integration-record",
   "title": "INTEGRATE output — end-to-end wiring record with mock-swap composition",
   "type": "object",
-  "required": ["class", "mode"],
+  "required": [
+    "class",
+    "mode"
+  ],
   "allOf": [
     {
-      "if": { "properties": { "mode": { "const": "skeleton-build" } }, "required": ["mode"] },
-      "then": { "required": ["flow", "walking_skeleton_path", "composition", "integration_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "skeleton-build",
+            "description": "discriminator guard: mode==\"skeleton-build\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "flow",
+          "walking_skeleton_path",
+          "composition",
+          "integration_counts"
+        ]
+      }
     },
     {
-      "if": { "properties": { "mode": { "const": "slice-build" } }, "required": ["mode"] },
-      "then": { "required": ["slice_id", "slice_name", "flow", "slice_path", "composition", "integration_counts"] }
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "slice-build",
+            "description": "discriminator guard: mode==\"slice-build\""
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "slice_id",
+          "slice_name",
+          "flow",
+          "slice_path",
+          "composition",
+          "integration_counts"
+        ]
+      }
     }
   ],
   "properties": {
-    "build_record_ref": { "type": "string" },
-    "flows_ref": { "type": "string" },
-    "oracle_lock_ref": { "type": "string" },
-    "oracle_ref": { "type": "string" },
-    "contracts_ref": { "type": "string" },
-    "components_ref": { "type": "string" },
-    "skeleton_lock_ref": { "type": "string" },
-    "adr_lock_ref": { "type": "string" },
-    "aprd_lock_ref": { "type": "string" },
-    "locks_verified": { "type": "boolean" },
-    "class": { "type": "string" },
-    "mode": { "type": "string" },
-    "slice": { "type": "string" },
-    "slice_id": { "type": "string" },
-    "slice_name": { "type": "string" },
-    "flow": { "type": "string" },
-    "walking_skeleton_path": { "type": "array", "items": { "type": "string" } },
-    "slice_path": { "type": "array", "items": { "type": "string" } },
-    "prior_built_components": { "type": "array", "items": { "type": "string" } },
-    "inherited_composition": { "type": "object" },
-    "composition": { "type": "object" },
-    "mock_swaps": { "type": "array" },
-    "mocks_retained": { "type": "array" },
-    "flow_test": { "type": "object" },
-    "verification": { "type": "object" },
-    "status": { "type": "string" },
-    "escape": {},
-    "provenance": { "type": "object" },
-    "commits": { "type": "array" },
-    "acceptance_harness": { "type": "object" },
-    "integration_counts": { "type": "object" },
-    "slice_build_record_ref": { "type": "string" },
-    "slice_flows_ref": { "type": "string" },
-    "slice_oracle_lock_ref": { "type": "string" },
-    "slice_oracle_ref": { "type": "string" },
-    "slice_contracts_ref": { "type": "string" },
-    "slice_components_ref": { "type": "string" },
-    "slice_build_plan_ref": { "type": "string" }
+    "build_record_ref": {
+      "type": "string",
+      "description": "Path to build-record.json (all build_set components green)"
+    },
+    "flows_ref": {
+      "type": "string",
+      "description": "Path to flows.json (flow narrative spine)"
+    },
+    "oracle_lock_ref": {
+      "type": "string",
+      "description": "Path to oracle.lock"
+    },
+    "oracle_ref": {
+      "type": "string",
+      "description": "Path to oracle.json (flow test oracle)"
+    },
+    "contracts_ref": {
+      "type": "string",
+      "description": "Path to contracts.json (seam shapes + failure modes)"
+    },
+    "components_ref": {
+      "type": "string",
+      "description": "Path to components.json"
+    },
+    "skeleton_lock_ref": {
+      "type": "string",
+      "description": "Path to skeleton.lock"
+    },
+    "adr_lock_ref": {
+      "type": "string",
+      "description": "Path to adr.lock"
+    },
+    "aprd_lock_ref": {
+      "type": "string",
+      "description": "Path to aprd.lock"
+    },
+    "locks_verified": {
+      "type": "boolean",
+      "description": "All locks confirmed frozen before integration"
+    },
+    "class": {
+      "type": "string",
+      "description": "Project class: greenfield | feature-add | bugfix"
+    },
+    "mode": {
+      "type": "string",
+      "description": "Build mode: skeleton-build | slice-build"
+    },
+    "slice": {
+      "type": "string",
+      "description": "Skeleton id (skeleton-build)"
+    },
+    "slice_id": {
+      "type": "string",
+      "description": "Slice identifier (slice-build)"
+    },
+    "slice_name": {
+      "type": "string",
+      "description": "Human-readable slice name (slice-build)"
+    },
+    "flow": {
+      "type": "string",
+      "description": "Flow id (F*) integrated this run"
+    },
+    "walking_skeleton_path": {
+      "type": "array",
+      "description": "Component ids on the walking-skeleton flow path in compose order (skeleton-build)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "slice_path": {
+      "type": "array",
+      "description": "Component ids on the slice flow path in compose order (slice-build)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "prior_built_components": {
+      "type": "array",
+      "description": "Prior-built component ids; real on disk, wired never rebuilt",
+      "items": {
+        "type": "string"
+      }
+    },
+    "inherited_composition": {
+      "type": "object",
+      "description": "Frozen skeleton composition root inherited by reference (slice-build); slice adds routes additively (H14)",
+      "properties": {
+        "skeleton_integration_ref": {
+          "type": "string",
+          "description": "Path to frozen skeleton integration-record.json"
+        },
+        "skeleton_flow": {
+          "type": "string",
+          "description": "Skeleton flow id (F1)"
+        },
+        "wsgi_entry": {
+          "type": "string",
+          "description": "WSGI entry point module path"
+        },
+        "frozen_verified": {
+          "type": "boolean",
+          "description": "Skeleton integration status==integrated; not re-run"
+        }
+      }
+    },
+    "composition": {
+      "type": "object",
+      "description": "Wiring written this run: WSGI entry + composition files + framework + LLD notes",
+      "properties": {
+        "wsgi_entry": {
+          "type": "string",
+          "description": "WSGI app entry point (e.g. freelancer_app.wsgi.application)"
+        },
+        "files": {
+          "type": "array",
+          "description": "Composition files written or modified this run",
+          "items": {
+            "type": "string"
+          }
+        },
+        "framework": {
+          "type": "string",
+          "description": "Framework carried from build-record lld_notes (NOT re-picked); ADR-named"
+        },
+        "lld_notes": {
+          "type": "string",
+          "description": "LLD: routing, seam wires, ADR rationale, external boundaries retained"
+        }
+      }
+    },
+    "mock_swaps": {
+      "type": "array",
+      "description": "Inter-component hops on the flow path: swapped mock→real or retained-mock",
+      "items": {
+        "type": "object",
+        "required": [
+          "via",
+          "from",
+          "to",
+          "seam",
+          "status"
+        ],
+        "properties": {
+          "via": {
+            "type": "string",
+            "description": "Contract id (CT*) of the seam"
+          },
+          "from": {
+            "type": "string",
+            "description": "Calling component id"
+          },
+          "to": {
+            "type": "string",
+            "description": "Called component id"
+          },
+          "seam": {
+            "type": "string",
+            "description": "Seam label (e.g. ingress->domain)"
+          },
+          "status": {
+            "type": "string",
+            "description": "swapped-real | retained-mock"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Wiring detail: why swapped real or retained mock"
+          }
+        }
+      }
+    },
+    "mocks_retained": {
+      "type": "array",
+      "description": "Seams staying mocked (external boundary or later-slice dep not yet built)",
+      "items": {
+        "type": "object",
+        "required": [
+          "boundary",
+          "reason"
+        ],
+        "properties": {
+          "boundary": {
+            "type": "string",
+            "description": "Why mocked: external | later-slice"
+          },
+          "seam": {
+            "type": "string",
+            "description": "Contract id or seam label"
+          },
+          "what": {
+            "type": "string",
+            "description": "Human description of the mocked component/boundary"
+          },
+          "via": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Contract id if applicable; null for external boundary"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason this seam stays mocked"
+          },
+          "dep": {
+            "type": "string",
+            "description": "Later-slice component id (later-slice mocks)"
+          }
+        }
+      }
+    },
+    "flow_test": {
+      "type": "object",
+      "description": "Flow test results: happy path + failure variant",
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "Flow test file path"
+        },
+        "happy": {
+          "type": "object",
+          "description": "Happy path flow test",
+          "properties": {
+            "test": {
+              "type": "string",
+              "description": "Test function name"
+            },
+            "asserts_ac": {
+              "type": "array",
+              "description": "AC ids asserted by happy path (carried from oracle.json)",
+              "items": {
+                "type": "string"
+              }
+            },
+            "result": {
+              "type": "string",
+              "description": "pass | fail"
+            },
+            "assertions": {
+              "type": "array",
+              "description": "Per-assertion results with trace",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Assertion id"
+                  },
+                  "assert": {
+                    "type": "string",
+                    "description": "Assertion expression"
+                  },
+                  "result": {
+                    "type": "string",
+                    "description": "pass | fail"
+                  },
+                  "trace": {
+                    "type": "string",
+                    "description": "Static trace of why assertion holds"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "failure": {
+          "type": "object",
+          "description": "Failure variant flow test",
+          "properties": {
+            "test": {
+              "type": "string",
+              "description": "Test function name"
+            },
+            "exercises": {
+              "type": "string",
+              "description": "Failure mode exercised (CT*:failure-mode-name)"
+            },
+            "arrives_at": {
+              "type": "string",
+              "description": "Expected failure arrival state (carried from flows.json failure_path)"
+            },
+            "result": {
+              "type": "string",
+              "description": "pass | fail"
+            },
+            "assertions": {
+              "type": "array",
+              "description": "Per-assertion results with trace",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Assertion id"
+                  },
+                  "assert": {
+                    "type": "string",
+                    "description": "Assertion expression"
+                  },
+                  "result": {
+                    "type": "string",
+                    "description": "pass | fail"
+                  },
+                  "trace": {
+                    "type": "string",
+                    "description": "Static trace of why assertion holds"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "description": "Verification status at INTEGRATE stage: flow layer only; contract inherited; acceptance deferred",
+      "properties": {
+        "flow": {
+          "type": "string",
+          "description": "Flow layer result: pass | fail"
+        },
+        "method": {
+          "type": "string",
+          "description": "How flow tests were run: executed | static-trace"
+        },
+        "static_trace_notes": {
+          "type": "string",
+          "description": "Per-assertion static trace when method==static-trace; empty when executed"
+        },
+        "contract": {
+          "type": "string",
+          "description": "Contract layer status: pass-inherited (IMPLEMENT greened it)"
+        },
+        "acceptance": {
+          "type": "string",
+          "description": "Acceptance layer status: not-run (VERIFY-OUTPUT stage)"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "description": "Integration outcome: integrated | blocked"
+    },
+    "escape": {
+      "description": "Null on integrated; on blocked: failure_signature + classification + route"
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Provenance: integrator role + frozen artifact refs built against",
+      "properties": {
+        "integrator_role": {
+          "type": "string",
+          "description": "Role: integrator (distinct from test-author, B4)"
+        },
+        "built_against": {
+          "type": "object",
+          "description": "Frozen artifact paths pinned at integration time",
+          "properties": {
+            "oracle_lock": {
+              "type": "string",
+              "description": "Oracle lock path"
+            },
+            "slice_oracle_lock": {
+              "type": "string",
+              "description": "Slice oracle lock (slice-build)"
+            },
+            "skeleton_integration": {
+              "type": "string",
+              "description": "Inherited frozen skeleton integration (slice-build)"
+            },
+            "skeleton_lock": {
+              "type": "string",
+              "description": "Skeleton lock path"
+            },
+            "adr_lock": {
+              "type": "string",
+              "description": "ADR lock path"
+            },
+            "aprd_lock": {
+              "type": "string",
+              "description": "APRD lock path"
+            },
+            "build_plan": {
+              "type": "string",
+              "description": "Build plan path"
+            },
+            "build_record": {
+              "type": "string",
+              "description": "Build record path"
+            },
+            "slice_build_plan": {
+              "type": "string",
+              "description": "Slice build plan (slice-build)"
+            },
+            "slice_build_record": {
+              "type": "string",
+              "description": "Slice build record (slice-build)"
+            }
+          }
+        }
+      }
+    },
+    "commits": {
+      "type": "array",
+      "description": "Commits made this run; each cites R/AC traces (untraceable wiring = drift)",
+      "items": {
+        "type": "object",
+        "required": [
+          "message",
+          "traces"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Commit message for the integration"
+          },
+          "traces": {
+            "type": "array",
+            "description": "R*/AC* ids satisfied by this commit",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "acceptance_harness": {
+      "type": "object",
+      "description": "Acceptance harness wiring metadata (when applicable) — visible + held_out test dirs",
+      "properties": {
+        "visible_dir": {
+          "type": "string",
+          "description": "Directory containing visible acceptance tests"
+        },
+        "held_out_dir": {
+          "type": "string",
+          "description": "Directory containing held-out acceptance tests (gate-only, B7)"
+        },
+        "conftest": {
+          "type": "string",
+          "description": "Path to conftest.py wiring the acceptance harness"
+        }
+      },
+      "additionalProperties": true
+    },
+    "integration_counts": {
+      "type": "object",
+      "description": "Integration summary counts; walk to count, don't estimate",
+      "properties": {
+        "path_hops": {
+          "type": "integer",
+          "description": "Steps in the flow path"
+        },
+        "hops_swapped_real": {
+          "type": "integer",
+          "description": "Inter-component hops wired real"
+        },
+        "mocks_retained": {
+          "type": "integer",
+          "description": "External + later-slice seams left mocked"
+        },
+        "flow_assertions_passed": {
+          "type": "integer",
+          "description": "Happy + failure variant assertions passed"
+        },
+        "flow_assertions_failed": {
+          "type": "integer",
+          "description": "Flow assertions failed"
+        }
+      }
+    },
+    "slice_build_record_ref": {
+      "type": "string",
+      "description": "Path to slice build-record.json (slice-build)"
+    },
+    "slice_flows_ref": {
+      "type": "string",
+      "description": "Path to slice flows.json (slice-build)"
+    },
+    "slice_oracle_lock_ref": {
+      "type": "string",
+      "description": "Path to slice oracle.lock (slice-build)"
+    },
+    "slice_oracle_ref": {
+      "type": "string",
+      "description": "Path to slice oracle.json (slice-build)"
+    },
+    "slice_contracts_ref": {
+      "type": "string",
+      "description": "Path to slice contracts.json (slice-build)"
+    },
+    "slice_components_ref": {
+      "type": "string",
+      "description": "Path to slice components.json (slice-build)"
+    },
+    "slice_build_plan_ref": {
+      "type": "string",
+      "description": "Path to slice build-plan.json (slice-build)"
+    }
   }
 }
