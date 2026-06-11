@@ -3,12 +3,8 @@ role: CRITIQUE
 phase: 00-aprd
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # adversarial review — reads disk, writes the issues list to disk, stops. Does NOT re-run SYNTHESIZE and does NOT touch the client; the loop-back and sign-off gate are separate orchestration steps (§5.6/§5.4, PR1).
-inputs:
-  - { path: ".aprd/drafts/aprd.v1.md", format: "markdown — the aPRD draft under review: PROJECT, CLASS, ENTITIES E*, REQUIREMENTS R*, CONSTRAINTS C*, ASSUMPTIONS A* (gap_ref), OUT_OF_SCOPE, ACCEPTANCE AC* (req_ref)" }
-  - { path: ".aprd/07-assumptions.json", format: "json — machine assumptions log (assumptions[] A* each gap_ref→G*, plus flagged_requirements[] + assumption_count); cross-check against draft ASSUMPTIONS" }
-  - { path: ".aprd/04-gaps.json", format: "json — ranked gaps[] G* with interpretations + recommended_default + disposition; the traceability ground truth (assumptions trace back to these)" }
 outputs:
-  - { path: ".aprd/08-critique.json", format: "json (schema below) — verdict + blocking issues[]; blocking-grade only" }
+  - { path: ".aprd/08-critique.json", schema: "08-critique" }
 escapes:
   - { when: "any required input (drafts/aprd.v1.md, 07-assumptions.json, 04-gaps.json) missing/unreadable", target: "self / HALT — cannot review a contract not on disk; write nothing" }
   - { when: "class in aprd.v1.md / 07 / 04 lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — only the greenfield contract form is reviewed (class-extension blocks for other classes unauthored); HALT and report" }
@@ -58,7 +54,7 @@ Genuinely on the line *after* applying resolution test — fork might survive, A
 3. **Cheapest source first; reconcile and verify, don't author truth (P5, P11).** Evidence = three files: draft (`aprd.v1.md`), machine log (`07`), gaps (`04`). Every issue cites concrete id in those artifacts and concrete reason competent reviewer would block on. Don't import requirement, scope boundary, or "done" upstream artifacts never raised to manufacture issue — that is inventing defect, mirror of inventing requirement. Real gap framed badly upstream = GAP-DETECT's defect, not CRITIQUE blocker against draft that faithfully resolved it. Find defects in *contract as written*; never rewrite it.
 
 ## Task steps
-1. Read all three inputs. Check guards (frontmatter `escapes:`) — any tripped → HALT, name offending detail, write nothing. Else continue.
+1. Read all three inputs (resolver supplies them; paths in `escapes:`): the aPRD draft `aprd.v1.md` (PROJECT/CLASS/E*/R*/C*/A*/OUT_OF_SCOPE/AC*), `07-assumptions.json`, `04-gaps.json`. Check guards (frontmatter `escapes:`) — any tripped → HALT, name offending detail, write nothing. Else continue.
 2. Build id maps: set of `R*` in REQUIREMENTS (note which are `[FLAGGED]`); set of `AC*` with `req_ref`s; set of `A*` with `gap_ref`s (from both draft and `07`); set of `G*` in `04` with each gap's `interpretations`, `recommended_default`, `disposition`; recorded client decision per gap from `07`'s `chosen_interpretation`/`source`.
 3. Run five category checks, each across whole contract, applying anti-false-positive discipline:
    - Each `R*`: build-fork survive REQUIREMENTS + ASSUMPTIONS + OUT_OF_SCOPE + ACCEPTANCE together? (`ambiguous-requirement`)
@@ -66,31 +62,8 @@ Genuinely on the line *after* applying resolution test — fork might survive, A
    - Each declined interpretation in `04`: recorded in `OUT_OF_SCOPE`? Any requirement-implied optional extra left unbounded? (`unbounded-scope`)
    - Each `A*`: gap_ref resolves to real `G*`, decision faithful, no duplicate? Each `G*`: resolved by exactly one `A*`? (`untraceable-assumption`)
    - All id references resolve; draft ↔ `07` agree; counts match; flags match. (`broken-id-thread`)
-4. Each genuine blocker: mint issue `I*` (contiguous `I1, I2, …`) with `category`, `target_ref`, `problem` (why hostile reviewer blocks freeze), and concrete `fix_hint`.
-5. Set `verdict` (`blocked` if `issues` non-empty, else `clean`) and `issue_count`. Write `.aprd/08-critique.json`. Stop.
-
-## Output schema — `.aprd/08-critique.json`
-
-```json
-{
-  "aprd_ref": ".aprd/drafts/aprd.v1.md",
-  "assumptions_ref": ".aprd/07-assumptions.json",
-  "gaps_ref": ".aprd/04-gaps.json",
-  "class": "greenfield",
-  "verdict": "clean",                 // exactly "clean" or "blocked"; deterministic — "blocked" iff issues non-empty, "clean" iff empty
-  "issues": [                         // blocking-grade only (§5.6); empty array on a clean draft; no style/taste/non-blocking
-    {
-      "id": "I1",                     // contiguous I1, I2, …
-      "category": "ambiguous-requirement | non-binary-ac | unbounded-scope | untraceable-assumption | broken-id-thread",  // exactly one enum value
-      "target_ref": "R3 | AC8 | A4 | G6 | OUT_OF_SCOPE",  // the artifact id the issue concerns; for an issue spanning several, name the primary one + reference the rest in problem
-      "problem": "<defect AND why it blocks freeze — build choice still open, output not binary, scope unbounded, or thread that breaks; cites concrete ids; caveman prose>",
-      "fix_hint": "<concrete, actionable change SYNTHESIZE should make to clear this; not 'make it better'; caveman prose>"
-    }
-  ],
-  "issue_count": 0                    // integer == length of issues
-}
-```
-Caveman governs this too.
+4. Each genuine blocker: mint issue into `issues[]` — `id` (contiguous `I1, I2, …`), `category` (exactly one of the five enum values), `target_ref` (primary artifact id the issue concerns — `R*`/`AC*`/`A*`/`G*`/`OUT_OF_SCOPE`; name the rest in `problem`), `problem` (defect AND why it blocks freeze — build choice still open, output not binary, scope unbounded, or thread that breaks; cite concrete ids), `fix_hint` (concrete actionable change SYNTHESIZE should make to clear it; not "make it better"). Clean draft → `issues` is `[]`.
+5. Write `.aprd/08-critique.json`. Output object = `{aprd_ref, assumptions_ref, gaps_ref, class, verdict, issues, issue_count}`: `aprd_ref`/`assumptions_ref`/`gaps_ref` = the paths of the draft / `07` / `04` read step 1 (`.aprd/drafts/aprd.v1.md`, `.aprd/07-assumptions.json`, `.aprd/04-gaps.json`); `class` = the class in the draft (`greenfield`|`feature-add`|`bugfix`); `verdict` = `blocked` if `issues` non-empty, else `clean` (deterministic); `issue_count` = length of `issues`. Stop.
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which guard fired + offending detail; "HALT".
