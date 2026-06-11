@@ -1,80 +1,59 @@
 {
-  "aprd_ref": ".aprd/aprd.frozen.md",
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
   "adr_lock_ref": ".adr/adr.lock",
+  "diagnosis_ref": ".aprd/diagnosis.json",
   "base_test_specs_ref": ".hld/skeleton/test-specs.json",
-  "base_contracts_ref": ".hld/skeleton/contracts.json",
   "skeleton_lock_ref": ".hld/skeleton.lock",
-  "slice_flows_ref": ".hld/slices/S4/flows.json",
   "slice_contracts_ref": ".hld/slices/S4/contracts.json",
   "skeleton_frozen_verified": true,
-  "class": "greenfield",
-  "mode": "increment",
+  "class": "bugfix",
+  "mode": "bugfix",
   "slice_id": "S4",
   "slice_name": "Create and manage client projects with currency and billable rate",
-  "layer": "design-layer oracle — the slice's flow test (new) + the frozen contract tests its seams inherit (by reference); DISTINCT from the aPRD black-box acceptance oracle (Phase 0). SPECS not code. No build DAG (emitted once in the skeleton, H7).",
-  "flow_tests": [
+  "layer": "design-layer oracle (bugfix) — ONE reproduction test (red→green) + mandatory scoped regression layer (BF4) + frozen touched contract tests inherited by reference. SPECS not code. No new contract/flow/AC, no build DAG.",
+  "reproduction_test": {
+    "id": "T-REPRO-1",
+    "target": "AC11",
+    "asserts": "GET /projects with null-rate project owned by authenticated freelancer → HTTP 200, project row present with rate column rendered as '—', no crash, no 500",
+    "defect_site": "_ProjectManagementAdapter._render (src/freelancer_app/wsgi.py)",
+    "starts_red": true,
+    "flips_green_when": "Null billable_rate renders as blank placeholder em-dash ('—') in rate column; the row renders, no numeric format applied to null value",
+    "traces": ["R11", "AC11"],
+    "baseline_ref": "AC6"
+  },
+  "class_ext_specs": [
     {
-      "id": "T-F4",
-      "target": "F4",
-      "slice": "S4",
-      "path": ["C6", "C3", "C2", "C1"],
-      "via": ["CT9", "CT3", "CT2"],
-      "happy_path": {
-        "assertion": "F4 path traverses CT9 (Web Ingress → Project Management dispatch), CT3 (Project Management → Identity & Auth session resolve), and CT2 (Project Management → Data Store project record persist/retrieve), arriving at acceptance oracle AC6.",
-        "asserts_ac": ["AC6"]
-      },
-      "failure_path": {
-        "exercises": "CT3:no-valid-session",
-        "expected_terminal_state": "Identity & Auth returns no authenticated identity; Project Management cannot determine ownership and rejects the request as unauthorized; Web Ingress returns an appropriate HTTP error response (e.g. redirect to sign-in)"
-      },
-      "traces": ["R4", "R6", "R9", "R10", "AC6"]
+      "layer": "regression",
+      "scope": "touched-surface + seams",
+      "asserts": ["AC6"],
+      "source_suites": [".build/slices/S4/oracle/"],
+      "basis": "REGRESSION_GUARD AC6 guards rated-project rendering + project CRUD; scope limited to BLAST_RADIUS symbol _ProjectManagementAdapter._render, NOT full inherited suite (Risk R4)"
     }
   ],
   "inherited_contract_tests": [
-    {
-      "id": "T-CT2",
-      "target": "CT2",
-      "between": ["C3", "C1"],
-      "contract_kind": "shared_data",
-      "source_ref": ".hld/skeleton/test-specs.json"
-    },
-    {
-      "id": "T-CT3",
-      "target": "CT3",
-      "between": ["C3", "C2"],
-      "contract_kind": "sync_api",
-      "source_ref": ".hld/skeleton/test-specs.json"
-    },
-    {
-      "id": "T-CT9",
-      "target": "CT9",
-      "between": ["C6", "C3"],
-      "contract_kind": "sync_api",
-      "source_ref": ".hld/skeleton/test-specs.json"
-    }
+    { "id": "T-CT9", "target": "CT9", "between": ["C6", "C3"], "contract_kind": "sync_api", "source_ref": ".hld/skeleton/test-specs.json" }
   ],
-  "new_contract_tests": [],
   "skeleton_fidelity": {
-    "inherited_contract_tests": ["T-CT2", "T-CT3", "T-CT9"],
+    "inherited_contract_tests": ["T-CT9"],
     "re_authored_contract_tests": [],
     "re_tested_flows": [],
     "build_dag_re_emitted": false,
     "verdict": "inherits-frozen-oracle"
   },
   "coverage": {
-    "touched_contracts": ["CT2", "CT3", "CT9"],
-    "contracts_covered": ["CT2", "CT3", "CT9"],
+    "touched_contracts": ["CT9"],
+    "contracts_covered": ["CT9"],
     "contract_orphans": [],
-    "slice_flow": "F4",
-    "flow_tested": "F4",
-    "asserted_acs": ["AC6"]
+    "reproduction_asserts": ["AC11"],
+    "regression_asserts": ["AC6"],
+    "defect_site": "_ProjectManagementAdapter._render"
   },
   "structural_defects": [],
   "frame_conflicts": [],
   "aprd_defects": [],
   "test_counts": {
-    "flow_tests": 1,
-    "inherited_contract_tests": 3,
-    "new_contract_tests": 0
+    "reproduction_tests": 1,
+    "regression_layers": 1,
+    "inherited_contract_tests": 1
   }
 }

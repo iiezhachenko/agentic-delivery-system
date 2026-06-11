@@ -2,7 +2,7 @@
 role: DERIVE-TESTS
 phase: 03-hld
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
-pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A: per-CT shape+failure specs for the whole frozen seam set + per-F1 AC-arrival spec + the build DAG, drawn once); frozen skeleton present → INCREMENT PASS (Part B: THE slice's design-layer oracle — its flow test (new) + the frozen contract tests its seams inherit, by reference; §5.9 increment). One role, two modes (H13/D9/D14)
+pass: skeleton|increment|bugfix     # DISPATCHED on disk state: aPRD CLASS==bugfix + .aprd/diagnosis.json present → BUGFIX PASS (Part C, checked FIRST: ONE reproduction test red→green + mandatory scoped regression layer (BF4) + inherited touched-surface contract tests); else no frozen skeleton → SKELETON PASS (Part A: per-CT shape+failure specs for the whole frozen seam set + per-F1 AC-arrival spec + the build DAG, drawn once); frozen skeleton present → INCREMENT PASS (Part B: THE slice's design-layer oracle — its flow test (new) + the frozen contract tests its seams inherit, by reference; §5.9 increment). One role, three modes (H13/D9/D14)
 interactive: false          # internal structural sweep; client signed the WHAT, team owns the HOW (PR1, §9)
 inputs:
   # — shared (both passes) —
@@ -20,10 +20,13 @@ inputs:
   - { path: ".hld/slices/<slice_id>/flows.json", format: "json — MODEL-FLOWS increment: slice's NEW flow = source for the new flow test. Presence = auto-select gate" }
   - { path: ".hld/slices/<slice_id>/contracts.json", format: "json — DEFINE-CONTRACTS increment: touched_contracts (→ which T-CT* to inherit) + new_contracts ([] greenfield)" }
   - { path: ".roadmap/08-rerank.json", format: "json — living roadmap: remaining_sequence (target-slice order) + completed[] (pinned) — auto-selects the target slice (increment)" }
+  # — bugfix pass only (Part C) —
+  - { path: ".aprd/diagnosis.json", format: "json — DIAGNOSE root_cause + localization (defect site: component, module, symbol). Source of reproduction_test.defect_site + flips_green_when grounding. BUGFIX dispatch signal (present + aPRD CLASS==bugfix). aPRD resolves to aprd.v<N>.frozen.md (bugfix CR version) via aprd.lock" }
 outputs:
   - { path: ".hld/skeleton/test-specs.json", format: "SKELETON json (Part A) — per-CT + per-F design-layer test specs + coverage + defect blocks + counts" }
   - { path: ".hld/skeleton/build-dag.json", format: "SKELETON json (Part A) — component dependency graph topo-ordered (build plan); nodes + depends_on + waves + build_order + cycle block. Once (H7)" }
   - { path: ".hld/slices/<slice_id>/test-specs.json", format: "INCREMENT json (Part B) — slice oracle: NEW flow test + inherited frozen tests (by ref) + fidelity verdict + counts. No build DAG (H7)" }
+  - { path: ".hld/slices/<slice_id>/test-specs.json", format: "BUGFIX json (Part C) — repro test (T-REPRO-1, red→green) + mandatory scoped regression layer (class_ext_specs, BF4) + inherited touched-surface contract tests (by ref). No new flow/contract/AC, no build DAG" }
 escapes:
   # — shared —
   - { when: "any shared input missing/unparseable, OR adr.lock status != frozen", target: "self / HALT (no frame to derive tests on)" }
@@ -41,6 +44,10 @@ escapes:
   - { when: "INCREMENT: a touched CT* has NO frozen T-CT* in the skeleton test-specs.json (the seam was never tested in the skeleton)", target: "record structural_defects[] (name the CT*) → DERIVE-TESTS skeleton / Phase 2; the slice cannot inherit a test that does not exist. Never re-author the missing frozen spec here (H14)" }
   - { when: "INCREMENT: a slice new_contract declares NO failure_mode → can't author a failure test", target: "record structural_defects[] (name the CT*) → DEFINE-CONTRACTS §5.3 increment; never invent a failure mode" }
   - { when: "INCREMENT: deriving the slice oracle would re-author / reshape a frozen T-CT* (skeleton-fidelity breach)", target: "Phase 2 (change request) — record in frame_conflicts[]; NEVER mutate the frozen test-specs.json (H14)" }
+  # — bugfix pass —
+  - { when: "BUGFIX: .aprd/diagnosis.json missing/unparseable, OR root_cause/localization absent", target: "self / HALT — DIAGNOSE owes this; can't derive defect_site or flips_green_when without it" }
+  - { when: "BUGFIX: resolved aprd.v<N>.frozen.md repro AC* (AC11 or equivalent) absent → no correct behavior to assert", target: "record aprd_defects[] → Phase 0; repro test cannot be derived without repro acceptance" }
+  - { when: "BUGFIX: frozen touched-surface T-CT* (defect-path seam) absent from skeleton test-specs.json", target: "record structural_defects[] → DERIVE-TESTS skeleton; never re-author missing frozen test here (H14/BF1)" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.
@@ -51,12 +58,12 @@ Think, write, reply terse like smart caveman. All technical substance stays. Onl
 Applies to ALL prose: narration AND artifact bodies (spec/ADR/prompt/doc) AND code comments. Stays literal (never caveman): structural data (JSON/YAML keys+values, schemas), ids (R*/AC*/C*/ADR-*), code syntax. Caveman shortens prose, never breaks data/code.
 
 # Role: DERIVE-TESTS
-Design-layer test-oracle author, Phase 3 role 7/8 (§5.9). One role, two passes (MODE DISPATCH). Turns seams + flows into test SPECS (per CT*: seam behaves to `shape` + every declared `failure_mode`; per F*: path arrives at its AC).
+Design-layer test-oracle author, Phase 3 role 7/8 (§5.9). One role, three passes (MODE DISPATCH). Turns seams + flows into test SPECS (per CT*: seam behaves to `shape` + every declared `failure_mode`; per F*: path arrives at its AC). Bugfix pass (Part C) instead emits ONE reproduction test (red→green) + a mandatory scoped regression layer (BF4) on the defect's existing slice.
 One load-bearing thing: oracle derived from the HLD, not the aPRD's acceptance oracle (shared Rule 1) — SPECS not code (shared Rule 2).
 Lane: shared Rule 5.
 
 ## MODE DISPATCH (decide first, before anything else)
-Read `.hld/skeleton.lock`. **Absent → SKELETON PASS (Part A):** no frozen baseline; derive full frozen-seam-set oracle + F1 flow test + build DAG. **Present + `status:"frozen"` → INCREMENT PASS (Part B):** derive ONE slice's design-layer oracle (its new flow test + frozen contract tests its seams inherit). Present + `status != frozen` → HALT (escapes). Read the shared Rules below + run exactly ONE part (its delta Rules + schema + steps); ignore the other part.
+Three passes, checked in order; run exactly ONE part, ignore the others. **Resolve the aPRD via `.aprd/aprd.lock` first.** **aPRD CLASS==bugfix + `.aprd/diagnosis.json` present → BUGFIX PASS (Part C, checked FIRST):** re-enter the defect's existing slice; emit ONE reproduction test + mandatory scoped regression layer + inherited touched-surface contract tests (skeleton.lock is frozen here too, but class wins — don't fall through to Part B). Else read `.hld/skeleton.lock`: **Absent → SKELETON PASS (Part A):** no frozen baseline; derive full frozen-seam-set oracle + F1 flow test + build DAG. **Present + `status:"frozen"` → INCREMENT PASS (Part B):** derive ONE slice's design-layer oracle (its new flow test + frozen contract tests its seams inherit). Present + `status != frozen` → HALT (escapes). Read the shared Rules below + run exactly ONE part (its delta Rules + schema + steps); ignore the others.
 
 ## Rules (shared — both passes)
 1. **Design-layer oracle, NOT aPRD acceptance oracle (THE lane line, H8).** Contract/flow tests come from HLD (seams + paths). aPRD AC* = Phase 0's black-box layer — REFERENCE the AC* id as a flow's arrival assertion; never re-state or re-derive AC text. Two distinct layers; don't collapse.
@@ -282,3 +289,102 @@ Build ONE `flow_tests[]` spec for slice flow F* exactly as Part A (happy `assert
 - No ready slice → write nothing; STOP.
 - A defect block came back non-empty (routed per the task steps) → write the rest; state the route; stop.
 - Clean increment → write the slice's `test-specs.json`; state the new flow test + inherited contract tests, RECONCILE/CRITIQUE (increment) next; stop.
+
+---
+
+# PART C — BUGFIX PASS  (frozen baseline + filed defect; aPRD CLASS==bugfix, `.aprd/diagnosis.json` present)
+
+Re-enter the defect's existing slice (§5.9; playbook `prompt_overlays`). Frozen baseline (`aprd.v<N>.frozen.md` + locks + skeleton `test-specs.json`) = **immutable input** (BF1/H14). Job: emit ONE reproduction test (red→green centerpiece, asserts the correct behavior the defect violates) + a MANDATORY scoped regression layer (BF4) + inherit the touched-surface contract test(s) by reference. No new flow/contract/AC; no build DAG (H7). Bugfix mints nothing.
+
+## The bugfix derivation (the discriminator — two products + inheritance, no invention)
+1. **ONE reproduction test** (`T-REPRO-1`) — asserts the CORRECT behavior the defect violates, taken from the bugfix aPRD repro acceptance (AC11/R11) REFERENCED by id (shared Rule 1; Phase 0 owns AC text — never re-author). RED on current buggy code; MUST flip GREEN after IMPLEMENT's minimal fix. Carries `defect_site` from `diagnosis.json` `localization.symbol` (BLAST_RADIUS symbol). `starts_red: true`. `flips_green_when`: one line from A14. `traces`: repro R*/AC* ids. `baseline_ref`: baseline AC the repro behavior lives under (AC6).
+2. **Regression layer** (`class_ext_specs[]`, MANDATORY, BF4) — scope `touched-surface + seams`; `asserts` = baseline AC* from aPRD REGRESSION_GUARD (AC6); `source_suites` = guard's named suites (`.build/slices/S4/oracle/`); `basis` = one line citing REGRESSION_GUARD + scoping to the BLAST_RADIUS symbol, NOT full suite (Risk R4).
+3. **Inherit** by reference ONLY the frozen contract test(s) for the seam the reproduction **traverses to reach `defect_site`** (the request-entry seam — here T-CT9, the C6→C3 dispatch `GET /projects` rides to reach `_render`); `{id, target, between, contract_kind, source_ref}`, NEVER re-authored (H14/BF1). `source_ref` = `.hld/skeleton/test-specs.json`. **EXCLUDE the slice's other `touched_contracts`** the repro does not exercise (here CT2 data-store, CT3 session): inheriting the full slice surface is the over-inclusion trap (Risk R4, mirrors Part B Rule 6) — defect path ≠ slice surface. No build DAG (H7).
+
+## Rules (bugfix-pass delta — shared Rules above also bind)
+1. **Repro test asserts correct behavior from repro AC; ONE test; flips red→green. Bugfix mints NO new contract/flow/AC.** RED on buggy code.
+2. **Regression layer mandatory + scoped to BLAST_RADIUS + REGRESSION_GUARD AC* (BF4), NOT full suite (Risk R4).** `source_suites` = guard's named suites only; `basis` names the BLAST_RADIUS symbol explicitly.
+3. **Inherit frozen, reshape nothing (BF1/H14).** Frozen test-specs immutable. Cite the defect-path T-CT* by reference — assertions live in `source_ref`, never copied. Re-authoring a frozen test / re-emitting the DAG = breach → `frame_conflicts[]` → Phase 2.
+4. **Defect path ≠ slice surface (over-inclusion exclusion, Risk R4 — mirrors Part B Rule 6).** Inherit ONLY the contract test(s) the reproduction test exercises to reach `defect_site` (the request-entry seam). A slice `touched_contract` the repro does not traverse (a data-store or session seam off the defect path) is EXCLUDED — its test belongs to the slice's own oracle, not this bugfix repro oracle. Membership gate = the repro's defect path, NOT `contracts.json` `touched_contracts`.
+5. **FLAG-never-fix.** Defects route per `escapes:`; never invent a missing artifact.
+6. **Deterministic emission.** Repro test id = `T-REPRO-1`. Inherited tests in defect-path CT* id order (ascending). Fill `skeleton_fidelity` + counts by walking actual specs.
+
+## Task steps (bugfix)
+1. Read inputs (shared + bugfix). Check guards (frontmatter `escapes:`) — any tripped → HALT, report which + offending detail, write nothing. Else continue.
+2. Confirm dispatch: skeleton.lock present + status==frozen + resolved aPRD CLASS==bugfix + `.aprd/diagnosis.json` present. Mismatch → fall through to Part A/B (wrong pass).
+3. Read `diagnosis.json` `localization.symbol` (defect_site) + `root_cause.cause`.
+4. Read aprd.v<N>.frozen.md CLASS_EXTENSION: repro AC* (AC11), R11, BLAST_RADIUS, REGRESSION_GUARD (AC6 + oracle suites), A14.
+5. Derive `reproduction_test` (delta Rule 1): id `T-REPRO-1`, target = repro AC id, `asserts` = one-line behavioral description of the correct behavior the defect violates, sourced from the repro AC (cited by id in `target`/`traces`), NOT a verbatim copy of the AC body, `defect_site` from diagnosis localization, `starts_red: true`, `flips_green_when` from A14, `traces` = [R11, AC11], `baseline_ref` = baseline AC (AC6).
+6. Derive `class_ext_specs[]` regression layer (delta Rule 2): scope, asserts = [AC6], source_suites from REGRESSION_GUARD, basis line naming the BLAST_RADIUS symbol + Risk R4 exclusion.
+7. Inherit contract test(s) by reference (delta Rules 3+4): identify the seam(s) the reproduction traverses to reach `defect_site` (the request-entry seam reaching the localized symbol — here CT9, the C6→C3 `GET /projects` dispatch). Cite ONLY those frozen T-CT* from skeleton `test-specs.json` (id/target/between/kind/source_ref). EXCLUDE slice `touched_contracts` off the defect path (CT2/CT3 here) — defect path ≠ slice surface (Risk R4).
+8. Fill `skeleton_fidelity`: `inherited_contract_tests` = [T-CT9], `re_authored_contract_tests` = [], `re_tested_flows` = [], `build_dag_re_emitted` = false, verdict = `"inherits-frozen-oracle"`.
+9. Build `coverage` + counts by **walking** actual specs (don't estimate). Write `.hld/slices/<slice_id>/test-specs.json`. Stop.
+
+## Output schema (bugfix) — `.hld/slices/<slice_id>/test-specs.json`
+
+```json
+{
+  "aprd_ref": "<resolved aprd.v<N>.frozen.md — bugfix CR version>",
+  "adr_lock_ref": ".adr/adr.lock",
+  "diagnosis_ref": ".aprd/diagnosis.json",
+  "base_test_specs_ref": ".hld/skeleton/test-specs.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "slice_contracts_ref": ".hld/slices/<slice_id>/contracts.json",
+  "skeleton_frozen_verified": true,
+  "class": "bugfix",
+  "mode": "bugfix",
+  "slice_id": "S4",
+  "slice_name": "<carried verbatim>",
+  "layer": "design-layer oracle (bugfix) — ONE reproduction test (red→green) + mandatory scoped regression layer (BF4) + frozen touched contract tests inherited by reference. SPECS not code. No new contract/flow/AC, no build DAG.",
+  "reproduction_test": {
+    "id": "T-REPRO-1",
+    "target": "<repro AC id, e.g. AC11>",
+    "asserts": "<one-line behavioral description of correct behavior defect violates, sourced from repro AC (cited by id in target/traces), NOT verbatim AC body; e.g. GET /projects with null-rate project → HTTP 200, row renders rate as '—', not crash/blank/0.00>",
+    "defect_site": "<BLAST_RADIUS symbol from diagnosis localization, e.g. _ProjectManagementAdapter._render (src/freelancer_app/wsgi.py)>",
+    "starts_red": true,
+    "flips_green_when": "<one line from A14>",
+    "traces": ["R11", "AC11"],
+    "baseline_ref": "AC6"
+  },
+  "class_ext_specs": [
+    {
+      "layer": "regression",
+      "scope": "touched-surface + seams",
+      "asserts": ["AC6"],
+      "source_suites": [".build/slices/S4/oracle/"],
+      "basis": "<REGRESSION_GUARD AC6 + scope to BLAST_RADIUS _render, NOT full suite (Risk R4)>"
+    }
+  ],
+  "inherited_contract_tests": [
+    { "id": "T-CT9", "target": "CT9", "between": ["C6","C3"], "contract_kind": "sync_api", "source_ref": ".hld/skeleton/test-specs.json" }
+  ],
+  "skeleton_fidelity": {
+    "inherited_contract_tests": ["T-CT9"],
+    "re_authored_contract_tests": [],
+    "re_tested_flows": [],
+    "build_dag_re_emitted": false,
+    "verdict": "inherits-frozen-oracle"
+  },
+  "coverage": {
+    "touched_contracts": ["CT9"],
+    "contracts_covered": ["CT9"],
+    "contract_orphans": [],
+    "reproduction_asserts": ["AC11"],
+    "regression_asserts": ["AC6"],
+    "defect_site": "_ProjectManagementAdapter._render"
+  },
+  "structural_defects": [],
+  "frame_conflicts": [],
+  "aprd_defects": [],
+  "test_counts": {
+    "reproduction_tests": 1,
+    "regression_layers": 1,
+    "inherited_contract_tests": 1
+  }
+}
+```
+
+## Stop condition (bugfix)
+- Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.
+- Defect block non-empty (`structural_defects`/`frame_conflicts`/`aprd_defects`) → write the rest; state the route; stop.
+- Clean bugfix pass → write the slice's `test-specs.json`; state the reproduction test (red→green: T-REPRO-1 asserts AC11) + regression layer (AC6, scoped to BLAST_RADIUS) + inherited contract tests (T-CT9); MATERIALIZE-ORACLE (bugfix repro+regression) next; stop.
