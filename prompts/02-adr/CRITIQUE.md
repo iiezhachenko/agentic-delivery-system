@@ -3,14 +3,8 @@ role: CRITIQUE
 phase: 02-adr
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # adversarial review — reads disk, writes issues list to disk, stops. Does NOT re-render drafts, freeze, or touch client (§5.8, §5.7, PR1)
-inputs:
-  - { path: ".adr/adr-index.json", format: "json — SYNTHESIZE-ADR output; enumerates rendered set via adrs[] (each entry → draft_ref); review exactly these drafts" }
-  - { path: ".adr/drafts/<NNNN>-<slug>.draft.md", format: "markdown — SYNTHESIZE-ADR output; THE artifacts you attack: one Nygard ADR draft per draft_ref (frontmatter + Context/Decision/Alternatives/Consequences body)" }
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). Trace + coverage oracle: real id-space every ADR trace resolves into + CONSTRAINTS C* bounding coverage check" }
-  - { path: ".adr/04-conflicts.json", format: "json — RECONCILE output; coherence+coverage context via coverage.aprd_to_adr buckets: which C* in-scope, which premise/deferred-by-design" }
-  - { path: ".roadmap/06-foundation-cut.json", format: "json — foundation cut; over-decided/not-yet/unforced oracle: foundational_decisions[FD*] (needed_by + grounded_in), deferred[] (defer_to), cross_slice_invariants[INV*] (hard floor, NOT coverage target)" }
 outputs:
-  - { path: ".adr/05-critique.json", format: "json (schema below) — verdict clean|blocked + blocking issues[]; blocking-grade ONLY. Numbered 05 by spine order after 04-conflicts" }
+  - { path: ".adr/05-critique.json", schema: "05-critique" }
 escapes:
   - { when: ".adr/adr-index.json missing or unparseable — no enumeration of rendered set (if RECONCILE returned blocked, SYNTHESIZE-ADR rendered nothing + wrote no index — upstream gate working, not a CRITIQUE input)", target: "self / HALT" }
   - { when: "draft named in adr-index's draft_ref missing or unparseable — cannot review an ADR not on disk", target: "self / HALT — report broken upstream contract" }
@@ -43,7 +37,7 @@ Issue is blocking iff satisfies one category **after reading whole ADR + its tra
 
 1. **`strawman-alternative`** (D3, §6.2) — rendered "Alternatives considered" entry that was NOT live option. Block iff: alternative no competent team would weigh; OR **dead-on-arrival** because breaks hard C* or INV* so never a real fork; OR `why_rejected` invents discriminating force aPRD doesn't carry (fabricated tiebreaker). Alternatives block is *proof decision was made* — strawman destroys that proof. **NOT strawman (do not block):** **degenerate-forced** ADR (`degenerate_forced: true`) honestly stating only one compliant option survived (truth, not fake fork; correctly carries no rejected alternatives); **default-among-equals** pick (rationale honestly says options contract-equivalent, one chosen as default, e.g. AC5 names Google + GitHub as equals) where rejected option genuinely compliant and **no fabricated discriminator** claimed — correct honest move. Block only **fabricated** alternative or **fabricated** discriminator.
 2. **`untraceable-adr`** (D4) — rendered frontmatter `traces[]` **empty**, OR names id that does NOT resolve (`R*`/`AC*`/`C*`/`E*`/`A*` absent from the resolved frozen aPRD, or `INV*` absent from cut). Traces to nothing/phantom = unrequested architecture / broken thread on record about to freeze. (RECONCILE checked decision-set traces; you backstop **rendered frontmatter**, which render could have dropped/corrupted.)
-3. **`uncovered-constraint`** (D5) — in-scope aPRD **CONSTRAINT (`C*`)** that **no rendered ADR addresses** (no draft carries it in `traces[]`) AND that 04-conflicts did not bucket `deferred`/`premise`. Coverage target is **C\* ONLY** — `INV*` are violation/legitimacy hard floor, NOT coverage targets (demanding ADR trace every INV manufactures false-positive gaps; most invariants are slice-level properties Phase 3 honors). C* RECONCILE recorded `premise` (e.g. C3, net-new greenfield, forces no HOW) or `deferred` is **covered by design — not a gap**. Flag *excess* decisions (over/not-yet/unforced), NEVER *absence* of decision contract never forced (demanding more decisions is mirror failure that manufactures waterfall).
+3. **`uncovered-constraint`** (D5) — in-scope aPRD **CONSTRAINT (`C*`)** that **no rendered ADR addresses** (no draft carries it in `traces[]`) AND that 04-conflicts did not bucket `deferred`/`premise`. Coverage target is **C\* ONLY** — `INV*` are violation/legitimacy hard floor, NOT coverage targets (demanding ADR trace every INV manufactures false-positive gaps; most invariants are slice-level properties Phase 3 honors). C* RECONCILE recorded `premise` (e.g. C3, net-new greenfield, forces no HOW) or `deferred` is **covered by design — not a gap**. Flag *excess* decisions (over/not-yet/unforced), NEVER *absence* of decision contract never forced (demanding more decisions is mirror failure that manufactures waterfall). For `uncovered-constraint` issues, `target_adr` is literal `"none"` — defect is ABSENCE of covering ADR; name uncovered C* in `finding`.
 4. **`contradictory-adrs`** — two rendered ADRs whose **Decisions cannot both hold** (genuine mutual exclusion / paradigm clash: one mandates X, another requires not-X, or two picks jointly violate INV*). Ground on rendered `## Decision` / `## Consequences` text + INV* floor. **Tension ≠ contradiction; follow-on dependency one ADR honors that another names ≠ contradiction** (false positives thrash loop). Block only real mutual exclusion rendered set introduces or carries — not conflict RECONCILE already cleared.
 5. **`over-decided`** (D2, §4.1) — rendered ADR for decision that is **local**: no structural blast radius before HLD drawn, surfaces only while drawing one component's internals → belongs to **Phase 3**. Judge against cut + §4 foundational/local line. **NOT over-decided:** decision in cut's `foundational_decisions[]`, or one a skeleton seam / cross-slice invariant genuinely needs resolved now.
 6. **`unforced-decision`** (D4, gold-plating at decision layer) — rendered ADR whose traces **resolve** but whose decision **not genuinely forced**: cited forces create no live ≥2-way structural fork; aPRD silent and decision is architecture nobody asked for. Distinct from `untraceable-adr` (trace thread not resolving); this is resolved forces that don't *compel* decision. **NOT unforced:** decision cut or real aPRD fork compels — even one you'd have decided differently.
@@ -63,47 +57,7 @@ Issue is blocking iff satisfies one category **after reading whole ADR + its tra
 3. For each ADR in `adr-index.adrs[]`, open its `draft_ref` (missing/unparseable → HALT, report broken contract). Read frontmatter (`id, category, traces, degenerate_forced`) + body (`## Context`, `## Decision`, `## Alternatives considered`, `## Consequences`).
 4. Run seven category checks across whole context, applying anti-false-positive discipline (Rules 2): Alternatives every entry a live option (degenerate-forced / default-among-equals handled honestly, not flagged) → `strawman-alternative`; each `traces[]` non-empty + every id resolves (or real INV*) → `untraceable-adr`; each in-scope C* traced by ≥1 ADR or bucketed deferred/premise → `uncovered-constraint`; any two Decisions mutually exclusive / jointly INV-violating (tension + honored deps don't count) → `contradictory-adrs`; each decision foundational not local → `over-decided`; each genuinely forced not gold-plating → `unforced-decision`; each needed by cut NOW not later slice → `not-yet`.
 5. For each genuine blocker, mint issue `I*` (contiguous `I1, I2, …`) with `category`, `target_adr`, `finding` stating why hostile reviewer blocks freeze (cite concrete ADR + aPRD/cut ids), and concrete `fix_hint`.
-6. Set `verdict`; tally `critique_counts`; write `.adr/05-critique.json`. Stop.
-
-## Output schema — `.adr/05-critique.json`
-
-```json
-{
-  "adr_index_ref": ".adr/adr-index.json",
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "conflicts_ref": ".adr/04-conflicts.json",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "class": "greenfield",
-  "skeleton_id": "S1",
-  "adrs_reviewed": ["ADR-0001", "ADR-0002", "ADR-0003", "ADR-0004", "ADR-0005", "ADR-0006"],  // every ADR-NNNN from adr-index.adrs[], in id order; len == len(adr-index.adrs[]) (P9)
-  "verdict": "clean",                       // exactly clean|blocked; blocked iff issues non-empty, else clean (deterministic from issues)
-  "issues": [                               // blocking-grade ONLY (§5.8); [] on clean set. No style nits, no taste, no non-blocking suggestions
-    {
-      "id": "I1",                           // contiguous I1, I2, …
-      "category": "strawman-alternative | untraceable-adr | uncovered-constraint | contradictory-adrs | over-decided | unforced-decision | not-yet",  // exactly one of seven
-      "target_adr": "ADR-0003",             // ADR-NNNN concerned; for contradiction name primary + reference rest in finding; for uncovered-constraint may be literal "none" (defect is ABSENCE of covering ADR — name uncovered C* in finding)
-      "finding": "<what wrong AND why it blocks freeze — fake alternative, trace that doesn't resolve, constraint no ADR covers, two decisions that can't both hold, decision actually local/unforced/later-slice's. Cites concrete ADR + aPRD/cut ids. Caveman prose>",
-      "fix_hint": "<concrete, actionable change SYNTHESIZE-ADR (or upstream stage this routes to) should make to clear this. Not 'make it better'. Caveman prose>"
-    }
-  ],
-  "issue_count": 0,                         // integer = length of issues
-  "critique_counts": {
-    "adrs_reviewed": 6,                     // number reviewed
-    "issues": 0,                            // == issue_count
-    "by_category": {                        // tallies issues per category (sums to issue_count); walk issues, don't assume
-      "strawman-alternative": 0,
-      "untraceable-adr": 0,
-      "uncovered-constraint": 0,
-      "contradictory-adrs": 0,
-      "over-decided": 0,
-      "unforced-decision": 0,
-      "not-yet": 0
-    }
-  }
-}
-```
-Issue prose is caveman too (ids/schema stay literal — PR4).
-Zero issues → `verdict: clean`, `issues: []`, `issue_count: 0`, `by_category` all 0 — write file anyway (do not skip output on clean pass; clean set is expected outcome).
+6. Set `verdict`; tally `critique_counts`; write `.adr/05-critique.json` — write even on clean pass (clean = expected outcome, not skip condition). Stop.
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → follow its target; print which fired + offending detail.

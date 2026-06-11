@@ -4,24 +4,9 @@ phase: 03-hld
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A: the walking-skeleton flow F1, drawn once, touching every foundational seam); frozen skeleton present → INCREMENT PASS (Part B: THE slice IS a flow F* — its vertical path composed against the frozen skeleton contracts, incl. failure variant; §5.7 increment centerpiece). One role, two modes (H13/D9/D14)
 interactive: false          # internal validation sweep; client signed the WHAT, team owns the HOW (PR1, §9)
-inputs:
-  # — shared (both passes) —
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). R*/AC* the flow arrives at; AC = the flow's arrival oracle" }
-  - { path: ".adr/adr.lock", format: "json — frozen gate (status==frozen); frame the flow runs inside" }
-  - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — frame ADRs; a flow that can't compose may reveal a bad decision → cite the ADR-* it breaks" }
-  - { path: ".roadmap/06-foundation-cut.json", format: "json — cross_slice_invariants INV* the flow must honor; skeleton_seams[] + skeleton_id (skeleton pass only)" }
-  # — skeleton pass —
-  - { path: ".hld/skeleton/components.json", format: "json — SKELETON: components[].realizes_seam + coverage.seam_realization = which C* realizes each foundational seam; edges[] = the graph the path walks. Defect blocks gate the run" }
-  - { path: ".hld/skeleton/contracts.json", format: "json (SKELETON, PRIMARY) — seams the path composes against; each hop maps to one CT*" }
-  # — increment pass only —
-  - { path: ".hld/skeleton.lock", format: "json — DISPATCH signal + freeze gate: status==frozen → INCREMENT PASS composes the slice flow against this baseline (H14)" }
-  - { path: ".hld/slices/<slice_id>/components.json", format: "json — DERIVE-COMPONENTS increment: introduced_components[] + touched_components[] (the boxes the slice path walks); membership gate (the over-inclusion guard)" }
-  - { path: ".hld/slices/<slice_id>/contracts.json", format: "json — DEFINE-CONTRACTS increment: FROZEN seams (by reference) each slice hop composes against. Presence = auto-select gate" }
-  - { path: ".roadmap/08-rerank.json", format: "json — living roadmap: remaining_sequence (target-slice order) + completed[] (pinned) — auto-selects the target slice (increment)" }
-  - { path: ".roadmap/02-slices.json", format: "json — slices[].requirements = the R* the target slice realizes (the flow's trace set + AC oracle); slice name (increment)" }
 outputs:
-  - { path: ".hld/skeleton/flows.json", format: "SKELETON json (Part A) — walking-skeleton flow F1 + seam_coverage + compose verdict + defect blocks + counts" }
-  - { path: ".hld/slices/<slice_id>/flows.json", format: "INCREMENT json (Part B) — THE slice flow F* composed against frozen contracts + fidelity verdict + defect blocks + counts" }
+  - { path: ".hld/skeleton/flows.json", schema: "flows" }
+  - { path: ".hld/slices/<slice_id>/flows.json", schema: "flows" }
 escapes:
   # — shared —
   - { when: "any shared input missing/unparseable, OR adr.lock status != frozen", target: "self / HALT (no frame to walk)" }
@@ -84,7 +69,7 @@ Construct ONE flow, walking skeleton (`skeleton_id` from cut, S1):
 3. **Every foundational seam crossed exactly once.** Use `skeleton_seams[]` as checklist; seam not crossed = skeleton not true end-to-end proof → defect. Don't add seams cut doesn't name; don't drop one it does.
 4. **AC* = arrival oracle (§4.1).** Each flow `traces` R*/AC* it arrives at, verbatim ids; happy path terminus = AC skeleton seams ground in. No fabricated AC.
 5. **FLAG-never-fix, two escape targets (H10).** Flow won't compose → name structural defect + route (missing CT* → DEFINE-CONTRACTS; bad decision → Phase 2; bad WHAT → Phase 0). Never patch contract, component, ADR, or aPRD in place.
-6. **Deterministic emission.** `seam_coverage[]` strictly in `skeleton_seams[]` array order (cut's order, NOT path-traversal order — coverage checklist against cut, so re-run stable regardless of path topology); `path`/`steps` in traversal order (ingress→…→persistence); F* ids monotonic from `F1` (skeleton pass emits exactly one flow).
+6. **Deterministic emission.** `seam_coverage[]` strictly in `skeleton_seams[]` array order (cut's order, NOT path-traversal order — coverage checklist against cut, so re-run stable regardless of path topology); `path`/`steps` in traversal order (ingress→…→persistence); F* ids monotonic from `F1` (skeleton pass emits exactly one flow). `flow_counts` = `{flows, foundational_seams (== `skeleton_seams[]` length), seams_crossed (== `seam_coverage[]` entries crossed==true), seams_uncovered, structural_defects (== `structural_defects[]` length)}`; closure check `seams_crossed + seams_uncovered == foundational_seams`.
 
 ## Task steps
 1. Read all inputs. Check guards (frontmatter `escapes:`) — any tripped → HALT, report which + offending detail, write nothing. Else continue.
@@ -93,72 +78,7 @@ Construct ONE flow, walking skeleton (`skeleton_id` from cut, S1):
 4. Draw failure variant from on-path CT*'s declared `failure_mode`; state where it arrives.
 5. Run flow on paper: confirm every foundational seam crossed once, every inter-component hop has CT*, happy path arrives at AC*, no INV* breached. Set `composes_against_contracts`.
 6. Any gap → record `structural_defects[]` (missing/wrong CT* or uncovered seam) / `frame_conflicts[]` (bad decision) / `aprd_defects[]` (bad WHAT) + route. Never invent missing artifact.
-7. Build `seam_coverage` + `flow_counts` by **walking actual flow** (don't estimate). Write `.hld/skeleton/flows.json`. Stop.
-
-## Output schema — `.hld/skeleton/flows.json`
-
-```json
-{
-  "components_ref": ".hld/skeleton/components.json",
-  "contracts_ref": ".hld/skeleton/contracts.json",
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "adr_lock_ref": ".adr/adr.lock",
-  "adr_log_ref": ".adr/log/",
-  "lock_verified": true,                 // adr.lock present + status==frozen + names frozen artifact (don't recompute hash)
-  "class": "greenfield",
-  "mode": "skeleton",
-  "skeleton_id": "S1",
-  "flows": [                              // skeleton pass emits EXACTLY ONE: walking-skeleton flow
-    {
-      "id": "F1",
-      "slice": "S1",
-      "name": "<one line: walking-skeleton path, e.g. Sign in via OAuth on web application>",
-      "trigger": "<what initiates path — e.g. Freelancer opens app, initiates OAuth sign-in>",
-      "path": ["C6", "C2", "C1"],        // ordered C* happy path traverses, ingress→…→persistence; thinnest end-to-end, NOT full graph
-      "steps": [                          // one per hop, traversal order — executes contract on paper
-        {
-          "from": "C6", "to": "C2",       // C* ids; external boundary: to = "EXTERNAL:<what>"
-          "via": "CT8",                   // CT* in contracts.json whose `between` matches hop; null ONLY for external boundary
-          "seam": "ingress->domain",      // foundational seam(s) hop crosses
-          "external": false,              // true => external system, no modeled component, no CT* (crossed by realizing on-path C*)
-          "action": "<what crosses seam — e.g. Web Ingress dispatches sign-in request to Identity & Auth>"
-        }
-        // ... e.g. {from:C2,to:"EXTERNAL:oauth-provider",via:null,seam:primary_external_integration,external:true,action:"Identity & Auth completes external OAuth handshake round-trip"}
-        // ... e.g. {from:C2,to:C1,via:CT1,seam:persistence,action:"Identity & Auth writes + reads freelancer identity record (E1) to establish session"}
-      ],
-      "via": ["CT8", "CT1"],             // all inter-component CT* happy path composes against (via:CT* across steps, externals excluded)
-      "failure_path": {
-        "trigger": "<unhappy variant — e.g. identity store write fails OR OAuth callback does not resolve>",
-        "exercises": "CT1:store-unavailable", // CT*:<declared failure_mode> from contracts.json variant exercises (reference, don't invent)
-        "arrives_at": "<terminal failure state — e.g. no session established; Web Ingress redirects to login entry with error>"
-      },
-      "traces": ["R1", "R5", "AC1", "AC5"], // R*/AC* flow arrives at (AC = oracle), verbatim ids, no padding
-      "honors_inv": ["INV1", "INV6"]     // cross_slice_invariants drawn path stays inside
-    }
-  ],
-  "seam_coverage": [                       // one per foundational seam, STRICTLY in skeleton_seams[] array order (cut order, not traversal order)
-    {
-      "seam": "ingress",                   // ingress | domain | persistence | primary_external_integration
-      "crossed": true,                     // false => uncovered seam → structural_defects[]
-      "by_component": "C6",                // on-path C* realizing it (from components.json realizes_seam)
-      "in_flow": "F1",
-      "via": null                          // CT* path reaches it through; null for entry seam or external boundary
-    }
-  ],
-  "composes_against_contracts": true,      // true iff every inter-component hop maps to existing CT* AND every foundational seam crossed; false => see structural_defects[]
-  "structural_defects": [],                // flow can't be drawn: missing/wrong CT* or uncovered seam. each {flow, gap, missing_or_wrong_ct, route:"DEFINE-CONTRACTS"}; [] on clean run
-  "frame_conflicts": [],                   // flow reveals bad foundational decision. each {flow, finding, breaks_adr, route:"Phase 2"}; [] on clean run
-  "aprd_defects": [],                      // flow reveals ambiguous/contradictory WHAT. each {flow, finding, ref, route:"Phase 0"}; [] on clean run
-  "flow_counts": {                         // walk to count, don't estimate
-    "flows": 1,
-    "foundational_seams": 4,               // == skeleton_seams[].length; seams_crossed + seams_uncovered == foundational_seams
-    "seams_crossed": 4,                    // == seam_coverage[] entries with crossed==true
-    "seams_uncovered": 0,
-    "structural_defects": 0                // == structural_defects.length
-  }
-}
-```
+7. Build `seam_coverage` + `flow_counts` by **walking actual flow** (don't estimate). Write `.hld/skeleton/flows.json` (schema: "flows" registry id). Stop.
 
 ## Stop condition
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.
@@ -196,7 +116,7 @@ Slice flow walks ONLY slice's `touched_components` + `touched_contracts`. Frozen
 4. **AC* arrival oracle (§4.1).** `traces` = slice's FULL R* set (verbatim — ALL slice requirements, flow realizes whole slice; NOT sub-filtered) + AC* happy path demonstrably reaches; demonstrable-reach filter on AC* ONLY. Verbatim ids; no fabricated/padded AC (AC needing another slice's flow NOT traced — discriminator step 5).
 5. **Exclusion — walk only touched boxes/contracts.** Apply the exclusion section above (its one home).
 6. **FLAG-never-fix, three escape targets (H10).** Flow won't compose → `structural_defects[]` (missing CT* → DEFINE-CONTRACTS); bad decision / fidelity breach → `frame_conflicts[]` → Phase 2; bad WHAT → `aprd_defects[]` → Phase 0. Never patch contract, component, ADR, aPRD, or frozen flows.json/contracts.json in place.
-7. **Deterministic emission.** Flow `id` = `F` + target slice's ordinal (S4 → `F4`; skeleton's F1 == S1) — globally unique, derivable in isolation without sibling visibility; `path`/`steps` in traversal order (ingress→…→persistence); `via` lists inter-component CT* in traversal order, externals excluded; `honors_inv` ascending. Fill `skeleton_fidelity` + `flow_counts` by walking actual flow — do not estimate.
+7. **Deterministic emission.** Flow `id` = `F` + target slice's ordinal (S4 → `F4`; skeleton's F1 == S1) — globally unique, derivable in isolation without sibling visibility; `path`/`steps` in traversal order (ingress→…→persistence); `via` lists inter-component CT* in traversal order, externals excluded; `honors_inv` ascending. Fill `skeleton_fidelity` + `flow_counts` by walking actual flow — do not estimate. `flow_counts` = `{flows, hops (inter-component `steps[]` incl external boundaries), hops_contracted (== `via[]` length), external_boundaries, structural_defects}`; closure check `hops_contracted + external_boundaries == hops`.
 
 ## Task steps (increment)
 1. Read inputs (shared + increment). Check guards (frontmatter `escapes:`) — any tripped → HALT (or STOP clean for "no ready slice"), report which + offending detail, write nothing. Else continue.
@@ -206,75 +126,7 @@ Slice flow walks ONLY slice's `touched_components` + `touched_contracts`. Frozen
 5. Draw failure variant from touched CT*'s declared `failure_mode` (shared Rule 1); state where it arrives.
 6. Run flow on paper: every inter-component hop has touched CT*, happy path arrives at AC*, no INV* breached, no frozen contract reshaped / F1 not re-walked (skeleton fidelity). Set `composes_against_frozen_contracts`; determine `traces` (slice R* + arrived-at AC*).
 7. Any gap → `structural_defects[]` (missing/wrong CT*) / `frame_conflicts[]` (bad decision / fidelity breach) / `aprd_defects[]` (bad WHAT) + route. Never invent missing artifact.
-8. Build `skeleton_fidelity` + `flow_counts` by **walking actual flow** (don't estimate). Write `.hld/slices/<slice_id>/flows.json` (create dir). Stop.
-
-## Output schema (increment) — `.hld/slices/<slice_id>/flows.json`
-
-```json
-{
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "adr_lock_ref": ".adr/adr.lock",
-  "adr_log_ref": ".adr/log/",
-  "base_flows_ref": ".hld/skeleton/flows.json",            // frozen skeleton flow (F1) this extends; never re-walked
-  "base_contracts_ref": ".hld/skeleton/contracts.json",    // frozen CT* set slice composes against (by reference)
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "slice_components_ref": ".hld/slices/<slice_id>/components.json",
-  "slice_contracts_ref": ".hld/slices/<slice_id>/contracts.json",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "skeleton_frozen_verified": true,        // skeleton.lock present + status==frozen (don't recompute hash)
-  "class": "greenfield",
-  "mode": "increment",
-  "slice_id": "S4",                        // auto-selected target (delta Rule 2)
-  "slice_name": "<carried verbatim from 02-slices / 08-rerank>",
-  "introduced_components": ["C3"],         // carried from slice components.json
-  "touched_components": ["C3", "C1", "C2", "C6"],  // ids, from slice components.json (membership gate)
-  "flows": [                               // increment emits EXACTLY ONE: slice's vertical flow
-    {
-      "id": "F4",                          // F + slice ordinal (S4->F4); globally unique, derivable in isolation (delta Rule 7)
-      "slice": "S4",
-      "name": "<one line: slice's vertical path, e.g. Create and manage client project on web application>",
-      "trigger": "<what initiates path — e.g. Freelancer opens project management page, submits create-project form>",
-      "path": ["C6", "C3", "C1"],          // ordered touched C* happy path traverses, ingress->introduced domain box->persistence; ONLY touched boxes
-      "steps": [                           // one per hop, traversal order — executes frozen contract on paper
-        {
-          "from": "C6", "to": "C3",        // C* ids; external boundary: to = "EXTERNAL:<what>"
-          "via": "CT9",                    // touched CT* whose `between` matches hop; null ONLY for external boundary
-          "seam": "ingress->domain",       // seam(s) hop crosses
-          "external": false,               // true => external system, no modeled component, no CT*
-          "action": "<what crosses seam — e.g. Web Ingress dispatches authenticated project page request to Project Management>"
-        }
-        // ... e.g. {from:C3,to:C2,via:CT3,seam:"domain->domain",action:"Project Management resolves authenticated freelancer session from Identity & Auth to scope project data to owner"}
-        // ... e.g. {from:C3,to:C1,via:CT2,seam:"domain->persistence",action:"Project Management persists + retrieves client project records (E2/E5/E6/E7) to/from Data Store"}
-      ],
-      "via": ["CT9", "CT3", "CT2"],        // all inter-component touched CT* happy path composes against (traversal order, externals excluded)
-      "failure_path": {
-        "trigger": "<unhappy variant — e.g. no authenticated session present when project request arrives>",
-        "exercises": "CT3:no-valid-session", // CT*:<declared failure_mode> from touched contract variant exercises (reference, don't invent)
-        "arrives_at": "<terminal failure state — e.g. Project Management rejects request as unauthorized; Web Ingress renders login entry>"
-      },
-      "traces": ["R4", "R6", "R9", "R10", "AC6"], // ALL slice R* (verbatim — flow realizes whole slice; not sub-filtered) + AC* happy path demonstrably reaches (demonstrable filter on AC* only, no padding — delta Rule 4)
-      "honors_inv": ["INV1", "INV3", "INV4", "INV6"]  // INV* drawn path stays inside (union of touched contracts' honors_inv)
-    }
-  ],
-  "composes_against_frozen_contracts": true, // true iff every inter-component hop maps to touched CT* (⊆ frozen skeleton contracts); false => see structural_defects[]
-  "skeleton_fidelity": {                     // H14 — flow composes against frozen skeleton, never redraws it
-    "reused_contracts_walked": ["CT9", "CT3", "CT2"], // frozen CT* flow composes against (carried by reference, verbatim)
-    "reshaped_contracts": [],              // frozen CT* whose shape/failure_modes flow changed — MUST be empty
-    "redrawn_flows": [],                   // re-walk/redraw of frozen F1 — MUST be empty
-    "verdict": "composes-against-frozen"   // "composes-against-frozen" on clean run; else describe breach (then escalate, delta Rule 6)
-  },
-  "structural_defects": [],                // flow can't be drawn: missing/wrong CT*. each {flow, gap, missing_or_wrong_ct, route:"DEFINE-CONTRACTS"}; [] on clean run
-  "frame_conflicts": [],                   // flow reveals bad foundational decision OR skeleton-fidelity breach. each {flow, finding, breaks_adr_or_inv, route:"Phase 2"}; [] on clean run
-  "aprd_defects": [],                      // flow reveals ambiguous/contradictory WHAT. each {flow, finding, ref, route:"Phase 0"}; [] on clean run
-  "flow_counts": {                         // walk to count, don't estimate
-    "flows": 1,
-    "hops": 3,                             // inter-component steps[] count (incl. external boundaries); hops_contracted + external_boundaries == hops
-    "hops_contracted": 3,                  // steps with non-null via (== via[].length)
-    "external_boundaries": 0,              // steps with external==true
-    "structural_defects": 0                // == structural_defects.length
-  }
-}
-```
+8. Build `skeleton_fidelity` + `flow_counts` by **walking actual flow** (don't estimate). Write `.hld/slices/<slice_id>/flows.json` (schema: "flows" registry id) (create dir). Stop.
 
 ## Stop condition (increment)
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.

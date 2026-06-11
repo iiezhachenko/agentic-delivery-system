@@ -3,13 +3,8 @@ role: RECONCILE
 phase: 02-adr
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal coherence + coverage check — reads disk, writes disk, stops. No client touch (PR1, §9)
-inputs:
-  - { path: ".adr/03-options/decisions-index.json", format: "json — EVALUATE-DECIDE manifest; the work list (decisions[] + undecided[]). Tells which decisions were made + where each file lives" }
-  - { path: ".adr/03-options/<DP-id>.decision.json", format: "json — per-DP decision; read decision_made, traces[], cut_ref, consequences.follow_on[] (the NOTED cross-decision deps — primary conflict-detection grounding)" }
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). In-scope CONSTRAINTS C* = the coverage target (D5), full id-space (R*/AC*/A*/E*) = trace-validity oracle (D4). Read-only, never re-opened (D9)" }
-  - { path: ".roadmap/06-foundation-cut.json", format: "json — FOUNDATION-CUT; cross_slice_invariants INV* (hard floor for violation check, NOT a coverage target), foundational_decisions FD*, deferred[] (explicit-deferral evidence)" }
 outputs:
-  - { path: ".adr/04-conflicts.json", format: "json (§10 reserved slot, schema below) — conflicts + violations + coverage + verdict; SYNTHESIZE-ADR gates on it, blocked loops back to re-decide" }
+  - { path: ".adr/04-conflicts.json", schema: "04-conflicts" }
 escapes:
   - { when: ".adr/03-options/decisions-index.json missing or unparseable — no manifest to enumerate", target: "self / HALT" }
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable — no CONSTRAINTS to coverage-check, no id-space to validate traces (D4/D5)", target: "self / HALT" }
@@ -45,7 +40,7 @@ Coherence + coverage gate, role 5 of ADR (Phase 2) pipeline. EVALUATE-DECIDE dec
 6. **Check coverage bidirectionally (D4, D5).** ADR→aPRD: each decision's `traces[]` non-empty + every id resolves to real aPRD element (R*/AC*/C*/A*/E*) or cut INV* — else flag (verify ids resolve, NOT whether set minimal; anti-padding = EVALUATE-DECIDE's job). aPRD→ADR: bucket **every in-scope C*** into exactly one of — **covered** (id appears literally in some decided DP's `traces[]`; under `by` list **only** decisions whose `traces[]` literally contains this exact id by string membership, never topical relevance — related-but-not-tracing decision must NOT be listed); **deferred** (explicitly deferred to later slice per cut `deferred[]`; deferred ≠ gap); **premise** (non-decision-forcing class fact satisfied by project's nature, e.g. C3 net-new greenfield — no decision addresses it); **gap** (none of above, or only would-be addresser is `undecided[]` entry — blocking). **INV* = hard floor, NOT coverage target:** do NOT require every INV* traced, do NOT bucket INV* — most are slice-level invariants Phase 3 honors; INV* tracing foundational decision = padding. INV* in some `traces[]` fine, but absence never a gap. Treat INV* purely as floor (Rules 5).
 7. **Cheapest source first; LLM not the source (P5/P11/D4/D7).** Check against fixed contract, never invented criterion. Every conflict/violation/gap names real id; every id (DP*/R*/AC*/C*/A*/E*/INV*/FD*) must exist verbatim in inputs. You detect + route; never re-decide, re-source, render, re-open any input (D9, §5.10).
 8. **Set verdict + route every issue.** `verdict: blocked` if ≥1 of: cross-decision conflict, constraint violation, coverage gap, untraceable/phantom-trace decision, structural defect; else `coherent`. Each issue carries `routes_to`: `EVALUATE-DECIDE` for conflict/violation/gap re-decision can close; `Phase 0` for gap rooted in aPRD defect (WHAT ambiguous/wrong, no decision *can* address it). You set route; don't perform it. Blocked verdict = SYNTHESIZE-ADR does NOT run.
-9. **Full accounting (P9).** `decisions_checked` = exactly manifest's `decisions[]` ids. Every in-scope C* in exactly one bucket. `reconcile_counts` tallies conflicts/violations/coverage_gaps/untraceable/structural_defects by walking each list. `blocking_count` == sum of blocking lists.
+9. **Full accounting (P9).** `decisions_checked` = exactly manifest's `decisions[]` ids. Every in-scope C* in exactly one bucket. `blocking_count` = len(conflicts) + len(constraint_violations) + len(gaps) + len(untraceable) + len(structural_defects). `reconcile_counts` tallies each by walking its list.
 10. **Stay in lane.** No re-decide/re-pick/edit of any decision (D9 — files read-only), no render/id-assign (SYNTHESIZE-ADR), no re-source/add/drop of options or decisions (OPTION-GEN/EVALUATE-DECIDE — assess picks as given), no strawman/over-/under-/not-yet audit (CRITIQUE — hostile pass on *rendered* ADRs), no re-open of aPRD/cut/triage (D9), no client touch (§9).
 
 ## Task steps
@@ -57,73 +52,6 @@ Coherence + coverage gate, role 5 of ADR (Phase 2) pipeline. EVALUATE-DECIDE dec
 6. **Coverage** (Rules 6): ADR→aPRD traces non-empty + every id real; aPRD→ADR bucket every in-scope C* (covered/deferred/premise/gap), don't bucket INV*, fold `undecided[]` in.
 7. Set `verdict` + per-issue `routes_to` (Rules 8); tally `reconcile_counts` + `blocking_count` by walking lists (Rules 9).
 8. Write `.adr/04-conflicts.json`. Stop.
-
-## Output schema — `.adr/04-conflicts.json`
-
-```json
-{
-  "decisions_index_ref": "03-options/decisions-index.json",   // manifest enumerated
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",  // trace/coverage oracle read (lock-resolved CURRENT version)
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",     // INV/deferred oracle read
-  "class": "greenfield",
-  "skeleton_id": "S1",
-  "decisions_checked": ["DP1", "DP2", "DP4", "DP6", "DP7", "DP10"],  // exactly manifest's decisions[] ids, once each
-  "undecided_carried": [],                                     // decisions-index.json's undecided[], verbatim; folded into coverage (covers nothing)
-  "conflicts": [                                               // one entry per GROUNDED cross-decision conflict; [] on coherent set
-    {
-      "id": "CF1",
-      "between": ["DPa", "DPb"],                               // two DP ids
-      "picks": ["<DPa decision_made, verbatim>", "<DPb decision_made, verbatim>"],
-      "finding": "<contradiction: condition under which both picks cannot hold, plain terms>",
-      "exposed_by": ["INV6"],                                  // C*/INV*/follow_on basis
-      "evidence": "<follow_on note or paradigm clash grounding it — cite ids>",
-      "routes_to": "EVALUATE-DECIDE"
-    }
-  ],
-  "constraint_violations": [                                   // one per pick breaching hard C*/INV*; [] normally (EVALUATE-DECIDE enforced floor)
-    {
-      "id": "CV1",
-      "decision": "DPx",
-      "decision_made": "<verbatim pick>",
-      "violates": "INV6",
-      "finding": "<how pick breaches hard constraint, grounded in id + pick's semantics>",
-      "routes_to": "EVALUATE-DECIDE"
-    }
-  ],
-  "coverage": {
-    "adr_to_aprd": {
-      "all_traceable": true,
-      "untraceable": [                                         // decisions with empty/phantom traces
-        { "decision": "DPx", "issue": "empty traces | phantom id <Rxx not in aPRD>", "routes_to": "EVALUATE-DECIDE" }
-      ]
-    },
-    "aprd_to_adr": {
-      "in_scope_constraints": ["C1", "C2", "C3"],              // aPRD's CONSTRAINTS (C*) ONLY; each in exactly one bucket below. INV* NOT bucketed (they = violation floor)
-      "covered": [                                             // each by[] lists ONLY decisions whose traces[] literally contains id (string membership, not topical relevance)
-        { "constraint": "C1", "by": ["DP1", "DP6", "DP10"] },
-        { "constraint": "C2", "by": ["DP1", "DP2", "DP4", "DP6", "DP7", "DP10"] }
-      ],
-      "deferred": [],                                          // explicitly deferred per cut deferred[]; record defer-to + evidence. Deferred ≠ gap
-      "premise": [
-        { "constraint": "C3", "why": "net-new greenfield class fact; forces no HOW, satisfied by project's nature, addressed by no decision" }
-      ],
-      "gaps": []                                              // D5 coverage-gap list: in-scope C* with no decision, no deferral, no premise (or only addresser is undecided[])
-    }
-  },
-  "structural_defects": [],                                   // {decision, decision_ref, issue} for any decision file missing/unparseable; [] normally
-  "verdict": "coherent",                                      // blocked iff blocking_count > 0, else coherent
-  "blocking_count": 0,                                        // len(conflicts) + len(constraint_violations) + len(gaps) + len(untraceable) + len(structural_defects)
-  "reconcile_counts": {                                       // each tallied by walking its list
-    "decisions_checked": 6,                                   // == len(decisions_checked)
-    "conflicts": 0,
-    "constraint_violations": 0,
-    "coverage_gaps": 0,
-    "untraceable": 0,
-    "structural_defects": 0
-  }
-}
-```
-All prose (`finding`/`evidence`/`why`/`issue`) caveman governs this too (PR4).
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → follow its target; print which fired + offending detail.

@@ -4,24 +4,9 @@ phase: 03-hld
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A: map every cross-cutting NFR to mechanism/frame-basis, drawn once); frozen skeleton present → INCREMENT PASS (Part B: slice NFR scope = frame NFRs governing its boxes (inherited by reference) + per-slice hardening skeleton deferred to it; new-mechanism delta typically []). One role, two modes (H13/D9/D14)
 interactive: false          # internal structural sweep; client signed WHAT, team owns HOW (PR1, §9)
-inputs:
-  # — shared (both passes) —
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). CONSTRAINTS C* + assumptions A* carrying non-functional force (scale A13, compliance/residency A9, security A2) = NFR set; R* = trace oracle" }
-  - { path: ".adr/adr.lock", format: "json — frozen gate (status==frozen) + ADR manifest; locates frame ADRs satisfying NFRs (monolith/MPA/OAuth/PaaS)" }
-  - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — frame ADRs; NFR satisfied-by-frame cites ADR-* that decided it. Reference what it fixed; never re-decide" }
-  - { path: ".roadmap/06-foundation-cut.json", format: "json — INV* = hard mechanism floor (INV6 forbids cache/queue/scale); cross_slice_invariants ground frame-satisfaction" }
-  # — skeleton pass —
-  - { path: ".hld/skeleton/components.json", format: "json — SKELETON: components[] = realizing C* set; structural/frame/aprd defect blocks gate the run" }
-  # — increment pass only —
-  - { path: ".hld/skeleton.lock", format: "json — DISPATCH signal + freeze gate: status==frozen → INCREMENT PASS extends this baseline (H14)" }
-  - { path: ".hld/skeleton/nfr-mechanisms.json", format: "json — FROZEN base NFR map: nfr_inventory[] (nfr_ref/category/disposition/frame_basis/realized_by/defer_to) + mechanisms[]. Slice inherits frame NFRs governing its boxes BY REFERENCE; never re-disposed (H14)" }
-  - { path: ".hld/slices/<slice_id>/components.json", format: "json — DERIVE-COMPONENTS increment: introduced_components[] + touched_components[]. Slice subgraph = membership gate for which frozen NFRs govern this slice's boxes" }
-  - { path: ".hld/slices/<slice_id>/contracts.json", format: "json — DEFINE-CONTRACTS increment: slice touched_contracts[]; seams introduced box operates through under each inherited frame NFR. Presence = upstream Phase-3 increments ran (auto-select gate)" }
-  - { path: ".roadmap/08-rerank.json", format: "json — living roadmap: remaining_sequence (target-slice order) + completed[] (pinned/skipped) — auto-selects target slice (increment)" }
-  - { path: ".roadmap/02-slices.json", format: "json — slices[].requirements = R* target slice realizes; slice metadata (increment)" }
 outputs:
-  - { path: ".hld/skeleton/nfr-mechanisms.json", format: "SKELETON: json (Part A schema) — per-NFR disposition + M* mechanisms + coverage buckets + unmet flags" }
-  - { path: ".hld/slices/<slice_id>/nfr-mechanisms.json", format: "INCREMENT json (Part B) — slice NFR scope: inherited frame NFRs + hardening drained + new-mechanism delta + fidelity verdict" }
+  - { path: ".hld/skeleton/nfr-mechanisms.json", schema: "nfr-mechanisms" }
+  - { path: ".hld/slices/<slice_id>/nfr-mechanisms.json", schema: "nfr-mechanisms" }
 escapes:
   # — shared —
   - { when: "any shared input missing/unparseable, OR adr.lock status != frozen", target: "self / HALT (no frame to map on)" }
@@ -86,64 +71,7 @@ Walk category checklist (scale, latency, availability, security, compliance, dat
 3. Per NFR in emission order: bucket via disposition rule — set `frame_basis`+`realized_by` (satisfied-by-frame), OR emit `M*` (mechanized), OR `defer_to` (deferred), OR grounding (not-applicable), OR `unmet[]` entry (H5).
 4. Apply anti-gold-plating gate to every candidate mechanism: frame-forbidden → never emit, bucket NFR satisfied-by-frame instead; genuine frame-vs-NFR contradiction → `frame_conflicts[]` → Phase 2.
 5. Build `coverage` + `nfr_counts` by **walking actual buckets** (don't estimate); confirm `all_nfrs_dispositioned` (four buckets + `unmet` cover `nfrs_in_scope` exactly once) before writing.
-6. Write `.hld/skeleton/nfr-mechanisms.json`. Stop.
-
-## Output schema — `.hld/skeleton/nfr-mechanisms.json`
-
-```json
-{
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "adr_lock_ref": ".adr/adr.lock",
-  "adr_log_ref": ".adr/log/",
-  "components_ref": ".hld/skeleton/components.json",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "lock_verified": true,                 // lock present + status==frozen + names frozen artifact (don't recompute hash)
-  "class": "greenfield",
-  "mode": "skeleton",
-  "skeleton_id": "S1",
-  "nfr_inventory": [                      // one entry per in-scope NFR, in category-checklist emission order
-    {
-      "nfr_ref": "A13",                   // verbatim C*/A*/INV* id, OR bare category label (e.g. "availability") when category has no governing id
-      "category": "scale",                // scale|latency|availability|security|compliance|data-residency|delivery-medium|timeline
-      "statement": "<faithful one-line of NFR, from aPRD>",
-      "disposition": "satisfied-by-frame",// satisfied-by-frame | mechanized | deferred | not-applicable | unmet
-      "mechanism_ref": null,              // M* id if mechanized, else null
-      "frame_basis": ["ADR-0001", "ADR-0006", "INV6"], // ADR-*/INV* satisfying it (satisfied-by-frame / not-applicable-by-waiver); [] otherwise
-      "realized_by": [],                  // C* realizing frame property or M*; [] for topology-wide property with no single box
-      "defer_to": null,                   // slice id if deferred, else null
-      "rationale": "<one line: why this disposition; for not-applicable, why no NFR exists / where waived>"
-    }
-  ],
-  "mechanisms": [                         // ONLY new frame-PERMITTED structural mechanisms; near-empty (often []) is correct under INV6
-    {
-      "id": "M1",
-      "nfr_ref": "<C*/A*/category the mechanism serves>",
-      "mechanism": "<concrete structural mechanism, named not designed>",
-      "realized_by": ["C2"],              // C* from components.json
-      "frame_permitted": true,            // MUST be true; INV6/A13-forbidden mechanism never emitted (→ satisfied-by-frame or frame_conflicts)
-      "traces": ["R5"]                    // aPRD R*/C*/A* mechanism serves, verbatim, no padding
-    }
-  ],
-  "coverage": {
-    "nfrs_in_scope": ["A13", "C1"],       // every NFR inventoried (== nfr_inventory ids)
-    "mechanized": [],                     // nfr_refs with M*
-    "satisfied_by_frame": ["A13", "C1"],  // nfr_refs frame already satisfies
-    "deferred": [],                       // each {nfr_ref, defer_to}
-    "not_applicable": ["C3"],             // nfr_refs aPRD waives / never states
-    "all_nfrs_dispositioned": true        // true iff four buckets + unmet[] cover nfrs_in_scope exactly once, no overlap
-  },
-  "unmet": [],                            // H5: NFR with no mechanism + not frame-satisfied + not deferrable; each {nfr_ref, finding, why_not_frame_satisfied}; [] on clean run
-  "frame_conflicts": [],                  // NFR requiring frame-forbidden mechanism (aPRD-vs-INV6 tension); each {nfr_ref, demand, forbidden_by, route:"Phase 2"}; [] on clean run
-  "nfr_counts": {                         // walk to count, don't estimate
-    "in_scope": 8,                        // == nfr_inventory.length == coverage.nfrs_in_scope.length; mechanized + satisfied_by_frame + deferred + not_applicable + unmet == in_scope
-    "mechanized": 0,
-    "satisfied_by_frame": 5,
-    "deferred": 0,
-    "not_applicable": 3,
-    "unmet": 0                            // == unmet.length
-  }
-}
-```
+6. Write `.hld/skeleton/nfr-mechanisms.json` (schema: "nfr-mechanisms" registry id). Stop.
 
 ## Stop condition
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.
@@ -187,73 +115,7 @@ Inherited frame NFRs **frozen-in-substance** — frame already satisfied them. S
 5. Drain slice hardening queue (delta Rule 5): frozen `deferred` NFRs with `defer_to == target slice`, re-bucketed now. Run new-mechanism test; add frame-permitted `M*` only if genuinely needed (greenfield → none), else route ungrounded NFR to `aprd_defects[]` / frame-forbidden demand to `frame_conflicts[]`.
 6. Verify frame fidelity (delta Rule 1/6) — confirm no frozen NFR re-disposed or re-realized (`re_disposed_nfrs`/`re_realized_nfrs` empty). Verify full accounting (shared Rule 3) — no silently-unmet slice NFR.
 7. Verify slice coverage (every slice requirement with non-functional footprint maps to ≥1 inherited NFR or new `M*`); walk lists for counts.
-8. Write `.hld/slices/<slice_id>/nfr-mechanisms.json` (create dir). Stop.
-
-## Output schema (increment) — `.hld/slices/<slice_id>/nfr-mechanisms.json`
-
-```json
-{
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "adr_lock_ref": ".adr/adr.lock",
-  "adr_log_ref": ".adr/log/",
-  "base_nfr_ref": ".hld/skeleton/nfr-mechanisms.json",      // frozen NFR map this extends; NFRs carried by reference from here
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "slice_components_ref": ".hld/slices/<slice_id>/components.json",
-  "slice_contracts_ref": ".hld/slices/<slice_id>/contracts.json",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "skeleton_frozen_verified": true,        // skeleton.lock present + status==frozen (don't recompute hash)
-  "class": "greenfield",
-  "mode": "increment",
-  "slice_id": "S4",                        // auto-selected target (delta Rule 2)
-  "slice_name": "<carried verbatim from 02-slices / 08-rerank>",
-  "introduced_components": ["C3"],         // carried from slice components.json
-  "touched_components": ["C3", "C1", "C2", "C6"],  // ids, from slice components.json (membership gate)
-  "inherited_nfrs": [                       // frame NFRs governing slice's boxes, in frozen nfr_inventory order; each carried BY REFERENCE (delta Rule 1)
-    {
-      "nfr_ref": "A2",                     // VERBATIM from frozen nfr_inventory
-      "category": "security",              // VERBATIM
-      "disposition": "satisfied-by-frame", // VERBATIM from frozen; NEVER re-disposed here
-      "mechanism_ref": null,               // VERBATIM (M* if frozen NFR mechanized, else null)
-      "frame_basis": ["ADR-0005", "INV1"], // VERBATIM
-      "realized_by": ["C2"],               // VERBATIM
-      "scope_role": "inherited-governing", // always inherited-governing in this list
-      "governs_basis": "<one line: which touched box it governs + via which touched seam, or 'topology-wide frame property — every slice'>"
-    }
-  ],
-  "slice_nfr_queue": [],                     // frozen NFRs with disposition deferred + defer_to==slice_id (per-slice hardening parked for THIS slice). [] in greenfield (skeleton deferred none) — CORRECT, not a miss
-  "resolutions": [                           // one entry per slice_nfr_queue item, re-bucketed now; [] when queue empty
-    {
-      "nfr_ref": "<verbatim>",
-      "category": "<verbatim>",
-      "disposition": "satisfied-by-frame", // satisfied-by-frame | mechanized | deferred | unmet | frame-conflict
-      "mechanism_ref": null,               // M* id IFF mechanized this slice (continues frozen M* sequence)
-      "defer_to": null,                    // non-null IFF re-deferred-further (rare)
-      "rationale": "<grounded reason — why this disposition now that THIS slice fleshes its box>"
-    }
-  ],
-  "new_mechanisms": [],                      // NEW frame-PERMITTED hardening M* slice's introduced box genuinely needs beyond frame; [] in greenfield (INV6/A13 forbid scale mechs, frame satisfies rest) — empty is CORRECT. Element shape = Part A mechanisms[] {id, nfr_ref, mechanism, realized_by, frame_permitted:true, traces}
-  "slice_coverage": {
-    "slice_requirements": ["R4", "R6", "R9", "R10"],       // 02-slices requirements for target slice, verbatim
-    "requirements_with_nfr": [],                           // slice R* carrying non-functional footprint, each covered by inherited NFR or new M*
-    "requirements_no_nfr_footprint": ["R4", "R6", "R9", "R10"],  // slice R* pure functional/behavior (no NFR); noted, NOT an orphan
-    "requirement_orphans": []              // requirement with NFR footprint but no covering mechanism (+ not framable) → also unmet/aprd_defects; [] on clean run
-  },
-  "frame_fidelity": {                        // H14 — increment extends, never re-disposes/re-realizes
-    "re_disposed_nfrs": [],                // frozen NFR whose disposition changed — MUST be empty
-    "re_realized_nfrs": [],                // frozen NFR whose realized_by/frame_basis changed — MUST be empty
-    "verdict": "extends-not-re-disposes"   // "extends-not-re-disposes" on clean run; else describe breach (then escalate, delta Rule 6)
-  },
-  "unmet": [],                               // H5: slice NFR with no mechanism + not frame-satisfied + not deferrable; each {nfr_ref, finding, why_not_frame_satisfied}; [] on clean run
-  "frame_conflicts": [],                     // slice NFR requiring frame-forbidden mechanism / frozen NFR re-disposed; each {nfr_ref, demand, forbidden_by, route:"Phase 2"}; []
-  "aprd_defects": [],                        // slice requirement implying NFR with no aPRD C*/A* grounding; each {requirement, reason, escape:"Phase 0 (change request)"}; []
-  "increment_counts": {                      // walk to count, don't estimate
-    "inherited_nfrs": 4,                   // == inherited_nfrs.length
-    "slice_nfr_queue": 0,                  // == slice_nfr_queue.length
-    "new_mechanisms": 0,                   // == new_mechanisms.length
-    "unmet": 0                             // == unmet.length
-  }
-}
-```
+8. Write `.hld/slices/<slice_id>/nfr-mechanisms.json` (schema: "nfr-mechanisms" registry id) (create dir). Stop.
 
 ## Stop condition (increment)
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.

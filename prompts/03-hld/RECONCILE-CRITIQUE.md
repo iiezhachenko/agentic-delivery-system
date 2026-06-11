@@ -4,34 +4,9 @@ phase: 03-hld
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment     # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A: adversarial gate on assembled SKELETON HLD before its mechanical freeze); frozen skeleton present → INCREMENT PASS (Part B: per-slice adversarial gate on slice's increment incl. skeleton-fidelity H14, before slice freeze §5.12). One role, two modes (H13/D9/D14)
 interactive: false          # hostile review — reads disk, writes issues list to disk, stops. Does NOT redraw, re-decide, re-render, or freeze (PR1, §5.10/§5.12, §9)
-inputs:
-  # — shared (both passes) —
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). Coverage + trace ORACLE: real id-space (R*/AC*/C*/E*/A*) every component/contract/flow/entity resolves into; in-scope CONSTRAINTS C* + NFR-bearing A* NFR check measures against" }
-  - { path: ".adr/adr.lock", format: "json — frozen frame gate (status==frozen): foundational decisions structure must HONOR (H2). Frame-fidelity oracle" }
-  - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — frame ADR bodies (read-only context for honor/violation judgement; never re-decided)" }
-  - { path: ".roadmap/06-foundation-cut.json", format: "json — cut: cross_slice_invariants[INV*] = hard VIOLATION FLOOR (NOT coverage target), foundational_decisions[FD*], deferred[], skeleton_seams[] flow must cross, skeleton_id" }
-  - { path: ".adr/02-triage.json", format: "json — TRIAGE output, AUTHORITATIVE deferred-queue source: deferred_queue[DP*] = exact set queue-drain check measures against (skeleton: RESOLVE-LOCAL's drain; increment: slice's local-fork drain)" }
-  # — skeleton pass —
-  - { path: ".hld/skeleton/components.json", format: "json — SKELETON: DERIVE-COMPONENTS output: components + edges + coverage + defect blocks. R↔component coverage subject (H4)" }
-  - { path: ".hld/skeleton/contracts.json", format: "json — SKELETON: DEFINE-CONTRACTS output: contracts + coverage. Contract-testability + frame (INV6 async) subject" }
-  - { path: ".hld/skeleton/data-model.json", format: "json — SKELETON: MODEL-DATA output: entities + ownership + coverage. Single-owner subject (§5.5)" }
-  - { path: ".hld/skeleton/nfr-mechanisms.json", format: "json — SKELETON: MAP-NFR output: nfr_inventory + coverage + unmet[]. NFR-coverage subject (H5)" }
-  - { path: ".hld/skeleton/flows.json", format: "json — SKELETON: MODEL-FLOWS output: flows + seam_coverage + composes_against_contracts. Flow-completeness subject (H6)" }
-  - { path: ".hld/skeleton/test-specs.json", format: "json — SKELETON: DERIVE-TESTS output: contract_tests[]{target:CT*} + flow_tests[]{target:F*} + coverage. Design-layer-oracle existence subject (every CT*/F* has spec, H8)" }
-  - { path: ".adr/deferred-decisions.json", format: "json — SKELETON: RESOLVE-LOCAL output, queue-drain ledger: local_queue_in[], drained[], resolved[]/re_deferred[]{defer_to}/escalated[]. Skeleton queue-drained subject (§5.4/§5.10)" }
-  # — increment pass only —
-  - { path: ".hld/skeleton.lock", format: "json — DISPATCH + freeze gate: status==frozen → INCREMENT gates slice against immutable baseline (H14 fidelity oracle). Frozen skeleton/* = extend-not-redraw reference" }
-  - { path: ".roadmap/08-rerank.json", format: "json — INCREMENT: living roadmap: remaining_sequence (slice order) + completed[] (pinned). Auto-selects target slice (first slice whose six increment artifacts present but reconcile.json absent)" }
-  - { path: ".hld/slices/<slice_id>/components.json", format: "json — INCREMENT: DERIVE-COMPONENTS increment output. Slice R↔component coverage + redraw subject" }
-  - { path: ".hld/slices/<slice_id>/contracts.json", format: "json — INCREMENT: DEFINE-CONTRACTS increment output. Slice contract-testability + frame + reshape subject" }
-  - { path: ".hld/slices/<slice_id>/data-model.json", format: "json — INCREMENT: MODEL-DATA increment output. Slice single-owner + re-model subject" }
-  - { path: ".hld/slices/<slice_id>/nfr-mechanisms.json", format: "json — INCREMENT: MAP-NFR increment output. Slice NFR-coverage + re-dispose subject" }
-  - { path: ".hld/slices/<slice_id>/flows.json", format: "json — INCREMENT: MODEL-FLOWS increment output. Slice flow-completeness + compose-against-frozen subject (H6/H14)" }
-  - { path: ".hld/slices/<slice_id>/test-specs.json", format: "json — INCREMENT: DERIVE-TESTS increment output. Slice design-layer-oracle existence + re-author subject (H8/H14)" }
-  - { path: ".hld/slices/<slice_id>/deferred-decisions.json", format: "json — INCREMENT: RESOLVE-LOCAL increment: slice_local_queue[] + resolved[]/re_deferred[]{defer_to}/escalated[] + foundational_routed[] + inherited_local_adrs[]. Slice queue-drained subject (§5.4/§5.10)" }
 outputs:
-  - { path: ".hld/skeleton/critique.json", format: "SKELETON json (Part A) — verdict clean|blocked + blocking issues[]; clean → mechanical freeze, blocked → loops to DERIVE-COMPONENTS (§5.10/§5.13)" }
-  - { path: ".hld/slices/<slice_id>/reconcile.json", format: "INCREMENT json (Part B) — verdict clean|blocked + issues[] + skeleton-fidelity verdict (H14); clean → slice freeze, blocked → loops to slice's DERIVE-COMPONENTS increment" }
+  - { path: ".hld/skeleton/critique.json", schema: "hld-critique" }
+  - { path: ".hld/slices/<slice_id>/reconcile.json", schema: "reconcile" }
 escapes:
   # — shared —
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable — no coverage/trace oracle", target: "self / HALT" }
@@ -104,55 +79,7 @@ Run the **seven shared blocking categories** (1–7 above; category 8 N/A — no
 2. Build oracles: **aPRD id-space** (R*/AC*/C*/E*/A* set; in-scope CONSTRAINTS = C* + NFR-bearing A*); **frame** (lock `adrs[]` + their ids/categories + INV* floor from cut); **cut** (`skeleton_seams[]` flow must cross, `deferred[]`, FD*); **queue** (triage `deferred_queue[]` = what owed, ledger `drained[]`/dispositions = what happened).
 3. Run seven category checks across assembled set, **recomputing each from primary arrays — never from producer's self-reported coverage/summary block (see "Your lane")** — applying resolution test (shared Rule 2). Plus self-flagged-defect backstop (shared Rule 4).
 4. For each genuine blocker, mint issue `I*` (contiguous `I1, I2, …`) with `category`, `target`, `finding` stating why hostile reviewer blocks freeze (cite concrete artifact id + aPRD/frame/cut id), `routes_to`, concrete `fix_hint`.
-5. Set `verdict`; tally `critique_counts` by walking issues; write `.hld/skeleton/critique.json`. Stop.
-
-## Output schema — `.hld/skeleton/critique.json`
-
-```json
-{
-  "components_ref": ".hld/skeleton/components.json",
-  "contracts_ref": ".hld/skeleton/contracts.json",
-  "data_model_ref": ".hld/skeleton/data-model.json",
-  "nfr_mechanisms_ref": ".hld/skeleton/nfr-mechanisms.json",
-  "flows_ref": ".hld/skeleton/flows.json",
-  "test_specs_ref": ".hld/skeleton/test-specs.json",
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "adr_lock_ref": ".adr/adr.lock",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "deferred_decisions_ref": ".adr/deferred-decisions.json",
-  "lock_verified": true,                  // lock present + status==frozen + names frozen artifact (don't recompute hash)
-  "class": "greenfield",
-  "mode": "skeleton",
-  "skeleton_id": "S1",
-  "artifacts_reviewed": ["components.json", "contracts.json", "data-model.json", "nfr-mechanisms.json", "flows.json", "test-specs.json"],  // six skeleton files read
-  "verdict": "clean",                     // exactly clean|blocked; blocked iff issues non-empty, else clean (deterministic from issues)
-  "issues": [                             // blocking-grade ONLY (§5.10); [] on clean skeleton. No style nits, no taste
-    {
-      "id": "I1",                         // contiguous I1, I2, …
-      "category": "coverage-gap | ownership-defect | unmechanized-nfr | frame-violation | untestable-contract | incomplete-flow | undrained-queue",  // exactly one of seven
-      "target": "CT4",                    // concrete id concerned (C*/CT*/E*/F*/M*/R*/DP*); for coverage-gap may be orphan R* or orphan C*; literal "none" only if defect is pure ABSENCE (name missing thing in finding)
-      "finding": "<what wrong AND why blocks freeze; cite concrete artifact id + aPRD/frame/cut id. Caveman prose>",
-      "routes_to": "DERIVE-COMPONENTS",   // where fix belongs: DERIVE-COMPONENTS (default loop-back) | DEFINE-CONTRACTS | MODEL-DATA | MAP-NFR | MODEL-FLOWS | DERIVE-TESTS | RESOLVE-LOCAL | Phase 2 (bad ADR) | Phase 0 (bad WHAT)
-      "fix_hint": "<concrete, actionable change routed stage should make to clear this. Not 'make it better'. Caveman prose>"
-    }
-  ],
-  "issue_count": 0,                       // integer = length of issues
-  "critique_counts": {
-    "artifacts_reviewed": 6,
-    "issues": 0,                          // == issue_count
-    "by_category": {                      // tallies issues per category (sums to issue_count); walk issues, don't assume
-      "coverage-gap": 0,
-      "ownership-defect": 0,
-      "unmechanized-nfr": 0,
-      "frame-violation": 0,
-      "untestable-contract": 0,
-      "incomplete-flow": 0,
-      "undrained-queue": 0
-    }
-  }
-}
-```
-Zero issues → `verdict: clean`, `issues: []`, `issue_count: 0`, `by_category` all 0 — write file anyway (clean skeleton expected outcome; do not skip output on clean pass).
+5. Set `verdict`; tally `critique_counts` by walking issues; write `.hld/skeleton/critique.json` (schema: "hld-critique" registry id). Stop.
 
 ## Stop condition (skeleton)
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.
@@ -182,69 +109,7 @@ Run **all eight shared blocking categories** (1–7 re-scoped to slice + categor
 3. Read target slice's six increment artifacts + its `deferred-decisions.json`. Build slice id-set (slice R*, touched/introduced C*, touched/new CT*, slice E*, inherited/slice-queue NFRs, slice flow F*, slice local queue) and oracles (aPRD id-space; frame lock+INV floor; cut seams+deferred; triage queue; frozen skeleton ids + definitions as fidelity baseline).
 4. Run eight category checks across assembled slice increment, **recomputing each from primary arrays — never from slice producer's self-reported coverage/fidelity/summary block (see "Your lane")** — applying resolution test (shared Rule 2). Run skeleton-fidelity by cross-checking slice's frozen-id carries against frozen skeleton definitions (not the `verdict` field). Plus self-flagged-defect backstop (shared Rule 4).
 5. For each genuine blocker, mint issue `I*` (contiguous `I1, I2, …`) with `category` (one of eight), `target`, `finding` stating why hostile reviewer blocks slice freeze (cite concrete slice id + aPRD/frame/cut/frozen-skeleton id), `routes_to`, concrete `fix_hint`.
-6. Set `verdict` + `skeleton_fidelity.verdict`; tally `critique_counts` by walking issues; write `.hld/slices/<slice_id>/reconcile.json`. Stop.
-
-## Output schema (increment) — `.hld/slices/<slice_id>/reconcile.json`
-
-```json
-{
-  "slice_components_ref": ".hld/slices/S4/components.json",
-  "slice_contracts_ref": ".hld/slices/S4/contracts.json",
-  "slice_data_model_ref": ".hld/slices/S4/data-model.json",
-  "slice_nfr_mechanisms_ref": ".hld/slices/S4/nfr-mechanisms.json",
-  "slice_flows_ref": ".hld/slices/S4/flows.json",
-  "slice_test_specs_ref": ".hld/slices/S4/test-specs.json",
-  "slice_deferred_decisions_ref": ".hld/slices/S4/deferred-decisions.json",
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "adr_lock_ref": ".adr/adr.lock",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "rerank_ref": ".roadmap/08-rerank.json",
-  "skeleton_frozen_verified": true,       // skeleton.lock present + status==frozen + names frozen skeleton (don't recompute hash)
-  "class": "greenfield",
-  "mode": "increment",
-  "slice_id": "S4",                       // auto-selected target (task step 2)
-  "slice_name": "<carried verbatim from slice artifacts>",
-  "artifacts_reviewed": ["components.json", "contracts.json", "data-model.json", "nfr-mechanisms.json", "flows.json", "test-specs.json", "deferred-decisions.json"],  // slice files read
-  "verdict": "clean",                     // exactly clean|blocked; blocked iff issues non-empty, else clean (deterministic from issues)
-  "issues": [                             // blocking-grade ONLY (§5.10); [] on clean slice. No style nits, no taste
-    {
-      "id": "I1",                         // contiguous I1, I2, …
-      "category": "coverage-gap | ownership-defect | unmechanized-nfr | frame-violation | untestable-contract | incomplete-flow | undrained-queue | skeleton-fidelity",  // exactly one of eight
-      "target": "CT2",                    // concrete slice id concerned (C*/CT*/E*/F*/M*/R*/DP*); literal "none" only if pure ABSENCE (name missing thing in finding)
-      "finding": "<what wrong AND why blocks slice freeze; cite concrete slice id + aPRD/frame/cut/frozen-skeleton id. Caveman prose>",
-      "routes_to": "DERIVE-COMPONENTS",   // where fix belongs: DERIVE-COMPONENTS (default slice loop-back) | DEFINE-CONTRACTS | MODEL-DATA | MAP-NFR | MODEL-FLOWS | DERIVE-TESTS | RESOLVE-LOCAL | Phase 2 (bad ADR or frozen-skeleton fault) | Phase 0 (bad WHAT)
-      "fix_hint": "<concrete, actionable change routed slice stage should make to clear this. Not 'make it better'. Caveman prose>"
-    }
-  ],
-  "issue_count": 0,                       // integer = length of issues
-  "skeleton_fidelity": {                  // H14 — increment-only verdict: slice extends, never redraws, frozen skeleton
-    "redrawn_components": [],             // frozen C* slice changed (re-derived, not producer's field); MUST be empty on clean slice
-    "reshaped_contracts": [],            // frozen CT* slice reshaped; MUST be empty
-    "re_owned_entities": [],             // frozen E* slice re-owned/re-modeled; MUST be empty
-    "re_disposed_nfrs": [],              // frozen NFR slice re-disposed/re-realized; MUST be empty
-    "re_authored_contract_tests": [],    // frozen T-CT* slice re-authored (vs inherited by reference); MUST be empty
-    "re_tested_flows": [],               // frozen skeleton flow (F1) slice re-tested; MUST be empty
-    "build_dag_re_emitted": false,       // DAG re-emission — MUST be false (emitted once in skeleton, H7)
-    "verdict": "extends-not-redraws"     // "extends-not-redraws" iff no skeleton-fidelity issue; else describe breach (then also category-8 issue)
-  },
-  "critique_counts": {
-    "artifacts_reviewed": 7,
-    "issues": 0,                          // == issue_count
-    "by_category": {                      // tallies issues per category (sums to issue_count); walk issues, don't assume
-      "coverage-gap": 0,
-      "ownership-defect": 0,
-      "unmechanized-nfr": 0,
-      "frame-violation": 0,
-      "untestable-contract": 0,
-      "incomplete-flow": 0,
-      "undrained-queue": 0,
-      "skeleton-fidelity": 0
-    }
-  }
-}
-```
-Zero issues → `verdict: clean`, `issues: []`, `issue_count: 0`, `skeleton_fidelity.verdict: "extends-not-redraws"`, `by_category` all 0 — write file anyway (clean slice expected outcome; do not skip output on clean pass).
+6. Set `verdict` + `skeleton_fidelity.verdict`; tally `critique_counts` by walking issues; write `.hld/slices/<slice_id>/reconcile.json` (schema: "reconcile" registry id). Stop.
 
 ## Stop condition (increment)
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.

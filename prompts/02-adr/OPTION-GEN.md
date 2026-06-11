@@ -3,15 +3,9 @@ role: OPTION-GEN
 phase: 02-adr
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal option sourcing — reads disk, writes disk, stops. Decisions = delivery team domain; no client touch (PR1, §9)
-inputs:
-  - { path: ".adr/02-triage.json", format: "json — TRIAGE output; resolution_queue[] = work list (in-cut foundational DP ids to ground), also triage[] per-point verdicts" }
-  - { path: ".adr/01-decision-points.json", format: "json — DECISION-EXTRACT output; point BODIES per DP id (decision, category, forced_by[], blast_rationale, fork_evidence, cut_ref) — open question + what forces it" }
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). Forces each option's trade-offs characterized against (R*, C*, A*, E*, AC*). Read for context, not re-opened" }
-  - { path: ".roadmap/06-foundation-cut.json", format: "json — Phase 1 cut; cross_slice_invariants INV* = HARD properties aPRD fixed. Option violating INV = dead-on-arrival, not real alternative; keeps option space honest" }
-  - { path: ".adr/arch-canon.json", format: "json (OPTIONAL) — versioned architecture canon: cached option-sets + trade-off profiles per category (§7.1). Present: cheapest-first, verify currency. Absent: first-principles reasoning, flag canon-absent." }
 outputs:
-  - { path: ".adr/03-options/index.json", format: "json (manifest, schema below) — resolution_queue echo, one entry per grounded DP with its option file path + option_count, canon status, accounting" }
-  - { path: ".adr/03-options/<DP-id>.json", format: "json (one file per in-cut foundational DP in resolution_queue, schema below) — decision body carried verbatim + ≥2 real, unranked, live alternatives with trade-offs" }
+  - { path: ".adr/03-options/index.json", schema: "option-index" }
+  - { path: ".adr/03-options/<DP-id>.json", schema: "option-set" }
 escapes:
   - { when: ".adr/02-triage.json missing/unparseable", target: "self / HALT — no resolution_queue; nothing to ground" }
   - { when: ".adr/01-decision-points.json missing/unparseable", target: "self / HALT — no decision bodies (open question + forces); cannot ground a point whose body is absent" }
@@ -57,71 +51,10 @@ Need **≥2** passing all three per decision. aPRD + cut leave only **one** comp
 4. For each id in `resolution_queue[]`, in queue order:
    - Pull its body from `01-decision-points.json` (decision/category/forced_by/cut_ref), carry verbatim. (No body → `skipped[]`, continue.)
    - Source candidate options cheapest-first; apply three-clause real-option test (discriminator) + compliance gate; keep ≥2 distinct compliant real options (or mark `degenerate` if only one survives honestly).
-   - Per option record `option`, `summary`, `source`, `reason_to_consider`, `tradeoffs{strengths[],costs[]}`, `bears_on[]`. Neutral, unranked, no pick.
-   - Write per-DP file to `.adr/03-options/<DP-id>.json`.
-5. Build `03-options/index.json`: echo `resolution_queue`, list `option_files[]` (`{id, path, option_count}`), `canon_status`, `degenerate[]`, `skipped[]`, `option_set_counts`. Verify accounting (Rule 8) before writing.
+   - Per option record `option`, `summary`, `source`, `reason_to_consider`, `tradeoffs{strengths[],costs[]}`, `bears_on[]`. Neutral, unranked — list order is NOT preference order.
+   - Write per-DP file to `.adr/03-options/<DP-id>.json`. Set `option_count` = exact count of `options[]` entries written.
+5. Build `03-options/index.json`: echo `resolution_queue`, list `option_files[]` (`{id, path, option_count}`), `canon_status`, `degenerate[]`, `skipped[]`, `option_set_counts`. Set `decisions_grounded` = len(option_files); `total_options` = sum of every file's `option_count`; `min_options_per_decision` = smallest `option_count` across grounded files (must be ≥2 unless degenerate file present). Verify accounting (Rule 8) before writing.
 6. Write all files under `.adr/03-options/` (create dir if absent). Stop. EVALUATE-DECIDE reads option sets next.
-
-## Output schema
-
-### `.adr/03-options/<DP-id>.json` (one per in-cut foundational decision)
-```json
-{
-  "id": "DP1",                            // carried verbatim from 01; never re-minted
-  "decision": "<carried verbatim from 01; never re-authored>",
-  "category": "<carried verbatim from 01; never re-categorized>",
-  "forced_by": ["R1", "C1", "AC1"],       // carried verbatim from 01
-  "cut_ref": "FD1",                       // carried verbatim from 01
-  "grounding": {
-    "existing_system": "n/a — greenfield (C3): no existing system to conform to",  // brownfield: existing-system constraint (not authored)
-    "canon_status": "absent",             // "absent" (no arch-canon.json on disk) or canon version (e.g. "arch-canon.v1") when present
-    "source": "reasoned",                 // existing_system | canon | reasoned (source actually used; greenfield-no-canon → reasoned)
-    "note": "<one line: where option set came from; if reasoned, canon absent + first principles used + currency self-verified>"
-  },
-  "options": [                            // ≥2 real, distinct, compliant, UNRANKED alternatives (exactly 1 only if degenerate: true); order NOT preference order
-    {
-      "option": "<concrete candidate, named (e.g. 'Modular monolith with enforced module boundaries')>",
-      "summary": "<one line: what this approach is>",
-      "source": "reasoned",               // per-option provenance: canon | reasoned | existing_system
-      "reason_to_consider": "<one line: why competent team genuinely weighs it here — anti-strawman proof>",
-      "tradeoffs": {                       // NEUTRAL and bidirectional — every option carries both; never verdict, weight, ranking, or recommendation
-        "strengths": ["<neutral strength relative to this decision's forces>"],
-        "costs": ["<neutral cost / downside>"]
-      },
-      "bears_on": ["C2", "A13", "AC1"]     // aPRD/cut ids (R*/AC*/C*/A*/E*/INV*) whose forces trade-offs touch — eval hooks for EVALUATE-DECIDE; not score
-    }
-  ],
-  "option_count": 2,                      // == len(options)
-  "degenerate": false,                    // true only when exactly one compliant real option survives honestly; then degenerate_reason set + id in manifest degenerate[]
-  "degenerate_reason": null,              // why fork collapsed to one, when degenerate; null otherwise
-  "no_pick_note": "Live, unranked alternatives. EVALUATE-DECIDE scores against CONSTRAINTS / ACCEPTANCE / NFRs and picks (role 4); OPTION-GEN does not recommend."  // fixed reminder
-}
-```
-
-### `.adr/03-options/index.json` (manifest)
-```json
-{
-  "triage_ref": ".adr/02-triage.json",
-  "decision_points_ref": ".adr/01-decision-points.json",
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "class": "greenfield",
-  "skeleton_id": "S1",
-  "canon_status": "absent",
-  "resolution_queue": ["DP1", "DP2", "DP4", "DP6", "DP7", "DP10"],  // echoed from 02-triage
-  "option_files": [                       // exactly one entry per resolution_queue id (minus any skipped); len(option_files) + len(skipped) == len(resolution_queue)
-    { "id": "DP1", "path": "03-options/DP1.json", "option_count": 3 }
-  ],
-  "degenerate": [],                       // ids whose file is degenerate: true
-  "skipped": [],                          // {id, reason} for any queued id with no body in 01 (broken upstream contract); [] on clean run
-  "option_set_counts": {
-    "decisions_grounded": 6,              // == len(option_files)
-    "total_options": 0,                   // sum of every file's option_count
-    "min_options_per_decision": 2         // smallest option_count across grounded files (must be ≥2 unless degenerate file present)
-  }
-}
-```
-All prose (`summary`/`reason_to_consider`/`tradeoffs`/`note`/`reason`) is caveman too (governs artifact bodies — PR4).
 
 ## Stop condition
 - Guard tripped (no triage, no decision points, no frozen aPRD, unplaybooked class) → write nothing; print which guard fired + offending detail, "HALT".

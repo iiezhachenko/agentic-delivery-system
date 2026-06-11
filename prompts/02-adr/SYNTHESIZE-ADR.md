@@ -3,13 +3,9 @@ role: SYNTHESIZE-ADR
 phase: 02-adr
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal render — reads disk, writes disk, stops. No client touch (PR1, §9)
-inputs:
-  - { path: ".adr/04-conflicts.json", format: "json — RECONCILE output, THE GATE. Render ONLY when verdict == coherent; blocked routes back to re-decide first, render nothing. Carries decisions_checked, undecided_carried, skeleton_id, class" }
-  - { path: ".adr/03-options/decisions-index.json", format: "json — EVALUATE-DECIDE manifest; enumeration entry point + deterministic id-assignment order (ADR ids assigned in decisions[] array order)" }
-  - { path: ".adr/03-options/<DP-id>.decision.json", format: "json — per-DP decision; render SOURCE OF TRUTH for content (decision/category/forced_by/evaluation/rationale/rejected/consequences/traces + degenerate flags)" }
 outputs:
-  - { path: ".adr/drafts/<NNNN>-<slug>.draft.md", format: "markdown (schema below) — one Nygard ADR DRAFT per decided point (§6.1): frontmatter + Context/Decision/Alternatives/Consequences body. status Proposed (freeze promotes to log/ as Accepted)" }
-  - { path: ".adr/adr-index.json", format: "json (schema below) — machine index of the rendered draft set. CRITIQUE (role 7) reads it to enumerate the ADRs without parsing every markdown frontmatter" }
+  - { path: ".adr/drafts/<NNNN>-<slug>.draft.md", schema: null }
+  - { path: ".adr/adr-index.json", schema: "adr-index" }
 escapes:
   - { when: ".adr/04-conflicts.json missing or unparseable — no coherence/coverage gate to read", target: "self / HALT" }
   - { when: ".adr/04-conflicts.json verdict != coherent (blocked) — unresolved conflicts/violations/gaps", target: "EVALUATE-DECIDE re-decide / HALT — render nothing; report blocking_count + the blocking issue ids (§5.8, §5.11). The loop-back already routed; you don't perform it" }
@@ -42,8 +38,20 @@ Render to `.adr/drafts/` with `status: Proposed`, NOT to immutable `.adr/log/` a
 7. **Stay in lane.** No decide/re-decide/re-score/re-pick (D1 — EVALUATE-DECIDE owns pick), no re-detect-conflict / re-check-coverage (RECONCILE owns it), no re-source/add/drop/re-word options (OPTION-GEN owns set — render verbatim names with recorded assessments/why-rejected), no critique of own render (CRITIQUE catches flaws), no freeze/promote-to-log/`adr.lock`/`status: Accepted` (mechanical freeze after CRITIQUE clears, §5.7 step 10 — you stop at drafts), no client touch (§9).
 
 ## Rendering each decision — Nygard sections from decision file (§6.1)
-For each decision in manifest, open its `decision_ref`; render frontmatter + body per schema field comments. Section essentials:
-- **`title`** — one original line you author: concise active-voice statement of choice already made, derived from `decision_made` + `category` (e.g. "Adopt a single-deployment flat monolith", "Use PostgreSQL as the primary datastore"). Names choice, never new choice, never open question. ≤ ~12 words.
+For each decision in manifest, open its `decision_ref`; render frontmatter + body per field below. Each draft = one Nygard ADR: YAML frontmatter followed by Context/Decision/Alternatives considered/Consequences markdown sections. Frontmatter fields (write all, verbatim from source where noted):
+- `id` — assigned ADR-NNNN (monotonic, manifest order)
+- `title` — one original line authored; active-voice statement of choice, ≤ ~12 words
+- `status` — always `Proposed` this pass; freeze flips to Accepted when promoted to `log/`
+- `date` — today's date ISO 8601; obtain actual date, do not hard-code
+- `class` — from 04-conflicts / decisions-index
+- `scope` — `global` (foundation-pass decisions serve whole set, §5.1)
+- `mode` — `foundation` (records which pass emitted it, §6.2)
+- `category` — verbatim from decision file's `category`
+- `traces` — verbatim from file's `traces[]`, array unchanged (no add/drop/re-order); RECONCILE verified these resolve
+- `supersedes` — `null` (first foundation pass; nothing to supersede)
+- `superseded_by` — `null` (newly rendered; not yet superseded)
+
+Section essentials:
 - **`## Context`** — forces that make decision necessary; states problem, NOT answer (§6.1). Composed ONLY from file's `decision` (open question), `forced_by` ids, tensions in `rationale`/`evaluation` — without naming chosen option, no new force/aPRD id. Cite forcing ids inline (e.g. "R1, C1, AC1"). Faithful restatement, not fresh analysis.
 - **`## Decision`** — choice in active voice, one decision per ADR. `decision_made` option name must appear **verbatim as substring** (copy by paste; do NOT alter, reword, abbreviate, re-case, re-punctuate option's own words; do not substitute another option or hedge commitment). May wrap in active-voice frame + append accurate clarifiers from file. Pattern: `Adopt the <decision_made, verbatim>.` Example — pick `Single-deployment monolith (flat structure)` → "Adopt the **Single-deployment monolith (flat structure)** as the architectural style." (CORRECT). NOT "Adopt a single-deployment monolith with flat internal structure" (WRONG — reworded, downstream string-audit fails). For `degenerate_forced`, state choice plainly (name still verbatim); degeneracy explained in Alternatives.
 - **`## Alternatives considered`** — proof fork was live (D3, §6.2). List **each** `rejected[]` option: name (verbatim), faithful 1–2 line restatement of its neutral `assessment` (matching option in `evaluation[]`), `why_rejected` traced to force that ruled it out (carry file's reasoning; invent no new reason). These = alternatives genuinely weighed, not strawmen.
@@ -57,86 +65,8 @@ For each decision in manifest, open its `decision_ref`; render frontmatter + bod
 3. Per `{id, decision_ref, …}` in `decisions[]`, array order: open decision file (missing/unparseable → HALT, report broken contract). Collect `decision`, `category`, `decision_made`, `forced_by`, `evaluation`, `rejected`, `consequences`, `traces`, `degenerate_forced`, `degenerate_reason`.
 4. Assign `ADR-NNNN` (manifest order, from 0001). Author title. Compose Context (problem), Decision (pick verbatim), Alternatives considered (rejected + assessments + why-rejected; degenerate-honest if forced), Consequences (transcribed).
 5. Write `.adr/drafts/<NNNN>-<slug>.draft.md` (`status: Proposed`; create `.adr/drafts/` if absent). `<slug>` = kebab-case of title (lowercase, alphanumerics + hyphens, no trailing punctuation); `<NNNN>` = 4-digit id (e.g. `0001-adopt-a-single-deployment-flat-monolith.draft.md`).
-6. Build index entry. After all decisions: write `.adr/adr-index.json`. Verify accounting (Rules 7).
+6. Build index entry. After all decisions: write `.adr/adr-index.json`. Verify accounting (Rules 6).
 7. Stop.
-
-## Output schema — `.adr/drafts/<NNNN>-<slug>.draft.md`
-
-```markdown
----
-id: ADR-0001                              # assigned ADR-NNNN (monotonic, manifest order)
-title: Adopt a single-deployment flat monolith   # one original line; active-voice statement of choice, ≤ ~12 words
-status: Proposed                          # always Proposed here; freeze flips to Accepted
-date: 2026-06-07                          # today's date, ISO 8601; obtain actual date, do not hard-code
-class: greenfield                         # from 04-conflicts / decisions-index
-scope: global                             # foundation-pass decisions serve whole set (§5.1)
-mode: foundation                          # foundation pass (§6.2 — records which pass emitted it)
-category: Architectural style             # verbatim from decision file's category
-traces: [R1, C1, AC1, C2, A13, INV6]      # verbatim from file's traces[], array unchanged (no add/drop/re-order); RECONCILE verified these resolve
-supersedes: null                          # first foundation pass; nothing to supersede
-superseded_by: null                       # newly rendered; not yet superseded
----
-
-## Context
-
-<Forces from aPRD that make decision necessary — requirements, constraints,
-NFRs in tension, citing forcing ids. States problem, NOT answer. Composed only
-from file's `decision` question, `forced_by`, tensions in `rationale`/`evaluation`
-— no new force, no naming chosen option.>
-
-## Decision
-
-<Choice in active voice, one decision per ADR. `decision_made` option name
-appears verbatim as substring (copy by paste; do not reword/re-case/re-punctuate).>
-
-## Alternatives considered
-
-- **<rejected option name, verbatim>** — <faithful restatement of its neutral
-  `assessment`>; rejected because <`why_rejected`, traced to force that ruled it out>.
-- **<next rejected option>** — <…>
-<or, if degenerate_forced: "Fork was degenerate — only one compliant option
-survived constraints: <degenerate_reason, verbatim>." — never fabricated alternative.>
-
-## Consequences
-
-- **Positive:** <each `consequences.positive[]` item>
-- **Accepted cost:** <each `consequences.accepted_cost[]` item — downside knowingly taken on>
-- **Follow-on:** <each `consequences.follow_on[]` item — decisions this enables/constrains, carrying any DP/deferred ids>
-```
-
-## Output schema — `.adr/adr-index.json`
-
-```json
-{
-  "decisions_index_ref": "03-options/decisions-index.json",   // manifest enumerated
-  "conflicts_ref": ".adr/04-conflicts.json",                  // gate read
-  "class": "greenfield",
-  "skeleton_id": "S1",
-  "gate": { "reconcile_verdict": "coherent", "gated_on": ".adr/04-conflicts.json" },  // records verdict this render gated on
-  "adrs": [                                                   // one entry per rendered draft, in id order
-    {
-      "id": "ADR-0001",
-      "dp_id": "DP1",                                         // source decision point
-      "title": "Adopt a single-deployment flat monolith",
-      "status": "Proposed",                                   // Proposed this pass
-      "mode": "foundation",
-      "scope": "global",
-      "category": "Architectural style",
-      "traces": ["R1", "C1", "AC1", "C2", "A13", "INV6"],     // decision file's traces[] verbatim
-      "supersedes": null,                                     // null this pass
-      "superseded_by": null,                                  // null this pass
-      "degenerate_forced": false,
-      "draft_ref": "drafts/0001-adopt-a-single-deployment-flat-monolith.draft.md"  // draft path relative to .adr/
-    }
-  ],
-  "undecided_not_rendered": [],                               // manifest's undecided[] ids, echoed (rendered no ADR)
-  "adr_counts": {
-    "rendered": 1,                                            // == len(adrs)
-    "degenerate_forced": 0,                                   // count of rendered ADRs whose decision degenerate-forced
-    "undecided_skipped": 0                                    // == len(undecided)
-  }
-}
-```
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → follow its target; print which fired + offending detail.

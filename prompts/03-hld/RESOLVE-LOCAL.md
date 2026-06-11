@@ -4,28 +4,10 @@ phase: 03-hld
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment    # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A: drain TRIAGE's whole local queue, resolve forks skeleton structure forces, re-defer slice-owned locals); frozen skeleton present → INCREMENT PASS (Part B: drain only local forks THIS slice touches, inherit skeleton-resolved locals on its boxes). One role, two modes (H13/D9/D14)
 interactive: false          # internal structural sweep; client signed the WHAT, team owns the HOW (PR1, §9)
-inputs:
-  # — shared (both passes) —
-  - { path: ".adr/01-decision-points.json", format: "json — DP BODIES: decision text + category + forced_by + fork_evidence + cut_ref per DP" }
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). Trace oracle + forces each local fork resolved against" }
-  - { path: ".adr/adr.lock", format: "json — frozen baseline + manifest; freeze gate + id-continuation point (local ADR ids continue monotonically after current max). NEVER mutate this lock" }
-  - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — baselined foundational ADR bodies (mode:foundation, Accepted); frozen frame local resolution may NOT re-decide (re-deciding one = escalation signal → Phase 2)" }
-  - { path: ".roadmap/06-foundation-cut.json", format: "json — deferred[] = per-slice HOW-items (grounding for re-deferring slice-owned local); cross_slice_invariants INV* = hard floor" }
-  # — skeleton pass —
-  - { path: ".adr/02-triage.json", format: "json — SKELETON: deferred_queue[] = LOCAL DPs to drain; slice_deferred[] = FOUNDATIONAL-not-yet. INCREMENT: slice_deferred[] = foundational forks for a slice (recorded, not resolved here)" }
-  - { path: ".hld/skeleton/components.json", format: "json — SKELETON: emerging structure; locate fork's owning component + test whether resolving forces cross-box change (escalation test). INCREMENT: FROZEN graph (touched_components membership)" }
-  - { path: ".hld/skeleton/contracts.json", format: "json — SKELETON: seam contracts; with components.json, test whether resolving would change contract KIND (escalation signal). INCREMENT: frozen contracts (escalation test)" }
-  # — increment pass only —
-  - { path: ".hld/skeleton.lock", format: "json — DISPATCH signal + freeze gate: status==frozen → INCREMENT PASS extends this baseline (H14)" }
-  - { path: ".adr/deferred-decisions.json", format: "json — SKELETON-pass ledger: re_deferred[] = slice-owned locals (filtered defer_to==this slice) + local_adrs[] = skeleton-resolved locals slice inherits by reference (never re-opened, H14)" }
-  - { path: ".hld/slices/<slice_id>/components.json", format: "json — DERIVE-COMPONENTS increment output: introduced_components[] + touched_components[]. Slice's subgraph = membership gate for which inherited locals apply + which deferred forks this slice forces" }
-  - { path: ".hld/slices/<slice_id>/contracts.json", format: "json — DEFINE-CONTRACTS increment output: slice contract surface; presence = upstream Phase-3 increments ran (auto-select gate)" }
-  - { path: ".roadmap/08-rerank.json", format: "json — living roadmap: remaining_sequence (target-slice order) + completed[] (pinned/skipped) — auto-selects target slice (increment)" }
-  - { path: ".roadmap/02-slices.json", format: "json — slices[].requirements = R* target slice realizes; slice metadata (increment)" }
 outputs:
-  - { path: ".adr/drafts/<NNNN>-<slug>.draft.md", format: "markdown — one Nygard ADR draft per RESOLVED fork (status:Proposed, mode:slice, ids continue after current max). NOT written to .adr/log/; mechanical freeze promotes drafts→log" }
-  - { path: ".adr/deferred-decisions.json", format: "SKELETON json (Part A) — queue-resolution LEDGER: each deferred_queue DP's disposition (resolved | re-deferred | escalated) + ADR id / defer_to / route + accounting" }
-  - { path: ".hld/slices/<slice_id>/deferred-decisions.json", format: "INCREMENT json (Part B) — per-slice ledger: slice's queue drained + new local ADRs ([]) + inherited locals (by ref) + foundational_routed + accounting" }
+  - { path: ".adr/drafts/<NNNN>-<slug>.draft.md", schema: null }
+  - { path: ".adr/deferred-decisions.json", schema: "deferred-decisions" }
+  - { path: ".hld/slices/<slice_id>/deferred-decisions.json", schema: "deferred-decisions" }
 escapes:
   # — shared —
   - { when: ".adr/01-decision-points.json missing/unparseable", target: "self / HALT — no DP bodies (decision text / forced_by / fork_evidence) to resolve against" }
@@ -63,7 +45,7 @@ Read `.hld/skeleton.lock`. **Absent → SKELETON PASS (Part A):** no frozen base
 ## Rules (shared — both passes)
 1. **Carry DP body verbatim (classify + resolve, don't rewrite).** Carry `decision`, `category`, `forced_by[]`, `cut_ref` **verbatim** from `01` into each ledger entry. Resolution reasons + ADR prose yours to author; DP's own fields transcribed, never reworded.
 2. **Resolve with LIVE alternatives, force-traced (D1/D3, EVALUATE-DECIDE+SYNTHESIZE compressed).** Local ADR still an ADR: real options + honest pick. Per `resolved` fork: source candidate options from DP's own `fork_evidence` + frozen frame + emerging structure; name **concrete** local options (by Phase 3 lane fully moved to *deciding* — naming + picking local choice IS the job; RM11's name-don't-decide was *foundational* pre-draw boundary, not this). `## Alternatives considered` section assesses each rejected option **neutrally** (reads live, as option-property), then rejects it **traced to a force** (R*/AC*/A*/C*/INV* — never bare "worse", never recalled market/popularity/adoption claim, never invented benchmark; ground only in contract + drawn structure). No force separating two compliant options → say so honestly: "default among contract-equivalent equals" — never fabricate discriminator.
-3. **Render each resolved fork as Nygard ADR draft (§6.1 form).** `status: Proposed`, `mode: slice`, `scope: local`. Frontmatter: `{id, title, status:Proposed, date, class, scope:local, mode:slice, category, traces, supersedes:null, superseded_by:null, component:<owning C*>, resolves:<DP id>}`. Body: `## Context` (frame fork as problem — forces + emerging-structure constraint making it a fork now; do not open by naming chosen option), `## Decision` (picked local option, stated plainly), `## Alternatives considered` (each live option + neutral assessment + force-traced rejection, shared Rule 2), `## Consequences` (positive / accepted cost / follow-on — transcribed in substance). `title` is only free-authored summary line ("Adopt <option> for <local concern>").
+3. **Render each resolved fork as Nygard ADR draft (§6.1 form).** `status: Proposed`, `mode: slice`, `scope: local`. Frontmatter: `{id, title, status:Proposed, date, class, scope:local, mode:slice, category, traces, supersedes:null, superseded_by:null, component:<owning C*>, resolves:<DP id>}`. Body: `## Context` (frame fork as problem — forces + emerging-structure constraint making it a fork now; do not open by naming chosen option), `## Decision` (picked local option, stated plainly), `## Alternatives considered` (each live option + neutral assessment + force-traced rejection, shared Rule 2), `## Consequences` (positive / accepted cost / follow-on — transcribed in substance). `title` is only free-authored summary line ("Adopt <option> for <local concern>"); `<slug>` = kebab-case of title.
 4. **Thread traces verbatim, no padding (H4, P9).** Each local ADR's `traces[]` = DP's `forced_by[]` ids ∪ any aPRD id cited by name in ADR prose — every id carried **verbatim** from frozen aPRD, none minted/approximated, none padded (id decision does not turn on is false trace). `component` + `resolves` thread local ADR to its box + its queue item.
 5. **Honor frozen frame; NEVER re-decide foundational ADR (H2/H10) — THE escalation criterion (both passes).** Local resolution lives *inside* fixed foundation ADRs. May **reference** a foundational decision ("given PaaS deployment per ADR-0006, inject config via platform's environment variables") but may never change, contradict, or re-open one. **Escalation criterion:** a "local" fork resolvable only by forcing a cross-box change (new/re-cut component, changed contract KIND) or violating INV* is FOUNDATIONAL → disposition `escalated` → Phase 2 (change request); never resolve locally, never silently re-decide frame (§5.4/§5.11/H10).
 6. **Cheapest source first; LLM not source of foundational decision (P5/P11).** Truth = queued DP bodies + frozen aPRD forces + baselined ADR frame + drawn structure (+ increment: skeleton-pass ledger) in front of you. Resolve each fork from its `fork_evidence` candidates + forces it traces + emerging structure; specialize frame to *this* local fork, never free-invent (grounding floor = shared Rule 2). Every `traces` id verbatim in frozen aPRD; every `component` id in `components.json`; every referenced `ADR-*`/`INV*` in frame.
@@ -103,85 +85,6 @@ Each DP in `deferred_queue[]` gets exactly one of three dispositions:
 4. Write each `resolved` fork's draft to `.adr/drafts/<NNNN>-<slug>.draft.md` (Proposed, mode:slice, §6.1 form). Do NOT touch `adr.lock` or `.adr/log/`.
 5. Build `.adr/deferred-decisions.json` ledger by **walking actual lists** — one `resolutions[]` entry per queued DP, disposition buckets, `local_adrs[]` index, `escalations[]`, `resolve_counts`. Verify `resolved + re_deferred + escalated == queue_in == len(resolutions) == len(drained)` and `local_adrs_emitted == resolved` before writing.
 
-## Output schema — `.adr/deferred-decisions.json`
-
-```json
-{
-  "triage_ref": ".adr/02-triage.json",
-  "decision_points_ref": ".adr/01-decision-points.json",
-  "components_ref": ".hld/skeleton/components.json",
-  "contracts_ref": ".hld/skeleton/contracts.json",
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "adr_lock_ref": ".adr/adr.lock",
-  "adr_log_ref": ".adr/log/",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "lock_verified": true,                 // lock present + names frozen artifact (don't recompute hash)
-  "class": "greenfield",
-  "mode": "skeleton",
-  "skeleton_id": "S1",
-  "baseline_adr_max": "ADR-0006",        // highest ADR-NNNN in adr.lock.adrs[]; local ADR ids continue after it
-  "local_queue_in": ["DP3", "DP8", "DP9", "DP11"],  // == 02-triage.json deferred_queue[], verbatim (same set)
-  "resolutions": [                        // one entry per queued DP, deferred_queue[] order. decision/category/forced_by/cut_ref VERBATIM from 01; adr_id+draft_ref non-null IFF resolved; defer_to IFF re-deferred; escalate_to=="Phase 2 (change request)" IFF escalated; owning_component = C* fork lives in (null if none)
-    { "dp_id": "DP3", "decision": "<verbatim>", "category": "<verbatim>", "forced_by": ["A1","R3","AC3"], "cut_ref": "deferred:S3", "owning_component": "C5", "disposition": "resolved | re-deferred | escalated", "adr_id": null, "draft_ref": null, "defer_to": "S3", "escalate_to": null, "rationale": "<grounded reason for the disposition>" }
-  ],
-  "resolved": [{ "dp_id": "DP9", "adr_id": "ADR-0007" }],  // bucket; pinned element shape {dp_id, adr_id} — object form only, never bare id strings (downstream role-8 audit consumes deterministically)
-  "re_deferred": [{ "dp_id": "DP3", "defer_to": "S3" }],   // bucket; pinned element shape {dp_id, defer_to}
-  "escalated": [],                        // bucket; pinned element shape {dp_id}
-  "drained": ["DP3", "DP8", "DP9", "DP11"],  // == deferred_queue[]; confirms every queued item got disposition. resolved ∪ re_deferred ∪ escalated partition this
-  "local_adrs": [                         // index of every emitted draft; one per resolved fork
-    { "id": "ADR-0007", "dp_id": "DP9", "title": "<author prose>", "status": "Proposed", "mode": "slice", "scope": "local", "component": "C?", "category": "<verbatim DP category>", "traces": ["A2","A6"], "draft_ref": "drafts/0007-<slug>.draft.md" }
-  ],
-  "escalations": [],                      // each {dp_id, surfaced_as:"foundational", finding, route:"Phase 2 (change request)"}; [] on clean run where no local fork is foundational
-  "note": null,                           // null normally; short string for empty-queue or no-resolution case
-  "resolve_counts": {                     // walk to count, don't estimate
-    "queue_in": 4,                        // == len(local_queue_in)
-    "resolved": 0,
-    "re_deferred": 4,
-    "escalated": 0,                       // resolved + re_deferred + escalated == queue_in
-    "local_adrs_emitted": 0               // == resolved == len(local_adrs)
-  }
-}
-```
-
-## Output schema — `.adr/drafts/<NNNN>-<slug>.draft.md` (one per resolved fork)
-
-```markdown
----
-id: ADR-0007                            # continues monotonically after baseline_adr_max, in deferred_queue[] order among resolved forks
-title: <Adopt <option> for <local concern> — author's prose; the only free-authored summary line>
-status: Proposed                        # always Proposed — never Accepted (local drafts, not frozen foundation)
-date: <yyyy-mm-dd>
-class: greenfield
-scope: local
-mode: slice                             # always slice — never foundation
-category: <verbatim DP category>
-traces: [<R*/AC*/A*/C*/INV* — forced_by ∪ cited-in-prose, verbatim; no padding/minting (shared Rule 4)>]
-supersedes: null
-superseded_by: null
-component: <owning C*>                   # threads local ADR to its box
-resolves: <DP id>                        # threads to its queue item
----
-
-## Context
-
-<Frame local fork as problem: forces making it a live fork, emerging-structure constraint (which component, which contract) surfacing it now, frame elements (foundational ADRs / INV*) it must live inside. Do NOT open by naming chosen option.>
-
-## Decision
-
-<Picked local option, stated plainly.>
-
-## Alternatives considered
-
-- **<rejected option>** — <neutral assessment, reads live as option-property> Rejected because <traced to specific R*/AC*/A*/C*/INV* force, or "default among contract-equivalent equals" if no force separates them>.
-
-## Consequences
-
-- **Positive:** <...>
-- **Accepted cost:** <...>
-- **Follow-on:** <... — e.g. which slice or component this binds>
-```
-`<slug>` = kebab-case of title; filename `<NNNN>-<slug>.draft.md` in `.adr/drafts/`. Body Nygard four-section — Decision carries picked option, Alternatives read live and reject by force.
-
 ## Stop condition
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.
 - Empty queue (empty-queue escape) → write the ledger with empty resolutions + note + zeroed counts; state "nothing to drain"; stop.
@@ -218,58 +121,7 @@ Drain only local forks ONE slice touches (§5.4). Frozen frame + skeleton-pass l
 5. Build slice local queue (delta Rule 4): skeleton ledger `re_deferred[]` filtered to `defer_to == target slice` (skip role-deferred). Drain each via discriminator; resolved → pick + mint id + render draft.
 6. Inherit skeleton-resolved locals on `touched_components` (delta Rule 5). Route foundational `slice_deferred` forks for this slice out (delta Rule 6).
 7. Surface slice fork turning out foundational → `escalations[]` (delta Rule 8).
-8. Write each `resolved` fork's draft to `.adr/drafts/<NNNN>-<slug>.draft.md` (Proposed, mode:slice, §6.1 form — Part A draft schema). Build `.hld/slices/<slice_id>/deferred-decisions.json` ledger by walking actual lists; verify `resolved + re_deferred + escalated == queue_in == len(resolutions) == len(drained)` and `new_local_adrs_emitted == resolved` before writing. Create slice dir if absent.
-
-## Output schema (increment) — `.hld/slices/<slice_id>/deferred-decisions.json`
-
-```json
-{
-  "decision_points_ref": ".adr/01-decision-points.json",
-  "triage_ref": ".adr/02-triage.json",
-  "skeleton_ledger_ref": ".adr/deferred-decisions.json",   // skeleton-pass ledger this extends
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "slice_components_ref": ".hld/slices/<slice_id>/components.json",
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "adr_lock_ref": ".adr/adr.lock",
-  "adr_log_ref": ".adr/log/",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "skeleton_frozen_verified": true,        // skeleton.lock present + status==frozen (don't recompute hash)
-  "class": "greenfield",
-  "mode": "increment",
-  "slice_id": "S4",                        // auto-selected target (delta Rule 2)
-  "slice_name": "<carried verbatim from 02-slices / 08-rerank>",
-  "introduced_components": ["C3"],         // carried from slice components.json
-  "touched_components": ["C3", "C1", "C2", "C6"],  // ids, from slice components.json (membership gate for inheritance)
-  "current_adr_max": "ADR-0008",           // highest ADR-NNNN across adr.lock.adrs[] AND skeleton ledger local_adrs[]; new local ADR ids continue after
-  "slice_local_queue": [],                 // LOCAL forks routed to THIS slice = skeleton ledger re_deferred[] with defer_to==slice_id (role-deferred skipped). [] in greenfield when skeleton parked none here — CORRECT, not a miss
-  "resolutions": [                         // one entry per slice_local_queue item, skeleton-ledger order; [] when queue empty. Same entry shape + IFF rules as Part A resolutions[]; resolved adr_id continues after current_adr_max, draft uses Part A draft schema
-    { "dp_id": "DP3", "decision": "<verbatim>", "category": "<verbatim>", "forced_by": ["A1","R3","AC3"], "cut_ref": "deferred:S3", "owning_component": "C5", "disposition": "resolved | re-deferred | escalated", "adr_id": "ADR-0009", "draft_ref": "drafts/0009-<slug>.draft.md", "defer_to": null, "escalate_to": null, "rationale": "<grounded reason — why THIS slice's flow forces/defers/escalates it>" }
-  ],
-  "resolved": [],                          // bucket; pinned element shape {dp_id, adr_id}
-  "re_deferred": [],                       // bucket; pinned element shape {dp_id, defer_to}
-  "escalated": [],                         // bucket; pinned element shape {dp_id}
-  "drained": [],                           // == slice_local_queue; resolved ∪ re_deferred ∪ escalated partition this
-  "new_local_adrs": [],                    // index of drafts emitted THIS slice; one per resolved fork; [] when queue empty. Element shape {id, dp_id, title, status:"Proposed", mode:"slice", scope:"local", component, category, traces, draft_ref}
-  "inherited_local_adrs": [                // skeleton-resolved locals whose component ∈ touched_components; carried BY REFERENCE, never re-opened (H14)
-    { "id": "ADR-0007", "dp_id": "DP8", "component": "C2", "title": "<verbatim from skeleton ledger>", "scope": "local", "mode": "slice", "source": "skeleton" },
-    { "id": "ADR-0008", "dp_id": "DP9", "component": "C2", "title": "<verbatim>", "scope": "local", "mode": "slice", "source": "skeleton" }
-  ],
-  "foundational_routed": [                 // TRIAGE slice_deferred[] forks for this slice — FOUNDATIONAL, routed OUT to slice's Phase-2 increment, NOT resolved here
-    { "dp_id": "DP5", "defer_to": "S4", "route": "Phase 2 (ADR slice increment)", "reason": "<one line: foundational decision (boundary/module-cut strategy) TRIAGE parked for this slice; out of RESOLVE-LOCAL's lane — slice's Phase-2 ADR increment resolves it>" }
-  ],
-  "escalations": [],                        // slice local fork turning out foundational; each {dp_id, surfaced_as:"foundational", finding, route:"Phase 2 (change request)"}; []
-  "note": null,                             // null normally; short string for empty-queue case (e.g. "S4 introduces no local fork; skeleton resolved/parked full local queue — inherits ADR-0007/0008 on touched C2")
-  "resolve_counts": {                       // walk to count, don't estimate
-    "queue_in": 0,                          // == len(slice_local_queue)
-    "resolved": 0,
-    "re_deferred": 0,
-    "escalated": 0,                         // resolved + re_deferred + escalated == queue_in
-    "new_local_adrs_emitted": 0,            // == resolved == len(new_local_adrs)
-    "inherited_local_adrs": 2,              // == len(inherited_local_adrs)
-    "foundational_routed": 1                // == len(foundational_routed)
-  }
-}
-```
+8. Write each `resolved` fork's draft to `.adr/drafts/<NNNN>-<slug>.draft.md` (Proposed, mode:slice, Nygard ADR draft per shared Rule 3). Build `.hld/slices/<slice_id>/deferred-decisions.json` ledger by walking actual lists; verify `resolved + re_deferred + escalated == queue_in == len(resolutions) == len(drained)` and `new_local_adrs_emitted == resolved` before writing. Create slice dir if absent.
 
 ## Stop condition (increment)
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.

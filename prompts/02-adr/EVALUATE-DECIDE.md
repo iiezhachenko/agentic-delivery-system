@@ -3,14 +3,9 @@ role: EVALUATE-DECIDE
 phase: 02-adr
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal evaluation + decision — reads disk, writes disk, stops. The HOW is the delivery team's domain; no client touch (PR1, §9) — client-visible decisions are a downstream GATE concern
-inputs:
-  - { path: ".adr/03-options/index.json", format: "json — OPTION-GEN manifest; enumeration entry point: which DPs have option sets + where each file lives (option_files[] + degenerate[]/skipped[])" }
-  - { path: ".adr/03-options/<DP-id>.json", format: "json — OPTION-GEN per-DP option set; live unranked alternatives to score + pick among (decision/category/forced_by/cut_ref + options[] + degenerate flag). bears_on[] = eval hooks" }
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). Scoring dimensions (CONSTRAINTS C*, ACCEPTANCE AC*, assumptions as cross-cutting NFRs: A6/A13/A9/C2). Scored against, never re-opened (D9)" }
-  - { path: ".roadmap/06-foundation-cut.json", format: "json — Phase 1 cut; cross_slice_invariants INV* = HARD floor (pick breaching an INV* invalid regardless of merit). Source of INV ids for traces/follow_on" }
 outputs:
-  - { path: ".adr/03-options/decisions-index.json", format: "json (manifest, schema below) — one entry per decided DP: pick + traces + decision-file path, plus undecided[]. Entry point RECONCILE + SYNTHESIZE-ADR read" }
-  - { path: ".adr/03-options/<DP-id>.decision.json", format: "json (one file per decided in-cut foundational DP, schema below) — per-option evaluation (live, before the pick), the chosen option, traced rejections, consequences, traces" }
+  - { path: ".adr/03-options/decisions-index.json", schema: "decisions-index" }
+  - { path: ".adr/03-options/<DP-id>.decision.json", schema: "decision" }
 escapes:
   - { when: ".adr/03-options/index.json missing/unparseable", target: "self / HALT — no manifest to enumerate; cannot know which option sets to decide" }
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no CONSTRAINTS/ACCEPTANCE/NFR forces to score against; Phase 2 decides against the lock-named CURRENT frozen WHAT, never a stale prior version" }
@@ -64,7 +59,7 @@ Per decision, score **every** option against forces — only forces contract rai
 2. Inventory scoring forces: aPRD's hard CONSTRAINTS (C*), ACCEPTANCE (AC*), assumptions as cross-cutting NFRs (A6, A13, A9, C2, …); cut's `cross_slice_invariants[]` (INV*) = hard floor.
 3. For each `{id, path, option_count}` in `option_files[]`, in manifest order:
    - Open option file at its `path`. Missing/unparseable → add `{id, reason}` to `undecided[]`, continue.
-   - Carry `id`/`decision`/`category`/`forced_by`/`cut_ref` verbatim.
+   - Carry `id`/`decision`/`category`/`forced_by`/`cut_ref`/`grounding_source` verbatim from option file.
    - Write one `evaluation` entry per option (neutral assessment + `decisive_factors`), grounded in `bears_on` + `forced_by` + C*/AC*/A*/INV* forces. `len(evaluation) == option_count`.
    - Pick one compliant option → `decision_made` (verbatim name) + `rationale` (forces + weighting). Degenerate → forced (Rule 9). No compliant option → `undecided[]`, continue.
    - Write `rejected[]` (every non-picked option, each traced to a force).
@@ -72,75 +67,6 @@ Per decision, score **every** option against forces — only forces contract rai
    - Write per-DP decision file to `.adr/03-options/<DP-id>.decision.json`.
 4. Build `03-options/decisions-index.json`: list `decisions[]`, `undecided[]`, `decision_counts`. Verify accounting (Rule 10) before writing.
 5. Write all files under `.adr/03-options/`. Stop. RECONCILE checks coherence + coverage next.
-
-## Output schema
-
-### `.adr/03-options/<DP-id>.decision.json` (one per decided in-cut foundational decision)
-```json
-{
-  "id": "DP1",                            // carried verbatim from option file; never re-minted
-  "decision": "<carried verbatim from option file; never re-authored>",
-  "category": "<carried verbatim; never re-categorized>",
-  "forced_by": ["R1", "C1", "AC1"],       // carried verbatim
-  "cut_ref": "FD1",                       // carried verbatim
-  "options_ref": "03-options/DP1.json",   // option file this decision made from (join back to OPTION-GEN's set)
-  "grounding_source": "reasoned",         // carried from option file's grounding.source (greenfield-no-canon → reasoned)
-  "evaluation": [                          // one entry PER option (len == option_count); proof alternatives were live (D1, D3)
-    {
-      "option": "<option name, verbatim from option file>",
-      "assessment": "<neutral: how this option fares against forces its bears_on + decision's forced_by raise — written as property of option, BEFORE any pick. Cites real ids.>",
-      "decisive_factors": ["C2", "A13", "INV6"]  // aPRD/cut ids most driving its standing
-    }
-  ],
-  "decision_made": "<chosen option's `option` string, VERBATIM — must match one evaluation entry. Exactly one. Compliant (no INV*/hard-C* breach)>",
-  "rationale": "<why this option's trade-off profile best satisfies contract; names forces that tip it + weighting (e.g. C2 timeline + A13 scale dominate at this size). Reads as reached-by-weighing, not foregone. Contract indifferent between finalists → say so, default among equals.>",
-  "rejected": [                            // one entry per NON-picked option (len == option_count - 1 normally; [] when degenerate)
-    {
-      "option": "<non-picked option's name, verbatim>",
-      "why_rejected": "<concrete consequence that ruled it out, traced to specific force (C*/AC*/A*/INV*/forced_by id) — never bare 'worse'>"
-    }
-  ],
-  "consequences": {                        // forward-looking; tells Phase 3 what HLD must honor
-    "positive": ["<what pick buys, traced to force it satisfies>"],
-    "accepted_cost": ["<downside knowingly taken on — trade-off accepted by this pick>"],
-    "follow_on": ["<decision this enables or constrains; may reference DP id, INV id, or deferred item — NOTED cross-decision dependency, not resolution>"]
-  },
-  "traces": ["R1", "C1", "AC1"],          // forced_by ∪ additional aPRD/cut ids cited as decisive. Real ids only; no padding (each in forced_by OR cited by name in prose), no omission. Do NOT copy bears_on wholesale
-  "degenerate_forced": false,             // true only when option file was degenerate: true (single compliant option); then rejected: [], degenerate_reason carried
-  "degenerate_reason": null,              // carried from option file when degenerate_forced; null otherwise
-  "lane_note": "Decision content for SYNTHESIZE-ADR (role 6) to render + RECONCILE (role 5) to coherence-check. EVALUATE-DECIDE picks; it does not assign an ADR id, reconcile cross-decision conflicts, or check coverage."  // fixed reminder
-}
-```
-
-### `.adr/03-options/decisions-index.json` (manifest)
-```json
-{
-  "options_index_ref": "03-options/index.json",
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "class": "greenfield",
-  "skeleton_id": "S1",
-  "decisions": [                           // one entry per decided id (those NOT in undecided[]); traces echoed for RECONCILE's coverage scan
-    {
-      "id": "DP1",
-      "category": "Architectural style",
-      "decision_made": "<chosen option name, verbatim>",
-      "options_ref": "03-options/DP1.json",
-      "decision_ref": "03-options/DP1.decision.json",
-      "option_count": 2,
-      "degenerate_forced": false,
-      "traces": ["R1", "C1", "AC1"]
-    }
-  ],
-  "undecided": [],                         // {id, reason} for any option-file id that could not be decided (missing/unparseable file, all-non-compliant set, or aPRD-defect block routed to Phase 0); [] on clean run
-  "decision_counts": {                     // len(decisions) + len(undecided) == len(option_files)
-    "decisions_made": 6,                   // == len(decisions)
-    "degenerate_forced": 0,                // count of decided files with degenerate_forced: true
-    "undecided": 0                         // == len(undecided)
-  }
-}
-```
-All prose (`assessment`/`rationale`/`why_rejected`/consequences/`reason`) is caveman (governs artifact bodies too — PR4).
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → follow its target; print which fired + offending detail.

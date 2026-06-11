@@ -3,12 +3,8 @@ role: DECISION-EXTRACT
 phase: 02-adr
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # internal sweep — reads disk, writes disk, stops. Decisions are the delivery team's domain; client signed the WHAT, no client touch (PR1, §9)
-inputs:
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). The contract walked for forks (PROJECT, ENTITIES E*, REQUIREMENTS R*, CONSTRAINTS C*, ASSUMPTIONS A*, OUT_OF_SCOPE, ACCEPTANCE AC*); CLASS read from THIS resolved body (dispatches playbook)" }
-  - { path: ".aprd/aprd.lock", format: "json — freeze signature AND version resolver: `artifact` field names CURRENT frozen WHAT (read FIRST → resolves entry above); freeze gate Phase 2 dispatches against (present + status==frozen + named artifact exists on disk = file walked; do not recompute hash)" }
-  - { path: ".roadmap/06-foundation-cut.json", format: "json — Phase 1 cut; names which foundational decision CATEGORIES are in play now (FD*, skeleton_seams[], cross_slice_invariants INV*, deferred[]). Seeds recognition, scopes the foundation pass" }
 outputs:
-  - { path: ".adr/01-decision-points.json", format: "json (schema below) — extracted decision points DP*, checklist coverage, accounting" }
+  - { path: ".adr/01-decision-points.json", schema: "01-decision-points" }
 escapes:
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — nothing frozen to decide against; Phase 2 consumes only the lock-named CURRENT FROZEN WHAT (P8/D9), never a draft, never a stale prior version" }
   - { when: ".roadmap/06-foundation-cut.json missing/unparseable", target: "self / HALT — no cut to scope the foundation pass; cannot extract against an absent cut" }
@@ -62,48 +58,10 @@ Pass all three → emit. Fail any → record in `checklist_coverage` (closed/not
 1. Read all three inputs. Check guards (frontmatter `escapes:`) — any tripped → HALT, report which fired + offending detail, write nothing. Else continue.
 2. Inventory frozen aPRD: every `R*`, `AC*` (with `req_ref`), `C*`, `A*`, `E*`, `PROJECT` statement. From cut, note `foundational_decisions[]` (FD*), `skeleton_seams[]`, `cross_slice_invariants[]` (INV*), `deferred[]`. This = material you walk.
 3. Walk §-checklist category by category (Rule 2). For each, run discriminator: ≥1 live, forced, structurally-significant fork? Seed from cut (Rule 3): expand FD categories, hunt hidden forks, treat INV* as fixed forces. Record every category's verdict in `checklist_coverage`.
-4. For each emitted fork build point: `decision` (open question, RM11), `category` (§-taxonomy label), `forced_by` (≥1 verbatim aPRD id, only genuine forcing elements — no padding; timeline/scale constraints rarely force HOW-fork, cite only when fork genuinely turns on it), `candidate_blast_radius` (`foundational` if determines what components ARE / how boundaries cut — pre-draw, cross-box; `local` if made while filling inside of already-decided box) + `blast_rationale`, `fork_evidence` (≥2 options exist). Split any bundled fork (Rule 4).
-5. Surface any unframeable/contradictory force → `aprd_defects[]` with reason + escape target. Never silently drop forced fork.
+4. For each emitted fork build point: `decision` (open question, RM11), `category` (§-taxonomy label), `forced_by` (≥1 verbatim aPRD id, only genuine forcing elements — no padding; timeline/scale constraints rarely force HOW-fork, cite only when fork genuinely turns on it), `candidate_blast_radius` (`foundational` if determines what components ARE / how boundaries cut — pre-draw, cross-box; `local` if made while filling inside of already-decided box) + `blast_rationale`, `fork_evidence` (≥2 options exist). Split any bundled fork (Rule 4). For adversarially-found fork cut did not name, set `cut_ref` to bare JSON null (not string "null").
+5. Surface any unframeable/contradictory force → `aprd_defects[]` with reason + escape target. Never silently drop forced fork. Clean run: `aprd_defects` = [] (empty is correct, not a miss).
 6. Sort + mint `DP1..DPn` (Rule 7). Fill `decision_point_counts` by **tallying actual `candidate_blast_radius` of every emitted point** (count `foundational`/`local` separately, do not estimate); verify `foundational + local == total == decision_points.length` before writing. Right sum with wrong sub-count = classic miscount — recount by walking.
 7. Write JSON to `.adr/01-decision-points.json` (create `.adr/` if absent). Stop.
-
-## Output schema — `.adr/01-decision-points.json`
-
-```json
-{
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "lock_verified": true,                 // lock present + status==frozen + named artifact exists on disk = the file walked (resolved, not hardcoded; do not recompute hash)
-  "class": "greenfield",                 // read from resolved aPRD body (feature-add body carries CLASS: feature-add)
-  "skeleton_id": "S1",
-  "decision_points": [                    // emission order: checklist order, ties by lowest forced_by id position
-    {
-      "id": "DP1",                        // stable DP* space, contiguous from DP1, emission order
-      "decision": "<open question / fork, what must be chosen — never answer; no vendor/stack/schema/endpoint (RM11)>",
-      "category": "<exactly one §-taxonomy label: Architectural style | Tech stack | Persistence | Sync vs async | Boundary strategy | API style | Cross-cutting | Deployment topology | Build/test strategy | Conformance>",
-      "forced_by": ["R1", "C1", "AC1"],   // NON-EMPTY array of frozen-aPRD ids, verbatim; only genuine forcing elements (removing id weakens fork), no padding. Point tracing to nothing = invalid — drop (D4)
-      "candidate_blast_radius": "foundational",  // exactly foundational | local; NEVER trivial (trivial convention not a decision point). PROPOSAL; TRIAGE owns binding call
-      "blast_rationale": "<one line grounding tag — pre-draw/cross-box (foundational) or inside-one-box (local)>",
-      "fork_evidence": "<one line: ≥2 real compliant resolutions exist — genuineness proof for discriminator clause 2, NOT enumerated/evaluated option set (OPTION-GEN's job)>",
-      "cut_ref": "FD1"                    // JSON string naming cut element traced to ("FD*" | "seam:<name>" | "deferred:<slice>"), OR JSON literal null (bare null, never "null") for adversarially-found fork cut did not name (null signals cut may have been thin)
-    }
-  ],
-  "checklist_coverage": [                  // EVERY §-taxonomy category appears exactly once — full accounting, no silent omission (P9)
-    { "category": "Architectural style", "fired": true,  "decision_points": ["DP1"], "note": "<why fired>" },
-    { "category": "Sync vs async",       "fired": false, "decision_points": [],      "note": "closed by A13/INV6 — single-server synchronous fixed; no live fork" },
-    { "category": "Conformance",         "fired": false, "decision_points": [],      "note": "not applicable — greenfield, no existing system" }
-  ],
-  "aprd_defects": [                        // forces that cannot be framed (contradictory/underspecified); [] on clean run
-    { "force": "<contradictory/underspecified force>", "reason": "<why no decision point can be framed>", "escape": "Phase 0 (change request)" }
-  ],
-  "decision_point_counts": {               // walk to count, do not estimate
-    "total": 0,                            // == decision_points.length
-    "foundational": 0,                     // tallied by walking emitted points
-    "local": 0                             // foundational + local == total
-  }
-}
-```
-All `decision`/`blast_rationale`/`fork_evidence`/`note`/`reason` content = caveman prose (governs artifact bodies too — PR4); keys/ids literal.
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which guard fired + offending detail; "HALT".

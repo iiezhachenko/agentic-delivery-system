@@ -4,20 +4,9 @@ phase: 03-hld
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 pass: skeleton|increment    # DISPATCHED on disk state: no frozen skeleton → SKELETON PASS (Part A); frozen skeleton present → INCREMENT PASS (Part B). One role, two modes (H13/D9)
 interactive: false          # internal structural sweep; client signed the WHAT, team owns the HOW (PR1, §9)
-inputs:
-  # — shared (both passes) —
-  - { path: ".adr/adr.lock", format: "json — FROZEN ADR baseline + manifest (adrs[]{id,dp_id,title,status,mode,scope,category,traces,log_ref}); the freeze gate Phase 3 dispatches against" }
-  - { path: ".adr/log/<NNNN>-<slug>.md", format: "markdown — baselined ADR bodies; the Architectural-style and/or Boundary-strategy ADR is the CUT DRIVER, rest of frame constrains" }
-  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — FROZEN aPRD RESOLVED via lock (NOT hardcoded path): read .aprd/aprd.lock, open .aprd/ + its `artifact` value = CURRENT frozen version (greenfield→aprd.frozen.md, feature-add→aprd.v<N>.frozen.md). The WHAT to cluster: R* = responsibilities, E* = owned entities; trace oracle" }
-  - { path: ".roadmap/06-foundation-cut.json", format: "json — skeleton_seams[] = component-graph recognition seed; INV* = aPRD-fixed properties the structure must honor (frame floor)" }
-  # — increment pass only —
-  - { path: ".hld/skeleton.lock", format: "json — DISPATCH signal + freeze gate: status==frozen → INCREMENT PASS extends this baseline (H14)" }
-  - { path: ".hld/skeleton/components.json", format: "json — FROZEN base graph; reused components carried VERBATIM, never redrawn (increment)" }
-  - { path: ".roadmap/08-rerank.json", format: "json — living roadmap: remaining_sequence (target-slice order) + introduction_map (slice→introduced C*) + completed[] (pinned/skipped) (increment)" }
-  - { path: ".roadmap/02-slices.json", format: "json — slices[].requirements/acceptance = the R*/AC* the target slice realizes; coverage oracle (increment)" }
 outputs:
-  - { path: ".hld/skeleton/components.json", format: "SKELETON: json (Part A schema) — full skeleton component graph: components, dependency edges, single-owner entity assignment, seam realization, coverage" }
-  - { path: ".hld/slices/<slice_id>/components.json", format: "INCREMENT: json (Part B schema) — slice-scoped component delta: touched subgraph (introduced + reused), new-capability boxes/edges (typically []), slice coverage, skeleton-fidelity verdict" }
+  - { path: ".hld/skeleton/components.json", schema: "components" }
+  - { path: ".hld/slices/<slice_id>/components.json", schema: "components" }
 escapes:
   # — shared —
   - { when: ".aprd/aprd.lock missing / status != frozen, OR the artifact it names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no WHAT to cluster; Phase 3 consumes only the lock-named CURRENT FROZEN WHAT (P8/H9), never a stale prior version" }
@@ -51,7 +40,7 @@ Read `.hld/skeleton.lock`. **Absent → SKELETON PASS (Part A):** no frozen base
 
 ## Rules (shared — both passes)
 1. **Stay in lane — boxes + edges only.** No contracts (DEFINE-CONTRACTS), no local ADRs (RESOLVE-LOCAL), no authoritative data model / adversarial ownership flag (MODEL-DATA), no NFR mechanisms (MAP-NFR), no flow path (MODEL-FLOWS), no cross-cutting placement, no tests/build-DAG artifact (DERIVE-TESTS), no hostile audit (RECONCILE/CRITIQUE — achieve+report coverage), no client touch (§9). NEVER mutate frozen `components.json` or a sibling slice's increment.
-2. **Cheapest source first; LLM not source (P5/P11).** Truth = frozen aPRD + baselined ADR frame + foundation cut in front of you, not how a web app is "usually" structured. Boundary-strategy ADR is structure source — specialize to *these* requirements, never free-invent (H12). Every `traces`/`E*`/`seam`/`C*`/`R*`/`ADR-*`/`INV*` id must exist verbatim in inputs — never mint, never approximate. Compose what the structure decisions imply; never source the decision.
+2. **Cheapest source first; LLM not source (P5/P11).** Truth = frozen aPRD + baselined ADR frame + foundation cut in front of you, not generic web-app structure assumptions. Boundary-strategy ADR is structure source — specialize to *these* requirements, never free-invent (H12). Every `traces`/`E*`/`seam`/`C*`/`R*`/`ADR-*`/`INV*` id must exist verbatim in inputs — never mint, never approximate. Compose what the structure decisions imply; never source the decision.
 3. **Honor frame; escape, never re-decide or re-spec (H2/H10/H14).** Frame unbuildable (foundational ADR no legal structure can honor), or extending a frozen skeleton needs a frozen box/edge redrawn → `frame_conflicts[]` {adrs in tension + why} → Phase 2 (increment: thin-skeleton signal, Phase 2/3). Requirement unframeable (cannot name responsibility it implies) → `aprd_defects[]` {reason} → Phase 0. Both are change requests; Phase 3 patches no upstream artifact in place, NEVER redraws the frozen graph.
 
 ---
@@ -68,11 +57,11 @@ Pass all three → draw. Fail 1 → drop (gold-plating). Fail 2 with genuine nee
 
 ## Rules (skeleton-pass delta — shared Rules above also bind)
 1. **Apply boundary-strategy ADR — do not invent cut (H2/H12).** Find ADR(s) deciding *how to cut* (`category: Architectural style` and, if present, `Boundary strategy`); record them + cut basis in `boundary_strategy` header. Boundary-strategy ADR **absent** (deferred) → Architectural-style ADR governs — flat monolith means cluster by responsibility within one deployable, no enforced internal module boundary; do not manufacture boundary frame deferred. Never pick different decomposition than frame's.
-2. **Skeleton pass clusters FULL requirement set, not just skeleton slice (H13, §5.2).** Draw whole graph — every in-scope `R*` lands in component, so graph is complete build DAG. Walking-skeleton slice (`skeleton_id`) is only thinnest *path* through it (MODEL-FLOWS' concern, later); boxes for later slices' requirements drawn now at box+edge level. Each increment later fills component *depth*, never redraws graph (H14).
+2. **Skeleton pass clusters FULL requirement set, not only skeleton slice (H13, §5.2).** Draw whole graph — every in-scope `R*` lands in component, so graph is complete build DAG. Walking-skeleton slice (`skeleton_id`) is only thinnest *path* through it (MODEL-FLOWS' concern, later); boxes for later slices' requirements drawn now at box+edge level. Each increment later fills component *depth*, never redraws graph (H14).
 3. **Bidirectional coverage (H4).** Component→R: drop any box tracing no requirement (clause 1). R→component: every in-scope `R*` must have structural home (requirement with no home is unbuilt). Report both in `coverage` — `requirement_orphans` and `components_without_requirement` (must be empty; cannot empty without gold-plating → mis-derived). Hostile bidirectional gate is RECONCILE/CRITIQUE's; you *achieve* + *report* coverage, not run audit.
 4. **Single-owner entity proposal (§5.5).** Every `E*` owned by exactly ONE component — whose responsibility governs it. Others access via that component, never write directly (no shared-write). Record `owns_entities:[E*]` per component; entity owned by two components is boundary defect → re-cut. This is your **proposed** ownership; MODEL-DATA produces authoritative single-owner model + flags residual ambiguity. Every `E*` owned by exactly one component (full entity coverage) unless genuinely out of skeleton scope — if so, note it, don't force bad home.
 5. **Edges = structural direction only, NOT contracts (H1 lane).** Per dependency pair emit `{from, to, reason}`: `from` depends on `to`. Bare direction + one-line reason; **not** contract — no `kind`/`shape`/`failure_modes` (DEFINE-CONTRACTS owns that). Edge set is build DAG (build order = topological sort). Keep acyclic; cycle is boundary defect → record in `structural_defects[]`, never silently break (OPEN QUESTION §14 auto-break-vs-kick-back unresolved → flag, never patch).
-6. **Realize every present skeleton seam (skeleton-pass anchor).** Cut's `skeleton_seams[]` (typically ingress, domain, persistence, primary_external_integration) name seams walking skeleton crosses. Each **present** seam realized by ≥1 component: per component `realizes_seam:[<names>]` (`[]` for boxes realizing none, e.g. later-slice capability box); in `coverage.seam_realization` list each present seam → its realizer(s). Present seam with no realizer is structural gap → `structural_defects[]`. (Tracing skeleton *path* is MODEL-FLOWS'.)
+6. **Realize every present skeleton seam (skeleton-pass anchor).** Cut's `skeleton_seams[]` (typically ingress, domain, persistence, primary_external_integration) name seams walking skeleton crosses. Each **present** seam realized by ≥1 component: per component `realizes_seam:[<names>]` (`[]` for boxes realizing none, e.g. later-slice capability box); in `coverage.seam_realization` list each present seam → its realizer(s). **`persistence` seam → ONE dedicated store component** (durable-state box, `owns_entities` typically `[]`, most-depended-upon → emits build-first; this seam realizer is a responsibility unit, NOT the banned `Repositories` layer of discriminator 3); domain boxes edge INTO it, never carry `realizes_seam:[persistence]` themselves — folding persistence onto a domain box loses the store boundary (boundary defect → re-cut). Present seam with no realizer is structural gap → `structural_defects[]`. (Tracing skeleton *path* is MODEL-FLOWS'.)
 7. **Name + responsibility concrete, single-purpose.** Stable `C*` id, short `name` (e.g. "Web Ingress", "Identity & Auth"), one-line `responsibility`. One responsibility per box; needs "and" for two unrelated jobs → split (unless cut deliberately groups — then cut governs). **Name responsibility, not implementation:** introduce NO new implementation detail frame left open — no library, internal schema/table, endpoint path, algorithm. Frame-FIXED choice (OAuth provider in auth ADR, SSR style in API-style ADR) may be referenced as frame context — reference what ADR decided, never decide what ADR deferred (deferred HOWs live inside box / later slice, §1.2).
 8. **Deterministic emission (P9).** Mint `C1..Cn`; emit in **topological build order — most-depended-upon first** (box with no outgoing edges, e.g. store, emits before its dependents; ties broken by lowest-positioned `traces` id in aPRD document order, `R*` ascending). `C1` is build-first box.
 
@@ -82,64 +71,7 @@ Pass all three → draw. Fail 1 → drop (gold-plating). Fail 2 with genuine nee
 3. Apply boundary-strategy cut to cluster requirements into components (Rules 1, 2). Run component test per candidate box (discriminator). Assign `owns_entities` single-owner (Rule 4); map `realizes_seam` (Rule 6); trace each box to its `R*` (Rule 3).
 4. Derive dependency edges — structural direction only (Rule 5). Keep acyclic; record any cycle or unrealized present seam in `structural_defects[]`.
 5. Surface unbuildable frame tension → `frame_conflicts[]` (→Phase 2); unframeable requirement → `aprd_defects[]` (→Phase 0) (shared Rule 3). Never silently drop forced requirement.
-6. Order topologically (delta Rule 8); mint `C1..Cn`. Fill `coverage` (both directions) + `component_counts` by **walking actual lists** — verify every in-scope `R*` lands, every `E*` has exactly one owner, `components_without_requirement` empty — do not estimate.
-
-## Output schema — `.hld/skeleton/components.json`
-
-```json
-{
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "adr_lock_ref": ".adr/adr.lock",
-  "adr_log_ref": ".adr/log/",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "lock_verified": true,                 // lock present + names frozen artifact (don't recompute hash)
-  "class": "greenfield",
-  "mode": "skeleton",
-  "skeleton_id": "S1",
-  "boundary_strategy": {                  // one header object
-    "adr_refs": ["ADR-0001"],            // ADR(s) that decided cut, verbatim
-    "style": "<architectural style / boundary cut named by ADR, carried faithfully — e.g. Single-deployment monolith (flat structure)>",
-    "cut_basis": "<one line: how ADR says to cut + frame constraint it sits under — e.g. cluster by responsibility within one deployable; logical units only, no distributed components (INV6)>"
-  },
-  "components": [                          // topological build order: most-depended-upon first; ties by lowest traces id index (aPRD doc order). C1 = build-first
-    {
-      "id": "C1",
-      "name": "<short responsibility label; name responsibility NOT implementation — no library/internal-schema/endpoint/algorithm frame left open; frame-fixed choice may be referenced (Rule 7)>",
-      "responsibility": "<one line, exactly one responsibility; caveman prose>",
-      "owns_entities": ["E1"],           // E* component owns (single-owner; each E* in exactly one component's list). [] only if genuinely owns none (e.g. pure ingress box)
-      "traces": ["R5"],                  // NON-EMPTY frozen-aPRD R* ids, verbatim. Tracing nothing = gold-plating → drop (H4)
-      "realizes_seam": ["persistence"],  // foundation-cut seam names this realizes, verbatim; [] if none (later-slice capability box)
-      "honors_adr": ["ADR-0003"]         // frozen ADR ids box must respect (boundary-strategy ADR + any frame ADR shaping it). Verbatim. Recognition aid, not coverage claim — fidelity audit is later role
-    }
-  ],
-  "edges": [                              // {from, to, reason}; from depends on to. Structural direction + one-line reason ONLY — no kind/shape/failure (DEFINE-CONTRACTS owns contract). Acyclic
-    { "from": "C2", "to": "C1", "reason": "<one line: why C2 depends on C1 — structural dependency direction, NOT contract>" }
-  ],
-  "coverage": {                           // both directions (Rule 3) + entity ownership + seam realization (Rule 6)
-    "requirements_in_scope": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10"],
-    "requirements_landed": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10"],
-    "requirement_orphans": [],            // R with no component; [] on clean run (non-empty = coverage defect surfaced for downstream audit)
-    "entities_in_scope": ["E1", "E2", "E3", "E4", "E5", "E6", "E7"],
-    "entities_owned": ["E1", "E2", "E3", "E4", "E5", "E6", "E7"],
-    "entity_orphans": [],
-    "components_without_requirement": [], // [] on clean run
-    "seam_realization": [                 // every present seam → its realizing component(s)
-      { "seam": "ingress", "present": true, "realized_by": ["C3"] },
-      { "seam": "domain", "present": true, "realized_by": ["C2"] },
-      { "seam": "persistence", "present": true, "realized_by": ["C1"] },
-      { "seam": "primary_external_integration", "present": true, "realized_by": ["C4"] }
-    ]
-  },
-  "structural_defects": [],               // cycle in edge graph, or present seam with no realizer; each {kind, detail}; [] on clean run
-  "frame_conflicts": [],                  // foundational ADRs no structure can jointly honor; each {adrs:[...], reason, escape:"Phase 2 (change request)"}; [] on clean run
-  "aprd_defects": [],                     // requirements with no framable home; each {requirement, reason, escape:"Phase 0 (change request)"}; [] on clean run
-  "component_counts": {                   // walk to count, don't estimate
-    "components": 0,                      // == components.length
-    "edges": 0,                           // == edges.length
-    "entities_owned": 0                   // == total distinct E* across all owns_entities
-  }
-}
-```
+6. Order topologically (delta Rule 8); mint `C1..Cn`. Fill `coverage` (both directions) + `component_counts` by **walking actual lists** — verify every in-scope `R*` lands, every `E*` has exactly one owner, `components_without_requirement` empty — do not estimate. Emit (schema: "components" registry id).
 
 ## Stop condition
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.
@@ -162,7 +94,7 @@ Slice needs **new component box iff** slice requirement (`R*`) has **no home in 
 4. **Touched subgraph = slice's vertical participation, NOT every neighbor.** Include exactly: (a) introduced box(es); (b) every frozen component introduced box transitively DEPENDS ON (follow out-edges); (c) ingress/entry box(es) routing user request INTO introduced box for THIS slice (caller realizing `ingress` seam, or built by completed slice). **EXCLUDE any component introduced by DIFFERENT slice** (`introduction_map` — future/other slice's box merely *consuming* introduced box is part of ITS path, not this increment; it names this box in its OWN increment). Box this slice does not exercise is not touched. Tag each `role: "introduced" | "reused"`. This NAMES boxes slice participates in; ordered traversal is MODEL-FLOWS' job — stay in lane.
 5. **New-capability test (discriminator above).** Add box only for unhomed slice requirement naming new capability. New box continues id sequence (`C7`+), registers acyclic `new_edges`, owns single-owner `new_entities_owned`. Greenfield → expect `[]` for all three; do not manufacture box to look busy (gold-plating).
 6. **Slice coverage.** Every slice requirement (`02-slices` `requirements`) must be traced by ≥1 touched-or-new component. Unhomed requirement NOT framable as new box → `aprd_defects[]` → Phase 0. Report `slice_coverage` by walking lists.
-7. **Deterministic emission (P9).** `touched_components`: introduced first, then reused in frozen build-order. New boxes continue `C*` sequence after frozen max. Fill `slice_coverage`, `skeleton_fidelity`, `increment_counts` by walking actual lists — do not estimate.
+7. **Deterministic emission (P9).** `touched_components`: introduced first, then reused in frozen build-order. New boxes continue `C*` sequence after frozen max. Fill `slice_coverage`, `skeleton_fidelity`, `increment_counts` by walking actual lists — do not estimate. Emit (schema: "components" registry id).
 
 ## Task steps (increment)
 1. Read inputs (shared + increment). Check guards (frontmatter `escapes:`) — any tripped → HALT, report which + offending detail, write nothing. Else continue.
@@ -173,66 +105,6 @@ Slice needs **new component box iff** slice requirement (`R*`) has **no home in 
 6. Verify slice coverage (delta Rule 6) + skeleton fidelity (delta Rule 1) — confirm no frozen box or edge altered (`redrawn_components`/`modified_edges` must be empty).
 7. Surface frame collisions → `frame_conflicts[]`; unframeable requirements → `aprd_defects[]` (shared Rule 3).
 8. Emit deterministically (delta Rule 7); write `.hld/slices/<slice_id>/components.json` (create dir).
-
-## Output schema (increment) — `.hld/slices/<slice_id>/components.json`
-
-```json
-{
-  "aprd_ref": "<resolved .aprd/<aprd.lock.artifact> — e.g. aprd.frozen.md (greenfield) | aprd.v2.frozen.md (feature-add)>",
-  "adr_lock_ref": ".adr/adr.lock",
-  "base_skeleton_ref": ".hld/skeleton/components.json",   // frozen graph this extends
-  "skeleton_lock_ref": ".hld/skeleton.lock",
-  "rerank_ref": ".roadmap/08-rerank.json",
-  "slices_ref": ".roadmap/02-slices.json",
-  "foundation_cut_ref": ".roadmap/06-foundation-cut.json",
-  "skeleton_frozen_verified": true,        // skeleton.lock present + status==frozen (don't recompute hash)
-  "class": "greenfield",
-  "mode": "increment",
-  "slice_id": "S4",                        // auto-selected target (delta Rule 2)
-  "slice_name": "<carried verbatim from 02-slices / 08-rerank>",
-  "introduced_components": ["C3"],         // from introduction_map; frozen boxes slice first fleshes to depth
-  "touched_components": [                   // introduced first, then reused in frozen build-order
-    {
-      "id": "C3",
-      "name": "<carried VERBATIM from frozen components.json>",
-      "role": "introduced",
-      "realizes_slice_requirements": ["R4", "R6", "R9", "R10"],  // slice R* box traces (⊆ frozen traces ∩ slice.requirements)
-      "owns_entities": ["E2", "E5", "E6", "E7"],                 // carried VERBATIM from frozen (reference, not re-proposed)
-      "fleshed_this_slice": true
-    },
-    {
-      "id": "C2",
-      "name": "<verbatim>",
-      "role": "reused",
-      "built_in": "S1",                    // completed slice that already built this box (from rerank skeleton_built / completed)
-      "why_on_path": "<one line: structural reason slice leans on it — e.g. session/ownership scoping>",
-      "realizes_slice_requirements": [],   // [] when box only supports, doesn't realize slice R*
-      "fleshed_this_slice": false
-    }
-  ],
-  "new_components": [],                     // boxes FROZEN graph lacks (genuine new capability). [] in greenfield (skeleton drew full R-set) — empty is CORRECT
-  "new_edges": [],                         // edges introduced WITH new box; {from,to,reason}; acyclic; []
-  "new_entities_owned": [],                // E* new box owns (single-owner); []
-  "slice_coverage": {
-    "slice_requirements": ["R4", "R6", "R9", "R10"],   // 02-slices requirements for target slice, verbatim
-    "requirements_landed": ["R4", "R6", "R9", "R10"],  // each traced by touched-or-new component
-    "requirement_orphans": []              // unhomed + not framable box → also in aprd_defects; [] on clean run
-  },
-  "skeleton_fidelity": {                    // H14 — increment extends, never redraws
-    "redrawn_components": [],              // frozen C* whose name/responsibility/traces/owns_entities changed — MUST be empty
-    "modified_edges": [],                  // frozen edges altered — MUST be empty
-    "verdict": "extends-not-redraws"       // "extends-not-redraws" on clean run; else describe breach (then escalate, shared Rule 3)
-  },
-  "frame_conflicts": [],                    // introduced capability collides with frozen box / forbidden by frame / needs redraw; each {adrs?:[...], detail, escape:"Phase 2/3 (change request)"}; []
-  "aprd_defects": [],                       // slice requirement with no framable home; each {requirement, reason, escape:"Phase 0 (change request)"}; []
-  "increment_counts": {                     // walk to count
-    "touched": 0,                          // == touched_components.length
-    "introduced": 0,                       // == introduced_components.length
-    "new_components": 0,                    // == new_components.length
-    "new_edges": 0                         // == new_edges.length
-  }
-}
-```
 
 ## Stop condition (increment)
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.
