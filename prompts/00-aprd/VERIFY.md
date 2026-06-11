@@ -3,10 +3,8 @@ role: VERIFY
 phase: 00-aprd
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # pure currency check — reads disk, annotates, writes disk, stops. No client touch (PR1). Client approves agreed[] and decides conflicts[] later, on the verified canon.
-inputs:
-  - { path: ".aprd/03-grounding/rules-reconciled.json", format: "json (RECONCILE output) — agreed[] AGR* + conflicts[] CONF*; each source carries tier/tool/tool_version_pinned/setting/evidence (carry all verbatim, currency-check the setting); plus unfetched_sources[] (carry through) and reconcile_meta" }
 outputs:
-  - { path: ".aprd/03-grounding/rules-verified.json", format: "json (schema below) — FINAL canon: every agreed[] entry + conflict position carried verbatim, annotated with verification block. GAP-DETECT reads it" }
+  - { path: ".aprd/03-grounding/rules-verified.json", schema: "rules-verified" }
 escapes:
   - { when: ".aprd/03-grounding/rules-reconciled.json missing/unreadable", target: "self / HALT — nothing to verify; cannot run" }
   - { when: "rules-reconciled.json class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "self / HALT — that canon playbook not authored; report rather than verify under the wrong corpus" }
@@ -45,94 +43,13 @@ Currency target = config `setting`, checked against tool + pinned version.
 8. **Cheapest source first; LLM verifies but never the source (P5, P11, §7.2).** Truth about *what canon says* = `rules-reconciled.json` (carry verbatim, never re-litigate its grouping). Truth about *currency* = tool's own versioned docs: consult if possible and set `source_of_truth: "fetched-doc"`, else apply pinned-version knowledge and set `source_of_truth: "llm-knowledge"`, marking `unverifiable` where not confident — never assert verdict from memory not held. Flag, don't delete; suggest replacement, don't rewrite.
 
 ## Task steps
-1. Read `.aprd/03-grounding/rules-reconciled.json` first. Check guards (frontmatter `escapes:`) — any tripped → HALT, report offending detail, write nothing. Else continue.
-2. For each `agreed[]` entry: read `setting`; if non-null, identify contributing config source's `tool` + `tool_version_pinned` and currency-check flag (discriminator + Rule 3), assign status; if null, status = `not-version-bound`. Attach `verification` block; carry every other field verbatim.
-3. For each `conflicts[]` entry: leave `id`/`topic`/`question`/`recommended_position` untouched. For **each** position in `positions[]`, currency-check `setting` exactly as step 2 and attach `verification` block; carry `stance`/`setting`/`sources[]` verbatim.
-4. For any `deprecated`/`renamed`/`superseded`/`unknown-flag` verdict, fill `replacement` (current correct flag, or null if none/obvious-intended-only) and one-line `finding`. For `current`/`not-version-bound`, `replacement` is null. For `unverifiable`, set `confidence: "low"` and state what could not be established.
-5. Carry `unfetched_sources[]` verbatim. Fill `verify_meta` (Rule 6): `agreed_in`, `agreed_verified`, `conflicts_in`, `positions_verified`, `status_counts`, `flagged_count`. **Compute `status_counts` by re-counting `verification.status` values in the arrays as written** — walk final `agreed[]` and `conflicts[].positions[]`, tally each status literally; do not estimate or carry remembered count. Then check: seven `status_counts` values sum to `agreed_verified + positions_verified`; each individual status tally equals count of blocks carrying that status (current↔not-version-bound swap that still sums right = classic miscount — verify per-status, not total alone); `flagged_count` = `deprecated + renamed + superseded + unknown-flag`. Also verify: every agreed entry and every position carries exactly one `verification`; counts match input; no `AGR*`/`CONF*` renumbered; no entry merged/split/reordered; no `recommended_position` changed.
-6. Write JSON. Stop.
-
-## Output schema — `.aprd/03-grounding/rules-verified.json`
-All RECONCILE fields carried VERBATIM (`id` AGR*/CONF* never renumbered (P9), `topic`/`rule`/`stance`/`question`/`setting`/`kind`/`corroboration`/`sources[]` with every per-source field intact, `positions[]`, `recommended_position`). ONLY additions: `verification` blocks; same entries, same order, same grouping as input.
-
-```json
-{
-  "rules_reconciled_ref": ".aprd/03-grounding/rules-reconciled.json",
-  "class": "greenfield",
-  "stack": ["typescript", "react", "node"],
-  "agreed": [
-    {
-      "id": "AGR1",
-      "topic": "semicolons",
-      "rule": "Statements must be terminated with a semicolon.",
-      "setting": "\"semi\": [\"error\", \"always\"]",
-      "kind": "mixed",
-      "corroboration": "multi-source",
-      "sources": [
-        { "rule_ref": "RULE1", "source_ref": "SRC1", "tier": 1, "tool": "eslint", "tool_version_pinned": "9.x", "setting": "\"semi\": [\"error\", \"always\"]", "evidence": "<verbatim, carried through>" },
-        { "rule_ref": "RULE11", "source_ref": "SRC3", "tier": 2, "tool": "house-style-guide", "tool_version_pinned": "n/a", "setting": null, "evidence": "<verbatim>" }
-      ],
-      "verification": {                   // exactly one per agreed[] entry
-        "status": "current | deprecated | renamed | superseded | unknown-flag | not-version-bound | unverifiable",  // not-version-bound iff setting is null (prose, no flag); unverifiable when currency cannot be confidently established (P11)
-        "checked": { "tool": "eslint", "tool_version_pinned": "9.x", "setting": "\"semi\": [\"error\", \"always\"]" },  // the {tool, tool_version_pinned, setting} checked (from the contributing config source); null when status is not-version-bound
-        "finding": "<one caveman prose line on what check found, e.g. 'Rule deprecated in ESLint 9; stylistic rules relocated to @stylistic plugin.' or 'Current and supported in TypeScript 5.4.'>",
-        "replacement": "<current correct flag/setting when status ∈ {deprecated, renamed, superseded} (and, if obvious, unknown-flag); null otherwise; NEVER written into the entry's own setting (Rule 4)>",
-        "source_of_truth": "llm-knowledge | fetched-doc",  // fetched-doc if you consulted the tool's versioned docs directly, else llm-knowledge
-        "confidence": "high | low"        // low is mandatory whenever status is unverifiable
-      }
-    }
-  ],
-  "conflicts": [
-    {
-      "id": "CONF1",
-      "topic": "quotes",
-      "question": "Single or double quotes for string literals?",
-      "positions": [
-        {
-          "stance": "Use single quotes for string literals.",
-          "setting": "\"quotes\": [\"error\", \"single\"]",
-          "sources": [ { "rule_ref": "RULE2", "source_ref": "SRC1", "tier": 1, "tool": "eslint", "tool_version_pinned": "9.x", "setting": "\"quotes\": [\"error\", \"single\"]", "evidence": "<verbatim>" } ],
-          "verification": {               // exactly one per conflicts[].positions[] element
-            "status": "deprecated",
-            "checked": { "tool": "eslint", "tool_version_pinned": "9.x", "setting": "\"quotes\": [\"error\", \"single\"]" },
-            "finding": "<one caveman prose line>",
-            "replacement": "<current correct flag or null>",
-            "source_of_truth": "llm-knowledge | fetched-doc",
-            "confidence": "high | low"
-          }
-        },
-        {
-          "stance": "Use double quotes for string literals.",
-          "setting": null,
-          "sources": [ { "rule_ref": "RULE10", "source_ref": "SRC3", "tier": 2, "tool": "house-style-guide", "tool_version_pinned": "n/a", "setting": null, "evidence": "<verbatim>" } ],
-          "verification": {
-            "status": "not-version-bound",
-            "checked": null,
-            "finding": "Prose opinion, no tool flag to currency-check.",
-            "replacement": null,
-            "source_of_truth": "llm-knowledge",
-            "confidence": "high"
-          }
-        }
-      ],
-      "recommended_position": 0           // carried verbatim; NEVER changed even if the recommended position is flagged (Rule 5)
-    }
-  ],
-  "unfetched_sources": [                  // carried through verbatim from rules-reconciled.json; [] if input had none
-    { "id": "SRC4", "reason": "<carried through verbatim>" }
-  ],
-  "verify_meta": {                        // integer tallies
-    "agreed_in": 10,                      // == input agreed.length
-    "agreed_verified": 10,                // == output agreed.length; must equal agreed_in
-    "conflicts_in": 2,                    // == input conflicts.length
-    "positions_verified": 4,              // == total positions across all conflicts (each annotated once)
-    "status_counts": { "current": 0, "deprecated": 0, "renamed": 0, "superseded": 0, "unknown-flag": 0, "not-version-bound": 0, "unverifiable": 0 },  // re-counted from the arrays; total == agreed_verified + positions_verified
-    "flagged_count": 0                    // == deprecated + renamed + superseded + unknown-flag
-  }
-}
-```
-Do NOT include any reconcile-stage decisions of your own — no new `AGR*`/`CONF*`, no changed grouping, no changed `recommended_position`; do NOT overwrite `setting`/`rule`/`stance` with a replacement. All `finding` content is authored caveman prose — caveman governs this too; carried `setting`/`evidence` stay verbatim transcriptions (literal-copy, not caveman).
+1. Read `.aprd/03-grounding/rules-reconciled.json` first (RECONCILE output). It carries top-level `class` + `stack`, an `agreed[]` of `AGR*` entries, a `conflicts[]` of `CONF*` entries (each with `positions[]` + `recommended_position`), plus `unfetched_sources[]` and `reconcile_meta`. Check guards (frontmatter `escapes:`) — any tripped → HALT, report offending detail, write nothing. Else copy `class` + `stack` verbatim onto output, set `rules_reconciled_ref` = `".aprd/03-grounding/rules-reconciled.json"`; continue.
+2. For each `agreed[]` entry: read `setting`; if non-null, identify contributing config source's `tool` + `tool_version_pinned` and currency-check flag (discriminator + Rule 3), assign status; if null, status = `not-version-bound`. Attach exactly one `verification` block `{status, checked, finding, replacement, source_of_truth, confidence}` (field semantics in step 4); `checked` = the `{tool, tool_version_pinned, setting}` checked (from the contributing config source), or `null` when status is `not-version-bound`. Carry every other field verbatim.
+3. For each `conflicts[]` entry: leave `id`/`topic`/`question`/`recommended_position` untouched. For **each** position in `positions[]`, currency-check `setting` exactly as step 2 and attach exactly one `verification` block; carry `stance`/`setting`/`sources[]` verbatim.
+4. Fill each `verification` block: `status` = one of the seven values (discriminator); `finding` = one caveman prose line on what the check found; `source_of_truth` = `fetched-doc` if you consulted versioned docs, else `llm-knowledge`; `confidence` = `high`, except `low` mandatory whenever status is `unverifiable`. For any `deprecated`/`renamed`/`superseded`/`unknown-flag` verdict, fill `replacement` (current correct flag, or null if none / obvious-intended-only) and a `finding` naming the rot. For `current`/`not-version-bound`, `replacement` is `null`. For `unverifiable`, state in `finding` what could not be established.
+5. Carry `unfetched_sources[]` verbatim. Fill `verify_meta` (Rule 6) integer tallies: `agreed_in` (== input `agreed.length`), `agreed_verified` (== output `agreed.length`; must equal `agreed_in`), `conflicts_in` (== input `conflicts.length`), `positions_verified` (== total positions across all conflicts, each annotated once), `status_counts` (object with the seven keys `current`/`deprecated`/`renamed`/`superseded`/`unknown-flag`/`not-version-bound`/`unverifiable`), `flagged_count`. **Compute `status_counts` by re-counting `verification.status` values in the arrays as written** — walk final `agreed[]` and `conflicts[].positions[]`, tally each status literally; do not estimate or carry remembered count. Then check: seven `status_counts` values sum to `agreed_verified + positions_verified`; each individual status tally equals count of blocks carrying that status (current↔not-version-bound swap that still sums right = classic miscount — verify per-status, not total alone); `flagged_count` = `deprecated + renamed + superseded + unknown-flag`. Also verify: every agreed entry and every position carries exactly one `verification`; counts match input; no `AGR*`/`CONF*` renumbered; no entry merged/split/reordered; no `recommended_position` changed.
+6. Write JSON. Output object = `{rules_reconciled_ref, class, stack, agreed, conflicts, unfetched_sources, verify_meta}` (top-level keys named in steps 1/5; `agreed[]`/`conflicts[]` = input entries carried structurally unchanged with one `verification` block attached per agreed entry and per position). Do NOT include any reconcile-stage decisions of your own — no new `AGR*`/`CONF*`, no changed grouping, no changed `recommended_position`; do NOT overwrite `setting`/`rule`/`stance` with a replacement. All `finding` content is caveman prose (caveman governs this too); carried `setting`/`evidence` stay verbatim transcriptions (literal-copy, NOT caveman). Stop.
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which fired + detail; HALT.
-- Clean run → write `.aprd/03-grounding/rules-verified.json` (create dir if absent; only output, **final canon** of research sub-pipeline; schema-exact, every per-source field intact, PR2); state "canon verified, research branch complete" + one-line tally (N verified + M positions, K flagged); stop.
+- Clean run → write `.aprd/03-grounding/rules-verified.json` (create dir if absent; only output, **final canon** of research sub-pipeline; schema-exact per `rules-verified`, every per-source field intact, PR2); state "canon verified, research branch complete" + one-line tally (N verified + M positions, K flagged); stop.
