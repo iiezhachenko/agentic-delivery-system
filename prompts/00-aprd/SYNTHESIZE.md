@@ -3,23 +3,12 @@ role: SYNTHESIZE
 phase: 00-aprd
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # authors the aPRD DRAFT — reads disk, writes disk, stops. Does NOT run the sign-off gate (client approve/redline) or CRITIQUE; those are separate downstream steps (§5.4/§5.6). PR1.
-inputs:
-  # — shared (both classes) —
-  - { path: ".aprd/02-extraction.json", format: "json — entities E*, explicit+implied requirements R*, stated_constraints C*; the canonical E*/R*/C* id-space carried forward unchanged (P9)" }
-  - { path: ".aprd/04-gaps.json", format: "json — ranked gaps[] G* with interpretations[], recommended_default, disposition; one assumption authored per gap" }
-  - { path: ".aprd/05-questions.md", format: "markdown — which gaps became questions Q* (gap_ref comments) vs deferred assumptions, + option lettering; maps a client answer letter back to gap + interpretation" }
-  - { path: ".aprd/06-answers.md", format: "markdown — client answers; lines 'Q<n>: <letter>' or 'Q<n>: Something else — <free text>'; missing/blank line = skipped" }
-  # — brownfield (feature-add + bugfix) —
-  - { path: ".aprd/baseline-map.json", format: "json — baseline id_high_water (new R*/AC*/A* continue strictly above it, BF3) + conventions (feature-add: feed CONVENTION_BASELINE, BF5) + integration_seams (feature-add: feed INTEGRATION_SEAMS, BF6) + existing_oracle (feed REGRESSION_GUARD, BF4 — both classes)" }
-  - { path: ".aprd/aprd.frozen.md", format: "markdown — frozen BASELINE version, READ-ONLY (BF1). Its R*/AC*/E*/C* carried forward by REFERENCE not re-emit; its max A* sets the A high-water for new assumptions. NEVER mutated — verifier checks byte-equality" }
-  # — bugfix —
-  - { path: ".aprd/diagnosis.json", format: "json — DIAGNOSE intake root-cause verdict (bugfix); the ROOT_CAUSE block is carried VERBATIM from it (SYNTHESIZE records, never re-diagnoses — lane)" }
 outputs:
-  - { path: ".aprd/drafts/aprd.v1.md", format: "markdown — dual-audience aPRD draft (schema below): PROJECT, CLASS, ENTITIES, REQUIREMENTS R*, CONSTRAINTS C*, ASSUMPTIONS A*, OUT_OF_SCOPE, ACCEPTANCE AC*; greenfield = no class-extension block" }
-  - { path: ".aprd/07-assumptions.json", format: "json — machine-readable assumptions log, one entry per gap, traceable gap_ref → G* (schema below); feature-add adds class/baseline_aprd_ref/aprd_version/touch_set[]" }
+  - { path: ".aprd/drafts/aprd.v1.md", schema: null }              # greenfield draft — markdown; the ## Output template below is its sole structural home
+  - { path: ".aprd/07-assumptions.json", schema: "07-assumptions" } # registry-validated; field-names + derivation carried in Task steps
   # — brownfield (feature-add + bugfix) —
-  - { path: ".aprd/aprd.v<N+1>.frozen.md", format: "markdown — the VERSION BUMP (suffix = baseline version + 1; baseline v1 → v2, v2 → v3). Carries CLASS:feature-add|bugfix + BASELINE pointer + NEW R*/AC*/E*/C*/A* above high-water + a class-specific CLASS_EXTENSION block (feature-add | bugfix variant). Baseline aprd.frozen.md stays byte-identical (BF1)" }
-  - { path: ".aprd/aprd.lock", format: "json — RE-SIGNED against the new version (version: v<N+1>, status: frozen); the change-request re-freeze (BF7). Baseline lock content replaced by new-version lock — old version pinned by its own content_sha256 in history" }
+  - { path: ".aprd/aprd.v<N+1>.frozen.md", schema: null }           # version-bump — markdown; template below (feature-add body + class-specific CLASS_EXTENSION)
+  - { path: ".aprd/aprd.lock", schema: null }                       # re-signed lock — no registry schema; template below
 escapes:
   - { when: "any required input (02-extraction.json, 04-gaps.json, 05-questions.md, 06-answers.md) missing/unreadable", target: "self / HALT — cannot synthesize a contract without all four; write nothing" }
   - { when: "class in 02/04 lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — only greenfield + feature-add + bugfix contract forms authored (class-extension blocks for other classes unauthored); HALT and report" }
@@ -85,7 +74,7 @@ For each gap `G*` in `04-gaps.json`, determine chosen interpretation by exactly 
 2. From `05` build map: which gap each `Q<n>` came from (`gap_ref` comment), which gaps deferred (assumptions block). From `06` read each `Q<n>` answer.
 3. For each gap `G*` in `04` order, resolve decision and classify provenance (discriminator).
 4. Assemble aPRD body: PROJECT (one line from entities + core requirements); CLASS `greenfield`; ENTITIES/REQUIREMENTS/CONSTRAINTS carried from `02` (Rules 1, 5 — may annotate entity note to reflect shape-changing resolved decision, but add no new entity unless chosen interpretation explicitly creates one); ASSUMPTIONS one `A*` per gap (Rule 2); OUT_OF_SCOPE declined interpretations (Rule 4); ACCEPTANCE `AC*` per requirement, decisions folded in, flag any with no testable AC (Rule 3).
-5. Write both artifacts. Verify coverage: every gap → one assumption; every requirement → ≥1 AC or flag. Stop.
+5. Write both artifacts. `07-assumptions.json` top-level keys: `aprd_ref` (→ `.aprd/drafts/aprd.v1.md`), `extraction_ref`, `gaps_ref`, `answers_ref` (the four input paths read), `class` (`greenfield`), `assumptions[]`, `flagged_requirements[]` ([] when every requirement got a testable AC; else one `{req_ref, reason}` per flag, each matching a `[FLAGGED]` marker in the draft — Rule 3), `assumption_count` (integer == `assumptions.length` == gap count in `04`). **Greenfield OMITS `baseline_aprd_ref`, `aprd_version`, and `touch_set` entirely — do NOT emit them as `null`/`"v1"`/`[]`; those three keys are brownfield-only (added by the feature-add/bugfix branches below).** Each `assumptions[]` entry = `{id` (A* contiguous, A1..An), `gap_ref` (the `G*` it resolves), `text` (clean-prose decision, identical to the aPRD ASSUMPTIONS line), `source` (provenance enum per the discriminator: `client-confirmed`|`default-applied`|`client-described`|`cosmetic-announced`), `chosen_interpretation` (verbatim chosen interpretation from `04`, or the client's free text for `client-described`), `rejected_interpretations[]` (each `04` interpretation not chosen — these become the OUT_OF_SCOPE exclusions, Rule 4)`}`. Verify coverage: every gap → one assumption; the `gap_ref` set == full `04` gap-id set; every requirement → ≥1 AC or a flag. Stop.
 
 **Feature-add branch** (class == feature-add — discriminator + coverage checks unchanged; replaces greenfield assembly/output with the version bump):
 1. Read baseline `aprd.frozen.md` + `aprd.lock` (version + sha) + `baseline-map.json` FIRST, then `02`/`04`/`05`/`06`. Guard tripped (baseline frozen file/lock absent, or class lacks playbook) → HALT, write nothing.
@@ -93,7 +82,7 @@ For each gap `G*` in `04-gaps.json`, determine chosen interpretation by exactly 
 3. Assemble the NEW version body: `BASELINE` pointer (version + lock sha it extends); CLASS `feature-add`; NEW `E*/R*/C*` carried from `02` (above high-water, ids unchanged); ASSUMPTIONS new `A*` above baseline A high-water, one per gap; OUT_OF_SCOPE from declined interpretations; ACCEPTANCE new `AC*` above high-water, decisions folded in. Do NOT re-emit baseline items (Rule 1).
 4. Emit `## CLASS_EXTENSION (feature-add)` — INTEGRATION_SEAMS + REGRESSION_GUARD + CONVENTION_BASELINE (delta Rule 3), each traced to `baseline-map.json` + gap `seam_ref`s.
 5. Compute touch-set (delta Rule 4) → `07.touch_set[]`.
-6. Write `aprd.v<N+1>.frozen.md` (NOT a draft — feature-add emits the frozen version directly); write `07-assumptions.json` (class/baseline_aprd_ref/aprd_version/touch_set added); re-sign `aprd.lock` against the new version (delta Rule 5). **Baseline `aprd.frozen.md` untouched.** Verify: new ids all above high-water, CLASS_EXTENSION present + complete, baseline byte-unchanged, lock re-signed. Stop.
+6. Write `aprd.v<N+1>.frozen.md` (NOT a draft — feature-add emits the frozen version directly); write `07-assumptions.json` — same keys as greenfield step 5 PLUS the three brownfield-only keys: `class` = `feature-add`, `baseline_aprd_ref` = `.aprd/aprd.frozen.md` (the version extended; not null here), `aprd_version` = `v<N+1>` (the emitted version), `aprd_ref` = the frozen version path (not a draft), and `touch_set[]` (delta Rule 4). Each `touch_set[]` entry = `{kind` (`net-new`|`seam-extended`), `requirements[]` (R* ids), `slices[]` (S* ids invalidated), `seam` (`seam-extended` only: `{at` (C*)`, contract_ref` (CT*)`}`), `note}`. Re-sign `aprd.lock` against the new version (delta Rule 5). **Baseline `aprd.frozen.md` untouched.** Verify: new ids all above high-water, CLASS_EXTENSION present + complete, baseline byte-unchanged, lock re-signed. Stop.
 
 **Bugfix branch** (class == bugfix — version-bump steps identical to the feature-add branch; only the inputs read + the CLASS_EXTENSION emitted differ, bugfix delta):
 1. Read baseline `aprd.frozen.md` + `aprd.lock` + `baseline-map.json` + the DIAGNOSE intake verdict `.aprd/diagnosis.json` FIRST, then `02`/`04`/`05`/`06`. Guard tripped (baseline file/lock absent, `diagnosis.json` absent, or class lacks playbook) → HALT, write nothing.
@@ -101,7 +90,7 @@ For each gap `G*` in `04-gaps.json`, determine chosen interpretation by exactly 
 3. Assemble the NEW version body: `BASELINE` pointer; CLASS `bugfix`; NEW `R*`/`AC*` above high-water asserting the CORRECT behavior the defect violates (bugfix delta Rule 1 — no new capability, no new `C*`); ASSUMPTIONS one `A*` per gap; OUT_OF_SCOPE from declined interpretations. Do NOT re-emit baseline items.
 4. Emit `## CLASS_EXTENSION (bugfix)` — REPRO_STEPS + ROOT_CAUSE (verbatim from `diagnosis.json`) + BLAST_RADIUS + REGRESSION_GUARD (bugfix delta Rule 2).
 5. Compute touch-set = blast-radius slice(s) (bugfix delta Rule 3) → `07.touch_set[]`.
-6. Write `aprd.v<N+1>.frozen.md` + `07-assumptions.json` (class `bugfix`) + re-sign `aprd.lock`. **Baseline untouched.** Verify: new ids above high-water, CLASS_EXTENSION (bugfix) present + complete (4 sub-blocks), ROOT_CAUSE matches `diagnosis.json`, baseline byte-unchanged, lock re-signed. Stop.
+6. Write `aprd.v<N+1>.frozen.md` + `07-assumptions.json` (same keys as the feature-add branch; `class` = `bugfix`, `baseline_aprd_ref` = `.aprd/aprd.frozen.md`, `aprd_version` = `v<N+1>`, `touch_set[]` entry `kind` = `blast-radius` carrying the `slices[]`/`requirements[]` the fix edits — bugfix delta Rule 3) + re-sign `aprd.lock`. **Baseline untouched.** Verify: new ids above high-water, CLASS_EXTENSION (bugfix) present + complete (4 sub-blocks), ROOT_CAUSE matches `diagnosis.json`, baseline byte-unchanged, lock re-signed. Stop.
 
 ## Output schema
 
@@ -226,38 +215,6 @@ Replaces the feature-add three-block extension; everything else in the version-b
   "signed_at": "<ISO-8601>",
   "status": "frozen",
   "supersedes": { "version": "v<N>", "content_sha256": "<baseline lock sha — pins the still-immutable parent>" }
-}
-```
-
-### `.aprd/07-assumptions.json` — machine-readable assumptions log
-
-```json
-{
-  "aprd_ref": ".aprd/drafts/aprd.v1.md",    // feature-add: ".aprd/aprd.v<N+1>.frozen.md" (the version, not a draft)
-  "extraction_ref": ".aprd/02-extraction.json",
-  "gaps_ref": ".aprd/04-gaps.json",
-  "answers_ref": ".aprd/06-answers.md",
-  "class": "greenfield",                     // "feature-add" | "bugfix" when playbook-dispatched
-  "baseline_aprd_ref": null,                 // brownfield (feature-add + bugfix) ONLY: ".aprd/aprd.frozen.md" (the version extended); null for greenfield
-  "aprd_version": "v1",                      // brownfield: "v<N+1>" (the emitted version); greenfield: "v1"
-  "assumptions": [                          // one per gap in 04; draft ASSUMPTIONS section must agree (ids, gap_refs, count)
-    {
-      "id": "A1",
-      "gap_ref": "G1",                      // names a real gap in 04
-      "text": "<clean-prose decision, same as the aPRD assumption>",
-      "source": "client-confirmed | default-applied | client-described | cosmetic-announced",  // provenance, per the discriminator
-      "chosen_interpretation": "<verbatim chosen interpretation from 04, OR the client's free text for client-described>",
-      "rejected_interpretations": ["<each interpretation from 04 not chosen>"]   // become OUT_OF_SCOPE exclusions (Rule 4)
-    }
-  ],
-  "flagged_requirements": [                  // empty array if every requirement got a testable AC; each entry must have a matching [FLAGGED] marker in the draft
-    { "req_ref": "R<k>", "reason": "<why no binary AC could be written>" }
-  ],
-  "assumption_count": 0,                     // integer == number of gaps in 04 == length of assumptions[]
-  "touch_set": [                             // brownfield (feature-add + bugfix) ONLY (omit/[] for greenfield) — slices the version bump invalidates (feature-add delta Rule 4 / bugfix delta Rule 3); RE-RANK rebuilds these, untouched slices stay completed[]
-    { "kind": "net-new", "requirements": ["R<k>"], "note": "<net-new feature requirements → net-new slice(s); no existing slice's R*/AC* altered>" },
-    { "kind": "seam-extended", "seam": { "at": "C<k>", "contract_ref": "CT<k>" }, "note": "<feature extends this seam → the slice owning the contract re-enters remaining_sequence>" }
-  ]
 }
 ```
 
