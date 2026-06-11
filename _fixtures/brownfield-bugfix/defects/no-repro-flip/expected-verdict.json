@@ -1,0 +1,14 @@
+{
+  "defect": "no-repro-flip",
+  "invariant": "bugfix delta Rule 2 — the reproduction test (OREPRO-1) MUST flip red→green vs the repaired code; a fix that does not address the defect leaves it red",
+  "owning_role": "VERIFY-OUTPUT (04-build/VERIFY-OUTPUT.md, bugfix delta Rule 2) — re-derives the red→green flip; reproduction.now=='green' is a CLAIM it re-derives. Still-red → verdict blocked.",
+  "seed": [
+    "overlay defects/no-repro-flip/wsgi.norepro.py → src/freelancer_app/wsgi.py",
+    "(authoritative rejecting output of running VERIFY-OUTPUT clean-room on the un-fixed tree) = defects/no-repro-flip/verify-output.blocked.json → .build/slices/S4/verify-output.json"
+  ],
+  "load_bearing_assertion": "The create_app injected render (the path OREPRO-1 exercises) keeps the null-unsafe f\"{float(rate):.2f}\" with no null guard, so billable_rate=None → float(None) → TypeError → GET /projects 500s. OREPRO-1 stays RED — the fix did not flip the defect. VERIFY-OUTPUT verdict == 'blocked' (reproduction still red). Golden verdict == 'verified' (reproduction red→green).",
+  "expected_verdict": "blocked",
+  "expected_signal": { "verdict": "blocked", "reproduction.was": "red", "reproduction.now": "red", "regression.ran": false, "escape.failing[0].layer": "reproduction", "escape.route": "self-heal → DIAGNOSE" },
+  "separates_from_golden_by": "reproduction.now (green in golden / red here) — the red→green flip the bugfix exists to deliver. Regression is not reached (reproduction red short-circuits the bar).",
+  "e2e_validated": "2026-06-11 — clean-room step-runner ran prompts/04-build/VERIFY-OUTPUT.md against the un-fixed bench → verdict 'blocked', reproduction still red (float(None) TypeError). Golden bench → 'verified'. Oracle separates."
+}

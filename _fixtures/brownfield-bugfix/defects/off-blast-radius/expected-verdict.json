@@ -1,0 +1,15 @@
+{
+  "defect": "off-blast-radius",
+  "invariant": "BF4 — a bugfix repair stays inside the declared BLAST_RADIUS; code added/edited outside it that traces to no requirement is off-surface drift",
+  "owning_role": "CRITIQUE (04-build/CRITIQUE.md, gold-plating category 5) — the hostile anti-cheat reads the diff for a path tracing to no R*/AC* and honoring no CT*/F*. VERIFY-OUTPUT does NOT own this: the export surface is additive (no frozen-skeleton reshape) and breaks no repro/regression test, so its ladder reads 'verified' — the off-surface, untraceable code is exactly the gap CRITIQUE covers (mirrors brownfield-feature convention-drift → CRITIQUE).",
+  "seed": [
+    "overlay defects/off-blast-radius/wsgi.offradius.py → src/freelancer_app/wsgi.py",
+    "(authoritative blocking output of running CRITIQUE clean-room) = defects/off-blast-radius/critique.flagged.json → .build/slices/S4/critique.json"
+  ],
+  "load_bearing_assertion": "The null-rate repair is correct (repro green, AC6 green), so VERIFY-OUTPUT certifies 'verified'. BUT the repair ALSO bolts on a NEW unowned CSV-export surface (_view_project_export + the 'projects/export' route) OUTSIDE the declared BLAST_RADIUS (_ProjectManagementAdapter._render), tracing to no R*/AC* and honoring no CT*/F*. Additive — NOT a frozen-skeleton reshape — so VERIFY-OUTPUT skeleton_fidelity stays false. CRITIQUE verdict == 'blocked' (gold-plating). Golden critique verdict == 'clean', breached false, 0 issues.",
+  "expected_verdict": "blocked",
+  "expected_signal": { "verdict": "blocked", "skeleton_fidelity.breached": false, "issues[].category": ["gold-plating"], "issues[].routes_to": ["IMPLEMENT"], "issue_count": 1 },
+  "separates_from_golden_by": "critique verdict (clean→blocked) + issue_count (0→1, category gold-plating) — the BF4 off-blast-radius invariant. skeleton_fidelity is false in BOTH (additive drift, not a baseline reshape).",
+  "note": "VERIFY-OUTPUT runs FIRST and PASSes this bench (verdict 'verified' — repair behaviorally correct, no frozen artifact touched), which is REQUIRED for CRITIQUE to run (CRITIQUE guard: verify-output verdict must be 'verified'). CRITIQUE is the backstop that blocks the off-surface gold-plating a behavior gate can't see — the bugfix analog of brownfield-feature's convention-drift (CRITIQUE-owned, VERIFY-OUTPUT-blind). [A frozen-skeleton-route reshape would instead trip VERIFY-OUTPUT's own skeleton_fidelity guard first → blocked/route Phase 2, so CRITIQUE never runs; this arm deliberately uses an ADDITIVE off-surface edit to keep the CRITIQUE gate exercised.]",
+  "e2e_validated": "2026-06-11 — clean-room step-runner ran prompts/04-build/VERIFY-OUTPUT.md → 'verified' (repro+regression green, breached false), then prompts/04-build/CRITIQUE.md → 'blocked', 1 gold-plating issue on wsgi.py:_view_project_export routed IMPLEMENT. Golden bench → CRITIQUE 'clean', 0 issues. Oracle separates."
+}

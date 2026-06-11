@@ -1,0 +1,121 @@
+{
+  "integration_record_ref": ".build/slices/S4/integration-record.json",
+  "build_record_ref": ".build/slices/S4/build-record.json",
+  "slice_oracle_lock_ref": ".build/slices/S4/oracle/oracle.lock",
+  "slice_oracle_ref": ".build/slices/S4/oracle/oracle.json",
+  "slice_nfr_mechanisms_ref": ".hld/slices/S4/nfr-mechanisms.json",
+  "slice_components_ref": ".hld/slices/S4/components.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "bugfix",
+  "mode": "bugfix",
+  "slice_id": "S4",
+  "slice_name": "Create and manage client projects with currency and billable rate",
+  "diagnosis_ref": ".aprd/diagnosis.json",
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "aprd_version": "v2",
+  "regression_guard_ref": ".aprd/aprd.v2.frozen.md#CLASS_EXTENSION/REGRESSION_GUARD",
+  "verification_method": "static-trace",
+  "inherited_oracle": {
+    "skeleton_oracle_ref": ".build/skeleton/oracle/oracle.json",
+    "skeleton_integration_ref": ".build/skeleton/integration-record.json",
+    "inherited_tests": ["OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
+    "frozen_verified": true,
+    "re_run": false
+  },
+  "ladder": {
+    "contract": {
+      "layer_verdict": "n/a",
+      "note": "Bugfix mints no new contract — no contract/flow/acceptance layer run (bugfix delta Rule 2)."
+    },
+    "flow": {
+      "layer_verdict": "n/a",
+      "note": "Bugfix — no new flow authored."
+    },
+    "acceptance": {
+      "layer_verdict": "n/a",
+      "note": "Bugfix — no new acceptance authored."
+    },
+    "class_ext": {
+      "layer_verdict": "not-run",
+      "note": "Regression layer not run — reproduction still RED; halting before regression per bugfix blocked schema (Rule 2/3 bugfix delta).",
+      "kinds": []
+    },
+    "nfr": {
+      "layer_verdict": "pass",
+      "mechanisms_checked": [],
+      "note": "slice nfr-mechanisms.json mechanisms == [] (bugfix adds no new M*); NFR layer passes vacuously."
+    }
+  },
+  "reproduction": {
+    "ran": true,
+    "test_id": "OREPRO-1",
+    "target": "AC11",
+    "req_ref": "R11",
+    "file": "reproduction/test_AC11_null_rate.py",
+    "was": "red",
+    "now": "red",
+    "flips_green_when": "null billable_rate renders as em-dash '—'; HTTP 200, no 500",
+    "trace": "conftest client fixture: create_app(project_store=mock, identity_auth=MagicMock(resolve_session→{freelancer_id:'freelancer-repro-7f3a'})) → _AppHandle(_injected_wsgi). Test sets project_store.list.return_value=[{billable_rate:None,...}]. client.get('/projects', headers={'Cookie':'session=repro-sess-9b2e4d1c; Path=/'}) → _TestClient.get: environ HTTP_COOKIE='session=repro-sess-9b2e4d1c'; calls _injected_wsgi. _injected_wsgi: path_info='/projects', method='GET' matches; session_token='repro-sess-9b2e4d1c'; calls _injected_mgmt.handle_request. handle_request: identity_auth.resolve_session('repro-sess-9b2e4d1c')→{'freelancer_id':'freelancer-repro-7f3a'}; project_store.list('freelancer-repro-7f3a')→[null_rate_project]; calls self._render([null_rate_project]). _InjectedProjectMgmtAdapter._render (PLANTED DEFECT, wsgi.py lines 437-446): _rate_str(rate) has NO null guard — body is 'return f\"{float(rate):.2f}/hr\"'. p.get('billable_rate')=None → _rate_str(None) → float(None) → TypeError: float() argument must be a string or a number, not 'NoneType'. TypeError propagates out of _render → out of handle_request → out of _injected_wsgi (no try/except). In _TestClient.get, body_iter = self._app(...) raises TypeError before start_response is called; exception propagates to test caller. Test assertion 'assert response.status_code == 200' never reached — test fails with TypeError. OREPRO-1 RED; reproduction does NOT flip.",
+    "result": "fail",
+    "defect_site_confirmed": "_InjectedProjectMgmtAdapter._render inside create_app (wsgi.py) — null guard present in outer _ProjectManagementAdapter._render (production path, lines 264-274) but absent in _InjectedProjectMgmtAdapter._render (create_app seam, lines 437-441); the repro test exercises the create_app path; the planted defect leaves float(None) unguarded on that path."
+  },
+  "regression": {
+    "ran": false,
+    "note": "Reproduction still RED — regression layer not run per bugfix blocked schema."
+  },
+  "skeleton_fidelity": {
+    "breached": false,
+    "inherited_tests": ["OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
+    "note": "No frozen skeleton test re-run or re-greened. Defect is in create_app seam (slice-local). Baseline untouched (H14)."
+  },
+  "per_ac_summary": [
+    { "ac": "AC11", "reproduction": "red", "result": "fail" }
+  ],
+  "verdict": "blocked",
+  "escape": {
+    "failing": [
+      {
+        "layer": "reproduction",
+        "id": "OREPRO-1",
+        "target": "AC11",
+        "subcase": "reproduction",
+        "what": "OREPRO-1 still RED: _InjectedProjectMgmtAdapter._render inside create_app seam (wsgi.py lines 437-446) has no null guard — _rate_str(rate) returns f'{float(rate):.2f}/hr' unconditionally; rate=None → float(None) → TypeError; _injected_wsgi propagates the exception; test never receives HTTP 200; assertion fails with TypeError (or status_code=500). The outer production _ProjectManagementAdapter._render (lines 264-274) has the null guard, but OREPRO-1 exercises the create_app injection path exclusively — the fix was not applied there. Reproduction does not flip."
+      }
+    ],
+    "failure_signature": "TypeError: float() argument must be a string or a number, not 'NoneType' raised in _InjectedProjectMgmtAdapter._render._rate_str(None) inside create_app seam — OREPRO-1 does not reach HTTP 200 assertion; reproduction stays RED",
+    "classification": "my-code",
+    "route": "self-heal → DIAGNOSE"
+  },
+  "provenance": {
+    "verifier_role": "verifier",
+    "built_against": {
+      "slice_oracle_lock": ".build/slices/S4/oracle/oracle.lock",
+      "diagnosis": ".aprd/diagnosis.json",
+      "skeleton_oracle": ".build/skeleton/oracle/oracle.json",
+      "skeleton_integration": ".build/skeleton/integration-record.json",
+      "skeleton_lock": ".hld/skeleton.lock",
+      "adr_lock": ".adr/adr.lock",
+      "aprd_lock": ".aprd/aprd.lock",
+      "slice_build_record": ".build/slices/S4/build-record.json",
+      "slice_integration_record": ".build/slices/S4/integration-record.json"
+    }
+  },
+  "verification_counts": {
+    "reproduction_flipped": 0,
+    "reproduction_result": "red",
+    "regression_asserts": 0,
+    "regression_asserts_passed": 0,
+    "contract_assertions": 0,
+    "flow_assertions": 0,
+    "acceptance_acs": 0,
+    "class_ext_layers": 0,
+    "mechanisms_checked": 0,
+    "inherited_tests_not_run": 5,
+    "layers_applicable": 1,
+    "layers_passed": 0,
+    "layers_failed": 1
+  }
+}

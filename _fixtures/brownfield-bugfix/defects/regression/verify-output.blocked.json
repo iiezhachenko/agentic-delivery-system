@@ -1,0 +1,150 @@
+{
+  "integration_record_ref": ".build/slices/S4/integration-record.json",
+  "build_record_ref": ".build/slices/S4/build-record.json",
+  "slice_oracle_lock_ref": ".build/slices/S4/oracle/oracle.lock",
+  "slice_oracle_ref": ".build/slices/S4/oracle/oracle.json",
+  "slice_nfr_mechanisms_ref": ".hld/slices/S4/nfr-mechanisms.json",
+  "slice_components_ref": ".hld/slices/S4/components.json",
+  "skeleton_lock_ref": ".hld/skeleton.lock",
+  "adr_lock_ref": ".adr/adr.lock",
+  "aprd_lock_ref": ".aprd/aprd.lock",
+  "locks_verified": true,
+  "class": "bugfix",
+  "mode": "bugfix",
+  "slice_id": "S4",
+  "slice_name": "Create and manage client projects with currency and billable rate",
+  "diagnosis_ref": ".aprd/diagnosis.json",
+  "aprd_ref": ".aprd/aprd.v2.frozen.md",
+  "aprd_version": "v2",
+  "regression_guard_ref": ".aprd/aprd.v2.frozen.md#CLASS_EXTENSION/REGRESSION_GUARD",
+  "verification_method": "static-trace",
+  "inherited_oracle": {
+    "slice_oracle_lock_ref": ".build/slices/S4/oracle/oracle.lock",
+    "slice_oracle_json_ref": ".build/slices/S4/oracle/oracle.json",
+    "inherited_tests": ["OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
+    "frozen_verified": true,
+    "re_run": false
+  },
+  "ladder": {
+    "contract": {
+      "layer_verdict": "n/a",
+      "note": "Bugfix mints no new contract (oracle_layers: [reproduction, regression]); contract layer not applicable."
+    },
+    "flow": {
+      "layer_verdict": "n/a",
+      "note": "Bugfix oracle_layers: [reproduction, regression]; flow not run."
+    },
+    "acceptance": {
+      "layer_verdict": "n/a",
+      "note": "Bugfix oracle_layers: [reproduction, regression]; acceptance not run."
+    },
+    "class_ext": {
+      "layer_verdict": "fail",
+      "kinds": [
+        {
+          "kind": "regression",
+          "scope": "touched-surface + seams",
+          "scope_basis": "REGRESSION_GUARD AC6 scoped to BLAST_RADIUS _ProjectManagementAdapter._render — rated-project rendering (billable_rate='95.00' string) + CRUD",
+          "asserts": ["AC6"],
+          "result": "fail",
+          "trace": "Production _ProjectManagementAdapter._render (wsgi.py line 271) uses f\"{rate:.2f}/hr\" without float() coercion. POST /projects sends billable_rate as form string '95.00'. _render([record]) calls _rate_str('95.00'): rate is not None → f\"{'95.00':.2f}/hr\" → ValueError: Unknown format code 'f' for object of type 'str'. Unhandled exception → HTTP 500. AC6 visible test_ac6_create_project_appears_in_list: create_resp['status'] 500 not in (200,201,302) → FAIL. AC6 held-out test_ac6_held_out_create_project_appears_in_list: same path, billable_rate='18000' (string) → same ValueError → FAIL. All six AC6 tests (visible: 3, held-out: 3) route through _render with string rate; all fail. Planted defect confirmed by wsgi.py header comment: 'float() coercion dropped from the rated path.'"
+        }
+      ]
+    },
+    "nfr": {
+      "layer_verdict": "pass",
+      "mechanisms_checked": [],
+      "note": "slice nfr-mechanisms.json new_mechanisms == [] — all NFRs satisfied-by-frame (A13/A2/C1/C2); no M* requires wiring check. NFR layer passes vacuously."
+    }
+  },
+  "reproduction": {
+    "ran": true,
+    "test_id": "OREPRO-1",
+    "target": "AC11",
+    "req_ref": "R11",
+    "file": "reproduction/test_AC11_null_rate.py",
+    "was": "red",
+    "now": "green",
+    "flips_green_when": "null billable_rate → em-dash '—'; HTTP 200, no 500",
+    "trace": "conftest client fixture calls create_app(project_store=project_store, identity_auth=mock_identity_auth_with_freelancer_repro_7f3a). create_app builds _InjectedProjectMgmtAdapter whose _render has: if rate is None: return '—'; else return f\"{float(rate):.2f}/hr\" — float() coercion present. project_store.list.return_value=[null_rate_project(billable_rate=None)]. _injected_wsgi: GET /projects → identity_auth.resolve_session('repro-sess-9b2e4d1c') → {freelancer_id:'freelancer-repro-7f3a'} (not None) → project_store.list('freelancer-repro-7f3a') → [null_rate_project]. _render: _rate_str(None) → '—'. body = '<html><body><ul><li>Zero-Rate Engagement — USD —</li></ul></body></html>'. status=200. Assertions: response.status_code==200 PASS; 'Zero-Rate Engagement' in body PASS; '—' in body PASS. OREPRO-1 GREEN.",
+    "result": "pass",
+    "baseline_ref": "AC6"
+  },
+  "regression": {
+    "ran": true,
+    "scope": "touched-surface + seams",
+    "scope_basis": "REGRESSION_GUARD AC6 scoped to BLAST_RADIUS _ProjectManagementAdapter._render — rated-project rendering (billable_rate='95.00' string) + CRUD; float() coercion dropped from rated path in production adapter",
+    "suites_run": [".build/slices/S4/oracle/"],
+    "asserts": ["AC6"],
+    "results": [
+      {
+        "ref": "AC6",
+        "result": "red",
+        "trace": "Production _ProjectManagementAdapter._render (wsgi.py line 271): f\"{rate:.2f}/hr\" — float() coercion absent from rated path. POST /projects → store.create({billable_rate:'95.00'}) → _render([record]) → _rate_str('95.00'): rate not None → f\"{'95.00':.2f}/hr\" → ValueError: Unknown format code 'f' for object of type 'str'. Uncaught → HTTP 500. test_ac6_create_project_appears_in_list: create_resp['status']=500 not in (200,201,302) → FAIL. test_ac6_edit_project_name_and_rate: same POST path → FAIL. test_ac6_delete_project_removed_from_list: POST create step → FAIL. Held-out tests identical failure: billable_rate='18000' (string) → same ValueError path. All 6 AC6 tests RED. Planted defect: wsgi.py header 'float() coercion dropped from the rated path … AC6 goes RED'."
+      }
+    ],
+    "verdict": "red",
+    "reds": [
+      {
+        "ref": "AC6",
+        "was": "green",
+        "now": "red",
+        "what": "AC6 regression: float() coercion removed from _ProjectManagementAdapter._render rated path; string billable_rate '95.00' hits f\"{str:.2f}\" → ValueError → GET /projects 500 after any rated-project create. Previously-green create+list+edit+delete CRUD tests all fail (BF4)."
+      }
+    ],
+    "baseline_tests_edited": false
+  },
+  "skeleton_fidelity": {
+    "breached": false,
+    "inherited_tests": ["OCT-CT2", "OCT-CT3", "OCT-CT9", "OF-F4", "OA-AC6"],
+    "note": "Bugfix re-enters slice S4. No frozen skeleton test re-run or edited. AC6 re-run via scoped regression layer only (H14). Defect is in production _ProjectManagementAdapter._render (slice-local); no skeleton artifact touched."
+  },
+  "per_ac_summary": [
+    { "ac": "AC11", "reproduction": "green" },
+    { "ac": "AC6", "regression": "red" }
+  ],
+  "verdict": "blocked",
+  "escape": {
+    "failing": [
+      {
+        "layer": "regression",
+        "id": "AC6",
+        "subcase": "regression",
+        "what": "Previously-green AC6 (rated project create/list/edit/delete) went RED after bugfix. Production _ProjectManagementAdapter._render drops float() coercion: f\"{rate:.2f}/hr\" with string rate '95.00' raises ValueError → HTTP 500. The repair fixed the null path (OREPRO-1 green) but broke the non-null rated path. All 6 AC6 tests (visible + held-out) fail (BF4 — real regression, not a flake)."
+      }
+    ],
+    "failure_signature": "ValueError: Unknown format code 'f' for object of type 'str' in _ProjectManagementAdapter._render — f\"{rate:.2f}/hr\" with rate='95.00' (string); AC6 create_resp['status']=500 not in (200,201,302)",
+    "classification": "my-code",
+    "route": "self-heal → DIAGNOSE"
+  },
+  "provenance": {
+    "verifier_role": "verifier",
+    "built_against": {
+      "slice_oracle_lock": ".build/slices/S4/oracle/oracle.lock",
+      "skeleton_oracle": ".build/skeleton/oracle/oracle.json",
+      "skeleton_integration": ".build/skeleton/integration-record.json",
+      "skeleton_lock": ".hld/skeleton.lock",
+      "adr_lock": ".adr/adr.lock",
+      "aprd_lock": ".aprd/aprd.lock",
+      "diagnosis": ".aprd/diagnosis.json",
+      "slice_build_record": ".build/slices/S4/build-record.json",
+      "slice_integration_record": ".build/slices/S4/integration-record.json"
+    }
+  },
+  "verification_counts": {
+    "reproduction_flipped": 0,
+    "reproduction_green": 1,
+    "regression_asserts": 1,
+    "regression_asserts_passed": 0,
+    "regression_asserts_failed": 1,
+    "contract_assertions": 0,
+    "flow_assertions": 0,
+    "acceptance_acs": 0,
+    "class_ext_layers": 1,
+    "mechanisms_checked": 0,
+    "inherited_tests_not_run": 5,
+    "layers_applicable": 2,
+    "layers_passed": 1,
+    "layers_failed": 1
+  }
+}
