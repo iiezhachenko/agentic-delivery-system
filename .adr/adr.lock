@@ -1,11 +1,11 @@
 {
   "artifact": ".adr/log/",
-  "version": "v6",
-  "content_sha256": "db94b71b02eea7abf482b1d68d3cb42588bbb5711335eac4379c426d27755b9a",
+  "version": "v7",
+  "content_sha256": "5dfee2dbc58966892186da77c6696d3402c08de8778c446aa0804b61e9727913",
   "signer": "self-host:agentic-delivery-pipeline",
   "signed_at": "2026-06-09T06:00:00Z",
   "status": "frozen",
-  "amendment": "v6 added ADR-0023 (D23) — stack ADR `stack = typescript`, the M12 Part-2 second canon profile / agnosticism proof (sibling of D21, NOT active; this repo's active stack stays ADR-0021). Additive to v5 (D1–D22 bodies unchanged); set coherent. Re-signed content_sha256 over the 23-body log set. v5 (editorial, operator-approved 2026-06-09) — scrubbed build-initiative provenance labels from ADR-0022 body (two inline references to the now-finished authoring scaffolding); no decision content changed, set remains coherent, all 22 bodies otherwise unchanged. v4 added ADR-0022 (D22) — deterministic helper tools, operator-approved 2026-06-08 (review gate = operator per spec §5.8 senior/human reviewer). content_sha256 = sha256 of .adr/log/*.md concatenated in sorted-name order.",
+  "amendment": "v7 added ADR-0024..0027 (D24–D27) — CR-002 deterministic-machine, all EXTENDING D22 (operator-approved Phase-2 re-trigger 2026-06-11): D24 schema-registry + structured-output (new frozen artifact class schemas.lock), D25 io-manifest + resolver (new frozen artifact class io.lock), D26 deterministic spine (Tier-1 emitters + verdict/route/sequence/idgen/coverage compute), D27 open-decision resolutions (output grade · Tier-1 retirement · CR batching). Additive to v6 (D1–D23 bodies unchanged); set coherent. New ADR bodies authored directly from the frozen design corpus `_deterministic-machine/` docs 00–04 (the CR drafts), so draft_ref points there. Re-signed content_sha256 over the 27-body log set. v6 added ADR-0023 (D23) — stack ADR `stack = typescript`, the M12 Part-2 second canon profile / agnosticism proof (sibling of D21, NOT active; this repo's active stack stays ADR-0021). Additive to v5 (D1–D22 bodies unchanged); set coherent. Re-signed content_sha256 over the 23-body log set. v5 (editorial, operator-approved 2026-06-09) — scrubbed build-initiative provenance labels from ADR-0022 body (two inline references to the now-finished authoring scaffolding); no decision content changed, set remains coherent, all 22 bodies otherwise unchanged. v4 added ADR-0022 (D22) — deterministic helper tools, operator-approved 2026-06-08 (review gate = operator per spec §5.8 senior/human reviewer). content_sha256 = sha256 of .adr/log/*.md concatenated in sorted-name order.",
   "gate": {
     "reconcile_verdict": "coherent",
     "critique_verdict": "clean"
@@ -313,7 +313,59 @@
       "draft_ref": "drafts/0023-stack-adr-stack-typescript-second-profile-agnosticism-proof.draft.md",
       "log_ref": "log/0023-stack-adr-stack-typescript-second-profile-agnosticism-proof.md",
       "stack": "typescript"
+    },
+    {
+      "id": "ADR-0024",
+      "dn": "D24",
+      "title": "Schema registry + structured-output enforcement — new frozen artifact class",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "reasoned",
+      "supersedes": null,
+      "superseded_by": null,
+      "draft_ref": "../_deterministic-machine/01-schema-externalization.md",
+      "log_ref": "log/0024-schema-registry-structured-output.md"
+    },
+    {
+      "id": "ADR-0025",
+      "dn": "D25",
+      "title": "io-manifest + resolver own the input read-graph — new frozen artifact class",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "reasoned",
+      "supersedes": null,
+      "superseded_by": null,
+      "draft_ref": "../_deterministic-machine/02-input-injection.md",
+      "log_ref": "log/0025-io-manifest-resolver-injection.md"
+    },
+    {
+      "id": "ADR-0026",
+      "dn": "D26",
+      "title": "Deterministic spine — Tier-1 emitters + verdict/route/sequence/id/coverage compute",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "reasoned",
+      "supersedes": null,
+      "superseded_by": null,
+      "draft_ref": "../_deterministic-machine/00-current-state-analysis.md",
+      "log_ref": "log/0026-deterministic-spine-emitters-compute.md"
+    },
+    {
+      "id": "ADR-0027",
+      "dn": "D27",
+      "title": "Deterministic-spine open decisions — output grade · Tier-1 retirement · CR batching",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "operator-approved",
+      "supersedes": null,
+      "superseded_by": null,
+      "draft_ref": "../_deterministic-machine/04-target-machine.md",
+      "log_ref": "log/0027-deterministic-spine-open-decisions.md"
     }
   ],
-  "adr_count": 23
+  "adr_count": 27
 }

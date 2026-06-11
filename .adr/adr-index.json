@@ -6,7 +6,7 @@
     "reconcile_verdict": "coherent",
     "critique_verdict": "clean"
   },
-  "note": "Canonical decision index (D1–D23 → ADR-0001..0023). D1–D4 are the foundational conventions; D21 is the stack ADR (stack = agentic-delivery-pipeline, this repo's active profile); D22 (operator-approved amendment) sanctions deterministic helper tools the spine may shell out to; D23 adds the second stack ADR (stack = typescript) — the M12 Part-2 agnosticism proof, a sibling profile, not the active one. The index lives HERE as JSON, never as a markdown header (canonical fixture layout).",
+  "note": "Canonical decision index (D1–D27 → ADR-0001..0027). D1–D4 are the foundational conventions; D21 is the stack ADR (stack = agentic-delivery-pipeline, this repo's active profile); D22 (operator-approved amendment) sanctions deterministic helper tools the spine may shell out to; D23 adds the second stack ADR (stack = typescript) — the M12 Part-2 agnosticism proof, a sibling profile, not the active one. D24–D27 (CR-002, deterministic-machine) EXTEND D22: D24 schema-registry + structured-output (new frozen class), D25 io-manifest + resolver (new frozen class), D26 deterministic spine (Tier-1 emitters + verdict/route/seq/id/coverage compute), D27 the three open-decision resolutions (output grade · Tier-1 retirement · CR batching). The index lives HERE as JSON, never as a markdown header (canonical fixture layout).",
   "adrs": [
     {
       "id": "ADR-0001",
@@ -308,10 +308,62 @@
       "stack": "typescript",
       "draft_ref": "drafts/0023-stack-adr-stack-typescript-second-profile-agnosticism-proof.draft.md",
       "log_ref": "log/0023-stack-adr-stack-typescript-second-profile-agnosticism-proof.md"
+    },
+    {
+      "id": "ADR-0024",
+      "dn": "D24",
+      "title": "Schema registry + structured-output enforcement — new frozen artifact class",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "reasoned",
+      "supersedes": null,
+      "superseded_by": null,
+      "draft_ref": "../_deterministic-machine/01-schema-externalization.md",
+      "log_ref": "log/0024-schema-registry-structured-output.md"
+    },
+    {
+      "id": "ADR-0025",
+      "dn": "D25",
+      "title": "io-manifest + resolver own the input read-graph — new frozen artifact class",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "reasoned",
+      "supersedes": null,
+      "superseded_by": null,
+      "draft_ref": "../_deterministic-machine/02-input-injection.md",
+      "log_ref": "log/0025-io-manifest-resolver-injection.md"
+    },
+    {
+      "id": "ADR-0026",
+      "dn": "D26",
+      "title": "Deterministic spine — Tier-1 emitters + verdict/route/sequence/id/coverage compute",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "reasoned",
+      "supersedes": null,
+      "superseded_by": null,
+      "draft_ref": "../_deterministic-machine/00-current-state-analysis.md",
+      "log_ref": "log/0026-deterministic-spine-emitters-compute.md"
+    },
+    {
+      "id": "ADR-0027",
+      "dn": "D27",
+      "title": "Deterministic-spine open decisions — output grade · Tier-1 retirement · CR batching",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "operator-approved",
+      "supersedes": null,
+      "superseded_by": null,
+      "draft_ref": "../_deterministic-machine/04-target-machine.md",
+      "log_ref": "log/0027-deterministic-spine-open-decisions.md"
     }
   ],
   "adr_counts": {
-    "rendered": 23,
+    "rendered": 27,
     "degenerate_forced": 0,
     "undecided_skipped": 0
   }

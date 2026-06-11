@@ -1,117 +1,120 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 3,
+  "roadmap_version": 4,
   "verdict": "re_ranked",
-  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each 'slice' = one remaining PROMPT-BUILD, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). roadmap_version 3 = CR-001 re-rank (aprd v3→v4): greenfield 10 builds reconciled to completed[] (all shipped on disk); bugfix-spine builds appended as the new remaining_sequence. Bugfix sentinels live in _fixtures/brownfield-bugfix/ (the build loop produces each golden + the both-directions oracle; head-start prompt edits already committed — re-run harmless, D20). Slice pathing under brownfield-bugfix finalized at P-BUGFIX-FIXTURE-BASELINE.",
+  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each entry = one remaining PROMPT-BUILD/CR, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). roadmap_version 4 = CR-002 re-rank (aprd v4->v5, deterministic-machine). SCOPED TO THIS CR's wave (operator call 2026-06-11): completed[] + remaining_sequence carry ONLY the W0-W8 deterministic-spine wave. Prior waves (greenfield 10, bugfix 8) are delivered; their done-state lives on disk (sentinels under _fixtures/greenfield-* + _fixtures/brownfield-bugfix/), NOT re-listed here (disk is source of truth, D20 — this ledger is informational, not the truth the loop derives from). W0-CANON-CR = THIS intake (CR-002 + aprd.v5 + ADRs 0024-0027/D24-D27 extending D22 + skeleton.lock v5 canon CR + all re-signed locks); shipped, so derived frontier = W1-SCHEMA-REGISTRY. Compound sentinels (the full '+ selftest green' bars from directive §6) summarized per entry in rationale; the single done_sentinel path is the frontier key, the both-directions selftest is the gate the drain loop enforces. Contracts before consumers, code before prompt-edits (W6), orchestrator swap last among consumers (W7); re-run harmless (D20).",
   "completed": [
-    { "position": 1, "id": "P-DERIVE-TESTS-INC", "name": "DERIVE-TESTS increment mode", "status": "shipped", "unit": "prompts/03-hld/DERIVE-TESTS.md (increment)", "done_sentinel": "_fixtures/greenfield-clean/.hld/slices/S4/test-specs.json" },
-    { "position": 2, "id": "P-RECONCILE-CRITIQUE-INC", "name": "RECONCILE/CRITIQUE increment mode", "status": "shipped", "unit": "prompts/03-hld/RECONCILE-CRITIQUE.md (increment)", "done_sentinel": "_fixtures/greenfield-clean/.hld/slices/S4/reconcile.json" },
-    { "position": 3, "id": "P-BUILD-PLAN-SLICE", "name": "BUILD-PLAN slice-build mode", "status": "shipped", "unit": "prompts/04-build/BUILD-PLAN.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/build-plan.json" },
-    { "position": 4, "id": "P-MATERIALIZE-ORACLE-SLICE", "name": "MATERIALIZE-ORACLE slice-build mode", "status": "shipped", "unit": "prompts/04-build/MATERIALIZE-ORACLE.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/oracle/oracle.json" },
-    { "position": 5, "id": "P-IMPLEMENT-SLICE", "name": "IMPLEMENT slice-build mode", "status": "shipped", "unit": "prompts/04-build/IMPLEMENT.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/build-record.json" },
-    { "position": 6, "id": "P-INTEGRATE-SLICE", "name": "INTEGRATE slice-build mode", "status": "shipped", "unit": "prompts/04-build/INTEGRATE.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/integration-record.json" },
-    { "position": 7, "id": "P-DIAGNOSE-SLICE", "name": "DIAGNOSE slice-build mode", "status": "shipped", "unit": "prompts/04-build/DIAGNOSE.md (slice-build)", "done_sentinel": "_fixtures/greenfield-build-reds/.build/slices/S4/diagnosis.json" },
-    { "position": 8, "id": "P-VERIFY-OUTPUT-SLICE", "name": "VERIFY-OUTPUT slice-build mode", "status": "shipped", "unit": "prompts/04-build/VERIFY-OUTPUT.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/verify-output.json" },
-    { "position": 9, "id": "P-CRITIQUE-SLICE", "name": "CRITIQUE slice-build mode", "status": "shipped", "unit": "prompts/04-build/CRITIQUE.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/critique.json" },
-    { "position": 10, "id": "P-DEMO-GEN-SLICE", "name": "DEMO-GEN slice-build mode", "status": "shipped", "unit": "prompts/04-build/DEMO-GEN.md (slice-build)", "done_sentinel": "_fixtures/greenfield-clean/.build/slices/S4/demo/demo.json" }
+    { "position": 1, "id": "W0-CANON-CR", "name": "deterministic-machine canon CR (intake)", "status": "shipped", "unit": ".aprd/change-requests/CR-002.md + aprd.v5 + ADRs 0024-0027 + skeleton.lock v5 + all re-signed locks", "done_sentinel": ".aprd/change-requests/CR-002.md" }
   ],
   "remaining_sequence": [
     {
-      "position": 11,
-      "id": "P-BUGFIX-FIXTURE-BASELINE",
-      "name": "brownfield-bugfix fixture baseline + CR",
+      "position": 2,
+      "id": "W1-SCHEMA-REGISTRY",
+      "name": "schema-registry + validate.mjs + selftest",
       "value": "high",
-      "retires_risk": "bugfix-spine-untracked",
-      "unit": "_fixtures/brownfield-bugfix/ (immutable baseline = greenfield-clean demo-accepted + the defect report CR)",
-      "done_sentinel": "_fixtures/brownfield-bugfix/README.md",
-      "rationale": "Establishes the both-directions oracle root: buggy baseline (null billable-rate crashes project-list, S4 surface) + defect report. Prereq for every bugfix-overlay golden. Mirrors brownfield-feature fixture.",
-      "coarse_depends_on": [],
-      "real_depends_on": []
+      "retires_risk": "schema-in-prompt-bloat",
+      "unit": "schemas/ (registry + _meta.json) + schemas.lock + tools/det/validate.mjs",
+      "done_sentinel": "schemas/schemas.lock",
+      "rationale": "Compound: schemas/schemas.lock + tools/det/validate.mjs + both-directions selftest green (reference conforms; planted bad-shape fails). Externalizes every output schema (R9/D24); validator enforces conformance (R10).",
+      "coarse_depends_on": ["W0-CANON-CR"],
+      "real_depends_on": ["W0-CANON-CR"]
     },
     {
-      "position": 12,
-      "id": "P-BUGFIX-DIAGNOSE",
-      "name": "DIAGNOSE bugfix defect-localize mode",
+      "position": 3,
+      "id": "W2-IO-MANIFEST",
+      "name": "io-manifest + resolve.mjs + selftest",
       "value": "high",
-      "retires_risk": "diagnose-bugfix-mode-missing",
-      "unit": "prompts/04-build/DIAGNOSE.md (bugfix defect-localize) + golden",
-      "done_sentinel": "_fixtures/brownfield-bugfix/.aprd/diagnosis.json",
-      "rationale": "Headline bugfix role. New intake mode: reproduce+localize a reported defect → root-cause verdict written to .aprd/diagnosis.json (ROOT_CAUSE source for SYNTHESIZE — forward contract from intake overlay 2a).",
-      "coarse_depends_on": ["P-BUGFIX-FIXTURE-BASELINE"],
-      "real_depends_on": ["P-BUGFIX-FIXTURE-BASELINE"]
+      "retires_risk": "inputs-drift",
+      "unit": "io/ (io-manifest.json) + io.lock + tools/io/resolve.mjs",
+      "done_sentinel": "io/io.lock",
+      "rationale": "Compound: io/io.lock + tools/io/resolve.mjs + both-directions selftest green (right state->right set; planted-wrong-state caught). Read-graph code-owned (R11/D25); prompts declare no inputs.",
+      "coarse_depends_on": ["W0-CANON-CR"],
+      "real_depends_on": ["W0-CANON-CR"]
     },
     {
-      "position": 13,
-      "id": "P-BUGFIX-SYNTHESIZE-CR",
-      "name": "SYNTHESIZE bugfix CR aPRD golden (CLASS_EXTENSION)",
+      "position": 4,
+      "id": "W3-GRAPH-LINT",
+      "name": "graph-lint: gen contracts.json, PR2 check",
       "value": "high",
-      "retires_risk": null,
-      "unit": "prompts/00-aprd/SYNTHESIZE.md (bugfix delta — authored 2a) + golden",
-      "done_sentinel": "_fixtures/brownfield-bugfix/.aprd/aprd.v2.frozen.md",
-      "rationale": "Intake overlay head-start (committed 60e8b99); golden owed. Version-bump aPRD with CLASS_EXTENSION (bugfix) = REPRO_STEPS/ROOT_CAUSE(from diagnosis.json)/BLAST_RADIUS/REGRESSION_GUARD.",
-      "coarse_depends_on": ["P-BUGFIX-DIAGNOSE"],
-      "real_depends_on": ["P-BUGFIX-DIAGNOSE"]
+      "retires_risk": "pr2-eyeballed",
+      "unit": "tools/io/graph-lint.mjs + generated contracts.json",
+      "done_sentinel": "tools/io/graph-lint.mjs",
+      "rationale": "Compound: graph-lint.mjs green + generated contracts.json matches frozen .hld/skeleton/contracts.json. PR2 auto-checked by registry-id equality (R14); chain generated not hand-written.",
+      "coarse_depends_on": ["W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST"],
+      "real_depends_on": ["W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST"]
     },
     {
-      "position": 14,
-      "id": "P-BUGFIX-DERIVE-TESTS",
-      "name": "DERIVE-TESTS bugfix reproduction-test mode",
+      "position": 5,
+      "id": "W4-DET-MODULES",
+      "name": "det/ compute modules + selftests",
       "value": "high",
-      "retires_risk": null,
-      "unit": "prompts/03-hld/DERIVE-TESTS.md (bugfix delta) + golden",
-      "done_sentinel": "_fixtures/brownfield-bugfix/.hld/slices/S4/test-specs.json",
-      "rationale": "Author the reproduction test spec (the red→green assertion of the correct behavior the defect violates).",
-      "coarse_depends_on": ["P-BUGFIX-SYNTHESIZE-CR"],
-      "real_depends_on": ["P-BUGFIX-SYNTHESIZE-CR"]
+      "retires_risk": "verdict-route-id-as-tokens",
+      "unit": "tools/det/{verdict,route,sequence,idgen,coverage,prefill}.mjs",
+      "done_sentinel": "tools/det/verdict.mjs",
+      "rationale": "Compound: all 6 modules + per-module both-directions selftests. verdict-from-count / route-from-axes / topo-sort / monotonic-id / set-bijection / mechanical-prefill computed by code (R12/D26).",
+      "coarse_depends_on": ["W1-SCHEMA-REGISTRY"],
+      "real_depends_on": ["W1-SCHEMA-REGISTRY"]
     },
     {
-      "position": 15,
-      "id": "P-BUGFIX-MATERIALIZE-ORACLE",
-      "name": "MATERIALIZE-ORACLE bugfix repro+regression mode",
+      "position": 6,
+      "id": "W5-TIER1-EMITTERS",
+      "name": "Tier-1 emitters; retire those prompts",
       "value": "high",
-      "retires_risk": null,
-      "unit": "prompts/04-build/MATERIALIZE-ORACLE.md (bugfix delta) + golden",
-      "done_sentinel": "_fixtures/brownfield-bugfix/.build/slices/S4/oracle/oracle.json",
-      "rationale": "Materialize the reproduction layer (red) + the scoped regression layer (BF4, baseline AC stays green). oracle_layers: [reproduction, regression].",
-      "coarse_depends_on": ["P-BUGFIX-DERIVE-TESTS"],
-      "real_depends_on": ["P-BUGFIX-DERIVE-TESTS"]
+      "retires_risk": "whole-mechanical-as-llm",
+      "unit": "tools/det/emit/*.mjs + Tier-1 prompts retired (sentinel + components.json note kept)",
+      "done_sentinel": "tools/det/emit/build-plan.mjs",
+      "rationale": "Compound: tools/det/emit/*.mjs (baseline-map, build-plan, derive-tests, verify-output, ...) emitter both-directions vs _fixtures + Tier-1 prompts retired (R13/D26/D27). Role keeps sentinel + components.json ownership note (D1).",
+      "coarse_depends_on": ["W4-DET-MODULES"],
+      "real_depends_on": ["W4-DET-MODULES"]
     },
     {
-      "position": 16,
-      "id": "P-BUGFIX-IMPLEMENT",
-      "name": "IMPLEMENT bugfix minimal-fix mode",
+      "position": 7,
+      "id": "W6-REAUTHOR-04BUILD",
+      "name": "re-author 04-build prompts (drop schema+inputs)",
       "value": "high",
-      "retires_risk": null,
-      "unit": "prompts/04-build/IMPLEMENT.md (bugfix delta) + golden",
-      "done_sentinel": "_fixtures/brownfield-bugfix/.build/slices/S4/build-record.json",
-      "rationale": "Minimal fix at the root cause; edits existing src scoped to BLAST_RADIUS (BF4); flips reproduction red→green.",
-      "coarse_depends_on": ["P-BUGFIX-MATERIALIZE-ORACLE"],
-      "real_depends_on": ["P-BUGFIX-MATERIALIZE-ORACLE"]
+      "retires_risk": "canon-prompt-mismatch",
+      "unit": "prompts/04-build/*.md re-authored against skeleton v5",
+      "done_sentinel": "prompts/04-build/IMPLEMENT.md",
+      "rationale": "Discriminator: 04-build prompts carry NO inputs: block + NO ## Output schema section (skeleton v5); outputs[].schema = registry id. Verify clean-room both-directions; VALUE parity vs pre-CR golden (regression-guard). Biggest payoff (26-30 input lines each).",
+      "coarse_depends_on": ["W2-IO-MANIFEST", "W4-DET-MODULES"],
+      "real_depends_on": ["W2-IO-MANIFEST", "W4-DET-MODULES"]
     },
     {
-      "position": 17,
-      "id": "P-BUGFIX-VERIFY-OUTPUT",
-      "name": "VERIFY-OUTPUT bugfix repro+regression-green mode",
+      "position": 8,
+      "id": "W6-REAUTHOR-REST",
+      "name": "re-author 03/02/01/00 prompts, per phase",
       "value": "high",
-      "retires_risk": null,
-      "unit": "prompts/04-build/VERIFY-OUTPUT.md (bugfix delta) + golden",
-      "done_sentinel": "_fixtures/brownfield-bugfix/.build/slices/S4/verify-output.json",
-      "rationale": "Assert reproduction flipped red→green AND regression stayed green (verify_method: inherited ladder + reproduction-must-flip + regression-must-stay-green).",
-      "coarse_depends_on": ["P-BUGFIX-IMPLEMENT"],
-      "real_depends_on": ["P-BUGFIX-IMPLEMENT"]
+      "retires_risk": "canon-prompt-mismatch",
+      "unit": "prompts/{03-hld,02-adr,01-roadmap,00-aprd}/*.md re-authored against skeleton v5",
+      "done_sentinel": "prompts/00-aprd/SYNTHESIZE.md",
+      "rationale": "Per-phase, same bar as W6-04build: no inputs:/schema block, outputs[].schema id, clean-room both-directions, VALUE parity. One self-slice pass per phase.",
+      "coarse_depends_on": ["W6-REAUTHOR-04BUILD"],
+      "real_depends_on": ["W6-REAUTHOR-04BUILD"]
     },
     {
-      "position": 18,
-      "id": "P-BUGFIX-DEFECTS-E2E",
-      "name": "brownfield-bugfix planted defects + both-directions e2e",
+      "position": 9,
+      "id": "W7-ORCH-SWAP",
+      "name": "orchestrator STEP-4.1 swap: resolve+prefill+compute",
       "value": "high",
-      "retires_risk": "bugfix-oracle-one-direction-only",
-      "unit": "_fixtures/brownfield-bugfix/defects/ + README e2e-validated note",
-      "done_sentinel": "_fixtures/brownfield-bugfix/defects/regression/expected-verdict.json",
-      "rationale": "Plant defects (regression breaks baseline AC; fix-does-not-flip-red; off-blast-radius edit) so each rejecting role FAILs while the golden PASSes. Both-directions oracle complete (BF4). e2e clean-room validated.",
-      "coarse_depends_on": ["P-BUGFIX-VERIFY-OUTPUT"],
-      "real_depends_on": ["P-BUGFIX-VERIFY-OUTPUT"]
+      "retires_risk": "spine-not-wired",
+      "unit": "prompts/_orchestrator.md STEP-4.1 = resolve+prefill+compute",
+      "done_sentinel": "prompts/_orchestrator.md",
+      "rationale": "Discriminator: STEP-4.1 calls resolve(role,state) + prefill + compute + validate around the LLM fill (replaces parse-frontmatter). Gate = full self-host loop drains _fixtures/ clean e2e (regression-guard). Lands LAST among consumers (code + prompts proven first).",
+      "coarse_depends_on": ["W5-TIER1-EMITTERS", "W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST"],
+      "real_depends_on": ["W5-TIER1-EMITTERS", "W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST"]
+    },
+    {
+      "position": 10,
+      "id": "W8-PACK-GATE",
+      "name": "pack gate: wire all selftests, re-skin, ship",
+      "value": "high",
+      "retires_risk": "spine-untested-in-dist",
+      "unit": "pack.mjs wires all selftests + dist/adp-v5.tgz",
+      "done_sentinel": "dist/adp-v5.tgz",
+      "rationale": "Compound: pack.mjs runs all selftests (validator + resolver + graph-lint + det modules + emitters + economy-lint) green; dist/adp-v<ver>.tgz ships. No tarball if any selftest mis-proves.",
+      "coarse_depends_on": ["W7-ORCH-SWAP"],
+      "real_depends_on": ["W7-ORCH-SWAP"]
     }
   ],
   "dependency_check": {
@@ -122,20 +125,19 @@
     "dangling_real_depends_on": []
   },
   "coverage": {
-    "completed": [
-      "P-DERIVE-TESTS-INC", "P-RECONCILE-CRITIQUE-INC", "P-BUILD-PLAN-SLICE", "P-MATERIALIZE-ORACLE-SLICE", "P-IMPLEMENT-SLICE", "P-INTEGRATE-SLICE", "P-DIAGNOSE-SLICE", "P-VERIFY-OUTPUT-SLICE", "P-CRITIQUE-SLICE", "P-DEMO-GEN-SLICE"
-    ],
+    "scope_note": "Scoped to the CR-002 deterministic-machine wave only. Prior delivered waves (greenfield, bugfix) are not tracked here; their done-state is on disk (D20).",
+    "completed": ["W0-CANON-CR"],
     "remaining_ranked": [
-      "P-BUGFIX-FIXTURE-BASELINE", "P-BUGFIX-DIAGNOSE", "P-BUGFIX-SYNTHESIZE-CR", "P-BUGFIX-DERIVE-TESTS", "P-BUGFIX-MATERIALIZE-ORACLE", "P-BUGFIX-IMPLEMENT", "P-BUGFIX-VERIFY-OUTPUT", "P-BUGFIX-DEFECTS-E2E"
+      "W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST", "W3-GRAPH-LINT", "W4-DET-MODULES", "W5-TIER1-EMITTERS", "W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST", "W7-ORCH-SWAP", "W8-PACK-GATE"
     ],
     "missing": [],
     "duplicated": []
   },
   "rerank_counts": {
-    "completed": 10,
-    "remaining": 8,
+    "completed": 1,
+    "remaining": 9,
     "reordered": 0,
     "deps_removed": 0,
-    "deps_added": 8
+    "deps_added": 9
   }
 }
