@@ -7,10 +7,8 @@ interaction:
   when: confidence < threshold OR is_compound == true OR detected class lacks authored playbook (refactor|migration|perf|integration|investigation)
   what: emit batched multiple-choice confirmation question(s) to the client, then HALT. Operator relays answer; re-run finalizes.
   threshold: 0.80           # classifier confidence cutoff (tunable; spec §14 open question)
-inputs:
-  - { path: ".aprd/00-raw-request.md", format: "markdown — verbatim client request + attachment refs; the ONLY classification source" }
 outputs:
-  - { path: ".aprd/01-classification.json", format: "json (schema below) — subrequests + class + confidence + confirmation questions + escape" }
+  - { path: ".aprd/01-classification.json", schema: "01-classification" }
 escapes:
   - { when: "needs_confirmation == true (confidence < threshold OR compound OR any subrequest unplaybooked)", target: "self / HALT — wait for client class confirmation before any downstream stage runs" }
   - { when: "a subrequest classifies as feature-add or bugfix", target: "prompts/_playbooks/{feature-add,bugfix}.md — authored playbook; route, no class-HALT (BF7)" }
@@ -52,43 +50,10 @@ Request is **compound** when it spans **more than one class** OR targets **more 
 ## Task steps
 1. Read `.aprd/00-raw-request.md` in full, including attachment refs. Guards (frontmatter `escapes:`) resolve only AFTER classifying — classify first, then route.
 2. Decide compound vs atomic (discriminator). If compound, split into atomic subrequests; preserve wording per subrequest.
-3. Classify each subrequest → `{class, confidence, reason}`.
+3. Classify each subrequest → `{id, text, class, confidence, reason}`: `id` = stable `SR1`, `SR2`, … (mint `SR`+integer, never renumber on re-run); `text` = faithfully-scoped slice of request (strip only connective tissue, never scope-bearing words); `class`/`confidence`/`reason` per Rule 3.
 4. Compute `overall_confidence` = minimum subrequest confidence (weakest link routes pipeline).
-5. Decide `needs_confirmation` (Rule 4). If true: produce ≤6 multiple-choice confirmation questions, each with recommended default marked (recognition over recall, P7). Default = one question per uncertain subrequest (1:1 trace via `targets`); batch multiple subrequests into one question only if otherwise exceeding 6. Ask only class/decomposition — nothing else.
-6. Write `.aprd/01-classification.json`. Guard tripped → HALT, surface questions to operator; else continue downstream (next stage per class — see Stop condition).
-
-## Output schema — `.aprd/01-classification.json`
-```json
-{
-  "request_ref": ".aprd/00-raw-request.md",
-  "is_compound": true,
-  "overall_confidence": 0.72,            // = min over subrequest confidences
-  "needs_confirmation": true,
-  "subrequests": [
-    {
-      "id": "SR1",                       // stable SR1, SR2, … — downstream + aPRD trace by these IDs (P9); never renumber on re-run
-      "text": "<faithfully-scoped slice of request; strip only connective tissue ('while you're in there', 'oh and also'), never scope-bearing words>",
-      "class": "greenfield",             // one of the eight classes
-      "confidence": 0.91,
-      "reason": "<words in request that drove this class>"
-    }
-  ],
-  "confirmation_questions": [            // [] when needs_confirmation is false
-    {
-      "id": "Q1",
-      "question": "<recognition-framed question about class or decomposition>",
-      "options": ["<option A>", "<option B>", "<option C>"],   // may tag recommended option with [DEFAULT] for operator readability
-      "default": "<recommended option's text, verbatim>",
-      "targets": ["SR1"]                 // the uncertain subrequest(s) this question resolves
-    }
-  ],
-  "escape": {                            // null when every subrequest has an authored playbook (greenfield | feature-add | bugfix)
-    "unplaybooked_subrequests": ["SR2"],   // SR ids whose class still lacks a playbook (refactor|migration|perf|integration|investigation); feature-add + bugfix NOT listed (route to prompts/_playbooks/). If ALL are unplaybooked, list all + say so in note
-    "note": "SR2 classified refactor; refactor playbook not authored — HALT."
-  }
-}
-```
-Caveman governs this too. Schema match is exact; this file is what EXTRACT reads next (PR2).
+5. Decide `needs_confirmation` (Rule 4). If true: produce ≤6 multiple-choice confirmation questions, each `{id, question, options, default, targets}`: `id` = `Q1`, `Q2`, …; `question` = recognition-framed; `options` = array of option texts (recommended one may be tagged `[DEFAULT]`); `default` = recommended option's text verbatim; `targets` = SR id(s) this question resolves. Default = one question per uncertain subrequest (1:1 trace via `targets`); batch multiple subrequests into one question only if otherwise exceeding 6. Ask only class/decomposition — nothing else.
+6. Write `.aprd/01-classification.json`. Output object = `{request_ref, is_compound, overall_confidence, needs_confirmation, subrequests, confirmation_questions, escape}`: `request_ref` = path of raw request read step 1 (`.aprd/00-raw-request.md`); `is_compound` per discriminator; `overall_confidence` per step 4; `confirmation_questions` = `[]` when `needs_confirmation` false; `escape` = JSON `null` when every subrequest has authored playbook (greenfield|feature-add|bugfix), else object `{unplaybooked_subrequests, note}`. Guard tripped → HALT, surface questions to operator; else continue downstream (next stage per class — see Stop condition). `escape.unplaybooked_subrequests` lists ONLY subrequests whose class lacks an authored playbook (refactor|migration|perf|integration|investigation) — feature-add + bugfix NEVER listed (they route to authored playbooks). All subrequests unplaybooked → list them all + say so in `note`.
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → write JSON, print confirmation questions for operator to relay, state "HALT: awaiting client class confirmation", stop. Don't proceed downstream; don't fabricate answers.
