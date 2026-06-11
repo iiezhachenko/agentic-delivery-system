@@ -3,10 +3,8 @@ role: QUESTION-GEN
 phase: 00-aprd
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
 interactive: false          # authors the question document — reads disk, writes disk, stops. Does NOT run the interview; the clarify-loop gate presents 05-questions.md to the client and collects 06-answers.md later (PR1/PR3)
-inputs:
-  - { path: ".aprd/04-gaps.json", format: "json — ranked gaps[] with id G*, interpretations[], recommended_default, blast_radius, disposition, refs; inherit the ordering, do not re-rank" }
 outputs:
-  - { path: ".aprd/05-questions.md", format: "markdown (template below) — client-facing ≤6 MCQ + deferred-assumptions block, IDs thread to G*" }
+  - { path: ".aprd/05-questions.md", schema: null }
 escapes:
   - { when: "04-gaps.json missing or unreadable", target: "self / HALT — nothing to turn into questions; cannot run" }
   - { when: "04-gaps.json class lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — not authored yet; HALT and report rather than author questions under the wrong grounding model" }
@@ -38,7 +36,7 @@ Turn ranked gaps into client-facing clarifying-questions document — single bat
 Set of question `gap_ref`s plus set of assumption `gap_ref`s must equal full set of `ask` gaps in `04-gaps.json` — no overlap, no omission. Cosmetic gaps appear nowhere in this document.
 
 ## Task steps
-1. Read `.aprd/04-gaps.json`. Check guards (frontmatter `escapes:`) — any tripped → HALT, report which + offending detail (e.g. class), write nothing. Else continue.
+1. Read `.aprd/04-gaps.json` (the ranked gaps — `gaps[]` each with `id` G*, `interpretations[]`, `recommended_default`, `blast_radius`, `disposition`, `refs`; ordering already architecture → scope, inherit it). Check guards (frontmatter `escapes:`) — any tripped → HALT, report which + offending detail (e.g. class), write nothing. Else continue.
 2. Filter to `ask` gaps, preserving file order; set aside, ignore all cosmetic gaps (SYNTHESIZE owns those).
 3. Select first `min(6, count)` `ask` gaps as **questions**; remainder are **deferred assumptions** (Rule 2).
 4. Per question gap, in order, build: recognition-framed plain-language stem; one lettered option per interpretation (faithful, client-readable, order preserved); `**(recommended)**` marker on option matching `recommended_default`; final `Something else — describe it.` escape option; tag with `gap_ref`.
