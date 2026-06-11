@@ -1,0 +1,679 @@
+{
+  "$schema_version": 1,
+  "_note": "Read-graph SOURCE OF TRUTH (D25/R11). groups = recurring bundles (one home, AB1); roles[].always = unconditional; roles[].when[] = predicate-gated (AND-equality over state keys mode/class/pass). read entry = group-id string OR inline path-object {path,hint?,glob?,indirect?,optional?}. Resolver tools/io/resolve.mjs expands: always-groups -> when-union -> {scope}/{slice} fill -> lock#field indirection -> glob -> drop-missing-optional -> dedupe. Prompts declare NO inputs (W6 re-author drops inputs:). io-manifest change = new version + downstream change-request (frozen class, mirrors schemas.lock).",
+  "groups": {
+    "frozen_frame": [
+      { "path": ".adr/adr.lock",                 "hint": "frozen gate (status==frozen); class" },
+      { "path": ".hld/skeleton.lock" },
+      { "path": ".aprd/aprd.lock" },
+      { "path": ".hld/skeleton/components.json", "hint": "your component id/name/responsibility + name->module" },
+      { "path": ".hld/skeleton/contracts.json",  "hint": "CT* for your seams; frozen contract is the wall (B3)" },
+      { "path": ".hld/skeleton/data-model.json" },
+      { "path": ".adr/log/<NNNN>-<slug>.md",     "glob": true, "hint": "frozen stack; ground, never re-decide (B5)" }
+    ],
+    "frozen_oracle": [
+      { "path": ".build/{scope}/oracle/oracle.lock" },
+      { "path": ".build/{scope}/oracle/oracle.json" },
+      { "path": ".build/{scope}/oracle/contract/*.py", "glob": true },
+      { "path": ".build/{scope}/oracle/contract/conftest.py" }
+    ],
+    "current_what": [
+      { "path": ".aprd/aprd.lock#artifact", "indirect": true, "hint": "CURRENT frozen WHAT via lock — never hardcode version (BF7/P8)" }
+    ],
+    "frame_adrs": [
+      { "path": ".adr/adr.lock",             "hint": "frozen frame gate (status==frozen) + ADR manifest" },
+      { "path": ".adr/log/<NNNN>-<slug>.md", "glob": true, "hint": "frozen stack ADR bodies; ground, never re-decide (B5)" }
+    ],
+    "hld_frame": [
+      { "path": ".aprd/aprd.lock#artifact",       "indirect": true, "hint": "FROZEN aPRD via lock; R*=responsibilities/trace, E*=owned entities" },
+      { "path": ".adr/adr.lock",                  "hint": "frozen ADR baseline + manifest; freeze gate" },
+      { "path": ".adr/log/<NNNN>-<slug>.md",      "glob": true, "hint": "frame ADR bodies; ground, never re-decide (B5)" },
+      { "path": ".roadmap/06-foundation-cut.json","hint": "cross_slice_invariants INV*=hard floor; deferred[]=per-slice details NOT to invent; skeleton_seams[]" }
+    ],
+    "build_gates": [
+      { "path": ".hld/skeleton.lock", "hint": "frozen skeleton gate + gate clean" },
+      { "path": ".adr/adr.lock",      "hint": "frozen frame gate" },
+      { "path": ".aprd/aprd.lock",    "hint": "frozen WHAT gate" }
+    ]
+  },
+  "roles": {
+
+    "CLASSIFIER": {
+      "always": [ { "path": ".aprd/00-raw-request.md", "hint": "verbatim client request + attachment refs; sole classification source" } ],
+      "when": []
+    },
+    "EXTRACT": {
+      "always": [
+        { "path": ".aprd/00-raw-request.md", "hint": "verbatim client request; greenfield source-of-truth" },
+        { "path": ".aprd/01-classification.json", "hint": "SR* subrequests + classes; tag extracted items with sr_ref" }
+      ],
+      "when": [
+        { "if": { "class": "feature-add" },
+          "read": [
+            { "path": ".aprd/baseline-map.json", "hint": "baseline id high-water + conventions; mint new IDs strictly above (BF3)" },
+            { "path": ".aprd/change-requests/CR-*.md", "glob": true, "hint": "feature ask; NEW delta atop baseline" }
+          ] }
+      ]
+    },
+    "GAP-DETECT": {
+      "always": [
+        { "path": ".aprd/02-extraction.json", "hint": "E*/R*/C*/U*; items each gap traces to via refs" },
+        { "path": ".aprd/03-grounding/", "optional": true, "hint": "grounding output dir; present only if grounding ran — gaps grounding closed are not gaps" }
+      ],
+      "when": [
+        { "if": { "class": "feature-add" },
+          "read": [
+            { "path": ".aprd/baseline-map.json", "hint": "baseline decisions/conventions settled; NOT re-litigated as gaps" },
+            { "path": ".aprd/aprd.frozen.md", "hint": "baseline REQUIREMENTS/ASSUMPTIONS/OUT_OF_SCOPE already decided; settled fork is not a gap" }
+          ] },
+        { "if": { "class": "bugfix" },
+          "read": [
+            { "path": ".aprd/baseline-map.json", "hint": "baseline decisions settled; expected-behavior baseline" },
+            { "path": ".aprd/aprd.frozen.md", "hint": "baseline settled expected behavior" }
+          ] }
+      ]
+    },
+    "SYNTHESIZE": {
+      "always": [
+        { "path": ".aprd/02-extraction.json", "hint": "canonical E*/R*/C* id-space carried forward unchanged" },
+        { "path": ".aprd/04-gaps.json", "hint": "ranked gaps G* + interpretations + recommended_default + disposition; one assumption per gap" },
+        { "path": ".aprd/05-questions.md", "hint": "which gaps became Q* vs deferred; maps answer letter back to gap+interpretation" },
+        { "path": ".aprd/06-answers.md", "hint": "client answers; 'Q<n>: <letter>' or free text; blank=skipped" }
+      ],
+      "when": [
+        { "if": { "class": "feature-add" },
+          "read": [
+            { "path": ".aprd/baseline-map.json", "hint": "id_high_water (BF3) + conventions (BF5) + integration_seams (BF6) + existing_oracle (BF4)" },
+            { "path": ".aprd/aprd.frozen.md", "hint": "frozen BASELINE, READ-ONLY (BF1); R*/AC*/E*/C* carried by REFERENCE, max A* sets high-water" }
+          ] },
+        { "if": { "class": "bugfix" },
+          "read": [
+            { "path": ".aprd/baseline-map.json", "hint": "id_high_water (BF3) + existing_oracle (BF4) + conventions" },
+            { "path": ".aprd/aprd.frozen.md", "hint": "frozen BASELINE, READ-ONLY (BF1)" },
+            { "path": ".aprd/diagnosis.json", "hint": "ROOT_CAUSE block carried VERBATIM into bugfix aPRD" }
+          ] }
+      ]
+    },
+    "QUESTION-GEN": {
+      "always": [ { "path": ".aprd/04-gaps.json", "hint": "ranked gaps G* + interpretations + recommended_default + blast_radius + disposition; inherit ordering, do not re-rank" } ],
+      "when": []
+    },
+    "CRITIQUE@00-aprd": {
+      "always": [
+        { "path": ".aprd/drafts/aprd.v1.md", "hint": "aPRD draft under review (PROJECT/CLASS/E*/R*/C*/A*/OUT_OF_SCOPE/AC*)" },
+        { "path": ".aprd/07-assumptions.json", "hint": "machine assumptions log; cross-check against draft ASSUMPTIONS" },
+        { "path": ".aprd/04-gaps.json", "hint": "ranked gaps = traceability ground truth (assumptions trace back to these)" }
+      ],
+      "when": []
+    },
+    "BASELINE-MAP": {
+      "always": [
+        { "path": ".aprd/aprd.frozen.md", "hint": "frozen requirements; R*/AC* high-water source" },
+        { "path": ".aprd/aprd.lock", "hint": "frozen-status gate + aprd digest" },
+        { "path": ".adr/adr.lock", "hint": "frozen-status gate + ADR-* index; ADR* high-water source" },
+        { "path": ".adr/log/", "optional": true, "hint": "decision bodies; lang/stack conventions cite source" },
+        { "path": ".hld/skeleton.lock", "hint": "frozen-status gate" },
+        { "path": ".hld/skeleton/*.json", "glob": true, "hint": "C*/E*/CT*/realizes_seam; seam catalog + C/E/CT high-water source" },
+        { "path": ".roadmap/08-rerank.json", "hint": "completed[]+remaining_sequence[] slice ids; S* high-water source" },
+        { "path": ".build/**/oracle/oracle.lock", "glob": true, "hint": "frozen oracle suites; regression-baseline inventory (BF4)" },
+        { "path": "src/**", "glob": true, "hint": "module layout + naming idioms; CONVENTION_BASELINE source (BF5)" },
+        { "path": "pyproject.toml", "hint": "lint/format/pytest config; convention source" }
+      ],
+      "when": []
+    },
+    "EXTRACT-RULES": {
+      "always": [
+        { "path": ".aprd/03-grounding/sources.json", "hint": "curated source allowlist + fetch index; per-source SRC* tier/tool/version/kind/url" },
+        { "path": ".aprd/03-grounding/manifests/", "hint": "raw fetched manifests, one per source; ground truth, transcribe verbatim" }
+      ],
+      "when": []
+    },
+    "RECONCILE@00-aprd": {
+      "always": [ { "path": ".aprd/03-grounding/rules-extracted.json", "hint": "per-source atomic RULE* pinned to SRC* with verbatim evidence; + unfetched_sources[]" } ],
+      "when": []
+    },
+    "VERIFY": {
+      "always": [ { "path": ".aprd/03-grounding/rules-reconciled.json", "hint": "agreed AGR* + conflicts CONF*; carry tier/tool/setting verbatim, currency-check setting" } ],
+      "when": []
+    },
+
+    "SLICE-EXTRACT": {
+      "always": [
+        { "path": ".aprd/aprd.lock", "hint": "freeze gate + frozen-artifact resolver (artifact field)" },
+        { "path": ".aprd/aprd.frozen.md", "hint": "greenfield frozen WHAT (v1); CLASS gates path" }
+      ],
+      "when": [
+        { "if": { "class": "feature-add" },
+          "read": [
+            "current_what",
+            { "path": ".aprd/baseline-map.json", "hint": "baseline S* high-water; new S* mint strictly above" },
+            { "path": ".roadmap/08-rerank.json", "hint": "baseline frontier; completed[]=pinned baseline slices" }
+          ] }
+      ]
+    },
+    "VERTICALITY-CHECK": {
+      "always": [
+        { "path": ".roadmap/02-slices.json", "hint": "candidate slices S* + acceptance AC*; carry verbatim onto verdict" },
+        { "path": ".aprd/aprd.frozen.md", "hint": "AC* TEXT oracle; verticality judged on actual ACCEPTANCE wording" }
+      ],
+      "when": []
+    },
+    "SKELETON-IDENTIFY": {
+      "always": [
+        { "path": ".roadmap/03-verticality.json", "hint": "verdict(all_vertical) + valid[]=ELIGIBILITY set" },
+        { "path": ".roadmap/02-slices.json", "hint": "slice bodies (R*/AC*/retires_risk/depends_on) for seam/thinness reasoning" },
+        { "path": ".aprd/aprd.frozen.md", "hint": "oracle for naming foundational seams + which seam each slice crosses" }
+      ],
+      "when": []
+    },
+    "SEQUENCE": {
+      "always": [
+        { "path": ".roadmap/04-skeleton.json", "hint": "skeleton{id} MUST lead [RM4 pos 1]; eligible_slices[]=set to sequence" },
+        { "path": ".roadmap/02-slices.json", "hint": "slice bodies (value/retires_risk/depends_on): scoring + cost-proxy, verbatim" },
+        { "path": ".roadmap/03-verticality.json", "hint": "verdict + valid[]; only validated-vertical sequenced" }
+      ],
+      "when": [
+        { "if": { "class": "feature-add" },
+          "read": [ { "path": ".roadmap/08-rerank.json", "hint": "BASELINE roadmap: completed[]=PIN (BF1), never re-sequenced; base_slices for dangling check" } ] }
+      ]
+    },
+    "FOUNDATION-CUT": {
+      "always": [
+        { "path": ".roadmap/04-skeleton.json", "hint": "skeleton + foundational_seams[] + skeleton_seams[]; the cut driver" },
+        { "path": ".roadmap/05-sequence.json", "hint": "verdict + sequence[]; LATER slices = deferral oracle" },
+        { "path": ".aprd/aprd.frozen.md", "hint": "C*/A*/E*=cross-slice-invariant oracle; invariants READ never invented" }
+      ],
+      "when": []
+    },
+    "SEQUENCE-REVIEW": {
+      "always": [ { "path": ".roadmap/05-sequence.json", "hint": "proposed order; verdict MUST be 'sequenced'; per-position id/value/depends_on/cost_proxy" } ],
+      "when": []
+    },
+    "RE-RANK": {
+      "always": [
+        { "path": ".roadmap/07-sequence-reviewed.json", "hint": "client-confirmed base sequence carried verbatim; order to re-rank, never re-scored" },
+        { "path": ".hld/skeleton/build-dag.json", "hint": "REAL component dependency DAG; authoritative component-level prerequisites" },
+        { "path": ".hld/skeleton/components.json", "hint": "traces[R*] + realizes_seam[]; slice->component projection key" },
+        { "path": ".roadmap/02-slices.json", "hint": "slices[].requirements[R*]; projection input" },
+        { "path": ".build/skeleton/demo/demo.json", "hint": "accepted-slice records; accepted slices COMPLETED (pinned)" },
+        { "path": ".build/slices/S*/demo/demo.json", "glob": true, "optional": true, "hint": "per-slice demo learnings = only value/risk-change source" }
+      ],
+      "when": []
+    },
+
+    "DECISION-EXTRACT": {
+      "always": [
+        "current_what",
+        { "path": ".aprd/aprd.lock", "hint": "freeze signature + version resolver; artifact names CURRENT frozen WHAT" },
+        { "path": ".roadmap/06-foundation-cut.json", "hint": "foundational decision categories FD*, skeleton_seams[], INV*, deferred[] seeds" }
+      ],
+      "when": []
+    },
+    "TRIAGE": {
+      "always": [
+        { "path": ".adr/01-decision-points.json", "hint": "raw fork list DP* + checklist_coverage + aprd_defects[]" },
+        { "path": ".roadmap/06-foundation-cut.json", "hint": "in-cut foundational_decisions FD*, skeleton_seams[], INV*, deferred[] for cut-split test" }
+      ],
+      "when": []
+    },
+    "OPTION-GEN": {
+      "always": [
+        { "path": ".adr/02-triage.json", "hint": "resolution_queue[]=work list (in-cut foundational DP ids)" },
+        { "path": ".adr/01-decision-points.json", "hint": "point bodies per DP (decision/category/forced_by/fork_evidence)" },
+        "current_what",
+        { "path": ".roadmap/06-foundation-cut.json", "hint": "INV*=HARD properties keeping option space honest" },
+        { "path": ".adr/arch-canon.json", "optional": true, "hint": "versioned arch canon; cached option-sets; cheapest-first, verify currency" }
+      ],
+      "when": []
+    },
+    "EVALUATE-DECIDE": {
+      "always": [
+        { "path": ".adr/03-options/index.json", "hint": "OPTION-GEN manifest; enumeration entry (option_files[]+degenerate[])" },
+        { "path": ".adr/03-options/DP*.json", "glob": true, "hint": "per-DP option set; live unranked alternatives + bears_on[] eval hooks" },
+        "current_what",
+        { "path": ".roadmap/06-foundation-cut.json", "hint": "INV*=HARD floor (pick breaching INV* invalid)" }
+      ],
+      "when": []
+    },
+    "RECONCILE@02-adr": {
+      "always": [
+        { "path": ".adr/03-options/decisions-index.json", "hint": "decisions[]+undecided[] enumerates decided set" },
+        { "path": ".adr/03-options/DP*.decision.json", "glob": true, "hint": "per-DP decision (decision_made/traces/consequences.follow_on for cross-decision deps)" },
+        "current_what",
+        { "path": ".roadmap/06-foundation-cut.json", "hint": "INV* hard floor; FD*; deferred[] evidence" }
+      ],
+      "when": []
+    },
+    "SYNTHESIZE-ADR": {
+      "always": [
+        { "path": ".adr/04-conflicts.json", "hint": "THE GATE; render ONLY when verdict==coherent" },
+        { "path": ".adr/03-options/decisions-index.json", "hint": "enumeration entry + deterministic id-assignment order" },
+        { "path": ".adr/03-options/DP*.decision.json", "glob": true, "hint": "per-DP decision = render SOURCE OF TRUTH" }
+      ],
+      "when": []
+    },
+    "CRITIQUE@02-adr": {
+      "always": [
+        { "path": ".adr/adr-index.json", "hint": "enumerates rendered set via adrs[] (each -> draft_ref)" },
+        { "path": ".adr/drafts/<NNNN>-<slug>.draft.md", "glob": true, "hint": "the ADR DRAFTS under review (Context/Decision/Alternatives/Consequences)" },
+        "current_what",
+        { "path": ".adr/04-conflicts.json", "hint": "coherence+coverage context via coverage.aprd_to_adr buckets" },
+        { "path": ".roadmap/06-foundation-cut.json", "hint": "over-decided/not-yet/unforced oracle (FD* needed_by, deferred[], INV* floor)" }
+      ],
+      "when": []
+    },
+
+    "DERIVE-COMPONENTS": {
+      "always": [ "hld_frame" ],
+      "when": [
+        { "if": { "pass": "increment" },
+          "read": [
+            { "path": ".hld/skeleton.lock", "hint": "DISPATCH + freeze gate: status==frozen -> INCREMENT" },
+            { "path": ".hld/skeleton/components.json", "hint": "FROZEN base graph; reused components carried VERBATIM" },
+            { "path": ".roadmap/08-rerank.json", "hint": "living roadmap: remaining_sequence + introduction_map + completed[]" },
+            { "path": ".roadmap/02-slices.json", "hint": "slices[].requirements/acceptance = R*/AC* target slice realizes" }
+          ] }
+      ]
+    },
+    "DEFINE-CONTRACTS": {
+      "always": [ "hld_frame", { "path": ".hld/skeleton/components.json", "hint": "components + edges = seam set to contract" } ],
+      "when": [
+        { "if": { "pass": "increment" },
+          "read": [
+            { "path": ".hld/skeleton.lock", "hint": "DISPATCH + freeze gate: status==frozen -> INCREMENT" },
+            { "path": ".hld/skeleton/contracts.json", "hint": "FROZEN base contracts; established seams already contracted" },
+            { "path": ".hld/slices/{slice}/components.json", "hint": "introduced_components[]+touched_components[]=contract surface" },
+            { "path": ".roadmap/08-rerank.json", "hint": "living roadmap: remaining_sequence + completed[]" },
+            { "path": ".roadmap/02-slices.json", "hint": "slices[].requirements=R* target slice realizes" }
+          ] }
+      ]
+    },
+    "MODEL-DATA": {
+      "always": [ "hld_frame" ],
+      "when": [
+        { "if": { "pass": "skeleton" },
+          "read": [
+            { "path": ".hld/skeleton/components.json", "hint": "owns_entities[]=PROPOSED single-owner assignment to FORMALIZE" },
+            { "path": ".hld/skeleton/contracts.json", "hint": "shared_data/sync_api seams=who writes/reads each entity" }
+          ] },
+        { "if": { "pass": "increment" },
+          "read": [
+            { "path": ".hld/skeleton.lock", "hint": "DISPATCH + freeze gate" },
+            { "path": ".hld/skeleton/data-model.json", "hint": "FROZEN base model; slice carries entities BY REFERENCE" },
+            { "path": ".hld/slices/{slice}/components.json", "hint": "introduced+touched components=membership gate" },
+            { "path": ".hld/slices/{slice}/contracts.json", "hint": "touched_contracts[]=which boxes write vs read entities" },
+            { "path": ".roadmap/08-rerank.json", "hint": "living roadmap" },
+            { "path": ".roadmap/02-slices.json", "hint": "slices[].requirements=R* realized" }
+          ] }
+      ]
+    },
+    "MAP-NFR": {
+      "always": [ "hld_frame" ],
+      "when": [
+        { "if": { "pass": "skeleton" },
+          "read": [ { "path": ".hld/skeleton/components.json", "hint": "components[]=realizing C* set" } ] },
+        { "if": { "pass": "increment" },
+          "read": [
+            { "path": ".hld/skeleton.lock", "hint": "DISPATCH + freeze gate" },
+            { "path": ".hld/skeleton/nfr-mechanisms.json", "hint": "FROZEN base NFR map; slice inherits frame NFRs BY REFERENCE" },
+            { "path": ".hld/slices/{slice}/components.json", "hint": "introduced+touched components=membership gate" },
+            { "path": ".hld/slices/{slice}/contracts.json", "hint": "touched_contracts[]=seams box operates through under inherited NFR" },
+            { "path": ".roadmap/08-rerank.json", "hint": "living roadmap" },
+            { "path": ".roadmap/02-slices.json", "hint": "slices[].requirements=R* realized" }
+          ] }
+      ]
+    },
+    "MODEL-FLOWS": {
+      "always": [ "hld_frame" ],
+      "when": [
+        { "if": { "pass": "skeleton" },
+          "read": [
+            { "path": ".hld/skeleton/components.json", "hint": "realizes_seam + seam_realization=which C* realizes each foundational seam" },
+            { "path": ".hld/skeleton/contracts.json", "hint": "seams path composes against; each hop maps to one CT*" }
+          ] },
+        { "if": { "pass": "increment" },
+          "read": [
+            { "path": ".hld/skeleton.lock", "hint": "DISPATCH + freeze gate" },
+            { "path": ".hld/slices/{slice}/components.json", "hint": "introduced+touched components=boxes slice path walks" },
+            { "path": ".hld/slices/{slice}/contracts.json", "hint": "FROZEN seams (by ref) each slice hop composes against" },
+            { "path": ".roadmap/08-rerank.json", "hint": "living roadmap" },
+            { "path": ".roadmap/02-slices.json", "hint": "slices[].requirements=R* realized" }
+          ] }
+      ]
+    },
+    "DERIVE-TESTS": {
+      "always": [ "hld_frame" ],
+      "when": [
+        { "if": { "pass": "skeleton" },
+          "read": [
+            { "path": ".hld/skeleton/contracts.json", "hint": "frozen CT* set; shape + declared failure_modes" },
+            { "path": ".hld/skeleton/flows.json", "hint": "frozen F* paths + failure_path" },
+            { "path": ".hld/skeleton/components.json", "hint": "dependency graph (edges+nodes) to topo-sort into build DAG" }
+          ] },
+        { "if": { "pass": "increment" },
+          "read": [
+            { "path": ".hld/skeleton.lock", "hint": "DISPATCH + freeze gate" },
+            { "path": ".hld/skeleton/test-specs.json", "hint": "frozen contract test specs slice's seams inherit" },
+            { "path": ".hld/slices/{slice}/flows.json", "hint": "slice NEW flow=source for new flow test" },
+            { "path": ".hld/slices/{slice}/contracts.json", "hint": "touched_contracts + new_contracts" },
+            { "path": ".roadmap/08-rerank.json", "hint": "living roadmap" }
+          ] }
+      ]
+    },
+    "RESOLVE-LOCAL": {
+      "always": [ "hld_frame", { "path": ".adr/01-decision-points.json", "hint": "DP bodies: decision text + category + forced_by + fork_evidence" } ],
+      "when": [
+        { "if": { "pass": "skeleton" },
+          "read": [
+            { "path": ".adr/02-triage.json", "hint": "deferred_queue[]=LOCAL DPs to drain" },
+            { "path": ".hld/skeleton/components.json", "hint": "emerging structure; locate fork's owning component" },
+            { "path": ".hld/skeleton/contracts.json", "hint": "seam contracts; test whether resolving changes contract KIND" }
+          ] },
+        { "if": { "pass": "increment" },
+          "read": [
+            { "path": ".hld/skeleton.lock", "hint": "DISPATCH + freeze gate" },
+            { "path": ".adr/deferred-decisions.json", "hint": "skeleton-pass ledger: re_deferred[] + local_adrs[]" },
+            { "path": ".hld/slices/{slice}/components.json", "hint": "introduced+touched components=membership gate" },
+            { "path": ".hld/slices/{slice}/contracts.json", "hint": "presence=upstream Phase-3 increments ran" },
+            { "path": ".roadmap/08-rerank.json", "hint": "living roadmap" },
+            { "path": ".roadmap/02-slices.json", "hint": "slice metadata" }
+          ] }
+      ]
+    },
+    "RECONCILE-CRITIQUE": {
+      "always": [ "hld_frame", { "path": ".adr/02-triage.json", "hint": "AUTHORITATIVE deferred-queue source" } ],
+      "when": [
+        { "if": { "pass": "skeleton" },
+          "read": [
+            { "path": ".hld/skeleton/components.json", "hint": "R<->component coverage subject" },
+            { "path": ".hld/skeleton/contracts.json", "hint": "contract-testability + frame subject" },
+            { "path": ".hld/skeleton/data-model.json", "hint": "single-owner subject" },
+            { "path": ".hld/skeleton/nfr-mechanisms.json", "hint": "NFR-coverage subject" },
+            { "path": ".hld/skeleton/flows.json", "hint": "flow-completeness subject" },
+            { "path": ".hld/skeleton/test-specs.json", "hint": "design-layer-oracle existence subject" },
+            { "path": ".adr/deferred-decisions.json", "hint": "skeleton queue-drained subject" }
+          ] },
+        { "if": { "pass": "increment" },
+          "read": [
+            { "path": ".hld/skeleton.lock", "hint": "DISPATCH + freeze gate; frozen skeleton/*=extend-not-redraw reference" },
+            { "path": ".roadmap/08-rerank.json", "hint": "auto-selects target slice" },
+            { "path": ".hld/slices/{slice}/components.json", "hint": "R<->component coverage + redraw subject" },
+            { "path": ".hld/slices/{slice}/contracts.json", "hint": "contract-testability + reshape subject" },
+            { "path": ".hld/slices/{slice}/data-model.json", "hint": "single-owner + re-model subject" },
+            { "path": ".hld/slices/{slice}/nfr-mechanisms.json", "hint": "NFR-coverage + re-dispose subject" },
+            { "path": ".hld/slices/{slice}/flows.json", "hint": "flow-completeness + compose-against-frozen subject" },
+            { "path": ".hld/slices/{slice}/test-specs.json", "hint": "design-layer-oracle existence + re-author subject" },
+            { "path": ".hld/slices/{slice}/deferred-decisions.json", "hint": "queue-drained subject" }
+          ] }
+      ]
+    },
+
+    "BUILD-PLAN": {
+      "always": [ "build_gates", { "path": ".hld/skeleton/build-dag.json", "hint": "PRIMARY — topological order, per-node depends_on" } ],
+      "when": [
+        { "if": { "mode": "skeleton-build" },
+          "read": [
+            { "path": ".hld/skeleton/flows.json", "hint": "walking skeleton = skeleton_id flow's path" },
+            { "path": ".hld/skeleton/components.json", "hint": "per-component id/name/traces, dependency edges" },
+            { "path": ".hld/skeleton/contracts.json", "hint": "per-CT* between-pair = seam->CT map" }
+          ] },
+        { "if": { "mode": "slice-build" },
+          "read": [
+            { "path": ".build/skeleton/build-plan.json", "hint": "DISPATCH signal present -> slice-build" },
+            { "path": ".roadmap/08-rerank.json", "hint": "living roadmap: remaining_sequence, auto-select target" },
+            { "path": ".hld/slices/{slice}/components.json", "optional": true, "hint": "fleshed_this_slice = build_set" },
+            { "path": ".hld/slices/{slice}/contracts.json", "optional": true, "hint": "touched CT* between-pairs" },
+            { "path": ".hld/slices/{slice}/flows.json", "optional": true, "hint": "slice flow, composes_against_frozen_contracts" }
+          ] }
+      ]
+    },
+    "IMPLEMENT": {
+      "always": [ "frozen_frame" ],
+      "when": [
+        { "if": { "mode": "skeleton-build" },
+          "read": [ "frozen_oracle",
+                    { "path": ".build/skeleton/build-plan.json", "hint": "PRIMARY scope; structural_defects must be empty" },
+                    { "path": ".build/skeleton/build-record.json", "optional": true } ] },
+        { "if": { "mode": "slice-build" },
+          "read": [ "frozen_oracle",
+                    { "path": ".build/slices/{slice}/build-plan.json" },
+                    { "path": ".build/skeleton/oracle/oracle.json", "hint": "inherited skeleton greens — never re-run (B4/H14)" },
+                    { "path": ".build/slices/{slice}/build-record.json", "optional": true },
+                    { "path": ".roadmap/08-rerank.json" } ] },
+        { "if": { "mode": "slice-build", "class": "feature-add" },
+          "read": [ "current_what",
+                    { "path": ".aprd/baseline-map.json" },
+                    { "path": "src/freelancer_app/**", "glob": true, "hint": "convention exemplar; READ-ONLY, never restyle (BF1/BF5)" } ] },
+        { "if": { "mode": "slice-build", "class": "bugfix" },
+          "read": [ "current_what",
+                    { "path": ".aprd/diagnosis.json", "hint": "root_cause + localization.symbol = the ONLY edit site" },
+                    { "path": ".build/slices/{slice}/oracle/reproduction/test_*.py", "glob": true },
+                    { "path": "src/freelancer_app/**", "glob": true, "hint": "EDIT in place at BLAST_RADIUS symbol (BF4)" } ] }
+      ]
+    },
+    "INTEGRATE": {
+      "always": [ "frame_adrs", { "path": ".hld/skeleton.lock", "hint": "frozen skeleton gate + gate clean" }, { "path": ".aprd/aprd.lock", "hint": "frozen WHAT gate" } ],
+      "when": [
+        { "if": { "mode": "skeleton-build" },
+          "read": [
+            { "path": ".build/skeleton/build-record.json", "hint": "PRIMARY — built components, framework in lld_notes" },
+            { "path": ".hld/skeleton/flows.json", "hint": "PRIMARY — walking skeleton flow path" },
+            { "path": ".build/skeleton/oracle/oracle.lock", "hint": "frozen oracle gate" },
+            { "path": ".build/skeleton/oracle/oracle.json", "hint": "flow-layer surface" },
+            { "path": ".build/skeleton/oracle/flow/test_F1.py", "hint": "executable flow test + mocks" },
+            { "path": ".build/skeleton/oracle/conftest.py", "hint": "frozen fixtures" },
+            { "path": ".hld/skeleton/contracts.json", "hint": "seams on flow path" },
+            { "path": ".hld/skeleton/components.json", "hint": "on-path components" },
+            { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "contract-layer modules — wire, never rewrite" },
+            { "path": ".build/skeleton/integration-record.json", "optional": true, "hint": "prior runs" }
+          ] },
+        { "if": { "mode": "slice-build" },
+          "read": [
+            { "path": ".roadmap/08-rerank.json", "hint": "auto-select target slice" },
+            { "path": ".build/slices/{slice}/build-record.json", "hint": "PRIMARY — slice components, framework" },
+            { "path": ".hld/slices/{slice}/flows.json", "hint": "PRIMARY — slice flow path" },
+            { "path": ".build/slices/{slice}/oracle/oracle.lock", "hint": "frozen slice-oracle gate" },
+            { "path": ".build/slices/{slice}/oracle/oracle.json", "hint": "slice flow-test surface" },
+            { "path": ".build/slices/{slice}/oracle/flow/test_F*.py", "glob": true, "hint": "executable slice flow test + mocks" },
+            { "path": ".build/slices/{slice}/oracle/conftest.py", "hint": "frozen fixtures" },
+            { "path": ".build/slices/{slice}/build-plan.json", "hint": "per-seam real|mocked + prior_built" },
+            { "path": ".hld/slices/{slice}/contracts.json", "hint": "on-path seams" },
+            { "path": ".hld/slices/{slice}/components.json", "hint": "on-path components" },
+            { "path": ".build/skeleton/integration-record.json", "hint": "FROZEN skeleton composition root — inherit by ref" },
+            { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "prior-built + this-slice code" },
+            { "path": ".build/slices/{slice}/integration-record.json", "optional": true, "hint": "prior runs" }
+          ] },
+        { "if": { "mode": "slice-build", "class": "feature-add" },
+          "read": [ "current_what", { "path": ".aprd/baseline-map.json", "hint": "integration_seams catalog (BF6)" } ] }
+      ]
+    },
+    "MATERIALIZE-ORACLE": {
+      "always": [
+        { "path": ".aprd/aprd.frozen.md", "hint": "AC* TEXT — oracle observable" },
+        "frame_adrs",
+        { "path": ".aprd/aprd.lock", "hint": "frozen WHAT gate" },
+        { "path": ".hld/skeleton.lock", "hint": "frozen skeleton gate + reconcile_critique_verdict==clean" },
+        { "path": ".hld/skeleton/components.json", "hint": "component id/name/traces, HIGH-BLAST" },
+        { "path": ".hld/skeleton/test-specs.json", "hint": "per-CT* shape+failure, per-F* flow specs" }
+      ],
+      "when": [
+        { "if": { "mode": "skeleton-build" },
+          "read": [ { "path": ".build/skeleton/build-plan.json", "hint": "PRIMARY — build_set + real seams" } ] },
+        { "if": { "mode": "slice-build" },
+          "read": [
+            { "path": ".build/slices/{slice}/build-plan.json", "hint": "DISPATCH — target scope" },
+            { "path": ".hld/slices/{slice}/test-specs.json", "hint": "slice design oracle: NEW tests" },
+            { "path": ".build/skeleton/oracle/oracle.lock", "hint": "DISPATCH signal present -> slice-build" },
+            { "path": ".build/skeleton/oracle/oracle.json", "hint": "frozen oracle manifest — inherited set" },
+            { "path": ".roadmap/08-rerank.json", "hint": "auto-select target slice" }
+          ] },
+        { "if": { "mode": "slice-build", "class": "feature-add" },
+          "read": [ "current_what", { "path": ".aprd/baseline-map.json", "hint": "existing_oracle suites (REGRESSION_GUARD BF4)" } ] },
+        { "if": { "mode": "slice-build", "class": "bugfix" },
+          "read": [
+            { "path": ".aprd/diagnosis.json", "hint": "DISPATCH signal + localization" },
+            "current_what",
+            { "path": ".hld/slices/{slice}/test-specs.json", "hint": "bugfix design oracle: reproduction_test" }
+          ] }
+      ]
+    },
+    "VERIFY-OUTPUT": {
+      "always": [ "build_gates" ],
+      "when": [
+        { "if": { "mode": "skeleton-build" },
+          "read": [
+            { "path": ".build/skeleton/integration-record.json", "hint": "PRIMARY — composed flow + composition.files" },
+            { "path": ".build/skeleton/build-record.json", "hint": "PRIMARY — built components + module_namespace" },
+            { "path": ".build/skeleton/oracle/oracle.lock", "hint": "frozen oracle gate" },
+            { "path": ".build/skeleton/oracle/oracle.json", "hint": "oracle manifest: ladder inventory" },
+            { "path": ".build/skeleton/oracle/contract/*.py", "glob": true, "hint": "executable ladder" },
+            { "path": ".build/skeleton/oracle/flow/*.py", "glob": true, "hint": "executable ladder" },
+            { "path": ".build/skeleton/oracle/acceptance/visible/*.py", "glob": true, "hint": "executable ladder" },
+            { "path": ".build/skeleton/oracle/acceptance/held_out/*.py", "glob": true, "hint": "executable ladder" },
+            { "path": ".build/skeleton/oracle/conftest.py", "hint": "frozen conftest" },
+            { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "component modules + composition root" },
+            { "path": ".hld/skeleton/nfr-mechanisms.json", "hint": "mechanisms[] to confirm wiring" },
+            { "path": ".hld/skeleton/components.json", "hint": "name->module map + M* realizing" },
+            { "path": ".build/skeleton/verification.json", "optional": true, "hint": "prior run" }
+          ] },
+        { "if": { "mode": "slice-build" },
+          "read": [
+            { "path": ".roadmap/08-rerank.json", "hint": "auto-select target slice" },
+            { "path": ".build/slices/{slice}/integration-record.json", "hint": "PRIMARY — composed slice flow" },
+            { "path": ".build/slices/{slice}/build-record.json", "hint": "PRIMARY — slice components" },
+            { "path": ".build/slices/{slice}/oracle/oracle.lock", "hint": "frozen slice-oracle gate" },
+            { "path": ".build/slices/{slice}/oracle/oracle.json", "hint": "slice oracle manifest + inherited_oracle" },
+            { "path": ".build/slices/{slice}/oracle/contract/*.py", "glob": true, "hint": "executable slice ladder" },
+            { "path": ".build/slices/{slice}/oracle/flow/*.py", "glob": true, "hint": "executable slice ladder" },
+            { "path": ".build/slices/{slice}/oracle/acceptance/visible/*.py", "glob": true, "hint": "executable slice ladder" },
+            { "path": ".build/slices/{slice}/oracle/acceptance/held_out/*.py", "glob": true, "hint": "executable slice ladder" },
+            { "path": ".build/slices/{slice}/oracle/conftest.py", "hint": "frozen fixtures" },
+            { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "prior-built + this-slice code" },
+            { "path": ".hld/slices/{slice}/nfr-mechanisms.json", "hint": "slice mechanisms[]" },
+            { "path": ".hld/slices/{slice}/components.json", "hint": "slice components" },
+            { "path": ".build/skeleton/oracle/oracle.json", "hint": "FROZEN skeleton oracle — inherited by ref" },
+            { "path": ".build/skeleton/integration-record.json", "hint": "FROZEN skeleton composition root" },
+            { "path": ".build/slices/{slice}/verify-output.json", "optional": true, "hint": "prior run" }
+          ] },
+        { "if": { "mode": "slice-build", "class": "feature-add" },
+          "read": [ "current_what", { "path": ".aprd/baseline-map.json", "hint": "existing_oracle suites (REGRESSION_GUARD)" } ] },
+        { "if": { "mode": "slice-build", "class": "bugfix" },
+          "read": [ { "path": ".aprd/diagnosis.json", "hint": "localization + regression_surface" }, "current_what" ] }
+      ]
+    },
+    "CRITIQUE@04-build": {
+      "always": [ "build_gates", { "path": ".aprd/aprd.frozen.md", "hint": "frozen WHAT: R*/AC* trace oracle" } ],
+      "when": [
+        { "if": { "mode": "skeleton-build" },
+          "read": [
+            { "path": ".build/skeleton/verification.json", "hint": "GATE — verdict must be verified" },
+            { "path": ".build/skeleton/build-record.json", "hint": "PRIMARY — diff inventory + traces" },
+            { "path": ".build/skeleton/integration-record.json", "hint": "PRIMARY — composition.files + mock_swaps" },
+            { "path": ".build/skeleton/build-plan.json", "hint": "build_set + mocked_deps oracle" },
+            { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "DIFF under review — read, never edit" },
+            { "path": ".hld/skeleton/contracts.json", "hint": "contract honor oracle" },
+            { "path": ".build/skeleton/oracle/oracle.json", "hint": "oracle manifest: tests that greened" },
+            { "path": ".build/skeleton/oracle/contract/*.py", "glob": true, "hint": "FIXTURE-LITERAL oracle — hardcode signal" },
+            { "path": ".build/skeleton/oracle/flow/*.py", "glob": true, "hint": "FIXTURE-LITERAL oracle" },
+            { "path": ".build/skeleton/oracle/acceptance/visible/*.py", "glob": true, "hint": "FIXTURE-LITERAL oracle" },
+            { "path": ".build/skeleton/oracle/acceptance/held_out/*.py", "glob": true, "hint": "FIXTURE-LITERAL oracle" },
+            { "path": ".build/skeleton/oracle/conftest.py", "hint": "mock return_values" },
+            { "path": ".hld/skeleton/components.json", "hint": "trace-to-requirement oracle" },
+            { "path": ".build/skeleton/oracle/oracle.lock", "hint": "frozen oracle gate" },
+            { "path": ".build/skeleton/critique.json", "optional": true, "hint": "prior run" }
+          ] },
+        { "if": { "mode": "slice-build" },
+          "read": [
+            { "path": ".roadmap/08-rerank.json", "hint": "auto-select target slice" },
+            { "path": ".build/slices/{slice}/verify-output.json", "hint": "GATE — verdict must be verified" },
+            { "path": ".build/slices/{slice}/build-record.json", "hint": "PRIMARY — slice diff inventory" },
+            { "path": ".build/slices/{slice}/integration-record.json", "hint": "PRIMARY — additive composition.files" },
+            { "path": ".build/slices/{slice}/build-plan.json", "hint": "slice build_set + mocked_deps" },
+            { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "slice diff + prior-built code" },
+            { "path": ".hld/slices/{slice}/contracts.json", "hint": "slice contract honor oracle" },
+            { "path": ".build/slices/{slice}/oracle/oracle.json", "hint": "slice oracle manifest" },
+            { "path": ".build/slices/{slice}/oracle/contract/*.py", "glob": true, "hint": "FIXTURE-LITERAL oracle" },
+            { "path": ".build/slices/{slice}/oracle/flow/*.py", "glob": true, "hint": "FIXTURE-LITERAL oracle" },
+            { "path": ".build/slices/{slice}/oracle/acceptance/visible/*.py", "glob": true, "hint": "FIXTURE-LITERAL oracle" },
+            { "path": ".build/slices/{slice}/oracle/acceptance/held_out/*.py", "glob": true, "hint": "FIXTURE-LITERAL oracle" },
+            { "path": ".build/slices/{slice}/oracle/conftest.py", "hint": "frozen fixtures" },
+            { "path": ".hld/slices/{slice}/components.json", "hint": "trace-to-requirement oracle" },
+            { "path": ".build/slices/{slice}/oracle/oracle.lock", "hint": "frozen slice oracle gate" },
+            { "path": ".build/skeleton/oracle/oracle.json", "hint": "FROZEN skeleton oracle — inherited by ref" },
+            { "path": ".build/skeleton/integration-record.json", "hint": "FROZEN skeleton composition root" },
+            { "path": ".build/slices/{slice}/critique.json", "optional": true, "hint": "prior run" }
+          ] }
+      ]
+    },
+    "DEMO-GEN": {
+      "always": [ { "path": ".aprd/aprd.frozen.md", "hint": "demo oracle: AC* TEXT" }, "build_gates" ],
+      "when": [
+        { "if": { "mode": "skeleton-build" },
+          "read": [
+            { "path": ".build/skeleton/verification.json", "hint": "GATE — verdict verified, per_ac[] proves" },
+            { "path": ".build/skeleton/critique.json", "hint": "GATE — verdict clean" },
+            { "path": ".build/skeleton/integration-record.json", "hint": "PRIMARY — composition wsgi_entry + lld_notes" },
+            { "path": ".build/skeleton/build-record.json", "hint": "build_set + traces + mocked_deps" },
+            { "path": ".hld/skeleton/flows.json", "hint": "walking skeleton flow: trigger + steps + failure_path" },
+            { "path": ".build/skeleton/demo/demo.json", "optional": true, "hint": "prior run, status:accepted=immutable" }
+          ] },
+        { "if": { "mode": "slice-build" },
+          "read": [
+            { "path": ".roadmap/08-rerank.json", "hint": "auto-select target slice" },
+            { "path": ".build/slices/{slice}/verify-output.json", "hint": "GATE — verdict verified" },
+            { "path": ".build/slices/{slice}/critique.json", "hint": "GATE — verdict clean, skeleton_fidelity.breached==false" },
+            { "path": ".build/slices/{slice}/integration-record.json", "hint": "PRIMARY — slice composition + lld_notes" },
+            { "path": ".build/slices/{slice}/build-record.json", "hint": "slice build_set + traces" },
+            { "path": ".hld/slices/{slice}/flows.json", "hint": "slice flow: trigger + steps + failure_path" },
+            { "path": ".build/slices/{slice}/demo/demo.json", "optional": true, "hint": "prior run" }
+          ] }
+      ]
+    },
+    "DIAGNOSE": {
+      "always": [ "frame_adrs", { "path": ".aprd/aprd.lock", "hint": "frozen WHAT gate" }, { "path": ".aprd/aprd.frozen.md", "hint": "frozen WHAT" }, { "path": ".hld/skeleton.lock", "hint": "frozen skeleton gate + gate clean" } ],
+      "when": [
+        { "if": { "mode": "skeleton-build" },
+          "read": [
+            { "path": ".build/skeleton/build-record.json", "hint": "PRIMARY — blocked record + escape" },
+            { "path": ".build/skeleton/integration-record.json", "hint": "PRIMARY — blocked record + escape" },
+            { "path": ".build/skeleton/oracle/oracle.json", "hint": "oracle manifest: failing tests" },
+            { "path": ".build/skeleton/oracle/contract/*.py", "glob": true, "hint": "frozen failing assertion + fixtures" },
+            { "path": ".build/skeleton/oracle/flow/*.py", "glob": true, "hint": "frozen failing assertion + fixtures" },
+            { "path": ".build/skeleton/oracle/acceptance/*.py", "glob": true, "hint": "frozen failing assertion + fixtures" },
+            { "path": ".hld/skeleton/contracts.json", "hint": "contract satisfiability oracle" },
+            { "path": ".hld/skeleton/components.json", "hint": "red component + responsibility" },
+            { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "impl under diagnosis — read, never edit" },
+            { "path": ".build/skeleton/diagnosis.json", "optional": true, "hint": "prior run" }
+          ] },
+        { "if": { "mode": "slice-build" },
+          "read": [
+            { "path": ".roadmap/08-rerank.json", "hint": "auto-select target slice" },
+            { "path": ".build/slices/{slice}/build-record.json", "hint": "PRIMARY — blocked slice record" },
+            { "path": ".build/slices/{slice}/integration-record.json", "hint": "PRIMARY — blocked slice record" },
+            { "path": ".build/slices/{slice}/oracle/oracle.json", "hint": "slice oracle: failing tests" },
+            { "path": ".build/slices/{slice}/oracle/contract/*.py", "glob": true, "hint": "frozen failing assertion" },
+            { "path": ".build/slices/{slice}/oracle/flow/*.py", "glob": true, "hint": "frozen failing assertion" },
+            { "path": ".build/slices/{slice}/oracle/acceptance/*.py", "glob": true, "hint": "frozen failing assertion" },
+            { "path": ".hld/slices/{slice}/contracts.json", "hint": "slice contract oracle" },
+            { "path": ".hld/slices/{slice}/components.json", "hint": "slice components" },
+            { "path": ".build/slices/{slice}/build-plan.json", "hint": "per-seam real|mocked + prior_built" },
+            { "path": ".hld/skeleton/contracts.json", "hint": "skeleton-fidelity check: would fix touch this?" },
+            { "path": ".build/skeleton/oracle/oracle.json", "hint": "FROZEN skeleton oracle + tests" },
+            { "path": ".build/skeleton/integration-record.json", "hint": "FROZEN skeleton composition root" },
+            { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "prior-built + this-slice code" },
+            { "path": ".build/slices/{slice}/diagnosis.json", "optional": true, "hint": "prior run" }
+          ] },
+        { "if": { "mode": "bugfix-localize" },
+          "read": [
+            { "path": ".aprd/change-requests/CR-*.md", "glob": true, "hint": "PRIMARY — defect report: class:bugfix" },
+            { "path": ".aprd/aprd.frozen.md", "hint": "frozen baseline WHAT: expected behavior" },
+            { "path": ".aprd/aprd.lock", "hint": "frozen baseline gate" },
+            { "path": ".hld/slices/{slice}/contracts.json", "hint": "slice CT* + AC* on defect surface" },
+            { "path": ".build/slices/{slice}/oracle/oracle.json", "hint": "regression-baseline inventory" },
+            { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "trace REPRO_STEPS — read, never edit" },
+            { "path": ".aprd/diagnosis.json", "optional": true, "hint": "prior run" }
+          ] }
+      ]
+    }
+  }
+}
