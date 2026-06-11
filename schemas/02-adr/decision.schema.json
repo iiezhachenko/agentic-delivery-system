@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decision",
+  "title": "EVALUATE-DECIDE output — scored decision per DP* with rationale and consequences",
+  "type": "object",
+  "required": ["id", "decision", "category", "forced_by", "options_ref", "grounding_source", "evaluation", "decision_made", "rationale", "rejected", "consequences", "traces", "degenerate_forced"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^DP[0-9]+$" },
+    "decision": { "type": "string" },
+    "category": { "type": "string" },
+    "forced_by": { "type": "array", "items": { "type": "string" } },
+    "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
+    "options_ref": { "type": "string" },
+    "grounding_source": { "type": "string" },
+    "evaluation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["option", "assessment", "decisive_factors"],
+        "properties": {
+          "option": { "type": "string" },
+          "assessment": { "type": "string" },
+          "decisive_factors": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "decision_made": { "type": "string" },
+    "rationale": { "type": "string" },
+    "rejected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["option", "why_rejected"],
+        "properties": {
+          "option": { "type": "string" },
+          "why_rejected": { "type": "string" }
+        }
+      }
+    },
+    "consequences": {
+      "type": "object",
+      "required": ["positive", "accepted_cost", "follow_on"],
+      "properties": {
+        "positive": { "type": "array", "items": { "type": "string" } },
+        "accepted_cost": { "type": "array", "items": { "type": "string" } },
+        "follow_on": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "traces": { "type": "array", "items": { "type": "string" } },
+    "degenerate_forced": { "type": "boolean" },
+    "degenerate_reason": { "oneOf": [{"type":"string"},{"type":"null"}] },
+    "lane_note": { "type": "string" }
+  }
+}

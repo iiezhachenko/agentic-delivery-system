@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "03-verticality",
+  "title": "VERTICALITY-CHECK output — valid vertical slices and rejected horizontal ones",
+  "type": "object",
+  "required": ["slices_ref", "aprd_ref", "class", "verdict", "valid", "rejected", "slice_counts"],
+  "properties": {
+    "slices_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "verdict": { "type": "string", "enum": ["all_vertical","horizontal_found"] },
+    "valid": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "vertical", "qualifying_acceptance", "reason"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "vertical": { "const": true },
+          "qualifying_acceptance": { "type": "array", "items": { "type": "string" } },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "rejected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "vertical", "qualifying_acceptance", "category", "reason", "remedy", "remedy_detail"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "vertical": { "const": false },
+          "qualifying_acceptance": { "type": "array", "maxItems": 0 },
+          "category": { "type": "string", "enum": ["horizontal_cut","no_acceptance","unresolved_acceptance"] },
+          "reason": { "type": "string" },
+          "remedy": { "type": "string", "enum": ["re-cut","merge"] },
+          "remedy_detail": { "type": "string" }
+        }
+      }
+    },
+    "slice_counts": {
+      "type": "object",
+      "required": ["total", "valid", "rejected"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "valid": { "type": "integer", "minimum": 0 },
+        "rejected": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "integration-record",
+  "title": "INTEGRATE output — end-to-end wiring record with mock-swap composition",
+  "type": "object",
+  "required": ["class", "mode"],
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "skeleton-build" } }, "required": ["mode"] },
+      "then": { "required": ["flow", "walking_skeleton_path", "composition", "integration_counts"] }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "slice-build" } }, "required": ["mode"] },
+      "then": { "required": ["slice_id", "slice_name", "flow", "slice_path", "composition", "integration_counts"] }
+    }
+  ],
+  "properties": {
+    "build_record_ref": { "type": "string" },
+    "flows_ref": { "type": "string" },
+    "oracle_lock_ref": { "type": "string" },
+    "oracle_ref": { "type": "string" },
+    "contracts_ref": { "type": "string" },
+    "components_ref": { "type": "string" },
+    "skeleton_lock_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "aprd_lock_ref": { "type": "string" },
+    "locks_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "slice": { "type": "string" },
+    "slice_id": { "type": "string" },
+    "slice_name": { "type": "string" },
+    "flow": { "type": "string" },
+    "walking_skeleton_path": { "type": "array", "items": { "type": "string" } },
+    "slice_path": { "type": "array", "items": { "type": "string" } },
+    "prior_built_components": { "type": "array", "items": { "type": "string" } },
+    "inherited_composition": { "type": "object" },
+    "composition": { "type": "object" },
+    "mock_swaps": { "type": "array" },
+    "mocks_retained": { "type": "array" },
+    "flow_test": { "type": "object" },
+    "verification": { "type": "object" },
+    "status": { "type": "string" },
+    "escape": {},
+    "provenance": { "type": "object" },
+    "commits": { "type": "array" },
+    "acceptance_harness": { "type": "object" },
+    "integration_counts": { "type": "object" },
+    "slice_build_record_ref": { "type": "string" },
+    "slice_flows_ref": { "type": "string" },
+    "slice_oracle_lock_ref": { "type": "string" },
+    "slice_oracle_ref": { "type": "string" },
+    "slice_contracts_ref": { "type": "string" },
+    "slice_components_ref": { "type": "string" },
+    "slice_build_plan_ref": { "type": "string" }
+  }
+}

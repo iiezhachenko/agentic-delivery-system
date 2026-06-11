@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "components",
+  "title": "DERIVE-COMPONENTS output — component graph with responsibility, entities, edges",
+  "type": "object",
+  "required": ["class", "mode"],
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "skeleton" } }, "required": ["mode"] },
+      "then": { "required": ["components", "edges", "coverage", "component_counts"] }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "increment" } }, "required": ["mode"] },
+      "then": { "required": ["introduced_components", "new_edges", "slice_coverage", "increment_counts"] }
+    }
+  ],
+  "properties": {
+    "aprd_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "adr_log_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "lock_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string", "enum": ["skeleton","increment"] },
+    "skeleton_id": { "type": "string" },
+    "skeleton_lock_ref": { "type": "string" },
+    "base_skeleton_ref": { "type": "string" },
+    "rerank_ref": { "type": "string" },
+    "slices_ref": { "type": "string" },
+    "skeleton_frozen_verified": { "type": "boolean" },
+    "slice_id": { "type": "string" },
+    "slice_name": { "type": "string" },
+    "introduced_components": { "type": "array", "items": { "type": "string" } },
+    "touched_components": { "type": "array" },
+    "new_components": { "type": "array" },
+    "new_edges": { "type": "array" },
+    "new_entities_owned": { "type": "array" },
+    "slice_coverage": { "type": "object" },
+    "skeleton_fidelity": { "type": "object" },
+    "increment_counts": { "type": "object" },
+    "boundary_strategy": {
+      "type": "object",
+      "properties": {
+        "adr_refs": { "type": "array", "items": { "type": "string" } },
+        "style": { "type": "string" },
+        "cut_basis": { "type": "string" }
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "responsibility", "owns_entities", "traces", "realizes_seam", "honors_adr"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^C[0-9]+$" },
+          "name": { "type": "string" },
+          "responsibility": { "type": "string" },
+          "owns_entities": { "type": "array", "items": { "type": "string" } },
+          "traces": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "realizes_seam": { "type": "array", "items": { "type": "string" } },
+          "honors_adr": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "reason"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["requirements_in_scope", "requirements_landed", "requirement_orphans", "entities_in_scope", "entities_owned", "entity_orphans", "components_without_requirement", "seam_realization"],
+      "properties": {
+        "requirements_in_scope": { "type": "array" },
+        "requirements_landed": { "type": "array" },
+        "requirement_orphans": { "type": "array" },
+        "entities_in_scope": { "type": "array" },
+        "entities_owned": { "type": "array" },
+        "entity_orphans": { "type": "array" },
+        "components_without_requirement": { "type": "array" },
+        "seam_realization": { "type": "array" }
+      }
+    },
+    "structural_defects": { "type": "array" },
+    "frame_conflicts": { "type": "array" },
+    "aprd_defects": { "type": "array" },
+    "component_counts": {
+      "type": "object",
+      "required": ["components", "edges", "entities_owned"],
+      "properties": {
+        "components": { "type": "integer" },
+        "edges": { "type": "integer" },
+        "entities_owned": { "type": "integer" }
+      }
+    }
+  }
+}

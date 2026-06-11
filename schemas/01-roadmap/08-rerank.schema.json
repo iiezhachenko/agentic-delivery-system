@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "08-rerank",
+  "title": "RE-RANK output — living roadmap with completed + re-ranked remaining slices",
+  "type": "object",
+  "required": ["class", "roadmap_version", "verdict", "completed", "introduction_map", "remaining_sequence", "dependency_check", "changes", "coverage", "rerank_counts"],
+  "properties": {
+    "base_ref": { "type": "string" },
+    "build_dag_ref": { "type": "string" },
+    "components_ref": { "type": "string" },
+    "slices_ref": { "type": "string" },
+    "completed_demo_refs": { "type": "array", "items": { "type": "string" } },
+    "class": { "type": "string" },
+    "roadmap_version": { "type": "integer", "minimum": 1 },
+    "verdict": { "type": "string", "enum": ["re_ranked","unchanged","dependency_defect"] },
+    "completed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["position", "id", "name", "status", "demo_ref"],
+        "properties": {
+          "position": { "type": "integer" },
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "const": "accepted" },
+          "demo_ref": { "type": "string" }
+        }
+      }
+    },
+    "introduction_map": { "type": "object" },
+    "remaining_sequence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["position", "id", "name", "value", "cost_proxy", "rationale"],
+        "properties": {
+          "position": { "type": "integer" },
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "value": { "type": "string" },
+          "retires_risk": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "components": { "type": "array" },
+          "coarse_depends_on": { "type": "array" },
+          "real_depends_on": { "type": "array" },
+          "depends_on": { "type": "array" },
+          "depends_on_delta": { "type": "object" },
+          "cost_proxy": { "type": "integer" },
+          "moved": { "oneOf": [{"type":"null"},{"type":"object"}] },
+          "value_risk_change": { "oneOf": [{"type":"null"},{"type":"object"}] },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "dependency_check": {
+      "type": "object",
+      "required": ["acyclic", "legal"],
+      "properties": {
+        "acyclic": { "type": "boolean" },
+        "legal": { "type": "boolean" },
+        "against": { "type": "string" },
+        "cycles": { "type": "array" },
+        "dangling_real_depends_on": { "type": "array" }
+      }
+    },
+    "changes": {
+      "type": "object",
+      "required": ["reordered", "dependency_refinements", "value_risk_changes"],
+      "properties": {
+        "reordered": { "type": "array" },
+        "dependency_refinements": { "type": "array" },
+        "value_risk_changes": { "type": "array" },
+        "thrash_avoided": { "type": "string" }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["base_slices", "completed", "remaining_ranked", "missing", "duplicated"],
+      "properties": {
+        "base_slices": { "type": "array" },
+        "completed": { "type": "array" },
+        "remaining_ranked": { "type": "array" },
+        "missing": { "type": "array" },
+        "duplicated": { "type": "array" }
+      }
+    },
+    "structural_defects": { "type": "array" },
+    "aprd_defects": { "type": "array" },
+    "foundation_gaps": { "type": "array" },
+    "rerank_counts": {
+      "type": "object",
+      "required": ["completed", "remaining", "reordered", "deps_removed", "deps_added"],
+      "properties": {
+        "completed": { "type": "integer" },
+        "remaining": { "type": "integer" },
+        "reordered": { "type": "integer" },
+        "deps_removed": { "type": "integer" },
+        "deps_added": { "type": "integer" }
+      }
+    }
+  }
+}

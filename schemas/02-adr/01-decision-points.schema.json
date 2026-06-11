@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "01-decision-points",
+  "title": "DECISION-EXTRACT output — decision points DP* with blast-radius proposals",
+  "type": "object",
+  "required": ["aprd_ref", "foundation_cut_ref", "lock_verified", "class", "skeleton_id", "decision_points", "checklist_coverage", "aprd_defects", "decision_point_counts"],
+  "properties": {
+    "aprd_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "lock_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "decision_points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "decision", "category", "forced_by", "candidate_blast_radius", "blast_rationale", "fork_evidence"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^DP[0-9]+$" },
+          "decision": { "type": "string" },
+          "category": { "type": "string" },
+          "forced_by": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "candidate_blast_radius": { "type": "string", "enum": ["foundational","local"] },
+          "blast_rationale": { "type": "string" },
+          "fork_evidence": { "type": "string" },
+          "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}] }
+        }
+      }
+    },
+    "checklist_coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["category", "fired", "decision_points", "note"],
+        "properties": {
+          "category": { "type": "string" },
+          "fired": { "type": "boolean" },
+          "decision_points": { "type": "array" },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "aprd_defects": { "type": "array" },
+    "decision_point_counts": {
+      "type": "object",
+      "required": ["total", "foundational", "local"],
+      "properties": {
+        "total": { "type": "integer" },
+        "foundational": { "type": "integer" },
+        "local": { "type": "integer" }
+      }
+    }
+  }
+}

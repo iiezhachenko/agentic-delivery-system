@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rules-verified",
+  "title": "VERIFY output — final canon: every agreed + conflict position annotated with verification block",
+  "type": "object",
+  "required": ["rules_reconciled_ref", "class", "stack", "agreed", "conflicts", "unfetched_sources", "verify_meta"],
+  "properties": {
+    "rules_reconciled_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "stack": { "type": "array", "items": { "type": "string" } },
+    "agreed": {
+      "type": "array",
+      "description": "same entries as reconciled, each carries exactly one verification block",
+      "items": {
+        "type": "object",
+        "required": ["id", "topic", "rule", "kind", "corroboration", "sources", "verification"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^AGR[0-9]+$" },
+          "topic": { "type": "string" },
+          "rule": { "type": "string" },
+          "setting": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "kind": { "type": "string" },
+          "corroboration": { "type": "string" },
+          "sources": { "type": "array" },
+          "verification": {
+            "type": "object",
+            "required": ["status", "source_of_truth", "confidence"],
+            "properties": {
+              "status": { "type": "string", "enum": ["current","deprecated","renamed","superseded","unknown-flag","not-version-bound","unverifiable"] },
+              "checked": { "oneOf": [{"type":"object"},{"type":"null"}] },
+              "finding": { "type": "string" },
+              "replacement": { "oneOf": [{"type":"string"},{"type":"null"}] },
+              "source_of_truth": { "type": "string", "enum": ["llm-knowledge","fetched-doc"] },
+              "confidence": { "type": "string", "enum": ["high","low"] }
+            }
+          }
+        }
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "topic", "question", "positions"],
+        "properties": {
+          "id": { "type": "string" },
+          "topic": { "type": "string" },
+          "question": { "type": "string" },
+          "positions": { "type": "array", "items": { "type": "object" } },
+          "recommended_position": { "oneOf": [{"type":"integer"},{"type":"null"}] }
+        }
+      }
+    },
+    "unfetched_sources": { "type": "array" },
+    "verify_meta": {
+      "type": "object",
+      "required": ["agreed_in", "agreed_verified", "conflicts_in", "positions_verified"],
+      "properties": {
+        "agreed_in": { "type": "integer" },
+        "agreed_verified": { "type": "integer" },
+        "conflicts_in": { "type": "integer" },
+        "positions_verified": { "type": "integer" },
+        "status_counts": { "type": "object" },
+        "flagged_count": { "type": "integer" }
+      }
+    }
+  }
+}

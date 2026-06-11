@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "option-index",
+  "title": "OPTION-GEN index — manifest of option files for the resolution queue",
+  "type": "object",
+  "required": ["triage_ref", "class", "skeleton_id", "resolution_queue", "option_files", "degenerate", "skipped", "option_set_counts"],
+  "properties": {
+    "triage_ref": { "type": "string" },
+    "decision_points_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "canon_status": { "type": "string" },
+    "resolution_queue": { "type": "array", "items": { "type": "string" } },
+    "option_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "option_count"],
+        "properties": {
+          "id": { "type": "string" },
+          "path": { "type": "string" },
+          "option_count": { "type": "integer" }
+        }
+      }
+    },
+    "degenerate": { "type": "array" },
+    "skipped": { "type": "array" },
+    "option_set_counts": {
+      "type": "object",
+      "required": ["decisions_grounded", "total_options", "min_options_per_decision"],
+      "properties": {
+        "decisions_grounded": { "type": "integer" },
+        "total_options": { "type": "integer" },
+        "min_options_per_decision": { "type": "integer" }
+      }
+    }
+  }
+}

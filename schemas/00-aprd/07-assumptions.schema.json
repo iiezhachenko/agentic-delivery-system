@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "07-assumptions",
+  "title": "SYNTHESIZE output — machine-readable assumptions log A*",
+  "type": "object",
+  "required": ["aprd_ref", "extraction_ref", "gaps_ref", "class", "assumptions", "assumption_count"],
+  "properties": {
+    "aprd_ref": { "type": "string", "description": "path to aPRD draft or frozen version" },
+    "extraction_ref": { "type": "string" },
+    "gaps_ref": { "type": "string" },
+    "answers_ref": { "type": "string", "description": "path to client answers file" },
+    "class": { "type": "string" },
+    "baseline_aprd_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
+    "aprd_version": { "type": "string" },
+    "assumptions": {
+      "type": "array",
+      "description": "one per gap in 04; A* stable, contiguous",
+      "items": {
+        "type": "object",
+        "required": ["id", "gap_ref", "text", "source", "chosen_interpretation"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^A[0-9]+$" },
+          "gap_ref": { "type": "string", "pattern": "^G[0-9]+$" },
+          "text": { "type": "string" },
+          "source": { "type": "string", "enum": ["client-confirmed","default-applied","client-described","cosmetic-announced"] },
+          "chosen_interpretation": { "type": "string" },
+          "rejected_interpretations": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "flagged_requirements": { "type": "array", "items": { "type": "string" } },
+    "assumption_count": { "type": "integer", "minimum": 0, "description": "== assumptions.length", "x-walk": "assumption_count == assumptions.length" },
+    "touch_set": { "type": "array", "description": "brownfield: slices the version bump invalidates" }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "build-record",
+  "title": "IMPLEMENT output — component build record with files and contract test results",
+  "type": "object",
+  "required": ["class", "mode", "build_units"],
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "skeleton-build" } }, "required": ["mode"] },
+      "then": { "required": ["build_set", "oracle", "verification", "provenance", "commits", "build_record_counts"] }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "slice-build" } }, "required": ["mode"] },
+      "then": { "required": ["slice_id", "slice_name", "build_set", "oracle", "verification", "provenance", "commits", "build_record_counts"] }
+    }
+  ],
+  "properties": {
+    "build_plan_ref": { "type": "string" },
+    "oracle_lock_ref": { "type": "string" },
+    "oracle_ref": { "type": "string" },
+    "skeleton_lock_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "aprd_lock_ref": { "type": "string" },
+    "locks_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "slice": { "type": "string" },
+    "slice_id": { "type": "string" },
+    "slice_name": { "type": "string" },
+    "build_set": { "type": "array", "items": { "type": "string" } },
+    "prior_built_components": { "type": "array", "items": { "type": "string" } },
+    "build_units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["component", "name", "status"],
+        "properties": {
+          "component": { "type": "string" },
+          "name": { "type": "string" },
+          "module_namespace": { "type": "string" },
+          "implements_contracts": { "type": "array" },
+          "mocked_deps": { "type": "array" },
+          "traces": { "type": "array" },
+          "files": { "type": "array", "items": { "type": "string" } },
+          "contract_tests_greened": { "type": "array" },
+          "lld_notes": { "type": "string" },
+          "status": { "type": "string", "enum": ["green","red","locked","planned"] },
+          "escape": { "oneOf": [{"type":"string"},{"type":"null"}] }
+        }
+      }
+    },
+    "oracle": { "type": "object" },
+    "verification": { "type": "object" },
+    "provenance": { "type": "object" },
+    "commits": { "type": "array" },
+    "build_record_counts": { "type": "object" },
+    "build_counts": { "type": "object" },
+    "inherited_oracle": { "type": "object" },
+    "carried": { "type": "object" },
+    "diagnosis_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "aprd_version": { "type": "string" },
+    "blast_radius": { "type": "object" },
+    "reproduction": { "type": "object" },
+    "regression": { "type": "object" }
+  }
+}

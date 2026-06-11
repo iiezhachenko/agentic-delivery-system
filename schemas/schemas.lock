@@ -1,0 +1,13 @@
+{
+  "artifact": "schemas/",
+  "version": "v1",
+  "content_sha256": "8d9f27868f64e99e958ea3c075503f86ffca93c374acff5ace14ccab0d218c40",
+  "content_sha256_algo": "sha256 of all *.schema.json files and _meta.json under schemas/, files enumerated by recursive readdir with entries sorted alphabetically at each directory level, file contents concatenated in that sorted order (no separators), hashed as single stream. Order: _meta.json first (root), then subdirs 00-aprd/ 01-roadmap/ 02-adr/ 03-hld/ 04-build/ each sorted internally. Node crypto.createHash('sha256').update(<file bytes>...).digest('hex').",
+  "signer": "self-host:agentic-delivery-pipeline",
+  "signed_at": "2026-06-11T00:00:00Z",
+  "status": "frozen",
+  "class": "self-host",
+  "mode": "schema-registry",
+  "schema_count": 47,
+  "note": "W1 of CR-002, externalizes 47 prompt output schemas per D24/R9; conformance enforced by tools/det/validate.mjs per R10"
+}

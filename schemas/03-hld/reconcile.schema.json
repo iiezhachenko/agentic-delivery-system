@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "reconcile",
+  "title": "RECONCILE-CRITIQUE increment output — slice-level HLD coherence verdict",
+  "type": "object",
+  "required": ["class", "mode", "slice_id", "verdict", "issues", "issue_count", "critique_counts"],
+  "properties": {
+    "slice_components_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "skeleton_lock_ref": { "type": "string" },
+    "skeleton_frozen_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "slice_id": { "type": "string" },
+    "slice_name": { "type": "string" },
+    "artifacts_reviewed": { "type": "array", "items": { "type": "string" } },
+    "verdict": { "type": "string", "enum": ["clean","blocked"] },
+    "issues": { "type": "array" },
+    "issue_count": { "type": "integer", "minimum": 0 },
+    "skeleton_fidelity": { "type": "object" },
+    "critique_counts": {
+      "type": "object",
+      "required": ["artifacts_reviewed", "issues"],
+      "properties": {
+        "artifacts_reviewed": { "type": "integer" },
+        "issues": { "type": "integer" },
+        "by_category": { "type": "object" }
+      }
+    }
+  }
+}

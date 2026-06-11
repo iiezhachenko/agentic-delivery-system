@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "02-triage",
+  "title": "TRIAGE output — blast-radius binding + queue routing for each DP*",
+  "type": "object",
+  "required": ["decision_points_ref", "foundation_cut_ref", "class", "skeleton_id", "triage", "resolution_queue", "slice_deferred", "deferred_queue", "conventions", "cut_gaps", "triage_counts"],
+  "properties": {
+    "decision_points_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "triage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "decision", "category", "candidate_blast_radius", "blast_radius", "blast_decision", "cut_status", "route"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^DP[0-9]+$" },
+          "decision": { "type": "string" },
+          "category": { "type": "string" },
+          "candidate_blast_radius": { "type": "string" },
+          "blast_radius": { "type": "string", "enum": ["foundational","local","trivial"] },
+          "blast_decision": { "type": "string", "enum": ["confirmed","overridden"] },
+          "blast_rationale": { "type": "string" },
+          "cut_status": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "cut_gap": { "type": "boolean" },
+          "defer_to": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "route": { "type": "string", "enum": ["resolution_queue","slice_deferred","deferred_queue","convention"] },
+          "route_rationale": { "type": "string" }
+        }
+      }
+    },
+    "resolution_queue": { "type": "array", "items": { "type": "string" } },
+    "slice_deferred": { "type": "array", "items": { "type": "object" } },
+    "deferred_queue": { "type": "array", "items": { "type": "string" } },
+    "conventions": { "type": "array", "items": { "type": "object" } },
+    "cut_gaps": { "type": "array", "items": { "type": "string" } },
+    "triage_counts": {
+      "type": "object",
+      "required": ["total", "foundational_in_cut", "foundational_not_yet", "local", "trivial"],
+      "properties": {
+        "total": { "type": "integer" },
+        "foundational_in_cut": { "type": "integer" },
+        "foundational_not_yet": { "type": "integer" },
+        "local": { "type": "integer" },
+        "trivial": { "type": "integer" }
+      }
+    }
+  }
+}

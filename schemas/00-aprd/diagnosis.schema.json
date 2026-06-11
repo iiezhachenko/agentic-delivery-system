@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "diagnosis",
+  "title": "DIAGNOSE output — defect localization verdict for bugfix class",
+  "type": "object",
+  "required": ["defect_report_ref", "locks_verified", "class", "defect", "reproduction", "localization", "root_cause", "verdict", "classification"],
+  "properties": {
+    "defect_report_ref": { "type": "string" },
+    "baseline_refs": { "type": "object" },
+    "locks_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "defect": {
+      "type": "object",
+      "required": ["summary", "repro_steps", "expected_behavior"],
+      "properties": {
+        "summary": { "type": "string" },
+        "repro_steps": { "type": "array", "items": { "type": "string" } },
+        "expected_behavior": { "type": "string" },
+        "expected_behavior_source": { "type": "string" }
+      }
+    },
+    "reproduction": {
+      "type": "object",
+      "required": ["method", "confirmed", "observed", "expected"],
+      "properties": {
+        "method": { "type": "string" },
+        "trace": { "type": "string" },
+        "confirmed": { "type": "boolean" },
+        "observed": { "type": "string" },
+        "expected": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "localization": {
+      "type": "object",
+      "required": ["component", "module", "symbol", "site", "surface"],
+      "properties": {
+        "component": { "type": "string" },
+        "module": { "type": "string" },
+        "symbol": { "type": "string" },
+        "site": { "type": "string" },
+        "surface": { "type": "string" }
+      }
+    },
+    "root_cause": {
+      "type": "object",
+      "required": ["cause", "mechanism", "symptom_vs_cause"],
+      "properties": {
+        "cause": { "type": "string" },
+        "mechanism": { "type": "string" },
+        "symptom_vs_cause": { "type": "string" }
+      }
+    },
+    "verdict": { "type": "string", "enum": ["defect-localized","cannot-localize"] },
+    "classification": { "type": "string" },
+    "repair_disposition": { "type": "string" },
+    "regression_surface": { "type": "object" },
+    "repair_behavior_gap": { "type": "object" },
+    "diagnosis_counts": { "type": "object" }
+  }
+}

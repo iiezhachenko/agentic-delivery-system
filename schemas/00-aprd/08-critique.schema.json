@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "08-critique",
+  "title": "CRITIQUE output — verdict + blocking issues list (00-aprd phase)",
+  "type": "object",
+  "required": ["aprd_ref", "assumptions_ref", "gaps_ref", "class", "verdict", "issues", "issue_count"],
+  "properties": {
+    "aprd_ref": { "type": "string" },
+    "assumptions_ref": { "type": "string" },
+    "gaps_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "verdict": { "type": "string", "enum": ["clean","blocked"], "description": "blocked iff issues non-empty; deterministic" },
+    "issues": {
+      "type": "array",
+      "description": "blocking-grade only; empty array on clean draft",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "target_ref", "problem", "fix_hint"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^I[0-9]+$" },
+          "category": { "type": "string", "enum": ["ambiguous-requirement","non-binary-ac","unbounded-scope","untraceable-assumption","broken-id-thread"] },
+          "target_ref": { "type": "string" },
+          "problem": { "type": "string" },
+          "fix_hint": { "type": "string" }
+        }
+      }
+    },
+    "issue_count": { "type": "integer", "minimum": 0, "x-walk": "issue_count == issues.length" }
+  }
+}

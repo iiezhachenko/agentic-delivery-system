@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "07-sequence-reviewed",
+  "title": "SEQUENCE-REVIEW output — client-confirmed slice order after review",
+  "type": "object",
+  "required": ["sequence_ref", "class", "verdict", "review", "sequence", "dependency_check", "coverage", "sequence_counts"],
+  "properties": {
+    "sequence_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "verdict": { "type": "string", "enum": ["confirmed","reordered"] },
+    "review": {
+      "type": "object",
+      "required": ["presented_order", "client_response", "skeleton_pinned", "overrides", "blocked_overrides", "needs_followup", "signoff"],
+      "properties": {
+        "presented_order": { "type": "array", "items": { "type": "string" } },
+        "client_response": { "type": "string", "enum": ["confirmed","reordered","deferred","blocked"] },
+        "skeleton_pinned": { "type": "string" },
+        "electable_slices": { "type": "array" },
+        "overrides": { "type": "array" },
+        "blocked_overrides": { "type": "array" },
+        "needs_followup": { "type": "boolean" },
+        "signoff": { "type": "string" }
+      }
+    },
+    "sequence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["position", "id", "name", "skeleton", "value", "depends_on", "cost_proxy", "rationale"],
+        "properties": {
+          "position": { "type": "integer", "minimum": 1 },
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "skeleton": { "type": "boolean" },
+          "value": { "type": "string" },
+          "retires_risk": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "depends_on": { "type": "array" },
+          "cost_proxy": { "type": "integer" },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "dependency_check": {
+      "type": "object",
+      "required": ["acyclic", "legal", "skeleton_first"],
+      "properties": {
+        "acyclic": { "type": "boolean" },
+        "legal": { "type": "boolean" },
+        "skeleton_first": { "type": "boolean" }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["presented", "confirmed", "missing", "added"],
+      "properties": {
+        "presented": { "type": "array" },
+        "confirmed": { "type": "array" },
+        "missing": { "type": "array" },
+        "added": { "type": "array" }
+      }
+    },
+    "sequence_counts": {
+      "type": "object",
+      "required": ["total", "positions"],
+      "properties": {
+        "total": { "type": "integer" },
+        "positions": { "type": "integer" }
+      }
+    }
+  }
+}

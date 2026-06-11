@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "05-sequence",
+  "title": "SEQUENCE output — dependency-legal ordered slice sequence",
+  "type": "object",
+  "required": ["skeleton_ref", "slices_ref", "verticality_ref", "aprd_ref", "class", "verdict", "sequence", "dependency_check", "coverage", "sequence_counts"],
+  "properties": {
+    "skeleton_ref": { "type": "string" },
+    "slices_ref": { "type": "string" },
+    "verticality_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "verdict": { "type": "string", "enum": ["sequenced","dependency_defect"] },
+    "sequence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["position", "id", "name", "skeleton", "value", "depends_on", "cost_proxy", "rationale"],
+        "properties": {
+          "position": { "type": "integer", "minimum": 1 },
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "skeleton": { "type": "boolean" },
+          "value": { "type": "string", "enum": ["high","med","low"] },
+          "retires_risk": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "depends_on": { "type": "array", "items": { "type": "string" } },
+          "cost_proxy": { "type": "integer", "minimum": 0 },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "ordering_basis": { "type": "string" },
+    "dependency_check": {
+      "type": "object",
+      "required": ["acyclic", "skeleton_is_root", "cycles", "dangling_depends_on"],
+      "properties": {
+        "acyclic": { "type": "boolean" },
+        "skeleton_is_root": { "type": "boolean" },
+        "cycles": { "type": "array" },
+        "dangling_depends_on": { "type": "array" }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["eligible_slices", "sequenced", "missing", "duplicated"],
+      "properties": {
+        "eligible_slices": { "type": "array", "items": { "type": "string" } },
+        "sequenced": { "type": "array", "items": { "type": "string" } },
+        "missing": { "type": "array" },
+        "duplicated": { "type": "array" }
+      }
+    },
+    "sequence_counts": {
+      "type": "object",
+      "required": ["total", "positions"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "positions": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

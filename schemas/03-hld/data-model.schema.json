@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "data-model",
+  "title": "MODEL-DATA output — logical data model with persistence strategy + entity ownership",
+  "type": "object",
+  "required": ["class", "mode"],
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "skeleton" } }, "required": ["mode"] },
+      "then": { "required": ["persistence", "entities", "ownership", "coverage", "data_model_counts"] }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "increment" } }, "required": ["mode"] },
+      "then": { "required": ["introduced_components", "slice_entities", "slice_coverage", "increment_counts"] }
+    }
+  ],
+  "properties": {
+    "aprd_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "adr_log_ref": { "type": "string" },
+    "components_ref": { "type": "string" },
+    "contracts_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "lock_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "skeleton_lock_ref": { "type": "string" },
+    "base_data_model_ref": { "type": "string" },
+    "slice_components_ref": { "type": "string" },
+    "slice_contracts_ref": { "type": "string" },
+    "skeleton_frozen_verified": { "type": "boolean" },
+    "slice_id": { "type": "string" },
+    "slice_name": { "type": "string" },
+    "introduced_components": { "type": "array", "items": { "type": "string" } },
+    "touched_components": { "type": "array", "items": { "type": "string" } },
+    "slice_entities": { "type": "array" },
+    "new_entities": { "type": "array" },
+    "slice_coverage": { "type": "object" },
+    "ownership_fidelity": { "type": "object" },
+    "ownership_defects": { "type": "array" },
+    "increment_counts": { "type": "object" },
+    "ownership": { "type": "object" },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "adr_refs": { "type": "array" },
+        "store": { "type": "string" },
+        "persistence_component": { "type": "string" },
+        "model_basis": { "type": "string" }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "owner"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^E[0-9]+$" },
+          "name": { "type": "string" },
+          "logical_description": { "type": "string" },
+          "owner": { "type": "string" },
+          "owner_basis": { "type": "string" },
+          "persisted": { "type": "boolean" },
+          "accessed_by": { "type": "array" }
+        }
+      }
+    },
+    "coverage": { "type": "object" },
+    "relationships": { "type": "array" },
+    "structural_defects": { "type": "array" },
+    "aprd_defects": { "type": "array" },
+    "data_model_counts": { "type": "object" },
+    "model_counts": { "type": "object" }
+  }
+}

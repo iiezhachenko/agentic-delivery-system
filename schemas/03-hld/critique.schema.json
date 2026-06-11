@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hld-critique",
+  "title": "RECONCILE-CRITIQUE output — verdict + blocking issues on HLD skeleton artifact set",
+  "type": "object",
+  "required": ["class", "mode", "verdict", "issues", "issue_count", "critique_counts"],
+  "properties": {
+    "components_ref": { "type": "string" },
+    "contracts_ref": { "type": "string" },
+    "data_model_ref": { "type": "string" },
+    "nfr_mechanisms_ref": { "type": "string" },
+    "flows_ref": { "type": "string" },
+    "test_specs_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "deferred_decisions_ref": { "type": "string" },
+    "lock_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "artifacts_reviewed": { "type": "array", "items": { "type": "string" } },
+    "verdict": { "type": "string", "enum": ["clean","blocked"] },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "target", "finding", "fix_hint"],
+        "properties": {
+          "id": { "type": "string" },
+          "category": { "type": "string", "enum": ["coverage-gap","ownership-defect","unmechanized-nfr","frame-violation","untestable-contract","incomplete-flow","undrained-queue"] },
+          "target": { "type": "string" },
+          "finding": { "type": "string" },
+          "fix_hint": { "type": "string" }
+        }
+      }
+    },
+    "issue_count": { "type": "integer", "minimum": 0 },
+    "critique_counts": {
+      "type": "object",
+      "required": ["artifacts_reviewed", "issues"],
+      "properties": {
+        "artifacts_reviewed": { "type": "integer" },
+        "issues": { "type": "integer" },
+        "by_category": { "type": "object" }
+      }
+    }
+  }
+}

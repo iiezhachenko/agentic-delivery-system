@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "build-dag",
+  "title": "DERIVE-TESTS output — build dependency DAG (nodes + acyclicity meta)",
+  "type": "object",
+  "required": ["class", "mode", "nodes"],
+  "properties": {
+    "components_ref": { "type": "string" },
+    "lock_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "edge_semantics": { "type": "string" },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "depends_on"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^C[0-9]+$" },
+          "name": { "type": "string" },
+          "depends_on": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "acyclic": { "type": "boolean" },
+    "cycles": { "type": "array" },
+    "node_count": { "type": "integer" },
+    "edge_count": { "type": "integer" }
+  }
+}

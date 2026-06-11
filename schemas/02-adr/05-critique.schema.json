@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "05-critique",
+  "title": "ADR CRITIQUE output — verdict + blocking issues on rendered ADR set",
+  "type": "object",
+  "required": ["adr_index_ref", "class", "skeleton_id", "adrs_reviewed", "verdict", "issues", "issue_count", "critique_counts"],
+  "properties": {
+    "adr_index_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "conflicts_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "adrs_reviewed": { "type": "array", "items": { "type": "string" } },
+    "verdict": { "type": "string", "enum": ["clean","blocked"] },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "target_adr", "finding", "fix_hint"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^I[0-9]+$" },
+          "category": { "type": "string", "enum": ["strawman-alternative","untraceable-adr","uncovered-constraint","contradictory-adrs","over-decided","unforced-decision","not-yet"] },
+          "target_adr": { "type": "string" },
+          "finding": { "type": "string" },
+          "fix_hint": { "type": "string" }
+        }
+      }
+    },
+    "issue_count": { "type": "integer", "minimum": 0 },
+    "critique_counts": {
+      "type": "object",
+      "required": ["adrs_reviewed", "issues"],
+      "properties": {
+        "adrs_reviewed": { "type": "integer" },
+        "issues": { "type": "integer" },
+        "by_category": { "type": "object" }
+      }
+    }
+  }
+}

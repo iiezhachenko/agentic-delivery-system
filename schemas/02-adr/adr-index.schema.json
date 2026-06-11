@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "adr-index",
+  "title": "SYNTHESIZE-ADR output — index of rendered ADR drafts",
+  "type": "object",
+  "required": ["decisions_index_ref", "conflicts_ref", "class", "skeleton_id", "gate", "adrs", "undecided_not_rendered", "adr_counts"],
+  "properties": {
+    "decisions_index_ref": { "type": "string" },
+    "conflicts_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "gate": {
+      "type": "object",
+      "required": ["reconcile_verdict", "gated_on"],
+      "properties": {
+        "reconcile_verdict": { "type": "string" },
+        "gated_on": { "type": "string" }
+      }
+    },
+    "adrs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "dp_id", "title", "status", "mode", "scope", "category", "traces", "draft_ref"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^ADR-[0-9]+$" },
+          "dp_id": { "type": "string" },
+          "title": { "type": "string" },
+          "status": { "type": "string" },
+          "mode": { "type": "string" },
+          "scope": { "type": "string" },
+          "category": { "type": "string" },
+          "traces": { "type": "array", "items": { "type": "string" } },
+          "supersedes": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "superseded_by": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "degenerate_forced": { "type": "boolean" },
+          "draft_ref": { "type": "string" }
+        }
+      }
+    },
+    "undecided_not_rendered": { "type": "array" },
+    "adr_counts": {
+      "type": "object",
+      "required": ["rendered", "degenerate_forced", "undecided_skipped"],
+      "properties": {
+        "rendered": { "type": "integer" },
+        "degenerate_forced": { "type": "integer" },
+        "undecided_skipped": { "type": "integer" }
+      }
+    }
+  }
+}

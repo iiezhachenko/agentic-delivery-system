@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "verify-output",
+  "title": "VERIFY-OUTPUT output — slice build verification ladder (slice-build mode)",
+  "type": "object",
+  "required": ["class", "mode", "slice_id", "verification_method", "ladder", "verdict"],
+  "properties": {
+    "integration_record_ref": { "type": "string" },
+    "build_record_ref": { "type": "string" },
+    "slice_oracle_lock_ref": { "type": "string" },
+    "slice_oracle_ref": { "type": "string" },
+    "slice_nfr_mechanisms_ref": { "type": "string" },
+    "slice_components_ref": { "type": "string" },
+    "skeleton_lock_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "aprd_lock_ref": { "type": "string" },
+    "locks_verified": { "type": "boolean" },
+    "diagnosis_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "aprd_version": { "type": "string" },
+    "regression_guard_ref": { "type": "string" },
+    "reproduction": { "type": "object" },
+    "regression": { "type": "object" },
+    "skeleton_fidelity": { "type": "object" },
+    "per_ac_summary": { "type": "array" },
+    "provenance": { "type": "object" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "slice_id": { "type": "string" },
+    "slice_name": { "type": "string" },
+    "flow": { "type": "string" },
+    "slice_path": { "type": "array" },
+    "prior_built_components": { "type": "array" },
+    "verification_method": { "type": "string" },
+    "inherited_oracle": { "type": "object" },
+    "ladder": {
+      "type": "object",
+      "required": ["contract", "flow", "acceptance"],
+      "properties": {
+        "contract": { "type": "object" },
+        "flow": { "type": "object" },
+        "acceptance": { "type": "object" },
+        "class_ext": { "type": "object" },
+        "nfr": { "type": "object" }
+      }
+    },
+    "verdict": { "type": "string", "enum": ["verified","failed","blocked"] },
+    "escape": { "oneOf": [{"type":"string"},{"type":"null"},{"type":"object"}] },
+    "verification_counts": { "type": "object" }
+  }
+}

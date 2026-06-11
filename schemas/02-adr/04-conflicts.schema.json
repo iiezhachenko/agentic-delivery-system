@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "04-conflicts",
+  "title": "RECONCILE output — cross-decision coherence check + coverage",
+  "type": "object",
+  "required": ["decisions_index_ref", "class", "skeleton_id", "decisions_checked", "conflicts", "constraint_violations", "coverage", "verdict", "blocking_count", "reconcile_counts"],
+  "properties": {
+    "decisions_index_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "decisions_checked": { "type": "array", "items": { "type": "string" } },
+    "undecided_carried": { "type": "array" },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "between", "picks", "finding", "exposed_by", "evidence", "routes_to"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^CF[0-9]+$" },
+          "between": { "type": "array", "items": { "type": "string" }, "minItems": 2 },
+          "picks": { "type": "array", "items": { "type": "string" } },
+          "finding": { "type": "string" },
+          "exposed_by": { "type": "array" },
+          "evidence": { "type": "string" },
+          "routes_to": { "type": "string" }
+        }
+      }
+    },
+    "constraint_violations": { "type": "array" },
+    "coverage": {
+      "type": "object",
+      "required": ["adr_to_aprd", "aprd_to_adr"],
+      "properties": {
+        "adr_to_aprd": { "type": "object" },
+        "aprd_to_adr": { "type": "object" }
+      }
+    },
+    "structural_defects": { "type": "array" },
+    "verdict": { "type": "string", "enum": ["coherent","blocked"] },
+    "blocking_count": { "type": "integer", "minimum": 0 },
+    "reconcile_counts": {
+      "type": "object",
+      "required": ["decisions_checked", "conflicts", "constraint_violations", "coverage_gaps", "untraceable", "structural_defects"],
+      "properties": {
+        "decisions_checked": { "type": "integer" },
+        "conflicts": { "type": "integer" },
+        "constraint_violations": { "type": "integer" },
+        "coverage_gaps": { "type": "integer" },
+        "untraceable": { "type": "integer" },
+        "structural_defects": { "type": "integer" }
+      }
+    }
+  }
+}

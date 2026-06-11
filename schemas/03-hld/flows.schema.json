@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flows",
+  "title": "MODEL-FLOWS output — ordered component-to-component flows per slice",
+  "type": "object",
+  "required": ["class", "mode", "flows"],
+  "properties": {
+    "components_ref": { "type": "string" },
+    "contracts_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "lock_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "flows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "slice", "name", "trigger", "path", "steps"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^F[0-9]+$" },
+          "slice": { "type": "string" },
+          "name": { "type": "string" },
+          "trigger": { "type": "string" },
+          "path": { "type": "array", "items": { "type": "string" } },
+          "steps": { "type": "array", "items": { "type": "object" } }
+        }
+      }
+    },
+    "coverage": { "type": "object" },
+    "structural_defects": { "type": "array" },
+    "flow_counts": { "type": "object" }
+  }
+}

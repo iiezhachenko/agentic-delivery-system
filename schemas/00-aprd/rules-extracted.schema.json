@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rules-extracted",
+  "title": "EXTRACT-RULES output — per-source atomic rules RULE* with verbatim evidence",
+  "type": "object",
+  "required": ["sources_ref", "class", "stack", "rules", "unfetched_sources", "extraction_meta"],
+  "properties": {
+    "sources_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "stack": { "type": "array", "items": { "type": "string" } },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "source_ref", "tier", "tool", "tool_version_pinned", "kind", "topic", "rule", "evidence"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^RULE[0-9]+$" },
+          "source_ref": { "type": "string", "pattern": "^SRC[0-9]+$" },
+          "tier": { "type": "integer" },
+          "tool": { "type": "string" },
+          "tool_version_pinned": { "type": "string" },
+          "kind": { "type": "string", "enum": ["config","opinion"] },
+          "topic": { "type": "string" },
+          "rule": { "type": "string" },
+          "setting": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "unfetched_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "reason"],
+        "properties": {
+          "id": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "extraction_meta": {
+      "type": "object",
+      "required": ["sources_total", "sources_extracted", "sources_unfetched", "rules_total"],
+      "properties": {
+        "sources_total": { "type": "integer" },
+        "sources_extracted": { "type": "integer" },
+        "sources_unfetched": { "type": "integer" },
+        "rules_total": { "type": "integer", "x-walk": "rules_total == rules.length" },
+        "by_tier": { "type": "object" }
+      }
+    }
+  }
+}

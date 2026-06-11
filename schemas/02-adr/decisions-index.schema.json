@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decisions-index",
+  "title": "EVALUATE-DECIDE index — manifest of decided DPs for RECONCILE",
+  "type": "object",
+  "required": ["options_index_ref", "class", "skeleton_id", "decisions", "undecided", "decision_counts"],
+  "properties": {
+    "options_index_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "decision_made", "options_ref", "decision_ref", "option_count", "degenerate_forced", "traces"],
+        "properties": {
+          "id": { "type": "string" },
+          "category": { "type": "string" },
+          "decision_made": { "type": "string" },
+          "options_ref": { "type": "string" },
+          "decision_ref": { "type": "string" },
+          "option_count": { "type": "integer" },
+          "degenerate_forced": { "type": "boolean" },
+          "traces": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "undecided": { "type": "array" },
+    "decision_counts": {
+      "type": "object",
+      "required": ["decisions_made", "degenerate_forced", "undecided"],
+      "properties": {
+        "decisions_made": { "type": "integer" },
+        "degenerate_forced": { "type": "integer" },
+        "undecided": { "type": "integer" }
+      }
+    }
+  }
+}

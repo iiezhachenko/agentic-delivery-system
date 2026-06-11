@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rules-reconciled",
+  "title": "RECONCILE output — agreed[] AGR* + conflicts[] CONF*, every RULE* placed exactly once",
+  "type": "object",
+  "required": ["rules_extracted_ref", "class", "stack", "agreed", "conflicts", "unfetched_sources", "reconcile_meta"],
+  "properties": {
+    "rules_extracted_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "stack": { "type": "array", "items": { "type": "string" } },
+    "agreed": {
+      "type": "array",
+      "description": "sorted by entry's own lowest contributing RULE* index",
+      "items": {
+        "type": "object",
+        "required": ["id", "topic", "rule", "kind", "corroboration", "sources"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^AGR[0-9]+$" },
+          "topic": { "type": "string" },
+          "rule": { "type": "string" },
+          "setting": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "kind": { "type": "string", "enum": ["config","opinion","mixed"] },
+          "corroboration": { "type": "string", "enum": ["multi-source","single-source"] },
+          "sources": { "type": "array", "items": { "type": "object" } }
+        }
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "topic", "question", "positions"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^CONF[0-9]+$" },
+          "topic": { "type": "string" },
+          "question": { "type": "string" },
+          "positions": { "type": "array", "items": { "type": "object" }, "minItems": 2 },
+          "recommended_position": { "oneOf": [{"type":"integer"},{"type":"null"}] }
+        }
+      }
+    },
+    "unfetched_sources": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "reconcile_meta": {
+      "type": "object",
+      "required": ["rules_in", "rules_accounted", "agreed_count", "conflicts_count"],
+      "properties": {
+        "rules_in": { "type": "integer" },
+        "rules_accounted": { "type": "integer" },
+        "agreed_count": { "type": "integer" },
+        "conflicts_count": { "type": "integer" },
+        "topics_reconciled": { "type": "integer" }
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "06-foundation-cut",
+  "title": "FOUNDATION-CUT output — foundational decisions, seams, invariants, deferred items",
+  "type": "object",
+  "required": ["skeleton_ref", "sequence_ref", "aprd_ref", "class", "skeleton_id", "foundation_cut", "deferred", "coverage", "cut_counts"],
+  "properties": {
+    "skeleton_ref": { "type": "string" },
+    "sequence_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "foundation_cut": {
+      "type": "object",
+      "required": ["foundational_decisions", "skeleton_seams", "cross_slice_invariants"],
+      "properties": {
+        "foundational_decisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "category", "needed_by", "why_foundational", "grounded_in"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^FD[0-9]+$" },
+              "category": { "type": "string" },
+              "needed_by": { "type": "array", "items": { "type": "string" } },
+              "why_foundational": { "type": "string" },
+              "grounded_in": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "skeleton_seams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["seam", "must_establish", "grounded_in"],
+            "properties": {
+              "seam": { "type": "string" },
+              "must_establish": { "type": "string" },
+              "grounded_in": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "cross_slice_invariants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "invariant", "applies_to", "grounded_in"],
+            "properties": {
+              "id": { "type": "string" },
+              "invariant": { "type": "string" },
+              "applies_to": { "type": "string" },
+              "grounded_in": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "deferred": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["item", "defer_to", "reason", "grounded_in"],
+        "properties": {
+          "item": { "type": "string" },
+          "defer_to": { "type": "string" },
+          "reason": { "type": "string" },
+          "grounded_in": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["skeleton_seams_carried", "post_skeleton_slices", "deferred_slices"],
+      "properties": {
+        "skeleton_seams_carried": { "type": "array", "items": { "type": "string" } },
+        "post_skeleton_slices": { "type": "array", "items": { "type": "string" } },
+        "deferred_slices": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "cut_counts": {
+      "type": "object",
+      "required": ["foundational_decisions", "skeleton_seams", "cross_slice_invariants", "deferred"],
+      "properties": {
+        "foundational_decisions": { "type": "integer", "minimum": 0 },
+        "skeleton_seams": { "type": "integer", "minimum": 0 },
+        "cross_slice_invariants": { "type": "integer", "minimum": 0 },
+        "deferred": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

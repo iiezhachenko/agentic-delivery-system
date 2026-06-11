@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "verification",
+  "title": "VERIFY-OUTPUT output — verification ladder results (skeleton build)",
+  "type": "object",
+  "required": ["class", "mode", "verification_method", "ladder", "verdict", "verification_counts"],
+  "properties": {
+    "integration_record_ref": { "type": "string" },
+    "build_record_ref": { "type": "string" },
+    "oracle_lock_ref": { "type": "string" },
+    "oracle_ref": { "type": "string" },
+    "nfr_mechanisms_ref": { "type": "string" },
+    "components_ref": { "type": "string" },
+    "skeleton_lock_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "aprd_lock_ref": { "type": "string" },
+    "locks_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "slice": { "type": "string" },
+    "verification_method": { "type": "string" },
+    "ladder": {
+      "type": "object",
+      "required": ["contract", "flow", "acceptance"],
+      "properties": {
+        "contract": {
+          "type": "object",
+          "required": ["layer_verdict", "tests"],
+          "properties": {
+            "layer_verdict": { "type": "string", "enum": ["pass","fail","n/a"] },
+            "tests": { "type": "array" }
+          }
+        },
+        "flow": {
+          "type": "object",
+          "required": ["layer_verdict", "tests"],
+          "properties": {
+            "layer_verdict": { "type": "string", "enum": ["pass","fail","n/a"] },
+            "tests": { "type": "array" }
+          }
+        },
+        "acceptance": {
+          "type": "object",
+          "required": ["layer_verdict", "per_ac"],
+          "properties": {
+            "layer_verdict": { "type": "string", "enum": ["pass","fail","n/a"] },
+            "per_ac": { "type": "array" }
+          }
+        },
+        "class_ext": { "type": "object" },
+        "nfr": { "type": "object" }
+      }
+    },
+    "per_ac_summary": { "type": "array" },
+    "verdict": { "type": "string", "enum": ["verified","failed","blocked"] },
+    "escape": { "oneOf": [{"type":"string"},{"type":"null"}] },
+    "provenance": { "type": "object" },
+    "verification_counts": {
+      "type": "object",
+      "required": ["layers_applicable", "layers_passed", "layers_failed"],
+      "properties": {
+        "contract_tests": { "type": "integer" },
+        "contract_assertions": { "type": "integer" },
+        "flow_assertions": { "type": "integer" },
+        "acceptance_acs": { "type": "integer" },
+        "acceptance_visible_passed": { "type": "integer" },
+        "acceptance_held_out_passed": { "type": "integer" },
+        "class_ext_layers": { "type": "integer" },
+        "mechanisms_checked": { "type": "integer" },
+        "layers_applicable": { "type": "integer" },
+        "layers_passed": { "type": "integer" },
+        "layers_failed": { "type": "integer" }
+      }
+    }
+  }
+}

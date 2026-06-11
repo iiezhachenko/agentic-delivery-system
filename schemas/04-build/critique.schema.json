@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "build-critique",
+  "title": "CRITIQUE output — verdict + blocking issues on build artifacts (04-build phase)",
+  "type": "object",
+  "required": ["class", "mode", "verdict", "issues", "issue_count", "critique_counts"],
+  "properties": {
+    "verification_ref": { "type": "string" },
+    "build_record_ref": { "type": "string" },
+    "integration_record_ref": { "type": "string" },
+    "build_plan_ref": { "type": "string" },
+    "contracts_ref": { "type": "string" },
+    "oracle_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "components_ref": { "type": "string" },
+    "oracle_lock_ref": { "type": "string" },
+    "skeleton_lock_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "aprd_lock_ref": { "type": "string" },
+    "locks_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "slice": { "type": "string" },
+    "components_reviewed": { "type": "array" },
+    "files_reviewed": { "type": "array" },
+    "verdict": { "type": "string", "enum": ["clean","blocked"] },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "finding", "fix_hint"],
+        "properties": {
+          "id": { "type": "string" },
+          "category": { "type": "string", "enum": ["hardcoded-fixture","swallowed-failure","stub-branch","under-complexity","gold-plating"] },
+          "target_component": { "type": "string" },
+          "target_file": { "type": "string" },
+          "finding": { "type": "string" },
+          "fix_hint": { "type": "string" }
+        }
+      }
+    },
+    "issue_count": { "type": "integer", "minimum": 0 },
+    "critique_counts": {
+      "type": "object",
+      "required": ["components_reviewed", "files_reviewed", "issues"],
+      "properties": {
+        "components_reviewed": { "type": "integer" },
+        "files_reviewed": { "type": "integer" },
+        "issues": { "type": "integer" },
+        "by_category": { "type": "object" }
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "economy-audit",
+  "title": "ECONOMY-AUDIT output — Layer-2 semantic economy audit (duplicate-fact, no-objective, etc.)",
+  "type": "object",
+  "required": ["target", "type", "oracle", "verdict", "issues", "issue_count", "by_category"],
+  "properties": {
+    "target": { "type": "string" },
+    "type": { "type": "string" },
+    "lint_ref": { "type": "string" },
+    "oracle": { "type": "array", "items": { "type": "string" } },
+    "verdict": { "type": "string", "enum": ["clean","blocked"] },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "target", "finding", "routes_to", "fix"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^I[0-9]+$" },
+          "category": { "type": "string", "enum": ["duplicate-fact","no-objective","mandate-narration","ambiguous","re-spec","starvation"] },
+          "target": { "type": "string" },
+          "finding": { "type": "string" },
+          "routes_to": { "type": "string" },
+          "fix": { "type": "string", "enum": ["DELETE","REWRITE"] }
+        }
+      }
+    },
+    "issue_count": { "type": "integer", "minimum": 0 },
+    "by_category": {
+      "type": "object",
+      "required": ["duplicate-fact", "no-objective", "mandate-narration", "ambiguous", "re-spec", "starvation"],
+      "properties": {
+        "duplicate-fact": { "type": "integer", "minimum": 0 },
+        "no-objective": { "type": "integer", "minimum": 0 },
+        "mandate-narration": { "type": "integer", "minimum": 0 },
+        "ambiguous": { "type": "integer", "minimum": 0 },
+        "re-spec": { "type": "integer", "minimum": 0 },
+        "starvation": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

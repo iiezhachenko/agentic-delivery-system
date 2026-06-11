@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "build-diagnosis",
+  "title": "DIAGNOSE output — build-phase red diagnosis (skeleton or slice build)",
+  "type": "object",
+  "required": ["locks_verified", "class", "mode", "red_under_diagnosis", "flaky_check", "stall_analysis", "verdict", "classification", "diagnosis_counts"],
+  "properties": {
+    "blocked_record_ref": { "type": "string" },
+    "locks_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "slice": { "type": "string" },
+    "slice_id": { "type": "string" },
+    "red_under_diagnosis": {
+      "type": "object",
+      "required": ["from_role", "target", "failing_tests", "failure_signature"],
+      "properties": {
+        "from_role": { "type": "string" },
+        "target": { "type": "string" },
+        "failing_tests": { "type": "array", "items": { "type": "string" } },
+        "failure_signature": { "type": "string" },
+        "provisional_hint": { "type": "object" }
+      }
+    },
+    "flaky_check": {
+      "type": "object",
+      "required": ["deterministic", "evidence"],
+      "properties": {
+        "deterministic": { "type": "boolean" },
+        "evidence": { "type": "string" },
+        "action": { "oneOf": [{"type":"string"},{"type":"null"}] }
+      }
+    },
+    "stall_analysis": {
+      "type": "object",
+      "required": ["basis", "progressing", "stall_confirmed"],
+      "properties": {
+        "basis": { "type": "string" },
+        "same_signature_attempts": { "type": "integer" },
+        "net_new_passes_trend": { "type": "string" },
+        "progressing": { "type": "boolean" },
+        "stall_confirmed": { "type": "boolean" }
+      }
+    },
+    "reflection_pass": { "type": "object" },
+    "skeleton_fidelity": { "type": "object" },
+    "verdict": { "type": "string", "enum": ["self-heal","escape","flaky-quarantine"] },
+    "classification": { "type": "string" },
+    "routable_diagnosis": { "oneOf": [{"type":"null"},{"type":"object"}] },
+    "self_heal": { "oneOf": [{"type":"null"},{"type":"object"}] },
+    "quarantine": { "oneOf": [{"type":"null"},{"type":"object"}] },
+    "diagnosis_counts": {
+      "type": "object",
+      "required": ["frozen_inputs_reread", "gates_to_verdict"],
+      "properties": {
+        "frozen_inputs_reread": { "type": "integer" },
+        "gates_to_verdict": { "type": "integer" }
+      }
+    }
+  }
+}

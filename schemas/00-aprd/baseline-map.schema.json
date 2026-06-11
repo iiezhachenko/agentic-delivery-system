@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "baseline-map",
+  "title": "BASELINE-MAP output — id high-water, conventions, seam catalog, oracle inventory",
+  "type": "object",
+  "required": ["built_by", "id_high_water", "conventions", "integration_seams", "existing_oracle", "frozen_locks"],
+  "properties": {
+    "built_by": { "type": "string" },
+    "id_high_water": {
+      "type": "object",
+      "description": "max index per id space; downstream mints strictly above",
+      "properties": {
+        "R": { "type": "integer" },
+        "AC": { "type": "integer" },
+        "S": { "type": "integer" },
+        "ADR": { "type": "integer" },
+        "C": { "type": "integer" },
+        "E": { "type": "integer" },
+        "CT": { "type": "integer" }
+      }
+    },
+    "conventions": {
+      "type": "object",
+      "description": "explicit enough for IMPLEMENT to conform; cite source files",
+      "properties": {
+        "lang": { "type": "string" },
+        "layout": { "type": "string" },
+        "lint": { "type": "string" },
+        "naming": { "type": "string" }
+      }
+    },
+    "integration_seams": {
+      "type": "array",
+      "description": "component boundaries the feature may plug into",
+      "items": {
+        "type": "object",
+        "required": ["at", "kind", "contract_ref"],
+        "properties": {
+          "at": { "type": "string" },
+          "kind": { "type": "string" },
+          "contract_ref": { "type": "string" }
+        }
+      }
+    },
+    "existing_oracle": {
+      "type": "object",
+      "required": ["suites", "must_stay_green"],
+      "properties": {
+        "suites": { "type": "array", "items": { "type": "string" } },
+        "must_stay_green": { "type": "boolean" }
+      }
+    },
+    "frozen_locks": {
+      "type": "object",
+      "description": "lock path → status; don't recompute hashes"
+    }
+  }
+}

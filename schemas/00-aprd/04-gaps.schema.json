@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "04-gaps",
+  "title": "GAP-DETECT output — blast-ranked gaps with interpretations and disposition",
+  "type": "object",
+  "required": ["extraction_ref", "class", "gaps", "dismissed_unknowns", "gap_counts"],
+  "properties": {
+    "extraction_ref": { "type": "string" },
+    "grounding_ref": { "description": "path string if 03-grounding/ was read, else null", "oneOf": [{"type":"string"},{"type":"null"}] },
+    "class": { "type": "string" },
+    "baseline_map_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
+    "baseline_aprd_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
+    "gaps": {
+      "type": "array",
+      "description": "sorted architecture → scope → cosmetic",
+      "items": {
+        "type": "object",
+        "required": ["id", "gap", "refs", "interpretations", "recommended_default", "blast_radius", "disposition", "reason"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^G[0-9]+$" },
+          "gap": { "type": "string" },
+          "refs": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "seam_ref": { "description": "feature-add optional: {at:C*, contract_ref:CT*}; null otherwise", "oneOf": [{"type":"null"},{"type":"object"}] },
+          "interpretations": { "type": "array", "items": { "type": "string" }, "minItems": 2 },
+          "recommended_default": { "type": "string" },
+          "blast_radius": { "type": "string", "enum": ["architecture","scope","cosmetic"] },
+          "disposition": { "type": "string", "enum": ["ask","assume"] },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "dismissed_unknowns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "reason"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^U[0-9]+$" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "gap_counts": {
+      "type": "object",
+      "required": ["architecture", "scope", "cosmetic", "total"],
+      "properties": {
+        "architecture": { "type": "integer", "minimum": 0 },
+        "scope": { "type": "integer", "minimum": 0 },
+        "cosmetic": { "type": "integer", "minimum": 0 },
+        "total": { "type": "integer", "minimum": 0 }
+      },
+      "x-walk": "total == gaps.length; architecture + scope + cosmetic == total"
+    }
+  }
+}

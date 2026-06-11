@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "demo",
+  "title": "DEMO-GEN output — client-facing demo record with acceptance evidence",
+  "type": "object",
+  "required": ["class", "mode", "demonstrated_acs", "status", "demo_counts"],
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "skeleton-build" } }, "required": ["mode"] },
+      "then": { "required": ["verification_ref", "slice", "flow_demonstrated"] }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "slice-build" } }, "required": ["mode"] },
+      "then": { "required": ["verify_output_ref", "slice_id", "slice_name", "builds_on", "flow_demonstrated"] }
+    }
+  ],
+  "properties": {
+    "verification_ref": { "type": "string" },
+    "verify_output_ref": { "type": "string" },
+    "critique_ref": { "type": "string" },
+    "integration_record_ref": { "type": "string" },
+    "build_record_ref": { "type": "string" },
+    "flows_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "skeleton_lock_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "aprd_lock_ref": { "type": "string" },
+    "locks_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "slice": { "type": "string" },
+    "slice_id": { "type": "string" },
+    "slice_name": { "type": "string" },
+    "builds_on": { "type": "array", "items": { "type": "string" } },
+    "demo_artifact": { "type": "string" },
+    "demo_modality": { "type": "string" },
+    "flow_demonstrated": { "type": "string" },
+    "demonstrated_acs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ac", "req_ref", "plain_outcome", "route", "evidence"],
+        "properties": {
+          "ac": { "type": "string" },
+          "req_ref": { "type": "string" },
+          "plain_outcome": { "type": "string" },
+          "route": { "type": "string" },
+          "evidence": {
+            "type": "object",
+            "required": ["visible", "held_out"],
+            "properties": {
+              "visible": { "type": "string", "enum": ["pass","fail"] },
+              "held_out": { "type": "string", "enum": ["pass","fail"] }
+            }
+          }
+        }
+      }
+    },
+    "client_response": { "type": "string", "enum": ["accepted","rejected","deferred","pending"] },
+    "accepted_by": { "type": "string" },
+    "accepted_at": { "type": "string" },
+    "rejection": { "oneOf": [{"type":"string"},{"type":"null"},{"type":"object"}] },
+    "learnings": { "type": "array", "items": { "type": "string" } },
+    "signoff": { "type": "string" },
+    "next": { "type": "string" },
+    "status": { "type": "string", "enum": ["accepted","rejected","pending"] },
+    "demo_counts": {
+      "type": "object",
+      "required": ["demonstrated_acs"],
+      "properties": {
+        "demonstrated_acs": { "type": "integer" },
+        "acs_visible_passed": { "type": "integer" },
+        "acs_held_out_passed": { "type": "integer" },
+        "learnings": { "type": "integer" }
+      }
+    }
+  }
+}

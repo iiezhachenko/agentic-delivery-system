@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "deferred-decisions",
+  "title": "RESOLVE-LOCAL output — disposition of local/deferred decision queue",
+  "type": "object",
+  "required": ["class", "mode", "resolutions", "resolved", "re_deferred", "escalated", "drained", "resolve_counts"],
+  "properties": {
+    "triage_ref": { "type": "string" },
+    "decision_points_ref": { "type": "string" },
+    "components_ref": { "type": "string" },
+    "contracts_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "adr_log_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "lock_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "baseline_adr_max": { "type": "string" },
+    "local_queue_in": { "type": "array", "items": { "type": "string" } },
+    "resolutions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["dp_id", "decision", "category", "forced_by", "owning_component", "disposition", "rationale"],
+        "properties": {
+          "dp_id": { "type": "string" },
+          "decision": { "type": "string" },
+          "category": { "type": "string" },
+          "forced_by": { "type": "array" },
+          "cut_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "owning_component": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "disposition": { "type": "string", "enum": ["resolved","re-deferred","escalated"] },
+          "adr_id": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "draft_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "defer_to": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "escalate_to": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "resolved": { "type": "array" },
+    "re_deferred": { "type": "array" },
+    "escalated": { "type": "array" },
+    "drained": { "type": "array" },
+    "local_adrs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "dp_id", "title", "status", "mode", "scope", "category", "traces", "draft_ref"],
+        "properties": {
+          "id": { "type": "string" },
+          "dp_id": { "type": "string" },
+          "title": { "type": "string" },
+          "status": { "type": "string" },
+          "mode": { "type": "string" },
+          "scope": { "type": "string" },
+          "component": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "category": { "type": "string" },
+          "traces": { "type": "array" },
+          "draft_ref": { "type": "string" }
+        }
+      }
+    },
+    "escalations": { "type": "array" },
+    "note": { "oneOf": [{"type":"string"},{"type":"null"}] },
+    "resolve_counts": {
+      "type": "object",
+      "required": ["queue_in", "resolved", "re_deferred", "escalated"],
+      "properties": {
+        "queue_in": { "type": "integer" },
+        "resolved": { "type": "integer" },
+        "re_deferred": { "type": "integer" },
+        "escalated": { "type": "integer" },
+        "local_adrs_emitted": { "type": "integer" }
+      }
+    }
+  }
+}

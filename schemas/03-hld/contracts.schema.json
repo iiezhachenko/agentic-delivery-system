@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contracts",
+  "title": "DEFINE-CONTRACTS output — one contract per component edge CT*",
+  "type": "object",
+  "required": ["class", "mode"],
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "skeleton" } }, "required": ["mode"] },
+      "then": { "required": ["contracts", "coverage", "contract_counts"] }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "increment" } }, "required": ["mode"] },
+      "then": { "required": ["introduced_components", "new_contracts", "slice_coverage", "increment_counts"] }
+    }
+  ],
+  "properties": {
+    "components_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "lock_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string", "enum": ["skeleton","increment"] },
+    "skeleton_id": { "type": "string" },
+    "skeleton_lock_ref": { "type": "string" },
+    "base_skeleton_contracts_ref": { "type": "string" },
+    "skeleton_frozen_verified": { "type": "boolean" },
+    "slice_components_ref": { "type": "string" },
+    "slice_id": { "type": "string" },
+    "slice_name": { "type": "string" },
+    "introduced_components": { "type": "array", "items": { "type": "string" } },
+    "touched_contracts": { "type": "array" },
+    "new_contracts": { "type": "array" },
+    "slice_coverage": { "type": "object" },
+    "skeleton_fidelity": { "type": "object" },
+    "increment_counts": { "type": "object" },
+    "contracts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "between", "kind", "shape", "failure_modes", "traces", "honors_adr"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^CT[0-9]+$" },
+          "between": { "type": "array", "items": { "type": "string" }, "minItems": 2 },
+          "kind": { "type": "string", "enum": ["sync_api","shared_data","async_event"] },
+          "shape": { "type": "string" },
+          "failure_modes": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "traces": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "honors_adr": { "type": "array", "items": { "type": "string" } },
+          "honors_inv": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["edges_in_scope", "edges_contracted", "edge_orphans", "contracts_without_edge", "kind_distribution"],
+      "properties": {
+        "edges_in_scope": { "type": "array", "items": { "type": "string" } },
+        "edges_contracted": { "type": "array", "items": { "type": "string" } },
+        "edge_orphans": { "type": "array" },
+        "contracts_without_edge": { "type": "array" },
+        "kind_distribution": {
+          "type": "object",
+          "required": ["sync_api", "shared_data", "async_event"],
+          "properties": {
+            "sync_api": { "type": "integer", "minimum": 0 },
+            "shared_data": { "type": "integer", "minimum": 0 },
+            "async_event": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "frame_conflicts": { "type": "array" },
+    "structural_defects": { "type": "array" },
+    "contract_counts": {
+      "type": "object",
+      "required": ["contracts", "edges_in_scope", "with_failure_mode", "with_trace"],
+      "properties": {
+        "contracts": { "type": "integer" },
+        "edges_in_scope": { "type": "integer" },
+        "with_failure_mode": { "type": "integer" },
+        "with_trace": { "type": "integer" }
+      }
+    }
+  }
+}

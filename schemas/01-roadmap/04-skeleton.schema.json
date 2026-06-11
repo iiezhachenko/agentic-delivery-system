@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "04-skeleton",
+  "title": "SKELETON-IDENTIFY output — walking skeleton designation + seam coverage",
+  "type": "object",
+  "required": ["verticality_ref", "slices_ref", "aprd_ref", "class", "foundational_seams", "eligible_slices", "rejected_as_skeleton"],
+  "properties": {
+    "verticality_ref": { "type": "string" },
+    "slices_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "class": { "type": "string" },
+    "foundational_seams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["seam", "present"],
+        "properties": {
+          "seam": { "type": "string" },
+          "present": { "type": "boolean" },
+          "instance": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "grounded_in": { "type": "array", "items": { "type": "string" } },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "eligible_slices": { "type": "array", "items": { "type": "string" } },
+    "skeleton": {
+      "description": "null when no single slice crosses all seams",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["id", "name", "kind", "requirements", "acceptance", "qualifying_acceptance", "depends_on", "seam_coverage", "selection_rationale"],
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string" },
+            "kind": { "const": "walking_skeleton" },
+            "requirements": { "type": "array", "items": { "type": "string" } },
+            "acceptance": { "type": "array", "items": { "type": "string" } },
+            "qualifying_acceptance": { "type": "array", "items": { "type": "string" } },
+            "retires_risk": { "oneOf": [{"type":"string"},{"type":"null"}] },
+            "depends_on": { "type": "array" },
+            "seam_coverage": { "type": "array", "items": { "type": "object" } },
+            "minimal_behaviour_rationale": { "type": "string" },
+            "selection_rationale": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "skeleton_seams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["seam", "must_establish", "grounded_in"],
+        "properties": {
+          "seam": { "type": "string" },
+          "must_establish": { "type": "string" },
+          "grounded_in": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "rejected_as_skeleton": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "reason"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "uncovered_seams": { "type": "array" }
+  }
+}

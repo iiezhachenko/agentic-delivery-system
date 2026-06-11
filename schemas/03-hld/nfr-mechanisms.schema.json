@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nfr-mechanisms",
+  "title": "MAP-NFR output — NFR mechanisms M* mapped to components and contracts",
+  "type": "object",
+  "required": ["class", "mode"],
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "skeleton" } }, "required": ["mode"] },
+      "then": { "required": ["nfr_inventory", "mechanisms", "coverage", "nfr_counts"] }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "increment" } }, "required": ["mode"] },
+      "then": { "required": ["introduced_components", "resolutions", "new_mechanisms", "slice_coverage", "increment_counts"] }
+    }
+  ],
+  "properties": {
+    "aprd_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "adr_log_ref": { "type": "string" },
+    "components_ref": { "type": "string" },
+    "foundation_cut_ref": { "type": "string" },
+    "lock_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "skeleton_lock_ref": { "type": "string" },
+    "base_nfr_ref": { "type": "string" },
+    "slice_components_ref": { "type": "string" },
+    "slice_contracts_ref": { "type": "string" },
+    "skeleton_frozen_verified": { "type": "boolean" },
+    "slice_id": { "type": "string" },
+    "slice_name": { "type": "string" },
+    "introduced_components": { "type": "array", "items": { "type": "string" } },
+    "touched_components": { "type": "array", "items": { "type": "string" } },
+    "inherited_nfrs": { "type": "array" },
+    "slice_nfr_queue": { "type": "array" },
+    "resolutions": { "type": "array" },
+    "new_mechanisms": { "type": "array" },
+    "slice_coverage": { "type": "object" },
+    "frame_fidelity": { "type": "object" },
+    "unmet": { "type": "array" },
+    "increment_counts": { "type": "object" },
+    "nfr_inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nfr_ref", "category", "statement", "disposition"],
+        "properties": {
+          "nfr_ref": { "type": "string" },
+          "category": { "type": "string" },
+          "statement": { "type": "string" },
+          "disposition": { "type": "string", "enum": ["mechanism","satisfied-by-frame","not-applicable","deferred"] },
+          "mechanism_ref": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "frame_basis": { "type": "array" },
+          "realized_by": { "type": "array" },
+          "defer_to": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "coverage": { "type": "object" },
+    "mechanisms": { "type": "array" },
+    "structural_defects": { "type": "array" },
+    "nfr_counts": { "type": "object" }
+  }
+}

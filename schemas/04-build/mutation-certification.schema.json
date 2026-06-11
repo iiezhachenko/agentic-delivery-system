@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mutation-certification",
+  "title": "MATERIALIZE-ORACLE output — mutation certification for high-blast components",
+  "type": "object",
+  "required": ["high_blast_components", "certified_tests"],
+  "properties": {
+    "oracle_ref": { "type": "string" },
+    "certified_at": { "type": "string" },
+    "certifier": { "type": "string" },
+    "slice_id": { "type": "string" },
+    "high_blast_components": { "type": "array", "items": { "type": "string" } },
+    "high_blast_rationale": { "type": "string" },
+    "high_blast_basis": { "type": "string" },
+    "verdict": { "type": "string", "enum": ["kill-strong","kill-weak","inconclusive"] },
+    "overall_verdict": { "type": "string" },
+    "uncertified_tests": { "type": "array" },
+    "certified_tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["target"],
+        "properties": {
+          "oracle_test_id": { "type": "string" },
+          "oracle_id": { "type": "string" },
+          "file": { "type": "string" },
+          "target": { "type": "string" },
+          "high_blast_reason": { "type": "string" },
+          "reason": { "type": "string" },
+          "fault_seeds": { "type": "array", "items": { "type": "object" } },
+          "seeded_faults": { "type": "array", "items": { "type": "object" } },
+          "kill_strength": { "type": "string" },
+          "verdict": { "type": "string" }
+        }
+      }
+    }
+  }
+}

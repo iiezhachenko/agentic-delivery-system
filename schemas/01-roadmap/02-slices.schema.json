@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "02-slices",
+  "title": "SLICE-EXTRACT output — candidate vertical slices S* with coverage",
+  "type": "object",
+  "required": ["aprd_ref", "lock_verified", "class", "project", "slices", "unsliceable", "coverage", "slice_counts"],
+  "properties": {
+    "aprd_ref": { "type": "string" },
+    "lock_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "project": { "type": "string" },
+    "slices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "requirements", "acceptance", "value", "value_basis", "depends_on", "candidate"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^S[0-9]+$" },
+          "name": { "type": "string" },
+          "requirements": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "acceptance": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "value": { "type": "string", "enum": ["high","med","low"] },
+          "value_basis": { "type": "string" },
+          "retires_risk": { "oneOf": [{"type":"string"},{"type":"null"}] },
+          "depends_on": { "type": "array", "items": { "type": "string" } },
+          "candidate": { "const": true }
+        }
+      }
+    },
+    "unsliceable": { "type": "array" },
+    "coverage": {
+      "type": "object",
+      "required": ["requirements_total", "requirements_covered", "requirement_orphans", "acceptance_total", "acceptance_covered", "acceptance_orphans"],
+      "properties": {
+        "requirements_total": { "type": "array", "items": { "type": "string" } },
+        "requirements_covered": { "type": "array", "items": { "type": "string" } },
+        "requirement_orphans": { "type": "array" },
+        "acceptance_total": { "type": "array", "items": { "type": "string" } },
+        "acceptance_covered": { "type": "array", "items": { "type": "string" } },
+        "acceptance_orphans": { "type": "array" }
+      }
+    },
+    "slice_counts": {
+      "type": "object",
+      "required": ["total"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "aprd_version": { "type": "string" },
+    "baseline_completed_slices": { "type": "array" }
+  }
+}

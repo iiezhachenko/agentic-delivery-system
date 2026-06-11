@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "oracle",
+  "title": "MATERIALIZE-ORACLE output — test oracle: contract tests + flow tests + acceptance tests",
+  "type": "object",
+  "required": ["class", "mode"],
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "skeleton-build" } }, "required": ["mode"] },
+      "then": { "required": ["skeleton_id", "build_set", "high_blast_components", "contract_tests", "flow_tests", "acceptance_tests", "oracle_counts"] }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "slice-build" } }, "required": ["mode"] },
+      "then": { "required": ["slice_id", "slice_name", "build_set", "contract_tests", "flow_tests", "acceptance_tests", "oracle_counts"] }
+    }
+  ],
+  "properties": {
+    "build_plan_ref": { "type": "string" },
+    "slice_build_plan_ref": { "type": "string" },
+    "test_specs_ref": { "type": "string" },
+    "slice_test_specs_ref": { "type": "string" },
+    "base_test_specs_ref": { "type": "string" },
+    "aprd_ref": { "type": "string" },
+    "aprd_version": { "type": "string" },
+    "diagnosis_ref": { "type": "string" },
+    "regression_guard_ref": { "type": "string" },
+    "skeleton_lock_ref": { "type": "string" },
+    "adr_lock_ref": { "type": "string" },
+    "aprd_lock_ref": { "type": "string" },
+    "locks_verified": { "type": "boolean" },
+    "class": { "type": "string" },
+    "mode": { "type": "string" },
+    "skeleton_id": { "type": "string" },
+    "slice_id": { "type": "string" },
+    "slice_name": { "type": "string" },
+    "slice_flow": { "type": "string" },
+    "role": { "type": "string" },
+    "starts_red": { "type": "boolean" },
+    "stack": { "type": "object" },
+    "build_set": { "type": "array", "items": { "type": "string" } },
+    "prior_built_components": { "type": "array", "items": { "type": "string" } },
+    "high_blast_components": { "type": "array" },
+    "oracle_layers": { "type": "array" },
+    "inherited_oracle": { "type": "object" },
+    "reproduction_test": { "type": "object" },
+    "inherited_contract_tests": { "type": "array" },
+    "class_ext": { "type": "array" },
+    "contract_tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "target"],
+        "properties": {
+          "id": { "type": "string" },
+          "target": { "type": "string" },
+          "provider": { "type": "string" },
+          "caller": { "type": "string" },
+          "kind": { "type": "string" },
+          "file": { "type": "string" },
+          "mocked_deps": { "type": "array" },
+          "shape_test": { "type": "string" },
+          "failure_tests": { "type": "array" },
+          "failure_modes": { "type": "array" },
+          "traces": { "type": "array" }
+        }
+      }
+    },
+    "flow_tests": { "type": "array" },
+    "acceptance_tests": { "type": "array" },
+    "class_ext_tests": { "type": "array" },
+    "held_out_split": { "type": "object" },
+    "mutation_certification": { "type": "object" },
+    "conftest": {},
+    "coverage": { "type": "object" },
+    "skeleton_fidelity": { "type": "object" },
+    "oracle_lock_ref": { "type": "string" },
+    "materialization_gaps": { "type": "array" },
+    "oracle_counts": { "type": "object" }
+  }
+}

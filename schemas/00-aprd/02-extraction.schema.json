@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "02-extraction",
+  "title": "EXTRACT output — entities E*, explicit/implied requirements R*, constraints C*, unknowns U*",
+  "type": "object",
+  "required": ["request_ref", "classification_ref", "class", "entities", "explicit_requirements", "implied_requirements", "stated_constraints", "unknowns"],
+  "properties": {
+    "request_ref": { "type": "string" },
+    "classification_ref": { "type": "string" },
+    "class": { "type": "string", "description": "greenfield | feature-add" },
+    "baseline_map_ref": { "description": "feature-add: path to baseline-map.json; null for greenfield", "oneOf": [{"type":"string"},{"type":"null"}] },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "note", "inferred", "source", "sr_ref"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^E[0-9]+$" },
+          "name": { "type": "string" },
+          "note": { "type": "string" },
+          "inferred": { "type": "boolean" },
+          "rationale": { "type": "string", "description": "required when inferred:true" },
+          "source": { "type": "string" },
+          "sr_ref": { "type": "string", "pattern": "^SR[0-9]+$" },
+          "baseline_ref": { "description": "feature-add: baseline E* this extends or null", "oneOf": [{"type":"string"},{"type":"null"}] }
+        }
+      }
+    },
+    "explicit_requirements": {
+      "type": "array",
+      "description": "inferred:false for all; R* numbered first",
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "inferred", "source", "sr_ref"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^R[0-9]+$" },
+          "text": { "type": "string" },
+          "inferred": { "const": false },
+          "source": { "type": "string" },
+          "sr_ref": { "type": "string" },
+          "baseline_ref": { "oneOf": [{"type":"string"},{"type":"null"}] }
+        }
+      }
+    },
+    "implied_requirements": {
+      "type": "array",
+      "description": "inferred:true for all; continues R* space after explicit",
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "inferred", "source", "rationale", "sr_ref"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^R[0-9]+$" },
+          "text": { "type": "string" },
+          "inferred": { "const": true },
+          "source": { "type": "string" },
+          "rationale": { "type": "string" },
+          "sr_ref": { "type": "string" },
+          "baseline_ref": { "oneOf": [{"type":"string"},{"type":"null"}] }
+        }
+      }
+    },
+    "stated_constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "kind", "inferred", "source", "sr_ref"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^C[0-9]+$" },
+          "text": { "type": "string" },
+          "kind": { "type": "string", "enum": ["platform","stack","scale","region","compliance","timeline","budget"] },
+          "inferred": { "type": "boolean" },
+          "source": { "type": "string" },
+          "sr_ref": { "type": "string" },
+          "baseline_ref": { "oneOf": [{"type":"string"},{"type":"null"}] }
+        }
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "source", "sr_ref"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^U[0-9]+$" },
+          "text": { "type": "string" },
+          "source": { "type": "string" },
+          "sr_ref": { "type": "string" }
+        }
+      }
+    }
+  }
+}
