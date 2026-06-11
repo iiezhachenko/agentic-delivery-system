@@ -1,0 +1,91 @@
+{
+  "wave": "W10-ECON-SWEEP-FULL",
+  "class": "agentic-delivery-pipeline",
+  "verdict": "reconciled",
+  "date": "2026-06-11",
+  "_note": "W10 done_sentinel (orchestrator STEP-0 derived-state). Full 44-prompt Layer-2 ECONOMY-AUDIT + corpus-wide reconcile of the 15 W9-catalogued inherited findings (.roadmap/09-economy-reconcile.json rolled_to.inherited_findings) PLUS the 40 prompts unaudited at L2 in W9. First job (per W9 lesson) = CALIBRATE _economy-audit.md Rule-2 against the auditor's mis-fire classes (controller-direct, P3/routes_to:canon — the analog of W9's lint.mjs C6/C8 calibration), THEN re-author only genuine residue. Operator-decided PRIORITY (_step-runner I2): SANCTION condensed Register (calibrate) — condensed = accepted RUNTIME register IFF all 6 core parts present verbatim; AB7/8/9 fix-lines + economy-invariant sentence are AUTHORING canon, mandated ONLY where prose authored/audited (IMPLEMENT, ECONOMY-AUDIT). Disk = source of truth (D20); this report is the W10 sentinel, not a tracker.",
+  "calibration": {
+    "target": "prompts/_economy-audit.md Rule 2 (anti-false-positive)",
+    "route": "controller-direct (P3 / routes_to:canon — fix the checker, not 40 artifacts; analog of W9 lint C6/C8 calibration)",
+    "sanctioned_patterns": [
+      { "id": "a", "name": "dual-mode delta", "clean": "fact in two parts of a dual-mode prompt WITH real per-pass delta", "exception_flags": "shared fact copied un-factored into both modes -> duplicate-fact" },
+      { "id": "b", "name": "named cross-ref pointer", "clean": "pointer naming where a fact lives ('see delta Rule 1', 'Distinction in STEP 4 intro')", "exception_flags": "restatement of that section's content beyond the bare pointer -> duplicate-fact" },
+      { "id": "c", "name": "deliberate multi-home emphasis", "clean": "load-bearing fact in N homes each carrying DISTINCT framing/reader-action (GIVEN/RULES/STEP)", "exception_flags": "verbatim restatement adding no per-home function -> duplicate-fact" },
+      { "id": "d", "name": "orientation/provenance header", "clean": "leading blockquote of provenance/North-Star/source refs (agent executes from role line down)", "exception_flags": "prose past the header narrating downstream actions changing no reader behavior -> no-objective" },
+      { "id": "e", "name": "condensed Register", "clean": "runtime Register conformant IFF all 6 core parts verbatim (Register/Drop/Pattern/NOT-YES/Applies/Stays-literal); AB7/8/9 + economy sentence required ONLY where prose authored/audited", "exception_flags": "Register missing ANY of the 6 core parts -> starvation" }
+    ],
+    "lint_after_calibration": "clean (2654 tok, budget 7500)"
+  },
+  "audit_layer2": {
+    "corpus_total": 44,
+    "clean": 44,
+    "blocked": 0,
+    "method": "calibrated ECONOMY-AUDIT swept corpus-wide in 6 phase-batches (fresh subagents); genuine residue re-authored as surface-preserving AB9 trims; FRESH verifier (separate spawn, no self-grade) re-audited the 10 fixed prompts -> all clean, no new defect",
+    "verdict_per_phase": {
+      "00-aprd": "9/9 clean (CLASSIFIER/CRITIQUE/EXTRACT/EXTRACT-RULES/GAP-DETECT/QUESTION-GEN/RECONCILE/SYNTHESIZE/VERIFY)",
+      "01-roadmap": "7/7 clean (SLICE-EXTRACT fixed; FOUNDATION-CUT/RE-RANK/SEQUENCE-REVIEW/SEQUENCE/SKELETON-IDENTIFY/VERTICALITY-CHECK clean as-is)",
+      "02-adr": "7/7 clean (CRITIQUE/EVALUATE-DECIDE/OPTION-GEN/RECONCILE/SYNTHESIZE-ADR fixed; DECISION-EXTRACT/TRIAGE clean as-is)",
+      "03-hld": "8/8 clean (all dual-mode shared/delta verified — no un-factored shared copy)",
+      "04-build": "7/7 clean (IMPLEMENT fixed; CRITIQUE/DEMO-GEN/DIAGNOSE/INTEGRATE/MATERIALIZE-ORACLE/VERIFY-OUTPUT clean as-is)",
+      "infra": "6/6 clean (_orchestrator + _orchestrator.generic + _step-runner fixed; _economy-audit + _playbooks/bugfix + _playbooks/feature-add clean as-is)"
+    }
+  },
+  "w9_inherited_findings_disposition": {
+    "_note": "Each of the 15 W9-catalogued findings re-judged FRESH under calibration. ~half were auditor mis-fires (now sanctioned); rest genuine (re-authored).",
+    "sanctioned_via_rule2_calibration": [
+      { "finding": "SEQUENCE I1 mandate-narration @26", "pattern": "role 'one load-bearing thing' slot with fused rationale (AB6 ok at <=3 lines)" },
+      { "finding": "SEQUENCE I2 dual-mode cross-ref @34", "pattern": "b" },
+      { "finding": "SEQUENCE I3 feature-add task branch @64", "pattern": "a (per-mode task branch, not a shared-copy)" },
+      { "finding": "SEQUENCE I4 Stop greenfield parenthetical @70", "pattern": "d" },
+      { "finding": "SEQUENCE I5 Stop greenfield tail @70", "pattern": "d/a (mode Stop-contract names its write+route target)" },
+      { "finding": "SEQUENCE I6 Stop feature-add tail @71", "pattern": "d/a" },
+      { "finding": "SLICE-EXTRACT I1 guard-check across modes @51+60", "pattern": "a (per-mode branch guard-check, not un-factored shared)" },
+      { "finding": "_orchestrator I1 no-bookkeeping 3 homes @33", "pattern": "c (GIVEN=scope decl / RULES=standing rule / STEP6=procedure — distinct framing)" },
+      { "finding": "_orchestrator I2 Model Sonnet-rationale @17-18", "pattern": "c (retirement rationale distinct from SUBAGENT-CONTRACT runtime home)" },
+      { "finding": "_step-runner I1 provenance blockquote @3-6", "pattern": "d" },
+      { "finding": "_step-runner I3 grader-reads-files tail @25", "pattern": "d (disk-is-deliverable reinforcement)" }
+    ],
+    "genuine_re_authored": [
+      { "finding": "SLICE-EXTRACT I2 motivational tail @30", "category": "no-objective", "fix": "DELETE parenthetical (downstream VC narration + 'nothing to reject' motivation)" },
+      { "finding": "_orchestrator I3 STEP-4 distinction restatement @113", "category": "duplicate-fact", "fix": "DELETE restatement, KEEP bare pointer '(Distinction in STEP 4 intro)' (pattern b)" },
+      { "finding": "_orchestrator I4 'retry budget: 3' ambiguous @83", "category": "ambiguous", "fix": "REWRITE -> '3 total attempts (initial + 2 re-authors)'" },
+      { "finding": "_step-runner I2 condensed-vs-PR4 @17-21", "category": "starvation", "fix": "operator SANCTIONED condensed (AB7/8/9 absence ok for executor); guardrail caught MISSING core part NOT/YES -> REWRITE restores NOT/YES only" }
+    ]
+  },
+  "new_corpus_findings_re_authored": [
+    { "prompt": "04-build/IMPLEMENT", "category": "starvation", "target": "Register", "fix": "REWRITE — IMPLEMENT authors artifact prose (pattern e named author); restore full canonical block (AB7/8/9 fix-lines + economy-invariant sentence)" },
+    { "prompt": "02-adr/CRITIQUE", "category": "mandate-narration", "target": "26", "fix": "REWRITE — cut positional/motivational sentences ('Stand between...', 'What survives becomes frame...'); keep who/one-thing/lane" },
+    { "prompt": "02-adr/EVALUATE-DECIDE", "category": "mandate-narration", "target": "25", "fix": "REWRITE — cut 'Prevent that: evaluate every option...' (home = How-to-score Rule 4); keep load-bearing rule" },
+    { "prompt": "02-adr/RECONCILE", "category": "mandate-narration", "target": "25", "fix": "REWRITE — cut prior-stage narration (home = discriminator items 1-2)" },
+    { "prompt": "02-adr/OPTION-GEN", "category": "mandate-narration", "target": "25", "fix": "REWRITE — cut motivational closer 'Open choice; next stage closes it'" },
+    { "prompt": "02-adr/SYNTHESIZE-ADR", "category": "mandate-narration", "target": "26", "fix": "REWRITE — cut prior-stage narration (home = Rules 1-2)" },
+    { "prompt": "_orchestrator.generic", "category": "ambiguous", "target": "65", "fix": "REWRITE — same 'retry budget: 3' disambiguation as _orchestrator" }
+  ],
+  "re_authored_prompts": [
+    "prompts/01-roadmap/SLICE-EXTRACT.md", "prompts/02-adr/CRITIQUE.md", "prompts/02-adr/EVALUATE-DECIDE.md",
+    "prompts/02-adr/RECONCILE.md", "prompts/02-adr/OPTION-GEN.md", "prompts/02-adr/SYNTHESIZE-ADR.md",
+    "prompts/04-build/IMPLEMENT.md", "prompts/_orchestrator.md", "prompts/_orchestrator.generic.md", "prompts/_step-runner.md"
+  ],
+  "re_author_method": "surface-preserving AB9 trims (DELETE clause / REWRITE word / restore verbatim canonical lines). Executable surface byte-identical -> behavior provably unchanged (W9 C4 precedent, operator-accepted); verify = lint clean + FRESH-verifier L2 re-audit clean + surgical-diff confirmation, NOT full clean-room regen. NEVER ADD an instruction to silence a finding (AB9 keystone).",
+  "both_directions_proof": {
+    "holds": true,
+    "claim": "calibration narrowed the auditor's mis-fires WITHOUT blinding genuine catches",
+    "forward_sanctioned_clean": "34 prompts clean as-is + all 11 W9-defensible findings re-judged clean under patterns a-e; CONTROL fixture (named pointer, pattern b) -> clean",
+    "reverse_genuine_blocked": "calibrated auditor STILL caught genuine residue (IMPLEMENT starvation, _step-runner missing-core-part, _orchestrator dup+ambiguous, SLICE-EXTRACT no-objective, 5x 02-adr mandate-narration); PLANTED fixture (verbatim 4th-home no-bookkeeping copy, pattern-c exception) -> BLOCKED on duplicate-fact",
+    "verifier": "fresh ECONOMY-AUDIT spawn (separate from authors); calibration_discriminates: true",
+    "lint_selftest": "tools/economy-lint/selftest.mjs -> PASS 24 checks (W9 C6/C8 calibration regressions + 10 defect injectors still block + determinism stable); corpus lint 44/44 clean unchanged"
+  },
+  "discriminator": {
+    "every_prompt_l2_verdict_clean": true,
+    "l2_clean_corpus": "44/44",
+    "every_finding_resolved_to_exactly_one": "prompt DELETE/REWRITE (genuine, via surface-preserving AB9 trim) | _economy-audit Rule-2 calibration (mis-fire, routes_to:canon) | (no lint-profile note needed this wave)",
+    "no_unresolved_blocking_l2_finding": true,
+    "both_directions_proof_holds": true,
+    "no_add_path_used": true,
+    "satisfied": true
+  },
+  "rolled_to": {
+    "wave": "W8-PACK-GATE",
+    "carries": "corpus now economy-clean L2 corpus-wide (44/44) + lint 44/44; W8 wires all selftests (validator + resolver + graph-lint + det modules + emitters + economy-lint incl W9 C6/C8 regressions) green into dist/adp-v5.tgz. W8 is the LAST remaining_sequence entry."
+  }
+}

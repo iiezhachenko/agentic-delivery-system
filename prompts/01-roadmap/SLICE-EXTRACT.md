@@ -27,8 +27,6 @@ Slice **vertical iff at least one acceptance criterion is black-box and user-obs
 - **Vertical** — "Freelancer signs in via OAuth" → AC5 (client watches OAuth flow land authenticated session). Valid.
 - **Horizontal** — "Build all database tables" / "Set up all the persistence layer" → no AC client can watch pass. Invalid; persistence rides *inside* capability slice that needs it.
 
-(Downstream VERTICALITY-CHECK = adversarial gate, formally rejects any horizontal candidate that slips through. Cluster vertically here so it has nothing to reject.)
-
 ## Rules
 1. **Cluster by capability, not by layer (RM1, RM7).** Group each aPRD requirement into slice that delivers **one demoable capability end-to-end** — pulls *some* of every layer it needs (data → logic → interface), **none of a layer wholesale**. Grouping drivers, cheapest-first: `AC*` that proves capability demoable; requirements that must travel together to run it (e.g. "log hours" needs "persist entries"); shared `ENTITIES`. Test: *can client watch one capability work end-to-end?* "All of layer X" = horizontal → re-cut.
 2. **Every slice carries ≥1 acceptance criterion.** `acceptance` non-empty for every slice — demo gate + verticality proof (RM2). Zero AC = not demoable; do not emit. Bind exactly the `AC*` that prove *that* capability (typically AC whose `req_ref` is one of slice's requirements).

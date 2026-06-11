@@ -62,7 +62,7 @@ Per slice on the roadmap frontier, one step per turn:
    - **Layer 1 lint** — `tools/economy-lint/lint.mjs` on scratch → `lint.json`. `blocked` → re-author, skip rest.
    - **Layer 2 ECONOMY-AUDIT** — only if lint clean: adversarial LLM on scratch → `economy-audit.json`. `blocked` → re-author.
    - **Layer 3 clean-room** — prose-clean scratch only: clear `_test_bench`, seed declared fixture inputs, spawn `step-runner` executor whose prompt = scratch verbatim + bench path (no orchestrator context leaks in). Verify AGAINST DISK: output at declared path, schema-valid, IDs threaded, acceptance satisfied. Judgment-heavy → SEPARATE verifier spawn (no self-grading). Both directions: known-good PASS + planted-defect FAIL.
-   - **Routing keystone:** any flaw ⇒ defect in the PROMPT, not artifact. `fix` = `DELETE | REWRITE`, never ADD, never hand-patch. ONE retry budget across layers: 3 → HALT, report layer + artifact, do not promote.
+   - **Routing keystone:** any flaw ⇒ defect in the PROMPT, not artifact. `fix` = `DELETE | REWRITE`, never ADD, never hand-patch. ONE budget across layers: 3 total attempts (initial + 2 re-authors) → HALT, report layer + artifact, do not promote.
 4. **CHECKPOINT C demo** — present verified slice to client. Value primary (correct behavior on staging), then both-directions held. Accept → promote scratch atomically to its home (the ship). Reject (value) → re-author. Reject (spine leak) → fix spine once, re-run.
 
 Loop to STEP 0 for next slice. All slices verified + demo accepted on staging = finish line.
