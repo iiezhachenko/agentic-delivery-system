@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 4,
+  "roadmap_version": 5,
   "verdict": "re_ranked",
-  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each entry = one remaining PROMPT-BUILD/CR, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). roadmap_version 4 = CR-002 re-rank (aprd v4->v5, deterministic-machine). SCOPED TO THIS CR's wave (operator call 2026-06-11): completed[] + remaining_sequence carry ONLY the W0-W8 deterministic-spine wave. Prior waves (greenfield 10, bugfix 8) are delivered; their done-state lives on disk (sentinels under _fixtures/greenfield-* + _fixtures/brownfield-bugfix/), NOT re-listed here (disk is source of truth, D20 — this ledger is informational, not the truth the loop derives from). W0-CANON-CR = THIS intake (CR-002 + aprd.v5 + ADRs 0024-0027/D24-D27 extending D22 + skeleton.lock v5 canon CR + all re-signed locks); shipped, so derived frontier = W1-SCHEMA-REGISTRY. Compound sentinels (the full '+ selftest green' bars from directive §6) summarized per entry in rationale; the single done_sentinel path is the frontier key, the both-directions selftest is the gate the drain loop enforces. Contracts before consumers, code before prompt-edits (W6), orchestrator swap last among consumers (W7); re-run harmless (D20). W9-ECON-RECONCILE appended by operator (2026-06-11): terminal sweep fixing ALL lint + ECONOMY-AUDIT findings deferred per-wave during the W6/W7 re-authors (defer-not-chase avoids over-stripping the standalone-PART-A/B dual-mode design); lands BEFORE W8 so dist ships economy-clean. Hand-appended under operator override; a formal RE-RANK pass would normally regenerate this entry.",
+  "_note": "SELF-HOST repurposing of the RE-RANK 08 schema (D21): each entry = one remaining PROMPT-BUILD/CR, not a product slice. done_sentinel = the disk path whose presence+validity == that build shipped (orchestrator STEP-0 derived-state key; D14/D20 analog). roadmap_version 5 = CR-003 re-rank (operator-directed RE-RANK pass, 2026-06-11): inserts W1b-REGISTRY-ENRICH after W6-REAUTHOR-04BUILD (position 8), shifting W6-REAUTHOR-REST/W7/W9/W8 down one. SCOPED TO THE CR-002 deterministic-spine wave + the CR-003 fix; prior delivered waves (greenfield 10, bugfix 8) live on disk (D20), not re-listed. Disk is source of truth — this ledger is informational ordering, not the truth the loop derives from. W0-CANON-CR shipped; W1-W5 + W6-REAUTHOR-04BUILD sentinels present on disk; derived frontier = W1b-REGISTRY-ENRICH. W1b appended by the CR-003 RE-RANK pass: W6-REAUTHOR-REST clean-room (03-hld) surfaced a value-parity drift (re-authored DERIVE-COMPONENTS 5-box vs golden/original 6-box) rooted in a thin W1 registry (0 description field-docs, violates D24 §1; loose element types let a non-conformant shape validate-clean). W1b enriches the registry to D24 fidelity + re-freezes, re-triggering W6-REAUTHOR-04BUILD re-verify (shipped, same gap) + unblocking W6-REAUTHOR-REST (held scratch at prompts/03-hld/.scratch/, un-promoted, resume-safe). Anti-thrash (RM6): W2-W5 shipped + unaffected by registry descriptions → left in base order; only the dependency-legal insertion of W1b at the frontier moves later entries. Hand-maintained under operator override; the literal greenfield RE-RANK prompt (product-slice projection) does not apply to this wave-build repurposing.",
   "completed": [
     { "position": 1, "id": "W0-CANON-CR", "name": "deterministic-machine canon CR (intake)", "status": "shipped", "unit": ".aprd/change-requests/CR-002.md + aprd.v5 + ADRs 0024-0027 + skeleton.lock v5 + all re-signed locks", "done_sentinel": ".aprd/change-requests/CR-002.md" }
   ],
@@ -16,7 +16,7 @@
       "retires_risk": "schema-in-prompt-bloat",
       "unit": "schemas/ (registry + _meta.json) + schemas.lock + tools/det/validate.mjs",
       "done_sentinel": "schemas/schemas.lock",
-      "rationale": "Compound: schemas/schemas.lock + tools/det/validate.mjs + both-directions selftest green (reference conforms; planted bad-shape fails). Externalizes every output schema (R9/D24); validator enforces conformance (R10).",
+      "rationale": "Compound: schemas/schemas.lock + tools/det/validate.mjs + both-directions selftest green (reference conforms; planted bad-shape fails). Externalizes every output schema (R9/D24); validator enforces conformance (R10). NOTE (CR-003): the v1 registry was built THIN — schemas carry 0 description field-docs (D24 §1 violation) + loose element types; W1b-REGISTRY-ENRICH fixes this.",
       "coarse_depends_on": ["W0-CANON-CR"],
       "real_depends_on": ["W0-CANON-CR"]
     },
@@ -40,7 +40,7 @@
       "retires_risk": "pr2-eyeballed",
       "unit": "tools/io/graph-lint.mjs + generated contracts.json",
       "done_sentinel": "tools/io/graph-lint.mjs",
-      "rationale": "Compound: graph-lint.mjs green + generated contracts.json matches frozen .hld/skeleton/contracts.json. PR2 auto-checked by registry-id equality (R14); chain generated not hand-written.",
+      "rationale": "Compound: graph-lint.mjs green + generated contracts.json matches frozen .hld/skeleton/contracts.json. PR2 auto-checked by registry-id equality (R14); chain generated not hand-written. Uses registry IDS (not descriptions) -> unaffected by W1b.",
       "coarse_depends_on": ["W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST"],
       "real_depends_on": ["W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST"]
     },
@@ -76,24 +76,36 @@
       "retires_risk": "canon-prompt-mismatch",
       "unit": "prompts/04-build/*.md re-authored against skeleton v5",
       "done_sentinel": "prompts/04-build/IMPLEMENT.md",
-      "rationale": "Discriminator: 04-build prompts carry NO inputs: block + NO ## Output schema section (skeleton v5); outputs[].schema = registry id. Verify clean-room both-directions; VALUE parity vs pre-CR golden (regression-guard). Biggest payoff (26-30 input lines each).",
+      "rationale": "Discriminator: 04-build prompts carry NO inputs: block + NO ## Output schema section (skeleton v5); outputs[].schema = registry id. Verify clean-room both-directions; VALUE parity vs pre-CR golden (regression-guard). Biggest payoff (26-30 input lines each). SHIPPED, but CR-003 blast radius: carries the same thin-registry gap (build-record.schema.json = 0 descriptions) -> W1b re-verifies VALUE parity against the enriched registry (no re-author needed; prompts already inputs-less).",
       "coarse_depends_on": ["W2-IO-MANIFEST", "W4-DET-MODULES"],
       "real_depends_on": ["W2-IO-MANIFEST", "W4-DET-MODULES"]
     },
     {
       "position": 8,
+      "id": "W1b-REGISTRY-ENRICH",
+      "name": "enrich schema registry to D24 fidelity (descriptions + tight constraints) + re-freeze",
+      "value": "high",
+      "retires_risk": "thin-registry-value-parity-loss",
+      "unit": "schemas/**/*.schema.json (description per property + tightened element shapes) + schemas.lock re-signed + tools/det/validate.mjs selftest tightened",
+      "done_sentinel": "schemas/schemas.lock",
+      "rationale": "CR-003 (operator-directed, surfaced by the W6-REAUTHOR-REST clean-room gate). Discriminator: schemas.lock version bumped (>1) AND every schema property carries `description` (ported from the pre-CR prompt inline `## Output schema` // field-docs, P5/B11 — git history, not re-invented) AND loose {type:array|object} on element-bearing fields (seam_realization, requirements_landed, entities_owned, edges, ...) tightened so a non-conformant shape FAILS + validator both-directions selftest green (pre-CR thin schema PASSES a planted bad shape; enriched schema FAILS it). Root cause = W1 under-implemented D24 §1 (NOT a W6 defect — the re-author is mechanically correct, merely exposes the latent gap). Re-triggers W6-REAUTHOR-04BUILD re-verify (shipped, same gap) + unblocks W6-REAUTHOR-REST. NEVER re-add an inline schema to a prompt (violates D24) — the faithful home is the registry.",
+      "coarse_depends_on": ["W1-SCHEMA-REGISTRY"],
+      "real_depends_on": ["W1-SCHEMA-REGISTRY"]
+    },
+    {
+      "position": 9,
       "id": "W6-REAUTHOR-REST",
       "name": "re-author 03/02/01/00 prompts, per phase",
       "value": "high",
       "retires_risk": "canon-prompt-mismatch",
       "unit": "prompts/{03-hld,02-adr,01-roadmap,00-aprd}/*.md re-authored against skeleton v5",
       "done_sentinel": "prompts/00-aprd/SYNTHESIZE.md",
-      "rationale": "Per-phase, same bar as W6-04build: no inputs:/schema block, outputs[].schema id, clean-room both-directions, VALUE parity. One self-slice pass per phase.",
+      "rationale": "Per-phase, same bar as W6-04build: no inputs:/schema block, outputs[].schema id, clean-room both-directions, VALUE parity. One self-slice pass per phase. HELD (CR-003): 03-hld scratch authored + discriminator-clean at prompts/03-hld/.scratch/ but NOT promoted — clean-room found value-parity drift rooted in the thin registry. Resumes after W1b: re-verify the held 03-hld scratch (both-directions, VALUE parity) against the enriched registry, then gate + promote; then 02/01/00.",
       "coarse_depends_on": ["W6-REAUTHOR-04BUILD"],
-      "real_depends_on": ["W6-REAUTHOR-04BUILD"]
+      "real_depends_on": ["W6-REAUTHOR-04BUILD", "W1b-REGISTRY-ENRICH"]
     },
     {
-      "position": 9,
+      "position": 10,
       "id": "W7-ORCH-SWAP",
       "name": "orchestrator STEP-4.1 swap: resolve+prefill+compute",
       "value": "high",
@@ -105,28 +117,28 @@
       "real_depends_on": ["W5-TIER1-EMITTERS", "W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST"]
     },
     {
-      "position": 10,
+      "position": 11,
       "id": "W9-ECON-RECONCILE",
       "name": "reconcile ALL accumulated lint + ECONOMY-AUDIT findings across the re-authored corpus",
       "value": "high",
       "retires_risk": "accumulated-economy-debt-ships",
       "unit": "prompts/**/*.md lint-clean + ECONOMY-AUDIT-clean (both-directions) + prompts/_economy-audit.md Rule-2 / lint-profile calibration where a finding is a dual-mode false-positive",
       "done_sentinel": ".roadmap/09-economy-reconcile.json",
-      "rationale": "Terminal sweep. Every prompt's lint + ECONOMY-AUDIT residue deferred per-wave during W6/W7 (defer-not-chase, avoids over-stripping the standalone-PART-A/B design) is resolved to EXACTLY ONE of: (a) prompt DELETE/REWRITE — genuine AB1/AB7 debt; (b) prompts/_economy-audit.md Rule-2 calibration — a dual-mode standalone-Part restatement is sanctioned, NOT a duplicate (the auditor mis-fires, fix the auditor not the prompt, routes_to:canon); (c) lint-profile threshold note in the stack profile. done_sentinel .roadmap/09-economy-reconcile.json records per-prompt lint verdict:clean + economy-audit verdict:clean across the whole corpus + a both-directions proof (planted-bloat copy still BLOCKED). Discriminator: zero prompt carries an unresolved blocking lint/audit finding AND the report's both-directions proof holds. NEVER ADD an instruction to silence a finding (AB9 keystone).",
+      "rationale": "Terminal sweep. Every prompt's lint + ECONOMY-AUDIT residue deferred per-wave during W6/W7 (defer-not-chase, avoids over-stripping the standalone-PART-A/B dual-mode design) is resolved to EXACTLY ONE of: (a) prompt DELETE/REWRITE — genuine AB1/AB7 debt; (b) prompts/_economy-audit.md Rule-2 calibration — a dual-mode standalone-Part restatement is sanctioned, NOT a duplicate (the auditor mis-fires, fix the auditor not the prompt, routes_to:canon); (c) lint-profile threshold note in the stack profile. done_sentinel .roadmap/09-economy-reconcile.json records per-prompt lint verdict:clean + economy-audit verdict:clean across the whole corpus + a both-directions proof (planted-bloat copy still BLOCKED). Discriminator: zero prompt carries an unresolved blocking lint/audit finding AND the report's both-directions proof holds. NEVER ADD an instruction to silence a finding (AB9 keystone).",
       "coarse_depends_on": ["W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST", "W7-ORCH-SWAP"],
       "real_depends_on": ["W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST", "W7-ORCH-SWAP"]
     },
     {
-      "position": 11,
+      "position": 12,
       "id": "W8-PACK-GATE",
       "name": "pack gate: wire all selftests, re-skin, ship",
       "value": "high",
       "retires_risk": "spine-untested-in-dist",
       "unit": "pack.mjs wires all selftests + dist/adp-v5.tgz",
       "done_sentinel": "dist/adp-v5.tgz",
-      "rationale": "Compound: pack.mjs runs all selftests (validator + resolver + graph-lint + det modules + emitters + economy-lint) green; dist/adp-v<ver>.tgz ships. Lands AFTER W9 so the corpus is economy-clean in the tarball. No tarball if any selftest mis-proves.",
+      "rationale": "Compound: pack.mjs runs all selftests (validator + resolver + graph-lint + det modules + emitters + economy-lint) green; dist/adp-v<ver>.tgz ships. Lands AFTER W9 so the corpus is economy-clean in the tarball. No tarball if any selftest mis-proves. Validator selftest now includes W1b's tightened both-directions proof.",
       "coarse_depends_on": ["W7-ORCH-SWAP", "W9-ECON-RECONCILE"],
-      "real_depends_on": ["W7-ORCH-SWAP", "W9-ECON-RECONCILE"]
+      "real_depends_on": ["W7-ORCH-SWAP", "W9-ECON-RECONCILE", "W1b-REGISTRY-ENRICH"]
     }
   ],
   "dependency_check": {
@@ -137,19 +149,19 @@
     "dangling_real_depends_on": []
   },
   "coverage": {
-    "scope_note": "Scoped to the CR-002 deterministic-machine wave only. Prior delivered waves (greenfield, bugfix) are not tracked here; their done-state is on disk (D20).",
+    "scope_note": "Scoped to the CR-002 deterministic-machine wave + the CR-003 registry-fidelity fix. Prior delivered waves (greenfield, bugfix) are not tracked here; their done-state is on disk (D20).",
     "completed": ["W0-CANON-CR"],
     "remaining_ranked": [
-      "W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST", "W3-GRAPH-LINT", "W4-DET-MODULES", "W5-TIER1-EMITTERS", "W6-REAUTHOR-04BUILD", "W6-REAUTHOR-REST", "W7-ORCH-SWAP", "W9-ECON-RECONCILE", "W8-PACK-GATE"
+      "W1-SCHEMA-REGISTRY", "W2-IO-MANIFEST", "W3-GRAPH-LINT", "W4-DET-MODULES", "W5-TIER1-EMITTERS", "W6-REAUTHOR-04BUILD", "W1b-REGISTRY-ENRICH", "W6-REAUTHOR-REST", "W7-ORCH-SWAP", "W9-ECON-RECONCILE", "W8-PACK-GATE"
     ],
     "missing": [],
     "duplicated": []
   },
   "rerank_counts": {
     "completed": 1,
-    "remaining": 10,
+    "remaining": 11,
     "reordered": 0,
     "deps_removed": 0,
-    "deps_added": 13
+    "deps_added": 16
   }
 }
