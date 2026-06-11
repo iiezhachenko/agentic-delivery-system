@@ -2,7 +2,7 @@
 role: IMPLEMENT
 phase: 04-build
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
-mode: skeleton-build|slice-build   # DISPATCHED on disk: a ready frozen slice oracle (.build/slices/<id>/oracle/oracle.lock, build-record absent/incomplete) → SLICE-BUILD (Part B: implement ONE slice component against the frozen slice oracle + prior-built slices, §5.5/D11); none → SKELETON-BUILD (Part A: implement ONE walking-skeleton component to contract-green, §5.5/B3). One role, two modes
+mode: skeleton-build|slice-build|bugfix   # DISPATCHED on disk: a ready frozen slice oracle (.build/slices/<id>/oracle/oracle.lock, build-record absent/incomplete) → SLICE-BUILD (Part B: implement ONE slice component against the frozen slice oracle + prior-built slices, §5.5/D11); none → SKELETON-BUILD (Part A: implement ONE walking-skeleton component to contract-green, §5.5/B3). bugfix = slice-build re-entry of the defect's EXISTING slice (class dispatched by playbook → bugfix delta in Part B): minimal fix at root_cause, flip reproduction test red→green, regression stays green. One role, modes
 interactive: false          # internal — team owns HOW + LLD (B8); client signed WHAT (P0) + ordered slices (P1). Demo gate later (PR1, §9)
 inputs:
   # — shared (both modes) —
@@ -31,6 +31,11 @@ inputs:
   - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — CURRENT frozen WHAT RESOLVED via lock (read .aprd/aprd.lock, open .aprd/ + its artifact value; feature-add → aprd.v<N>.frozen.md, e.g. aprd.v2 — NEVER a hardcoded version path; BF7/P8 + 07a canon). Carries CLASS_EXTENSION → CONVENTION_BASELINE: lang/layout/lint/naming the new code matches (BF5)" }
   - { path: ".aprd/baseline-map.json", format: "json — baseline inventory: conventions (lang/layout/lint/naming = the convention ground truth, BF5) + integration_seams (where the feature plugs in). New code conforms to conventions, NOT canon defaults (Risk R5: the explicit block is the ground truth)" }
   - { path: "src/freelancer_app/**", format: "python (READ-ONLY — the convention exemplar) — existing component modules the new component sits beside; read the neighbor code FIRST (cheapest-source-first, BF5) to match its naming/layout/idioms. NEVER reformat/restyle/edit (BF1 — new namespace only)" }
+  # — slice-build bugfix (class dispatched by playbook) —
+  - { path: ".aprd/diagnosis.json", format: "json — DIAGNOSE verdict: root_cause + localization.symbol (the defect_site) + repair_disposition + regression_surface. Fix targets root_cause; localization names the ONLY edit site (BLAST_RADIUS candidate)" }
+  - { path: ".aprd/<aprd.lock.artifact>", format: "markdown — CURRENT frozen WHAT via lock (bugfix → aprd.v<N>; NEVER hardcoded, BF7/P8). CLASS_EXTENSION (bugfix) → ROOT_CAUSE + BLAST_RADIUS (fix scope) + REGRESSION_GUARD (BF4)" }
+  - { path: ".build/slices/<slice_id>/oracle/reproduction/test_*.py + oracle.json", format: "python + json (FROZEN, read-only) — the ONE reproduction test your fix flips red→green; oracle reproduction_test.flips_green_when = correct behavior. Baseline S4 oracle inherited green" }
+  - { path: "src/freelancer_app/**", format: "python — EXISTING module the fix EDITS in place at BLAST_RADIUS symbol (BF4); read defect_site code FIRST (BF2). Edits src UNLIKE feature-add; nothing off-blast-radius" }
 outputs:
   # — shared —
   - { path: "src/freelancer_app/<module>/*.py", format: "python — your component's real implementation (LLD honoring frozen contract + ADR frame + INV); unbuilt seams stay mocked via frozen conftest, never re-stubbed" }
@@ -38,6 +43,9 @@ outputs:
   - { path: ".build/skeleton/build-record.json", format: "json (schema below) — build record: this run appends/updates its ONE build_unit + verification + provenance. PR2 artifact INTEGRATE consumes" }
   # — slice-build —
   - { path: ".build/slices/<slice_id>/build-record.json", format: "json (schema below) — slice build record: ONE build_unit + inherited_oracle ref + verification + provenance. PR2 artifact INTEGRATE consumes" }
+  # — slice-build bugfix (class dispatched by playbook) —
+  - { path: "src/freelancer_app/<existing-module>.py", format: "python — EXISTING file EDITED IN PLACE at the BLAST_RADIUS symbol (minimal fix, BF4); the sanctioned scoped repair of baseline code, not a new namespace" }
+  - { path: ".build/slices/<slice_id>/build-record.json", format: "json (bugfix schema delta below) — bugfix repair record: class/mode:bugfix + ONE repair build_unit + reproduction(red→green) + regression(green) + blast_radius. VERIFY-OUTPUT consumes" }
 escapes:
   # — shared —
   - { when: "the active oracle.lock missing OR status != frozen OR builder_may_not_edit != true OR starts_red != true, OR skeleton.lock|adr.lock|aprd.lock status != frozen, OR skeleton.lock gate not clean, OR (feature-add) the artifact aprd.lock names (.aprd/<aprd.lock.artifact>) missing/unparseable", target: "self / HALT — no frozen oracle/frame to build against (§5.1, B4; BF7/P8 — walk the lock-named version, never a hardcoded aprd.frozen.md). Report which" }
@@ -55,6 +63,10 @@ escapes:
   # — slice-build feature-add (class dispatched by playbook) —
   - { when: "SLICE-BUILD feature-add: .aprd/baseline-map.json missing/unparseable, OR the resolved .aprd/<aprd.lock.artifact> carries no CLASS_EXTENSION/CONVENTION_BASELINE block", target: "self / HALT — no convention ground truth to conform the new code to (BF5). Report which" }
   - { when: "SLICE-BUILD feature-add: greening a slice test would require reformatting/restyling/editing an EXISTING baseline src/ file (baseline mutation)", target: "ESCAPE (BF1) — touch only the new component's namespace; a needed baseline edit = a defect → record + route Phase 2/3, never reformat existing code" }
+  # — slice-build bugfix (class dispatched by playbook) —
+  - { when: "SLICE-BUILD bugfix: .aprd/diagnosis.json missing/unparseable OR verdict != defect-localized, OR the resolved .aprd/<aprd.lock.artifact> carries no CLASS_EXTENSION (bugfix) with BLAST_RADIUS + REGRESSION_GUARD", target: "self / HALT — no localized root cause / repair scope to fix against (BF2/BF4). Report which" }
+  - { when: "SLICE-BUILD bugfix: flipping the reproduction test green would require EDITING a DIFFERENT baseline file, or a production symbol outside the defect + the frozen conftest's required test-entry seam (diagnosis localized the wrong site, or the fix is wider than declared)", target: "ESCAPE (BF4) — record escape{classification:WHAT, diagnosis:'BLAST_RADIUS too narrow / mislocalized', route:Phase 0 (DIAGNOSE/SYNTHESIZE)}; never silently widen scope, never edit off-blast-radius src" }
+  - { when: "SLICE-BUILD bugfix: the reproduction test cannot flip green WITHOUT breaking a REGRESSION_GUARD baseline AC* (the fix regresses rated-project rendering / CRUD)", target: "ESCAPE (BF4) — the fix is not minimal/correct; after the self-heal budget record escape{classification:my-code, diagnosis, route:self}, never ship a regression-breaking fix" }
 ---
 # Register
 Think, write, reply terse like smart caveman. All technical substance stays. Only fluff dies.
@@ -204,6 +216,14 @@ The active build-plan = the auto-selected `.build/slices/<id>/build-plan.json`, 
 4. **MODE=slice, no scaffold (playbook `build_depth: per-slice-no-scaffold`).** Harness + `src/freelancer_app/` package already exist. Do NOT lay scaffold or a new `pyproject.toml` (shared Rule 8's first-run scaffold does NOT fire).
 5. **Convention drift = a CRITIQUE-flaggable defect (BF5).** New code diverging from the captured `conventions`/`CONVENTION_BASELINE` without cause = drift → re-author, never ship. Record `conforms_to_conventions:true` + the conventions checked per build_unit.
 
+### bugfix delta (slice-build — class dispatched by playbook; shared + slice-build Rules above also bind)
+> Fires only when the playbook sets `class: bugfix` (`build_depth: single-unit-no-scaffold`, `oracle_layers:[reproduction,regression]`) AND `.aprd/diagnosis.json` present AND the slice oracle `class:"bugfix"`. Re-enters the defect's EXISTING slice (S4 — Part B territory) but MINIMAL-FIXES the root cause INSTEAD OF building a new component. Mints NOTHING new (no new component/contract/scaffold/namespace; new `R*`/`AC*` are Phase 0's, already minted). Carries ONLY what differs from slice-build (AB1).
+1. **Dispatch by diagnosis, not a build-plan (playbook `build_depth: single-unit-no-scaffold`).** Signal = resolved aPRD CLASS==bugfix + `.aprd/diagnosis.json` present + the slice oracle `oracle_layers:[reproduction,regression]`. Harness + the component already exist (greenfield shipped them); there is NO slice build-plan to dispatch on (mirrors MATERIALIZE-ORACLE bugfix delta). Shared Rule 8's first-run scaffold does NOT fire.
+2. **Resolve frozen-WHAT via lock, never a hardcoded version (BF7/P8 — feature-add delta Rule 1 mechanic).** Read `.aprd/aprd.lock` → open `.aprd/<aprd.lock.artifact>` carrying `CLASS_EXTENSION (bugfix)` → ROOT_CAUSE + BLAST_RADIUS + REGRESSION_GUARD. Lock missing / `status != frozen` / no `CLASS_EXTENSION` → HALT (guard).
+3. **The fix EDITS EXISTING src, scoped to the BLAST_RADIUS module (BF4 — the sanctioned baseline edit, OPPOSITE of feature-add).** Read `diagnosis.json` `root_cause` + `localization.symbol` (the defect_site) + the existing code there FIRST (cheapest-source-first, BF2). Make the MINIMAL repair at the root cause — edit the BLAST_RADIUS symbol IN the BLAST_RADIUS module. If the frozen reproduction conftest IMPORTS a test-entry/injection seam absent from baseline (e.g. `create_app`), add it MINIMALLY in the SAME blast-radius module, touching NO production/CRUD path — that is part of greening the frozen oracle (shared Rule 1), not scope creep; record it in `edit_scope`. Editing a DIFFERENT baseline file, or any production symbol outside the defect + its required test-entry, = the diagnosis is wrong → ESCAPE (guard), never widen scope silently. Record `baseline_files_edited:true` + the `edit_scope` (symbol(s) touched).
+4. **Green target = flip the reproduction test red→green; regression STAYS green (BF4, both mandatory).** The fix flips the ONE frozen reproduction test (oracle `reproduction_test`, `OREPRO-1`) red→green, guided by its `flips_green_when` (the correct behavior the defect violates — NOT re-authored; Phase 0 owns AC text). It must NOT break a `REGRESSION_GUARD` baseline `AC*`/suite (rated-project rendering + CRUD, AC6). A fix that can't green the repro without regressing AC6 is not minimal/correct → self-heal then escape (guard).
+5. **Inherit the frozen oracle by reference; NEVER edit a frozen test/oracle/baseline test (B4/H14/BF1).** Make the frozen reproduction test pass by fixing CODE, never by editing the test. The inherited baseline S4 oracle (CT2/CT3/CT9/F4/AC6) is referenced, never re-run/re-greened/edited; a needed baseline-test edit = a defect → ESCAPE (route Phase 2), never patch.
+
 ## Task steps (slice-build)
 1. Read inputs (shared + slice-build). Check guards (frontmatter `escapes:`) — any tripped → HALT (or STOP clean for "no ready slice"), report which + detail, write nothing. Else continue.
 2. Auto-select the target slice (delta Rule 1). None ready → STOP clean.
@@ -217,6 +237,15 @@ The active build-plan = the auto-selected `.build/slices/<id>/build-plan.json`, 
 - **0a (before step 5, after picking the component).** Resolve frozen-WHAT: read `.aprd/aprd.lock` → open `.aprd/<aprd.lock.artifact>` (feature-add delta Rule 1, NEVER a hardcoded `v<N>`). Read its `CLASS_EXTENSION` → `CONVENTION_BASELINE` + `baseline-map.json` `conventions` + READ the existing neighbor `src/freelancer_app/` modules the new component sits beside (delta Rule 2 — cheapest-source-first). No `CLASS_EXTENSION`/`CONVENTION_BASELINE`, or baseline-map missing → HALT (guard).
 - **5 (feature-add).** LLD + write code CONFORMING to the captured `conventions`/`CONVENTION_BASELINE` (naming, layout, idioms, error handling, framework usage), NOT canon defaults — convention wins on conflict (delta Rules 2–3). Touch only the new namespace; never reformat a baseline file (delta Rule 3, guard).
 - **7 (feature-add).** Update slice build-record.json as above PLUS `class:"feature-add"` + `convention_baseline_ref` (resolved) + per build_unit `conforms_to_conventions:true` with the `conventions_checked` list (delta Rule 5). Stop.
+
+**Bugfix branch** (class == bugfix, playbook-dispatched — REPLACES the component-build steps; no build-plan / new component. Steps mirror MATERIALIZE-ORACLE Part B Bugfix branch):
+- **1b.** Read inputs (shared + slice-build bugfix). Check guards (frontmatter `escapes:`) — any tripped → HALT, report which + detail, write no code. Else continue.
+- **2b.** Confirm dispatch: resolved aPRD CLASS==bugfix + `.aprd/diagnosis.json` present + the slice oracle `oracle_layers:[reproduction,regression]`. Mismatch → fall through to greenfield/feature-add slice-build (wrong branch).
+- **3b.** Resolve frozen-WHAT via lock (delta Rule 2): read `CLASS_EXTENSION (bugfix)` → ROOT_CAUSE + BLAST_RADIUS + REGRESSION_GUARD. Read `diagnosis.json` `root_cause` + `localization.symbol` (defect_site) + the oracle `reproduction_test` (`OREPRO-1` + `flips_green_when`).
+- **4b.** Read the EXISTING code at the defect_site FIRST (delta Rule 3, cheapest-source-first). Design the MINIMAL repair at the root cause, scoped to the BLAST_RADIUS symbol — would the fix touch anything outside BLAST_RADIUS? → ESCAPE (guard).
+- **5b.** Edit the existing src IN PLACE (delta Rule 3): the minimal null-/error-guard (or equivalent root-cause repair) at the BLAST_RADIUS symbol. Touch ONLY that symbol/file. Never edit a frozen test/oracle/baseline test (delta Rule 5).
+- **6b.** Run the reproduction test + the REGRESSION_GUARD baseline suite (pytest scoped, or static-trace where no runtime — shared Rule 5). Iterate red→green under the self-heal budget: reproduction must flip red→green AND regression must stay green. Stall / regression-breaks / off-blast-radius need → ESCAPE (guard) with a routable diagnosis.
+- **7b.** Green → write `.build/slices/<slice_id>/build-record.json` (bugfix schema delta below): `class:"bugfix"` + `mode:"bugfix"` + `diagnosis_ref` + `aprd_ref` (lock-resolved) + the ONE repair build_unit (`baseline_files_edited:true`, `edit_scope`, `files`) + `reproduction` (flipped red→green) + `regression` (AC6 green, scope) + INHERITED_ORACLE ref + PROVENANCE + COMMITS (cite R11/AC11). Stop.
 
 ## Output schema — `.build/slices/<slice_id>/build-record.json`
 Same shape as Part A; the slice deltas (everything else carried verbatim):
@@ -303,9 +332,39 @@ Same shape as above; the feature-add slice adds (everything else carried verbati
 "baseline_files_edited": false            // BF1 — only the new namespace touched; no existing src/ file reformatted/restyled/edited
 ```
 
+### Bugfix schema delta (slice-build, class == bugfix — only what differs, AB1)
+Same shape as above; the bugfix repair record adds/changes (everything else carried verbatim):
+- `"class": "bugfix"` + `"mode": "bugfix"` (the discriminator; was `"greenfield"` / `"slice-build"`).
+- `"diagnosis_ref": ".aprd/diagnosis.json"` + `"aprd_ref": ".aprd/<aprd.lock.artifact>"` (lock-resolved, NEVER hardcoded) + `"aprd_version"`.
+- `"blast_radius": { "module": "src/freelancer_app/wsgi.py", "symbol": "_ProjectManagementAdapter._render", "source": ".aprd/<aprd>.frozen.md#CLASS_EXTENSION/BLAST_RADIUS" }` — the fix scope (BF4).
+- `inherited_oracle.inherited_green_tests` = the baseline S4 oracle tests held green by reference (CT2/CT3/CT9/F4/AC6) — NOT re-run.
+- The ONE `build_units[]` entry is a REPAIR unit (no new component):
+```json
+{
+  "component": "C3",
+  "name": "Project Management",
+  "repair": true,                              // bugfix repair, not a new component build
+  "defect_site": "_ProjectManagementAdapter._render (src/freelancer_app/wsgi.py)", // diagnosis localization.symbol
+  "root_cause_ref": ".aprd/diagnosis.json#root_cause",
+  "files": ["src/freelancer_app/wsgi.py"],     // the EXISTING file edited in place (BF4)
+  "edit_scope": ["_ProjectManagementAdapter._render"], // ONLY the BLAST_RADIUS symbol touched
+  "baseline_files_edited": true,               // the SANCTIONED scoped repair (opposite of feature-add's false)
+  "blast_radius_respected": true,              // no file/symbol outside BLAST_RADIUS touched (else escape)
+  "traces": ["R11", "AC11"],                   // the repro AC/req the fix satisfies (Phase 0 minted)
+  "lld_notes": "Minimal null-guard at _render: billable_rate renders '—' when None, else f'{rate:.2f}'. No other behavior changed; rated-project rendering + CRUD path untouched (AC6 regression-safe).",
+  "status": "green",
+  "escape": null
+}
+```
+- `"reproduction": { "test_id": "OREPRO-1", "file": "reproduction/test_AC11_null_rate.py", "was": "red", "now": "green", "flipped_by": "<the one-line fix>", "traces": ["R11","AC11"], "baseline_ref": "AC6" }`.
+- `"regression": { "asserts": ["AC6"], "source_suites": [".build/slices/S4/oracle/"], "scope": "touched-surface + seams", "scope_basis": "BLAST_RADIUS symbol _ProjectManagementAdapter._render, NOT full suite (Risk R4)", "status": "green", "baseline_tests_edited": false }`.
+- `"verification": { "reproduction": "green", "regression": "green", "method": "executed|static-trace", "contract": "n/a — bugfix mints no new contract", "flow": "not-run", "acceptance": "not-run" }` (VERIFY-OUTPUT runs the authoritative repro-flipped + regression-green ladder).
+- `"build_record_counts": { "repair_units": 1, "reproduction_flipped": 1, "regression_asserts_green": 1, "baseline_files_edited": 1 }`.
+
 ## Stop condition (slice-build)
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which fired + detail; HALT.
 - No ready slice → write nothing; STOP clean.
 - Self-heal exhausted / edit-need / skeleton-fidelity breach (Rule 5 / delta Rule 4, guard) → flag per the guard, name the target phase, stop. Defects flagged, never patched.
 - Clean → module written under `src/freelancer_app/<module>/`, slice obligation suite green (deps mocked, frozen skeleton oracle inherited), build_unit recorded. State "Built <C*> (<name>) for slice <id> — <N> contract test(s) green, deps mocked; <next un-built slice component, or 'slice contract layer complete'>; INTEGRATE wires the slice flow next", stop. Lane per shared Rule 10.
 - Clean (feature-add) → as above PLUS the new code conforms to the captured `conventions`/`CONVENTION_BASELINE` (`conforms_to_conventions:true`, no baseline file edited) + `class:"feature-add"` + `convention_baseline_ref`. State "Built <C*> (<name>) for feature-add slice <id> — <N> contract test(s) green, deps mocked, convention-conformant (baseline untouched); <next ...>; INTEGRATE wires the slice flow next", stop.
+- Clean (bugfix) → minimal fix written IN PLACE at the BLAST_RADIUS symbol (`baseline_files_edited:true`, nothing off-blast-radius touched); reproduction test flipped red→green; REGRESSION_GUARD baseline AC* stayed green; bugfix build-record recorded (`class:"bugfix"`, `mode:"bugfix"`). State "Repaired <defect_site> for bugfix slice <id> — reproduction OREPRO-1 red→green, AC6 regression green, edit scoped to BLAST_RADIUS; VERIFY-OUTPUT asserts repro-flipped + regression-green next", stop.

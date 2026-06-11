@@ -256,8 +256,13 @@ class _ProjectManagementAdapter:
         self._project_store = ProjectStore(_PROJECT_DATA_STORE)  # real C1 project persistence
 
     def _render(self, projects: list) -> str:
+        # AC11/R11: null billable_rate renders as em-dash; no numeric format applied to None
+        def _rate_str(rate):
+            if rate is None:
+                return "—"  # em-dash '—'
+            return f"{float(rate):.2f}/hr"
         items = "".join(
-            f"<li>{p.get('name','')} — {p.get('currency','')} {p['billable_rate']:.2f}/hr</li>"
+            f"<li>{p.get('name','')} — {p.get('currency','')} {_rate_str(p.get('billable_rate'))}</li>"
             for p in projects
         )
         return f"<html><body><ul>{items}</ul></body></html>"
@@ -342,3 +347,181 @@ settings.ROOT_URLCONF = __name__
 # WSGI entry — the frozen conftest wsgi_app fixture imports this callable:
 #   from freelancer_app.wsgi import application
 application = get_wsgi_application()
+
+
+# ---------------------------------------------------------------------------
+# Test-entry seam — create_app (OREPRO-1 / AC11 / R11)
+# Imported by frozen conftest's client fixture (delta Rule 3 / BF4).
+# Minimal factory: accepts contract-level mocks (project_store, identity_auth),
+# returns AppHandle with .test_client() → _TestClient.
+# Touches NO production/CRUD path; only wires injection into the adapter for test use.
+# ---------------------------------------------------------------------------
+
+class _TestResponse:
+    """Thin response wrapper — .status_code + .text + .get_data(as_text)."""
+    def __init__(self, status_code: int, body: str):
+        self.status_code = status_code
+        self.text = body
+
+    def get_data(self, as_text: bool = False) -> str:
+        return self.text if as_text else self.text.encode("utf-8")
+
+
+class _TestClient:
+    """Framework-agnostic WSGI test client for injection-seam app."""
+    def __init__(self, wsgi_callable):
+        self._app = wsgi_callable
+
+    def get(self, path: str, headers: dict | None = None) -> _TestResponse:
+        import io
+        environ = {
+            "REQUEST_METHOD": "GET",
+            "PATH_INFO": path,
+            "QUERY_STRING": "",
+            "HTTP_COOKIE": "",
+            "wsgi.input": io.BytesIO(b""),
+            "wsgi.errors": io.BytesIO(),
+            "wsgi.multithread": False,
+            "wsgi.multiprocess": False,
+            "wsgi.run_once": False,
+            "wsgi.url_scheme": "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "80",
+            "HTTP_HOST": "localhost",
+        }
+        # Inject Cookie header from headers dict (handles "Cookie: session=..." style)
+        if headers:
+            for key, val in headers.items():
+                k_upper = key.upper().replace("-", "_")
+                if k_upper == "COOKIE":
+                    # Extract cookie value (strip "Path=/..." trailing segments)
+                    cookie_part = val.split(";")[0].strip()
+                    environ["HTTP_COOKIE"] = cookie_part
+                else:
+                    environ[f"HTTP_{k_upper}"] = val
+        responses: list = []
+        def start_response(status, resp_headers, exc_info=None):
+            responses.append({"status": int(status.split(" ", 1)[0]), "headers": dict(resp_headers)})
+        body_iter = self._app(environ, start_response)
+        body_bytes = b"".join(body_iter)
+        status_code = responses[0]["status"] if responses else 500
+        return _TestResponse(status_code, body_bytes.decode("utf-8", errors="replace"))
+
+
+class _AppHandle:
+    """Returned by create_app — holds injected-mock WSGI app and vends test client."""
+    def __init__(self, wsgi_callable):
+        self._wsgi = wsgi_callable
+
+    def test_client(self) -> _TestClient:
+        return _TestClient(self._wsgi)
+
+
+def create_app(project_store=None, identity_auth=None):
+    """Test-entry seam (OREPRO-1/AC11/R11).
+    Builds a WSGI app wired with injected contract-level mocks:
+      project_store: mock with .list(owner_id) → list of project dicts (CT2 shape)
+      identity_auth: mock with .resolve_session(token) → identity dict or None (CT3 shape)
+    Returns _AppHandle; call .test_client() to get a _TestClient.
+    Does NOT touch production singleton adapters; builds isolated app closure.
+    """
+    # Build isolated adapter with injected mocks (not the module-level singletons)
+    class _InjectedProjectMgmtAdapter:
+        """Adapter scoped to create_app call — uses injected mocks, not production singletons."""
+        def _render(self, projects: list) -> str:
+            # Same null-safe render as _ProjectManagementAdapter._render (AC11/R11)
+            def _rate_str(rate):
+                if rate is None:
+                    return "—"
+                return f"{float(rate):.2f}/hr"
+            items = "".join(
+                f"<li>{p.get('name','')} — {p.get('currency','')} {_rate_str(p.get('billable_rate'))}</li>"
+                for p in projects
+            )
+            return f"<html><body><ul>{items}</ul></body></html>"
+
+        def handle_request(self, request: dict) -> dict:
+            # CT3: resolve session from injected identity_auth mock
+            token = request.get("session_token")
+            identity = identity_auth.resolve_session(token) if identity_auth else None
+            if not identity:
+                return {"status": 302, "body": "", "content_type": "text/html", "location": "/auth/login"}
+            owner_id = identity["freelancer_id"]
+            method = request.get("method", "GET").upper()
+            parts = [p for p in request.get("path", "").split("/") if p]
+            if parts == ["projects"] and method == "GET":
+                # CT2: list from injected project_store mock
+                projects = project_store.list(owner_id) if project_store else []
+                return {"status": 200, "body": self._render(projects), "content_type": "text/html", "projects": projects}
+            return {"status": 200, "body": "<html><body></body></html>", "content_type": "text/html"}
+
+    _injected_mgmt = _InjectedProjectMgmtAdapter()
+
+    def _injected_view_project_management(request):
+        req_dict = {
+            "method": request.method,
+            "path": request.path,
+            "session_token": request.COOKIES.get("session"),
+            "body": dict(request.POST.items()) if request.method == "POST" else {},
+        }
+        result = _injected_mgmt.handle_request(req_dict)
+        location = result.get("location")
+        if location:
+            return HttpResponseRedirect(location)
+        return HttpResponse(result.get("body", ""), content_type=result.get("content_type", "text/html"),
+                            status=result.get("status", 200))
+
+    # Build isolated URL conf for this test app
+    from django.urls import path as _path
+    injected_urlpatterns = [
+        _path("projects", _injected_view_project_management, name="inj_projects_list"),
+        _path("projects/", _injected_view_project_management, name="inj_projects_list_slash"),
+    ]
+
+    # Wire a fresh WSGI handler for isolated URL dispatch
+    from django.core.handlers.wsgi import WSGIHandler
+    from django.urls.resolvers import URLResolver, RoutePattern
+
+    def _injected_wsgi(environ, start_response):
+        # Temporarily override ROOT_URLCONF to isolated patterns
+        import threading
+        _orig = settings.ROOT_URLCONF
+        # Use django's get_wsgi_application pattern but with isolated urlconf
+        # Simplest: use Django's test request factory via the existing application
+        # but monkeypatch the view for /projects only.
+        # Cleaner: implement tiny WSGI directly for the test surface.
+        path_info = environ.get("PATH_INFO", "/")
+        method = environ.get("REQUEST_METHOD", "GET").upper()
+        cookie_str = environ.get("HTTP_COOKIE", "")
+        # Parse cookies
+        cookies = {}
+        for part in cookie_str.split(";"):
+            part = part.strip()
+            if "=" in part:
+                k, v = part.split("=", 1)
+                cookies[k.strip()] = v.strip()
+        session_token = cookies.get("session")
+        if path_info.rstrip("/") == "/projects" and method == "GET":
+            req_dict = {
+                "method": "GET",
+                "path": "/projects",
+                "session_token": session_token,
+                "body": {},
+            }
+            result = _injected_mgmt.handle_request(req_dict)
+            location = result.get("location")
+            if location:
+                status_line = "302 Found"
+                resp_headers = [("Location", location), ("Content-Type", "text/html")]
+                start_response(status_line, resp_headers)
+                return [b""]
+            body = (result.get("body") or "").encode("utf-8")
+            status_code = result.get("status", 200)
+            start_response(f"{status_code} OK", [("Content-Type", "text/html; charset=utf-8"),
+                                                  ("Content-Length", str(len(body)))])
+            return [body]
+        # fallthrough: 404
+        start_response("404 Not Found", [("Content-Type", "text/html")])
+        return [b"<html><body>Not Found</body></html>"]
+
+    return _AppHandle(_injected_wsgi)
