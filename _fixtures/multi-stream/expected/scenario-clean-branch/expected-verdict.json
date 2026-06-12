@@ -1,0 +1,14 @@
+{
+  "scenario": "clean-branch",
+  "description": "Workstream branch + clean fast-forward reconcile — STEP 0.0 passes, STEP 0.1 merges clean, frontier-scan proceeds.",
+  "src_state": "src/state-clean-branch.md",
+  "owning_behavior": "STEP 0.0 (enforce-non-master) + STEP 0.1 (auto-reconcile from main)",
+  "expected_result": "PASS — no HALT; auto-reconcile succeeds; orchestrator advances to frontier-scan",
+  "expected_signal": {
+    "step_0_0_halt": false,
+    "step_0_1_merge_result": "clean",
+    "frontier_scan_reached": true
+  },
+  "load_bearing_assertion": "STEP 0.0 does not HALT because current branch is not master/main. STEP 0.1 runs git merge origin/main --ff-only; clean fast-forward exits 0. Orchestrator proceeds past STEP 0 sub-steps.",
+  "separates_from_defect_by": "no-enforce-non-master defect would not block master; no-auto-reconcile defect would skip the reconcile entirely (dirty state undetected). Golden: both sub-steps run correctly."
+}

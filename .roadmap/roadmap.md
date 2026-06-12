@@ -23,4 +23,4 @@ P-DERIVE-TESTS-INC · P-RECONCILE-CRITIQUE-INC · P-BUILD-PLAN-SLICE · P-MATERI
 7. **P-BUGFIX-VERIFY-OUTPUT** — repro flips red→green + regression stays green. Sentinel: `_fixtures/brownfield-bugfix/.build/slices/S4/verify-output.json`.
 8. **P-BUGFIX-DEFECTS-E2E** — planted defects + both-directions e2e + README note. Sentinel: `_fixtures/brownfield-bugfix/defects/regression/expected-verdict.json`.
 
-Frontier = first entry whose `done_sentinel` absent or schema-invalid — bugfix wave (8 entries above) still pending; **CR-007 multi-stream wave** added as positions 19–22 in `08-rerank.json` (branch `feature/multi-stream-workstreams`, frontier = W16-ADR-0028).
+Frontier = first entry whose `done_sentinel` absent or schema-invalid — bugfix wave (8 entries above) still pending; **CR-007 multi-stream wave** positions 19–22 in `08-rerank.json` (branch `feature/multi-stream-workstreams`). W16-ADR-0028 + W17-HLD-STREAM-COMPONENT + W18-ORCH-MULTISTREAM shipped; W19-STREAM-ORACLE at STEP-5 gate (roadmap_version 25).

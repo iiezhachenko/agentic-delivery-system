@@ -1,0 +1,18 @@
+{
+  "defect": "no-auto-reconcile",
+  "invariant": "STEP 0.1 (R-MW-2, D28) — on workstream branch, run git fetch origin + git merge origin/main --ff-only; conflict/non-ff → HALT. A runner that skips STEP 0.1 proceeds without reconciling, silently advancing on a stale/unreconciled tree.",
+  "owning_role": "prompts/_orchestrator.md STEP 0.1 — Run git fetch origin && git merge origin/main --ff-only. Non-fast-forward or conflict → HALT.",
+  "seed": [
+    "Apply defect: STEP 0.1 block removed from orchestrator (skip fetch+merge entirely)",
+    "Run against scenario-conflict-halt state (non-fast-forward merge would fire)",
+    "Expected: orchestrator proceeds to frontier-scan without reconcile HALT"
+  ],
+  "load_bearing_assertion": "Golden orchestrator: HALT with 'Merge conflict or non-fast-forward against origin/main...' emitted. Defect orchestrator: no HALT — skips reconcile, proceeds to frontier-scan. Value-parity fails: step_0_1_halt == false vs golden true.",
+  "expected_verdict": "value-parity FAIL — no-auto-reconcile: orchestrator skips reconcile HALT on non-fast-forward",
+  "expected_signal": {
+    "step_0_1_halt": false,
+    "frontier_scan_reached": true,
+    "halt_message_present": false
+  },
+  "separates_from_golden_by": "HALT message presence + step_0_1_halt flag. Golden: HALT fires on non-fast-forward. Defect: no HALT, proceeds on unreconciled tree."
+}

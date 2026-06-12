@@ -1,0 +1,18 @@
+{
+  "defect": "no-enforce-non-master",
+  "invariant": "STEP 0.0 (R-MW-3, D28) — if current branch = master AND workstream branches present → HALT. A runner that skips STEP 0.0 proceeds silently past master state, violating the enforce-non-master guard.",
+  "owning_role": "prompts/_orchestrator.md STEP 0.0 — Run git rev-parse --abbrev-ref HEAD; if master/main: scan feature/* + bugfix/*; any present → HALT with branch list.",
+  "seed": [
+    "Apply defect: STEP 0.0 block removed from orchestrator (orchestrator proceeds directly to STEP 0.1 without branch check)",
+    "Run against scenario-master-halt state (current branch = master, feature/my-feature + bugfix/fix-rate present)",
+    "Expected: orchestrator proceeds past STEP 0.0 without HALT (no branch-guard message)"
+  ],
+  "load_bearing_assertion": "Golden orchestrator: HALT with 'On master with in-flight workstream branches: ...' emitted. Defect orchestrator: no HALT — proceeds to STEP 0.1 / frontier-scan on master. Value-parity fails: step_0_0_halt == false vs golden true.",
+  "expected_verdict": "value-parity FAIL — no-enforce-non-master: orchestrator proceeds on master without HALT",
+  "expected_signal": {
+    "step_0_0_halt": false,
+    "frontier_scan_reached": true,
+    "halt_message_present": false
+  },
+  "separates_from_golden_by": "HALT message presence + step_0_0_halt flag. Golden: HALT fires with branch list. Defect: no HALT, orchestrator runs on master — any frontier-scan output = discrimination signal."
+}

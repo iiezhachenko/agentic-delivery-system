@@ -1,0 +1,25 @@
+{
+  "scenario": "new-stream",
+  "description": "new-stream dispatch — branch created locally, brief.md written, STOP emitted; current workstream not advanced.",
+  "src_state": "src/state-new-stream.md",
+  "owning_behavior": "MODES new-stream dispatch (R-MW-4, D28, G1 local-only)",
+  "dispatch_arg": "new-stream analytics-pipeline \"Add analytics pipeline to ADP\"",
+  "expected_result": "branch feature/analytics-pipeline created locally; _streams/analytics-pipeline/brief.md written; STOP",
+  "expected_signal": {
+    "branch_created": "feature/analytics-pipeline",
+    "branch_local_only": true,
+    "brief_md_written": "_streams/analytics-pipeline/brief.md",
+    "brief_md_fields": {
+      "ask": "Add analytics pipeline to ADP",
+      "branch": "feature/analytics-pipeline",
+      "status": "pending",
+      "date": "present"
+    },
+    "stop_emitted": true,
+    "remote_push_performed": false,
+    "current_workstream_advanced": false
+  },
+  "load_bearing_assertion": "new-stream dispatch: branch created off HEAD (local, no push); brief.md written with ask/branch/status=pending/date; 'New workstream queued on branch feature/analytics-pipeline. Check out that branch in a new harness session.' emitted; STOP. STEP 0 sub-steps NOT run. Current workstream not advanced.",
+  "separates_from_defect_by": "new-stream-auto-push defect pushes branch to remote (violates G1). Golden: branch local-only, no remote push.",
+  "stop_message_template": "New workstream queued on branch `feature/analytics-pipeline`. Check out that branch in a new harness session."
+}

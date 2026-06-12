@@ -1,0 +1,17 @@
+{
+  "scenario": "master-halt",
+  "description": "On master with in-flight workstream branches — STEP 0.0 fires HALT, names branches.",
+  "src_state": "src/state-master-halt.md",
+  "owning_behavior": "STEP 0.0 (enforce-non-master, R-MW-3, D28)",
+  "expected_result": "HALT — master + in-flight workstream branches detected",
+  "expected_signal": {
+    "step_0_0_halt": true,
+    "halt_message_contains": "On master with in-flight workstream branches",
+    "in_flight_branches_listed": ["feature/my-feature", "bugfix/fix-rate"],
+    "step_0_1_reached": false,
+    "frontier_scan_reached": false
+  },
+  "load_bearing_assertion": "git rev-parse --abbrev-ref HEAD = master. git branch --list 'feature/*' 'bugfix/*' returns feature/my-feature + bugfix/fix-rate. Orchestrator emits HALT message with branch list. Does not proceed to STEP 0.1 or frontier-scan.",
+  "separates_from_defect_by": "no-enforce-non-master defect skips STEP 0.0 — orchestrator proceeds past master state silently. Golden: HALT fires with branch names listed.",
+  "halt_message_template": "On master with in-flight workstream branches: [feature/my-feature, bugfix/fix-rate]. Check out the target workstream branch and re-run."
+}

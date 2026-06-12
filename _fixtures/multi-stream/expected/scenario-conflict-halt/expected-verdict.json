@@ -1,0 +1,16 @@
+{
+  "scenario": "conflict-halt",
+  "description": "Merge conflict or non-fast-forward on reconcile — STEP 0.1 fires HALT.",
+  "src_state": "src/state-conflict-halt.md",
+  "owning_behavior": "STEP 0.1 (auto-reconcile from main, R-MW-2, D28)",
+  "expected_result": "HALT — non-fast-forward or conflict against origin/main",
+  "expected_signal": {
+    "step_0_0_halt": false,
+    "step_0_1_halt": true,
+    "halt_message_contains": "Merge conflict or non-fast-forward against origin/main",
+    "frontier_scan_reached": false
+  },
+  "load_bearing_assertion": "STEP 0.0 passes (not master). git merge origin/main --ff-only fails (non-ff or conflict). Orchestrator emits HALT: 'Merge conflict or non-fast-forward against origin/main. Resolve manually, then re-run.' Frontier-scan not reached.",
+  "separates_from_defect_by": "no-auto-reconcile defect skips STEP 0.1 entirely — orchestrator proceeds to frontier-scan on a dirty/unreconciled tree. Golden: HALT fires on non-fast-forward.",
+  "halt_message_template": "Merge conflict or non-fast-forward against origin/main. Resolve manually, then re-run."
+}

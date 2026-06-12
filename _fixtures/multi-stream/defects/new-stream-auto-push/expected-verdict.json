@@ -1,0 +1,17 @@
+{
+  "defect": "new-stream-auto-push",
+  "invariant": "MODES new-stream dispatch G1 — branch created LOCAL-ONLY; operator pushes when ready. A runner that auto-pushes to remote violates G1 (gate answer 2026-06-12, persisted D20 guarantee 6). No auto-push at any point in the new-stream path.",
+  "owning_role": "prompts/_orchestrator.md MODES new-stream — create branch feature/<slug> off current HEAD (locally, do NOT push); write _streams/<slug>/brief.md; emit stop message; STOP.",
+  "seed": [
+    "Apply defect: new-stream path adds git push origin feature/<slug> after branch creation",
+    "Run against scenario-new-stream state (dispatch arg: new-stream analytics-pipeline '...')",
+    "Expected: git push executed — branch visible on remote"
+  ],
+  "load_bearing_assertion": "Golden: branch created local-only (git branch feature/analytics-pipeline off HEAD; no git push). Defect: git push origin feature/analytics-pipeline executed. Value-parity fails: remote_push_performed == true vs golden false. G1 gate answer violated.",
+  "expected_verdict": "value-parity FAIL — new-stream-auto-push: git push executed violating G1 local-only constraint",
+  "expected_signal": {
+    "remote_push_performed": true,
+    "branch_local_only": false
+  },
+  "separates_from_golden_by": "remote_push_performed flag. Golden: no push (local-only). Defect: push executed — any remote branch listing showing feature/analytics-pipeline = discrimination signal. G1 gate answer (LOCAL-ONLY) is the invariant."
+}
