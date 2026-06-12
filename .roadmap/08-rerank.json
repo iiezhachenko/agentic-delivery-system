@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 44,
+  "roadmap_version": 45,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 44 (W30f-SEQUENCE-SPLIT shipped, 2026-06-12): SEQUENCE trimmed to greenfield-only (class=greenfield), SEQUENCE-FEATURE-ADD new Phase-1 role added (D37/CR-019), feature-add.md playbook rewired (prompt_overlays SEQUENCE-FEATURE-ADD). components.json 44→45, skeleton.lock v14→v15, io.lock v3→v4. W30g–W30l unshipped (remaining CR-020–CR-021 role splits). W29i–W29j reconciled unshipped→shipped 2026-06-12: done_sentinels present on disk (CLASSIFIER audit routing 13c7967, BASELINE-MAP overlay 6535710); status flags were stale, never flipped at promotion. Deferred unchanged [I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth).",
+  "_note": "roadmap_version 45 (W30h-SYNTHESIZE-INCREMENT-SPLIT shipped, 2026-06-12): SYNTHESIZE trimmed to greenfield-only (class=greenfield, escape → SYNTHESIZE-INCREMENT for feature-add/bugfix), SYNTHESIZE-INCREMENT new Phase-0 role added (D37/CR-021), io-manifest SYNTHESIZE.when cleared + SYNTHESIZE-INCREMENT entry added, components.json 46→47, io.lock v4→v5. W30g + W30i–W30l unshipped (remaining CR-020–CR-021 role splits). W29i–W29j reconciled unshipped→shipped 2026-06-12: done_sentinels present on disk. Deferred unchanged [I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth).",
   "completed": [],
   "remaining_sequence": [
     {
@@ -125,7 +125,7 @@
       "position": 46,
       "id": "W30h-SYNTHESIZE-INCREMENT-SPLIT",
       "name": "CR-021: SYNTHESIZE trimmed (greenfield only) + SYNTHESIZE-INCREMENT added (feature-add/bugfix)",
-      "status": "unshipped",
+      "status": "shipped",
       "unit": "prompts/00-aprd/SYNTHESIZE-INCREMENT.md",
       "done_sentinel": "prompts/00-aprd/SYNTHESIZE-INCREMENT.md",
       "depends_on": [

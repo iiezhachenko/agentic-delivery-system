@@ -80,16 +80,20 @@
         { "path": ".aprd/05-questions.md", "hint": "which gaps became Q* vs deferred; maps answer letter back to gap+interpretation" },
         { "path": ".aprd/06-answers.md", "hint": "client answers; 'Q<n>: <letter>' or free text; blank=skipped" }
       ],
+      "when": []
+    },
+    "SYNTHESIZE-INCREMENT": {
+      "always": [
+        { "path": ".aprd/02-extraction.json", "hint": "canonical E*/R*/C* id-space carried forward unchanged" },
+        { "path": ".aprd/04-gaps.json", "hint": "ranked gaps G* + interpretations + recommended_default + disposition; one assumption per gap" },
+        { "path": ".aprd/05-questions.md", "hint": "which gaps became Q* vs deferred; maps answer letter back to gap+interpretation" },
+        { "path": ".aprd/06-answers.md", "hint": "client answers; 'Q<n>: <letter>' or free text; blank=skipped" },
+        { "path": ".aprd/baseline-map.json", "hint": "id_high_water (BF3) + conventions (BF5) + integration_seams (BF6) + existing_oracle (BF4)" },
+        { "path": ".aprd/aprd.frozen.md", "hint": "frozen BASELINE, READ-ONLY (BF1); R*/AC*/E*/C* carried by REFERENCE, max A* sets high-water" }
+      ],
       "when": [
-        { "if": { "class": "feature-add" },
-          "read": [
-            { "path": ".aprd/baseline-map.json", "hint": "id_high_water (BF3) + conventions (BF5) + integration_seams (BF6) + existing_oracle (BF4)" },
-            { "path": ".aprd/aprd.frozen.md", "hint": "frozen BASELINE, READ-ONLY (BF1); R*/AC*/E*/C* carried by REFERENCE, max A* sets high-water" }
-          ] },
         { "if": { "class": "bugfix" },
           "read": [
-            { "path": ".aprd/baseline-map.json", "hint": "id_high_water (BF3) + existing_oracle (BF4) + conventions" },
-            { "path": ".aprd/aprd.frozen.md", "hint": "frozen BASELINE, READ-ONLY (BF1)" },
             { "path": ".aprd/diagnosis.json", "hint": "ROOT_CAUSE block carried VERBATIM into bugfix aPRD" }
           ] }
       ]

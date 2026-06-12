@@ -1,14 +1,14 @@
 {
   "artifact": "io/io-manifest.json",
-  "version": "v4",
-  "content_sha256": "cbbbd622e5231ebd45badf31fb03c4aefb7a875e5fcbe97668a022bc2271ee62",
+  "version": "v5",
+  "content_sha256": "414c1903bfd356d9fd88b3b8e6589510f7c331f8db688e1d530fc1863a0b1e50",
   "content_sha256_algo": "sha256 of io/io-manifest.json file bytes verbatim (single file). Node crypto.createHash('sha256').update(<file bytes>).digest('hex'); == coreutils sha256sum.",
   "signer": "self-host:agentic-delivery-pipeline",
-  "signed_at": "2026-06-12T16:00:00Z",
+  "signed_at": "2026-06-12T18:00:00Z",
   "status": "frozen",
   "class": "self-host",
   "mode": "io-manifest",
-  "role_count": 43,
+  "role_count": 44,
   "group_count": 6,
-  "note": "v4 = v3 + W30f/CR-019 SEQUENCE-FEATURE-ADD role entry (2026-06-12): SEQUENCE-FEATURE-ADD added to roles[] — always reads .roadmap/02-slices.json (new candidate slice bodies) + .roadmap/03-verticality.json (valid[] new slices) + .roadmap/08-rerank.json (baseline completed[] pin). role_count 42→43. v3 = v2 + W30e/CR-018 BUGFIX-LOCALIZE role entry (2026-06-12): BUGFIX-LOCALIZE added to roles[] — always reads CR-*.md (defect report) + aprd.lock + adr.lock + skeleton.lock + aprd.frozen.md + optional prior diagnosis.json; when class=bugfix reads slice CT*/oracle/src. DIAGNOSE bugfix-localize when-block removed (mode extracted to BUGFIX-LOCALIZE per SRP split D37/CR-018). role_count 41→42. v2 = v1 + W29h/CR-015 AUDIT-REPORT role entry (2026-06-12): AUDIT-REPORT added to roles[] — always reads .aprd/aprd.lock (project name) + .audit/audit-report.json (AUDIT-RUN output, schema audit-report). role_count 40→41. v1 = W2 of CR-002, externalizes the input read-graph per D25/R11 (groups + roles[].always + roles[].when[] over state mode/class/pass). resolve(role,state) -> flat deduped path list via tools/io/resolve.mjs; orchestrator STEP-4.1 seeds _test_bench + path-grade injects. Prompts declare no inputs (W6 re-author drops inputs:). Collision roles (CRITIQUE/RECONCILE in >1 phase) keyed <ROLE>@<phase>. Both-directions selftest: tools/io/resolve.selftest.mjs."
+  "note": "v5 = v4 + W30h/CR-021 SYNTHESIZE-INCREMENT role entry (2026-06-12): SYNTHESIZE-INCREMENT added to roles[] — always reads .aprd/02-extraction.json + .aprd/04-gaps.json + .aprd/05-questions.md + .aprd/06-answers.md + .aprd/baseline-map.json + .aprd/aprd.frozen.md; when class=bugfix reads .aprd/diagnosis.json. SYNTHESIZE.when[] cleared (greenfield-only, feature-add/bugfix dispatch moved to SYNTHESIZE-INCREMENT per SRP split D37/CR-021). role_count 43→44. v4 = v3 + W30f/CR-019 SEQUENCE-FEATURE-ADD role entry (2026-06-12): SEQUENCE-FEATURE-ADD added to roles[] — always reads .roadmap/02-slices.json (new candidate slice bodies) + .roadmap/03-verticality.json (valid[] new slices) + .roadmap/08-rerank.json (baseline completed[] pin). role_count 42→43. v3 = v2 + W30e/CR-018 BUGFIX-LOCALIZE role entry (2026-06-12): BUGFIX-LOCALIZE added to roles[] — always reads CR-*.md (defect report) + aprd.lock + adr.lock + skeleton.lock + aprd.frozen.md + optional prior diagnosis.json; when class=bugfix reads slice CT*/oracle/src. DIAGNOSE bugfix-localize when-block removed (mode extracted to BUGFIX-LOCALIZE per SRP split D37/CR-018). role_count 41→42. v2 = v1 + W29h/CR-015 AUDIT-REPORT role entry (2026-06-12): AUDIT-REPORT added to roles[] — always reads .aprd/aprd.lock (project name) + .audit/audit-report.json (AUDIT-RUN output, schema audit-report). role_count 40→41. v1 = W2 of CR-002, externalizes the input read-graph per D25/R11 (groups + roles[].always + roles[].when[] over state mode/class/pass). resolve(role,state) -> flat deduped path list via tools/io/resolve.mjs; orchestrator STEP-4.1 seeds _test_bench + path-grade injects. Prompts declare no inputs (W6 re-author drops inputs:). Collision roles (CRITIQUE/RECONCILE in >1 phase) keyed <ROLE>@<phase>. Both-directions selftest: tools/io/resolve.selftest.mjs."
 }
