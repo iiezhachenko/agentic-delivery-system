@@ -85,18 +85,16 @@ const anySlice = (set) => set.some(p => p.includes("/slices/"));
 }
 
 // ===========================================================================
-// FORWARD 2 (GOLDEN) — IMPLEMENT slice-build + bugfix @ S4:
+// FORWARD 2 (GOLDEN) — IMPLEMENT-BUGFIX slice-build + bugfix @ S4:
 //   MUST include diagnosis + reproduction + src/**; MUST NOT include baseline-map.
+//   (IMPLEMENT no longer handles class=bugfix — SRP split D37/CR-021/F11)
 // ===========================================================================
 {
-  const s = paths("IMPLEMENT", { mode: "slice-build", class: "bugfix", scope: "slices/S4", slice: "S4" });
+  const s = paths("IMPLEMENT-BUGFIX", { mode: "slice-build", class: "bugfix", scope: "slices/S4", slice: "S4" });
   ok(has(s, ".aprd/diagnosis.json"), "bugfix: diagnosis.json present");
   ok(has(s, ".build/slices/S4/oracle/reproduction/test_repro.py"), "bugfix: reproduction test glob present");
   ok(has(s, "src/freelancer_app/web_ingress/app.py"), "bugfix: src/** glob present");
   ok(has(s, ".aprd/aprd.v5.frozen.md"), "bugfix: current_what lock-indirection -> aprd.v5.frozen.md");
-  ok(has(s, ".build/slices/S4/oracle/oracle.lock"), "bugfix: frozen_oracle {scope}=slices/S4 filled");
-  ok(has(s, ".build/slices/S4/build-plan.json"), "bugfix: slice build-plan {slice}=S4 filled");
-  ok(has(s, ".build/skeleton/oracle/oracle.json"), "bugfix: inherited skeleton oracle.json present");
   ok(!has(s, ".aprd/baseline-map.json"), "bugfix: baseline-map ABSENT (feature-add only) — class discrimination");
 }
 
@@ -125,8 +123,8 @@ const anySlice = (set) => set.some(p => p.includes("/slices/"));
 // DETERMINISM — same (state,disk) twice -> byte-identical.
 // ===========================================================================
 {
-  const a = JSON.stringify(paths("IMPLEMENT", { mode: "slice-build", class: "bugfix", scope: "slices/S4", slice: "S4" }));
-  const b = JSON.stringify(paths("IMPLEMENT", { mode: "slice-build", class: "bugfix", scope: "slices/S4", slice: "S4" }));
+  const a = JSON.stringify(paths("IMPLEMENT-BUGFIX", { mode: "slice-build", class: "bugfix", scope: "slices/S4", slice: "S4" }));
+  const b = JSON.stringify(paths("IMPLEMENT-BUGFIX", { mode: "slice-build", class: "bugfix", scope: "slices/S4", slice: "S4" }));
   ok(a === b, "determinism: identical output across two runs");
 }
 

@@ -492,7 +492,12 @@
         { "if": { "mode": "slice-build", "class": "feature-add" },
           "read": [ "current_what",
                     { "path": ".aprd/baseline-map.json" },
-                    { "path": "src/freelancer_app/**", "glob": true, "hint": "convention exemplar; READ-ONLY, never restyle (BF1/BF5)" } ] },
+                    { "path": "src/freelancer_app/**", "glob": true, "hint": "convention exemplar; READ-ONLY, never restyle (BF1/BF5)" } ] }
+      ]
+    },
+    "IMPLEMENT-BUGFIX": {
+      "always": [ "frozen_frame" ],
+      "when": [
         { "if": { "mode": "slice-build", "class": "bugfix" },
           "read": [ "current_what",
                     { "path": ".aprd/diagnosis.json", "hint": "root_cause + localization.symbol = the ONLY edit site" },

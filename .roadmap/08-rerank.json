@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 45,
+  "roadmap_version": 46,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 45 (W30h-SYNTHESIZE-INCREMENT-SPLIT shipped, 2026-06-12): SYNTHESIZE trimmed to greenfield-only (class=greenfield, escape → SYNTHESIZE-INCREMENT for feature-add/bugfix), SYNTHESIZE-INCREMENT new Phase-0 role added (D37/CR-021), io-manifest SYNTHESIZE.when cleared + SYNTHESIZE-INCREMENT entry added, components.json 46→47, io.lock v4→v5. W30g reconciled unshipped→shipped 2026-06-12: done_sentinel prompts/03-hld/DERIVE-BUILD-DAG.md present on disk (committed 7b60ec1) — RE-RANK had read stale status (CR-022 pattern). W30i–W30l unshipped (remaining CR-020–CR-021 role splits). W29i–W29j reconciled unshipped→shipped 2026-06-12: done_sentinels present on disk. Deferred unchanged [I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth).",
+  "_note": "roadmap_version 46 (W30i-IMPLEMENT-BUGFIX-SPLIT shipped, 2026-06-12): IMPLEMENT.when[] bugfix block removed (class=bugfix dispatch moved to IMPLEMENT-BUGFIX per SRP split D37/CR-021), IMPLEMENT-BUGFIX new Phase-4 role added, io-manifest IMPLEMENT bugfix when removed + IMPLEMENT-BUGFIX entry added, components.json 47→48, io.lock v5→v6, skeleton.lock v16→v17. W30j–W30l unshipped (remaining CR-021 role splits). Deferred unchanged [I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth).",
   "completed": [],
   "remaining_sequence": [
     {
@@ -139,7 +139,7 @@
       "position": 47,
       "id": "W30i-IMPLEMENT-BUGFIX-SPLIT",
       "name": "CR-021: IMPLEMENT trimmed (greenfield/feature-add only) + IMPLEMENT-BUGFIX added",
-      "status": "unshipped",
+      "status": "shipped",
       "unit": "prompts/04-build/IMPLEMENT-BUGFIX.md",
       "done_sentinel": "prompts/04-build/IMPLEMENT-BUGFIX.md",
       "depends_on": [
@@ -230,7 +230,7 @@
         "note": "Lint C8 flags repeated verbatim OPEN-tag across 5 ACs in the fixture. Operator-directed: mis-fire vs sanctioned mandatory-verbatim-tag pattern (W9/W10 precedent). Fixture oracle correct; do NOT alter fixture. Linter needs calibration for this pattern — treat as lint-calibration backlog. Route: next lint-calibration pass (P3, same as W9 C6/C8 fixes)."
       }
     ],
-    "in_progress_note": "SRP-refactor branch feature/spine-srp-refactor: W30a–W30f shipped (2026-06-12) — CR-016–CR-021 authored + ADR-0037 accepted (adr.lock v17) + W30d AUDIT-PROMOTE/AUDIT-REPORT-SPLIT + W30e DIAGNOSE-SPLIT/BUGFIX-LOCALIZE + W30f SEQUENCE-SPLIT/SEQUENCE-FEATURE-ADD (roadmap_version 44, components.json 45, skeleton.lock v15, io.lock v4). W30g shipped (7b60ec1, reconciled from stale unshipped 2026-06-12); W30h shipped (de6e058). W30i–W30l (CR-020–CR-021 role splits) = next. W29i–W29j (CR-015 audit-spine overlays) shipped — sentinels on disk (13c7967/6535710); reconciled from stale unshipped 2026-06-12. I6/I7/I8 + C8-BROWNFIELD-ORACLE deferred (unchanged).",
+    "in_progress_note": "SRP-refactor branch feature/spine-srp-refactor: W30a–W30i shipped (2026-06-12) — CR-016–CR-021 authored + ADR-0037 accepted + AUDIT-PROMOTE + BUGFIX-LOCALIZE + SEQUENCE-FEATURE-ADD + DERIVE-BUILD-DAG + SYNTHESIZE-INCREMENT + IMPLEMENT-BUGFIX (roadmap_version 46, components.json 48, skeleton.lock v17, io.lock v6). W30j–W30l (CR-021 remaining splits: MATERIALIZE-ORACLE-BUGFIX, VERIFY-OUTPUT-BUGFIX, DERIVE-TESTS-BUGFIX) = next. I6/I7/I8 + C8-BROWNFIELD-ORACLE deferred (unchanged).",
     "missing": [],
     "duplicated": []
   },
