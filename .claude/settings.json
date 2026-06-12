@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Agent",
+      "Glob",
+      "Grep",
+      "Bash(node tools/:*)",
+      "Bash(node bin/:*)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "_note": "Factory self-host wiring (NOT a user `adp init` install). Read/Write/Edit/Agent = artifact mgmt + orchestrator spawns step-runner without prompt; acceptEdits auto-approves writes. Bash allow-list scoped to repo node tools (det spine tools/{io,det}/*.mjs, economy-lint, selftests, bin/) so the self-host loop + verify don't prompt per call; any other shell still asks. Canonical surface mirrors adapters/claude/settings.json but engine is in-place at repo root (no .claude/adp/ copy) + Bash scoped for the live spine."
+}

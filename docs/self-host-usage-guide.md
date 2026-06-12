@@ -30,13 +30,13 @@ Same two harnesses, same trade-offs as generic guide. Difference = purely what y
 | | **Claude Code** | **Kiro** |
 |---|---|---|
 | Form | Terminal CLI | Full IDE + chat panel |
-| Self-host driver | `/self-host` skill → orchestrator scoped to repo root + agentic-delivery-pipeline target | CLI custom agent `selfhost` → same scope, run exclusively |
+| Self-host driver | `/self-host` skill → **adp-orchestrator** wrapper (root-wired) scoped to repo root + agentic-delivery-pipeline target | CLI custom agent `selfhost` → same scope, run exclusively |
 | Best when | scripted/automatable self-host runs | visual view of canonical trees + authored prompts |
 | Built-in spec flow | n/a | **not used** — system runs exclusively (as in generic guide) |
 
 Pick one; **operator gate identical** (Part C). Deploy/use differ — Part A (Claude Code), Part B (Kiro).
 
-> **Prerequisite for either:** clone the ADP repo + install the harness. Self-host runs ADP on its OWN repo — role library (`prompts/`), root `CLAUDE.md`, and self-host wiring (`.claude/skills/self-host/`, `.claude/agents/step-runner.md` · Kiro `.kiro/agents/{selfhost,step}.json`, `.kiro/steering/`) are ALREADY in-tree. Do NOT `npx adp init` (that's the end-user install into a *different* project — `generic-usage-guide.md`). Self-host **adds** a deliverable target on top of the checkout; doesn't replace it.
+> **Prerequisite for either:** clone the ADP repo + install the harness. Self-host runs ADP on its OWN repo — role library (`prompts/`), root `CLAUDE.md`, and the **canonical self-host wiring** (Claude: `.claude/{settings.json, agents/{adp-orchestrator.md,step-runner.md}, skills/{self-host,deliver}/}` · Kiro `.kiro/agents/{selfhost,step}.json`, `.kiro/steering/`) are ALREADY in-tree. Same canonical shape an end-user gets (thin skill → orchestrator wrapper → loop body + clean-room runner), only **root-wired**: the engine sits in-place at the repo root, not copied under `.claude/adp/`. Do NOT `npx adp init` (that's the end-user install into a *different* project — `generic-usage-guide.md`). Self-host **adds** a deliverable target on top of the checkout; doesn't replace it.
 
 ---
 
@@ -44,7 +44,7 @@ Pick one; **operator gate identical** (Part C). Deploy/use differ — Part A (Cl
 
 ## A1. Deploy (one-time setup)
 
-**Step 1 — Clone repo + install Claude Code.** Self-host runs against the checkout itself — `prompts/<phase>/<ROLE>.md`, root `CLAUDE.md`, `.claude/{settings.json,agents/step-runner.md,skills/self-host/}` already in-tree. No `npx adp init` (that installs into a separate end-user project). Self-host builds on the checkout.
+**Step 1 — Clone repo + install Claude Code.** Self-host runs against the checkout itself — `prompts/<phase>/<ROLE>.md`, root `CLAUDE.md`, `.claude/{settings.json, agents/{adp-orchestrator.md,step-runner.md}, skills/{self-host,deliver}/}` already in-tree (the canonical thin-skill → orchestrator-wrapper → runner shape, root-wired). No `npx adp init` (that installs into a separate end-user project). Self-host builds on the checkout.
 
 **Step 2 — agentic-delivery-pipeline coding-canon profile = active target.** Lives at `code-canon/agentic-delivery-pipeline.md` (per-stack canon store spec already defines — **not** new registry), selected by stack ADR in `.adr/`. Holds six fields:
 ```
@@ -70,23 +70,27 @@ repo root/
 ```
 `prompts/*` already shipped = "built skeleton"; `_fixtures/*` = oracle baseline. These trees = **frozen artifacts** — signed, immutable, never hand-edited; change = new version + change request (see §4), not edit to frozen body.
 
-**Step 4 — Point orchestrator at self-project.** Tell orchestrator agent (or dedicated copy) two things: **workspace root = repo root** (read frozen trees there) + **deliverable target = agentic-delivery-pipeline coding-canon profile (`code-canon/agentic-delivery-pipeline.md`)** (so Build writes prompts + verifies via clean-room sim, not pytest). Outputs (authored prompts) land in `prompts/` tree.
+**Step 4 — The orchestrator wrapper binds the self-project params.** The canonical `.claude/agents/adp-orchestrator.md` wrapper (root-wired) is handed two things by the launcher: **WORKSPACE_ROOT = repo root** (engine + frozen trees coincide) + **DELIVERABLE_TARGET = agentic-delivery-pipeline coding-canon profile (`code-canon/agentic-delivery-pipeline.md`)** (so Build writes prompts + verifies via clean-room sim, not pytest). It reads the self-host loop body `prompts/_orchestrator.md` + runs it verbatim, spawning `step-runner` for clean-room verify. Outputs (authored prompts) land in `prompts/`.
 
-**Step 5 — `/self-host` entry point.** Create `.claude/skills/self-host/SKILL.md`:
+**Step 5 — `/self-host` entry point = a thin launcher** at `.claude/skills/self-host/SKILL.md`. It carries no loop logic — it just hands `$ARGUMENTS` to the **adp-orchestrator** wrapper with the self-host params:
 ```markdown
 ---
 name: self-host
 description: Run the delivery pipeline on its own project — author the next unshipped prompt
-argument-hint: "[optional: a specific role to target, else RE-RANK picks the next]"
+argument-hint: "[optional: status | a specific ROLE to target, else RE-RANK picks the next]"
 ---
-Run the orchestrator with workspace root = the repo root and deliverable target
-code-canon/agentic-delivery-pipeline.md. The four upstream phases (Understand/Plan/Decide/Design)
-are already frozen at the repo root (.aprd .adr .hld .roadmap) — only Build runs live.
-Let RE-RANK pick the next unshipped prompt from .roadmap/08-rerank.json, author it (IMPLEMENT),
-verify it clean-room against _fixtures/, and pause at the value gate before promoting it to prompts/.
+Thin launcher. Hand $ARGUMENTS to the adp-orchestrator agent with:
+  LOOP_BODY=prompts/_orchestrator.md · ENGINE_ROOT=. · WORKSPACE_ROOT=.
+  DELIVERABLE_TARGET=code-canon/agentic-delivery-pipeline.md
+The four upstream phases are frozen at the repo root (.aprd .adr .hld .roadmap) — only Build runs
+live (the loop's disk-derived STEP-0 frontier skips them). RE-RANK picks the next unshipped prompt;
+IMPLEMENT authors it; step-runner verifies it clean-room against _fixtures/; pause at the value gate.
 ```
+This mirrors the end-user `/deliver` launcher (which hands the **generic** loop body to the same wrapper) — same canonical shape, different params.
 
-**Step 6 — Orchestrator model during self-host.** Runtime target = Sonnet, but **while loop unproven orchestrator stays Opus** as external judge (workflow §7 — system doesn't yet grade own grading). After first prompt's value confirmed + loop trusted, drop to Sonnet.
+**Step 6 — Orchestrator model.** Runtime target = Sonnet. The loop is now trusted + observed to advance, so the orchestrator runs **Sonnet** and the earlier Opus external-judge pass is **retired** (the runner/verifier were always Sonnet/High). (Historical: while the loop was unproven, the orchestrator ran Opus as an external judge so the system didn't grade its own grading — workflow §7.)
+
+> **`/deliver` in the checkout (parity).** The same `.claude/skills/deliver/SKILL.md` an end-user gets is wired in-tree too, over the SAME `adp-orchestrator` wrapper — so you can dogfood the canonical end-user path from the dev repo. It runs the **generic** loop (all 5 phases live) and **must target an EXTERNAL workspace root** (`/deliver "<request>" --root <external-dir>`); the wrapper HALTs if WORKSPACE_ROOT resolves to the repo root, protecting the factory's frozen `.aprd/.roadmap/.adr/.hld`. For real end-user delivery, still prefer `npx adp init` into the target project (`generic-usage-guide.md`).
 
 ## A2. Use (run the self-host)
 
