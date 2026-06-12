@@ -1,0 +1,19 @@
+{
+  "scenario": "case-e-unregistered-halt",
+  "description": "Unregistered non-master branch — Case E: HALT, name the branch, instruct registration.",
+  "src_state": "src/state-case-e-unregistered-halt.md",
+  "owning_behavior": "STEP 0.0 Case E (R-MW-5, D29) — HEAD not in registered set AND not master/main → HALT",
+  "expected_result": "HALT — Case E fires; branch named in message; new-stream / switch-to instructions given",
+  "expected_signal": {
+    "step_0_0_case": "E",
+    "step_0_0_halt": true,
+    "halt_message_names_branch": "feature/orphan-work",
+    "halt_message_mentions_new_stream": true,
+    "halt_message_mentions_switch_to": true,
+    "step_0_1_reached": false,
+    "frontier_scan_reached": false
+  },
+  "load_bearing_assertion": "HEAD = feature/orphan-work. Registered set = {feature/my-analytics}. feature/orphan-work not in registered set AND not master/main → Case E → HALT. Emit: \"Branch `feature/orphan-work` not registered in `_streams/`; run `new-stream` to register it or `switch-to <slug>` to move to a registered workstream.\"",
+  "separates_from_defect_by": "defect-case-e-no-unregistered-halt proceeds on unregistered non-master branch silently. Golden: HALT fires naming the unregistered branch.",
+  "halt_message_template": "Branch `feature/orphan-work` not registered in `_streams/`; run `new-stream` to register it or `switch-to <slug>` to move to a registered workstream."
+}

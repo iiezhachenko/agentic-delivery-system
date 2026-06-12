@@ -1,0 +1,17 @@
+{
+  "scenario": "case-b-master-single-auto-checkout",
+  "description": "master + exactly 1 pending stream — Case B: auto-checkout, emit message, continue.",
+  "src_state": "src/state-case-b-master-single-auto-checkout.md",
+  "owning_behavior": "STEP 0.0 Case B (R-MW-5, D29) — master + 1 pending → auto-checkout",
+  "expected_result": "PASS — Case B fires; branch checked out; emit message; orchestrator advances to STEP 0.1",
+  "expected_signal": {
+    "step_0_0_case": "B",
+    "step_0_0_halt": false,
+    "auto_checkout_performed": true,
+    "checked_out_branch": "feature/my-analytics",
+    "emit_message_contains": "Auto-checked out branch `feature/my-analytics` for workstream `my-analytics`",
+    "frontier_scan_reached": true
+  },
+  "load_bearing_assertion": "HEAD = master. _streams/my-analytics/brief.md status=pending, branch=feature/my-analytics. Registered set = {feature/my-analytics}. Exactly 1 pending → Case B → git checkout feature/my-analytics → emit 'Auto-checked out branch `feature/my-analytics` for workstream `my-analytics`.' → continue.",
+  "separates_from_defect_by": "defect-case-b-no-auto-checkout proceeds on master without checking out the pending stream branch (master state unresolved). Golden: checkout message present + branch switched."
+}

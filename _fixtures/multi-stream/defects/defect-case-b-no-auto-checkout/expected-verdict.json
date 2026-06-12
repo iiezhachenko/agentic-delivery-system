@@ -1,0 +1,19 @@
+{
+  "defect": "defect-case-b-no-auto-checkout",
+  "invariant": "STEP 0.0 Case B (R-MW-5, D29) — master + exactly 1 pending → auto-checkout that branch. Skipping means orchestrator runs on master for a single-pending case instead of checking out the correct branch.",
+  "owning_role": "prompts/_orchestrator.md STEP 0.0 Case B — git checkout <branch> + emit 'Auto-checked out...'",
+  "seed": [
+    "Apply defect: remove Case B auto-checkout logic (orchestrator on master + 1 pending proceeds without checkout or emit)",
+    "Run against scenario-case-b-master-single-auto-checkout state (master + 1 pending: feature/my-analytics)",
+    "Expected: orchestrator proceeds on master without checking out feature/my-analytics; no emit message"
+  ],
+  "load_bearing_assertion": "Golden: Case B fires → git checkout feature/my-analytics → emit message → continue. Defect: master state unresolved; no checkout performed; orchestrator runs on master. Value-parity fails: auto_checkout_performed == false vs golden true.",
+  "expected_verdict": "value-parity FAIL — no-auto-checkout: master state unresolved; pending stream branch not checked out",
+  "expected_signal": {
+    "step_0_0_halt": false,
+    "auto_checkout_performed": false,
+    "emit_message_present": false,
+    "frontier_scan_reached": true
+  },
+  "separates_from_golden_by": "auto_checkout_performed flag + emit message presence. Golden: checkout message emitted. Defect: no checkout, no message — orchestrator runs on master."
+}

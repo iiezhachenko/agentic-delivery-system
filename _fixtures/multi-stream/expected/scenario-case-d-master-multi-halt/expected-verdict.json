@@ -1,0 +1,20 @@
+{
+  "scenario": "case-d-master-multi-halt",
+  "description": "master + >1 pending streams — Case D: HALT, list all pending slugs + branches.",
+  "src_state": "src/state-case-d-master-multi-halt.md",
+  "owning_behavior": "STEP 0.0 Case D (R-MW-5, D29) — master + >1 pending → HALT ambiguous",
+  "expected_result": "HALT — Case D fires; all pending streams listed; STEP 0.1 not reached",
+  "expected_signal": {
+    "step_0_0_case": "D",
+    "step_0_0_halt": true,
+    "pending_streams_listed": [
+      {"slug": "analytics-pipeline", "branch": "feature/analytics-pipeline"},
+      {"slug": "auth-refactor", "branch": "feature/auth-refactor"}
+    ],
+    "step_0_1_reached": false,
+    "frontier_scan_reached": false
+  },
+  "load_bearing_assertion": "HEAD = master. 2 pending streams: analytics-pipeline (feature/analytics-pipeline) + auth-refactor (feature/auth-refactor). >1 pending → Case D → HALT. Emit: 'On master with multiple pending workstreams: [analytics-pipeline → feature/analytics-pipeline, auth-refactor → feature/auth-refactor]. Check out the target workstream branch and re-run.'",
+  "separates_from_defect_by": "defect-case-d-no-multi-halt proceeds on master despite >1 pending (auto-checkout or silent proceed). Golden: HALT fires with full stream list.",
+  "halt_message_template": "On master with multiple pending workstreams: [analytics-pipeline → feature/analytics-pipeline, auth-refactor → feature/auth-refactor]. Check out the target workstream branch and re-run."
+}

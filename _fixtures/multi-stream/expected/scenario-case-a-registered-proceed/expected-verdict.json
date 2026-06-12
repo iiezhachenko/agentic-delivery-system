@@ -1,0 +1,15 @@
+{
+  "scenario": "case-a-registered-proceed",
+  "description": "HEAD on registered workstream branch — Case A: proceed. No action, no message.",
+  "src_state": "src/state-case-a-registered-proceed.md",
+  "owning_behavior": "STEP 0.0 Case A (R-MW-5, D29) — HEAD in registered set → proceed",
+  "expected_result": "PASS — Case A fires; no HALT; no auto-checkout message; orchestrator advances to STEP 0.1",
+  "expected_signal": {
+    "step_0_0_case": "A",
+    "step_0_0_halt": false,
+    "auto_checkout_performed": false,
+    "frontier_scan_reached": true
+  },
+  "load_bearing_assertion": "HEAD = feature/my-analytics. _streams/my-analytics/brief.md status=pending, branch=feature/my-analytics. Registered set = {feature/my-analytics}. HEAD in registered set → Case A. No HALT, no emit, proceed to STEP 0.1.",
+  "separates_from_defect_by": "defect-case-a-skip-registered-check skips the registered-set read (set always empty) — on this Case A state, HEAD=feature/my-analytics not in empty set AND not master → Case E HALT fires. Golden: set built correctly, HEAD in set → Case A proceed (no HALT)."
+}

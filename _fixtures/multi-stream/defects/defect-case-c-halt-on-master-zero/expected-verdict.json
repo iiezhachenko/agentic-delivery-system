@@ -1,0 +1,17 @@
+{
+  "defect": "defect-case-c-halt-on-master-zero",
+  "invariant": "STEP 0.0 Case C (D28 §3, D29) — master + 0 pending → solo-master flow, proceed. HALTing on 0 pending is an over-aggressive guard that breaks the greenfield flow.",
+  "owning_role": "prompts/_orchestrator.md STEP 0.0 Case C — master + 0 pending → proceed; no HALT.",
+  "seed": [
+    "Apply defect: Case C handler emits HALT on master even when 0 pending streams (incorrectly treats 0-pending as ambiguous)",
+    "Run against scenario-case-c-master-zero-proceed state (master, _streams/ empty)",
+    "Expected: orchestrator HALTs despite 0 pending streams — solo-master flow broken"
+  ],
+  "load_bearing_assertion": "Golden: Case C → proceed silently, no HALT. Defect: HALT fired on master+0-pending; orchestrator blocks solo-master flow. Value-parity fails: step_0_0_halt == true vs golden false.",
+  "expected_verdict": "value-parity FAIL — halt-on-master-zero: solo-master flow blocked; HALT fires with 0 pending streams",
+  "expected_signal": {
+    "step_0_0_halt": true,
+    "frontier_scan_reached": false
+  },
+  "separates_from_golden_by": "step_0_0_halt flag. Golden: false (solo-master proceeds). Defect: true (over-aggressive HALT blocks greenfield)."
+}

@@ -1,0 +1,20 @@
+{
+  "scenario": "switch-to-registered",
+  "description": "switch-to <slug> dispatch — checkout registered stream branch, emit message, STOP.",
+  "src_state": "src/state-switch-to-registered.md",
+  "owning_behavior": "MODES switch-to dispatch (R-MW-5, D29) — read brief.md; checkout branch; emit; STOP",
+  "dispatch_arg": "switch-to my-analytics",
+  "expected_result": "branch feature/my-analytics checked out; emit message; STOP — no workstream advance",
+  "expected_signal": {
+    "switch_to_slug": "my-analytics",
+    "checked_out_branch": "feature/my-analytics",
+    "emit_message_contains": "Switched to branch `feature/my-analytics` for workstream `my-analytics`",
+    "stop_emitted": true,
+    "step_0_subsets_run": false,
+    "frontier_scan_reached": false,
+    "workstream_advanced": false
+  },
+  "load_bearing_assertion": "_streams/my-analytics/brief.md exists, status=pending, branch=feature/my-analytics. git checkout feature/my-analytics executed. Emit: 'Switched to branch `feature/my-analytics` for workstream `my-analytics`. Re-run orchestrator to continue.' STOP — STEP 0 sub-steps NOT run.",
+  "separates_from_defect_by": "defect-switch-to-no-halt-on-absent proceeds even when _streams/<slug>/brief.md absent (skips the guard). Golden: absent brief → HALT 'No stream registered as `<slug>`; run `new-stream` first.'",
+  "stop_message_template": "Switched to branch `feature/my-analytics` for workstream `my-analytics`. Re-run orchestrator to continue."
+}

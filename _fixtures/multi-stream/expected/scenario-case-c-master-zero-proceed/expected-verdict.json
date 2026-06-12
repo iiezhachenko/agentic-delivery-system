@@ -1,0 +1,16 @@
+{
+  "scenario": "case-c-master-zero-proceed",
+  "description": "master + 0 pending streams — Case C: solo-master flow, proceed silently.",
+  "src_state": "src/state-case-c-master-zero-proceed.md",
+  "owning_behavior": "STEP 0.0 Case C (D28 §3 solo-master, D29) — master + 0 pending → proceed",
+  "expected_result": "PASS — Case C fires; no HALT; no message; orchestrator advances to STEP 0.1",
+  "expected_signal": {
+    "step_0_0_case": "C",
+    "step_0_0_halt": false,
+    "auto_checkout_performed": false,
+    "halt_message_present": false,
+    "frontier_scan_reached": true
+  },
+  "load_bearing_assertion": "HEAD = master. _streams/ absent or empty → registered set = {}. 0 pending → Case C → proceed. No message emitted. Orchestrator advances to STEP 0.1.",
+  "separates_from_defect_by": "defect-case-c-halt-on-master-zero HALTs even with 0 pending streams (over-aggressive guard). Golden: Case C proceeds silently — solo-master flow valid."
+}

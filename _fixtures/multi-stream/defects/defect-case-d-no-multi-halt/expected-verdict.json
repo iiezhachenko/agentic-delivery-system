@@ -1,0 +1,18 @@
+{
+  "defect": "defect-case-d-no-multi-halt",
+  "invariant": "STEP 0.0 Case D (R-MW-5, D29) — master + >1 pending → HALT with stream list. Skipping means orchestrator auto-checkouts or proceeds on master with multiple pending streams (ambiguous choice).",
+  "owning_role": "prompts/_orchestrator.md STEP 0.0 Case D — >1 pending → HALT; list all slug + branch.",
+  "seed": [
+    "Apply defect: remove Case D HALT logic (orchestrator on master + >1 pending proceeds or auto-checkouts one stream silently)",
+    "Run against scenario-case-d-master-multi-halt state (master, 2 pending: analytics-pipeline + auth-refactor)",
+    "Expected: orchestrator proceeds or auto-checkouts without HALT — ambiguous multi-stream choice made silently"
+  ],
+  "load_bearing_assertion": "Golden: Case D fires → HALT with [analytics-pipeline, auth-refactor] listed. Defect: no HALT; ambiguous case proceeds silently. Value-parity fails: step_0_0_halt == false vs golden true.",
+  "expected_verdict": "value-parity FAIL — no-multi-halt: ambiguous multi-pending case proceeds without HALT",
+  "expected_signal": {
+    "step_0_0_halt": false,
+    "pending_streams_listed": [],
+    "frontier_scan_reached": true
+  },
+  "separates_from_golden_by": "step_0_0_halt flag + pending_streams_listed presence. Golden: HALT with full list. Defect: no HALT, no list — silent ambiguous proceed."
+}

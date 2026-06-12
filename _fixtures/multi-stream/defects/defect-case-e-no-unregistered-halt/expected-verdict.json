@@ -1,0 +1,18 @@
+{
+  "defect": "defect-case-e-no-unregistered-halt",
+  "invariant": "STEP 0.0 Case E (R-MW-5, D29) — HEAD not in registered set AND not master/main → HALT. Skipping means orchestrator runs on unregistered non-master branches silently.",
+  "owning_role": "prompts/_orchestrator.md STEP 0.0 Case E — HEAD not in registered set AND not master → HALT naming the branch.",
+  "seed": [
+    "Apply defect: remove Case E HALT condition (orchestrator treats any non-master branch as Case A regardless of registration)",
+    "Run against scenario-case-e-unregistered-halt state (HEAD = feature/orphan-work, registered set = {feature/my-analytics})",
+    "Expected: orchestrator proceeds without HALT — orphan branch proceeds silently"
+  ],
+  "load_bearing_assertion": "Golden: Case E fires → HALT 'Branch `feature/orphan-work` not registered in `_streams/`...'. Defect: no HALT; unregistered branch proceeds. Value-parity fails: step_0_0_halt == false vs golden true.",
+  "expected_verdict": "value-parity FAIL — no-unregistered-halt: unregistered non-master branch proceeds silently without Case E HALT",
+  "expected_signal": {
+    "step_0_0_halt": false,
+    "halt_message_present": false,
+    "frontier_scan_reached": true
+  },
+  "separates_from_golden_by": "HALT message presence naming the branch. Golden: HALT fires with feature/orphan-work named. Defect: no HALT — unregistered branch proceeds."
+}

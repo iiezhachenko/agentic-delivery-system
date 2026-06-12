@@ -1,0 +1,18 @@
+{
+  "defect": "defect-case-a-skip-registered-check",
+  "invariant": "STEP 0.0 Case A (R-MW-5, D29) — orchestrator reads _streams/*/brief.md registered set; HEAD in set → proceed (Case A). Skipping the registered-set read means a registered non-master branch cannot be identified as Case A — instead it falls through to Case E logic and gets HALTed.",
+  "owning_role": "prompts/_orchestrator.md STEP 0.0 — reads all _streams/*/brief.md where status:pending; builds registered set; HEAD in set → Case A proceed.",
+  "seed": [
+    "Apply defect: remove registered-set read from STEP 0.0 (orchestrator skips _streams/ scan; registered set is always empty)",
+    "Run against scenario-case-a-registered-proceed state (HEAD = feature/my-analytics, _streams/my-analytics/brief.md present with status:pending)",
+    "Expected: orchestrator HALTs on the registered branch (Case E fires because registered set empty → HEAD not in set AND not master → HALT)"
+  ],
+  "load_bearing_assertion": "Golden: registered-set read → {feature/my-analytics}; HEAD in set → Case A → proceed, no HALT. Defect: registered-set never built → empty; HEAD=feature/my-analytics not in empty set AND not master → Case E → HALT. Value-parity fails: step_0_0_halt == true vs golden false.",
+  "expected_verdict": "value-parity FAIL — skip-registered-check: registered branch incorrectly HALTed (Case E fires on registered branch because set never built)",
+  "expected_signal": {
+    "step_0_0_halt": true,
+    "frontier_scan_reached": false,
+    "halt_message_present": true
+  },
+  "separates_from_golden_by": "step_0_0_halt flag on Case A state. Golden: false (registered branch proceeds). Defect: true (registered branch HALTed — set read missing). Distinct from defect-case-e-no-unregistered-halt which tests Case E state; this defect tests Case A state."
+}

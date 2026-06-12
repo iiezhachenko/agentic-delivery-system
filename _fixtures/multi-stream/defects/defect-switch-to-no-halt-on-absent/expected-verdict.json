@@ -1,0 +1,18 @@
+{
+  "defect": "defect-switch-to-no-halt-on-absent",
+  "invariant": "MODES switch-to dispatch (R-MW-5, D29) — if _streams/<slug>/brief.md absent → HALT 'No stream registered as `<slug>`; run `new-stream` first.' Skipping guard means switch-to proceeds on unregistered slugs.",
+  "owning_role": "prompts/_orchestrator.md MODES switch-to — read brief.md; if absent → HALT.",
+  "seed": [
+    "Apply defect: remove absent-brief guard from switch-to path (orchestrator attempts checkout even when _streams/<slug>/brief.md absent)",
+    "Run against switch-to state with slug = 'nonexistent-stream' (no _streams/nonexistent-stream/brief.md)",
+    "Expected: orchestrator attempts checkout of unknown branch without HALT"
+  ],
+  "load_bearing_assertion": "Golden: _streams/nonexistent-stream/brief.md absent → HALT 'No stream registered as `nonexistent-stream`; run `new-stream` first.' Defect: no HALT; attempts git checkout of undefined branch. Value-parity fails: halt_on_absent == false vs golden true.",
+  "expected_verdict": "value-parity FAIL — no-halt-on-absent: switch-to proceeds on unregistered slug without HALT",
+  "expected_signal": {
+    "halt_on_absent": false,
+    "stop_emitted": false,
+    "checkout_attempted_on_undefined": true
+  },
+  "separates_from_golden_by": "halt_on_absent flag. Golden: HALT fires naming the absent slug. Defect: no HALT — checkout attempted on undefined slug."
+}
