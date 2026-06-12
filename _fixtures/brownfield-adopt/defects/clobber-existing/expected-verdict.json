@@ -1,0 +1,18 @@
+{
+  "defect": "clobber-existing",
+  "invariant": "ADOPT escape #1 — if .aprd/ AND .hld/ AND .adr/ all present → HALT (trees exist; run normal ADP loop, not ADOPT). A runner that writes output despite trees existing violates Rule 5 (Never overwrite existing ADP artifacts) and the escape guard.",
+  "owning_role": "ADOPT (00-aprd/ADOPT.md) — Task step 1 checks guards; first escape fires when all three tree dirs present. Correct output: write nothing; emit HALT message.",
+  "seed": [
+    "run ADOPT against a bench that has .aprd/ + .hld/ + .adr/ all present (defects/clobber-existing/ contains pre-seeded stubs for all three)",
+    "a defective runner writes output anyway instead of HALTing"
+  ],
+  "load_bearing_assertion": "Correct ADOPT behavior on a bench with all three ADP trees: HALT immediately (write nothing), emit 'HALT — trees exist; run normal ADP loop, not ADOPT'. Defect behavior: runner ignores the guard and writes aprd.frozen.md + skeleton.lock + .adr/ stubs into the existing trees. Value-parity fails: the escape must fire; any output written = violation.",
+  "expected_verdict": "HALT — trees exist; run normal ADP loop, not ADOPT",
+  "expected_signal": {
+    "escape_fires": true,
+    "files_written": 0,
+    "halt_message_contains": "trees exist"
+  },
+  "separates_from_golden_by": "escape behavior: golden (no trees) → writes output + prints summary; defect (trees present) → must HALT with no writes. A runner that writes output on the trees-present bench has violated the guard — any written file is the discriminating signal.",
+  "e2e_validated": "2026-06-12 — golden run (no ADP trees in src/ bench): ADOPT writes 6 files (aprd.frozen.md + skeleton.lock + 4 ADR stubs) + prints summary. Defect run (bench has .aprd/+.hld/+.adr/ pre-seeded): correct runner halts with 0 files written. Verifier checks: no new file written to bench + HALT message present."
+}

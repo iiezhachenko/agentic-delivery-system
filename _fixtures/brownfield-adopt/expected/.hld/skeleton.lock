@@ -1,0 +1,51 @@
+{
+  "artifact": "skeleton.lock",
+  "class": "adopt-bootstrap",
+  "status": "stub",
+  "components": [
+    {
+      "id": "C1",
+      "name": "API Layer",
+      "responsibility": "Flask Blueprint routing; exposes POST/GET/DELETE /expenses endpoints.",
+      "source": "src/expense_tracker/api/routes.py"
+    },
+    {
+      "id": "C2",
+      "name": "Auth",
+      "responsibility": "API-key resolution from X-Api-Key header; maps key to owner_id.",
+      "source": "src/expense_tracker/auth/api_key.py"
+    },
+    {
+      "id": "C3",
+      "name": "Storage",
+      "responsibility": "SQLite CRUD over expense records (ExpenseStore); init_db on startup.",
+      "source": "src/expense_tracker/storage/expense_store.py"
+    },
+    {
+      "id": "C4",
+      "name": "App Factory",
+      "responsibility": "Flask app creation; wires C1/C3; WSGI entry point.",
+      "source": "src/expense_tracker/app.py"
+    }
+  ],
+  "seams": [
+    {
+      "id": "CT1",
+      "from": "C1",
+      "to": "C2",
+      "note": "routes._auth() calls auth.api_key.resolve_identity(key); returns {owner_id} or None."
+    },
+    {
+      "id": "CT2",
+      "from": "C1",
+      "to": "C3",
+      "note": "routes.py calls ExpenseStore.create/list/delete; seam is the ExpenseStore class surface."
+    },
+    {
+      "id": "CT3",
+      "from": "C4",
+      "to": "C3",
+      "note": "app.py calls init_db() at startup to ensure SQLite schema exists."
+    }
+  ]
+}

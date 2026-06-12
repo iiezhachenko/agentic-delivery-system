@@ -1,0 +1,17 @@
+{
+  "defect": "closed-acs",
+  "invariant": "ADOPT Rule 2 — every AC in the stub carries the OPEN tag; hallucinating closed ACs is a defect (P1). Zero closed ACs is correct output.",
+  "owning_role": "ADOPT (00-aprd/ADOPT.md) — Step 6 shapes aprd.frozen.md stub; Rule 2 mandates OPEN tag on every AC. A runner producing closed ACs has violated the discriminator.",
+  "seed": [
+    "overlay defects/closed-acs/aprd.frozen.closed.md → .aprd/aprd.frozen.md (ACs without OPEN tag — 5 closed ACs authored by runner as if the requirements were known)"
+  ],
+  "load_bearing_assertion": "Golden aprd.frozen.md has every AC containing '[OPEN — client to fill at Checkpoint A]'. Defect aprd.frozen.md has ACs without that tag (closed, filled text). Value-parity fails: the OPEN-tag discriminator is absent in defect output.",
+  "expected_verdict": "value-parity FAIL — closed ACs where OPEN tags required",
+  "expected_signal": {
+    "open_tag_present_in_all_acs": false,
+    "closed_acs_count": 5,
+    "golden_open_acs_count": 5
+  },
+  "separates_from_golden_by": "presence of '[OPEN — client to fill at Checkpoint A]' tag in every AC (golden: all 5 present / defect: 0 present). The hallucinated closed ACs are a P1 violation — ADOPT's core discriminator.",
+  "e2e_validated": "2026-06-12 — clean-room step-runner ran prompts/00-aprd/ADOPT.md against the src/ bench (no ADP trees) → all 5 ACs carry OPEN tag (golden). Defect overlay: runner given closed-acs bench produces ACs lacking OPEN tag. Oracle separates on OPEN-tag presence per AC."
+}

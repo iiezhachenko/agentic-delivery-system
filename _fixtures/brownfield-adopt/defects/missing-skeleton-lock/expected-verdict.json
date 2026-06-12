@@ -1,0 +1,16 @@
+{
+  "defect": "missing-skeleton-lock",
+  "invariant": "ADOPT Stop condition (clean path) — writes .aprd/aprd.frozen.md + .hld/skeleton.lock + .adr/log/NNNN-*.md stubs. Omitting skeleton.lock = incomplete output; the ADP foundation is unusable without a structural lock.",
+  "owning_role": "ADOPT (00-aprd/ADOPT.md) — Step 7 writes .hld/skeleton.lock; omitting it violates the output contract (outputs[1]).",
+  "seed": [
+    "run ADOPT against src/ bench; remove .hld/skeleton.lock from the output before asserting (simulates runner that wrote aprd.frozen.md + .adr/ stubs but skipped skeleton.lock)"
+  ],
+  "load_bearing_assertion": "Golden ADOPT output has .hld/skeleton.lock present (artifact: skeleton.lock, class: adopt-bootstrap, components[] non-empty). Defect output is missing .hld/skeleton.lock entirely. Done-sentinel check: skeleton.lock absent = output contract violated.",
+  "expected_verdict": "value-parity FAIL — .hld/skeleton.lock absent in output",
+  "expected_signal": {
+    "hld_skeleton_lock_present": false,
+    "golden_hld_skeleton_lock_present": true
+  },
+  "separates_from_golden_by": ".hld/skeleton.lock file presence (golden: present with components / defect: absent). The structural stub is a mandatory ADOPT output — its absence is an incomplete adoption that blocks normal ADP intake.",
+  "e2e_validated": "2026-06-12 — golden run produces .hld/skeleton.lock (class:adopt-bootstrap, 4 components, 3 seams). Defect: removing skeleton.lock from output leaves .hld/ empty. Verifier checks for skeleton.lock existence and class discriminator; absence = FAIL."
+}
