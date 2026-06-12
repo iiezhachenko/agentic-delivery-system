@@ -1,0 +1,4 @@
+{
+  "_note": "Direction-1 (golden) merged set: done_sentinels present on master = complete+accepted+merged. Wave A + B merged; wave C accepted-but-unmerged (absent) so preserved. Drives pruneLedger(input, Set(merged)) == expected/08-rerank.json.",
+  "merged": ["src/merged-a.txt", "src/merged-b.txt"]
+}

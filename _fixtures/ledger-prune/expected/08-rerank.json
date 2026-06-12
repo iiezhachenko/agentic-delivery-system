@@ -1,0 +1,46 @@
+{
+  "base_ref": ".roadmap/07-sequence-reviewed.json",
+  "class": "ledger-prune-fixture",
+  "roadmap_version": 6,
+  "verdict": "re_ranked",
+  "_note": "roadmap_version 6 (D31/CR-010 ledger-prune): pruned 2 merged+accepted+complete wave(s) [WX-MERGED-A, WX-MERGED-B] — done_sentinel present on master. Live: remaining=1, kept-completed=1, deferred=[IX-OPEN]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth; loop derives frontier from disk sentinels). Prior version history recoverable from git.",
+  "completed": [
+    {
+      "position": 3,
+      "id": "WX-UNMERGED-C",
+      "name": "accepted wave C — on feature branch only, NOT merged to master",
+      "status": "shipped",
+      "unit": "src/unmerged-c.txt",
+      "done_sentinel": "src/unmerged-c.txt"
+    }
+  ],
+  "remaining_sequence": [
+    {
+      "position": 4,
+      "id": "WX-NEXT-D",
+      "name": "next unshipped build",
+      "status": "pending",
+      "unit": "src/next-d.txt",
+      "done_sentinel": "src/next-d.txt"
+    }
+  ],
+  "coverage": {
+    "scope_note": "Synthetic ledger-prune oracle. Merged set (present on master) = wave A + wave B; wave C accepted-but-unmerged; wave D unshipped.",
+    "completed": [
+      "WX-UNMERGED-C"
+    ],
+    "remaining_ranked": [
+      "WX-NEXT-D"
+    ],
+    "deferred_findings": [
+      {
+        "id": "IX-OPEN",
+        "source": "synthetic",
+        "status": "deferred",
+        "note": "Open carry-forward finding — MUST survive prune (R-LH-2). Not a merged wave."
+      }
+    ],
+    "missing": [],
+    "duplicated": []
+  }
+}

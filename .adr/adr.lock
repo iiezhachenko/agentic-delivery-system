@@ -1,11 +1,11 @@
 {
   "artifact": ".adr/log/",
-  "version": "v10",
-  "content_sha256": "e2a4e893ec1badb9313fe549eee481f1ffebd836c292b558abc8a12640a15806",
+  "version": "v11",
+  "content_sha256": "e2e38ab849fe7b86b1a87d5f667afa18b271812f7e246f00e896c4a622f46692",
   "signer": "self-host:agentic-delivery-pipeline",
   "signed_at": "2026-06-12T00:00:00Z",
   "status": "frozen",
-  "amendment": "v10 added ADR-0030 (D30) — CR-009 rename launcher command /self-host → /evolve, clean/no-alias (operator-approved 2026-06-12): surface-rename of the Claude Code launcher slash command only; self-host concept noun (titles, prose, filenames, frozen-doc references) unchanged. Lean cascade — command name not a frozen requirement + zero behavior change → controller-direct wiring edit (P3, CR-006 precedent), no new R-id/aPRD-version/HLD-delta. Additive to v9 (D1–D29 bodies unchanged); set coherent. Re-signed content_sha256 over the 30-body log set. v9 added ADR-0029 (D29) — CR-008 Amendment-1 to D28 (operator-approved 2026-06-12): brief.md branch: field as authoritative binding (R-MW-5), Option-B auto-checkout (Cases A–E), new HALT classes (wrong-branch/no-registration). Additive to v8 (D1–D28 bodies unchanged); set coherent. Re-signed content_sha256 over the 29-body log set. v8 added ADR-0028 (D28) — CR-007 branch-per-workstream model (operator-approved 2026-06-12): branch isolation (R-MW-1), auto-reconcile via merge --ff-only (R-MW-2), enforce-non-master HALT (R-MW-3), new-stream dispatch local-only (R-MW-4, G1 gate: NO auto-push). Additive to v7 (D1–D27 bodies unchanged); set coherent. Re-signed content_sha256 over the 28-body log set. v7 added ADR-0024..0027 (D24–D27) — CR-002 deterministic-machine, all EXTENDING D22 (operator-approved Phase-2 re-trigger 2026-06-11): D24 schema-registry + structured-output (new frozen artifact class schemas.lock), D25 io-manifest + resolver (new frozen artifact class io.lock), D26 deterministic spine (Tier-1 emitters + verdict/route/sequence/idgen/coverage compute), D27 open-decision resolutions (output grade · Tier-1 retirement · CR batching). Additive to v6 (D1–D23 bodies unchanged); set coherent. New ADR bodies authored directly from the frozen design corpus `_deterministic-machine/` docs 00–04 (the CR drafts), so draft_ref points there. Re-signed content_sha256 over the 27-body log set. v6 added ADR-0023 (D23) — stack ADR `stack = typescript`, the M12 Part-2 second canon profile / agnosticism proof (sibling of D21, NOT active; this repo's active stack stays ADR-0021). Additive to v5 (D1–D22 bodies unchanged); set coherent. Re-signed content_sha256 over the 23-body log set. v5 (editorial, operator-approved 2026-06-09) — scrubbed build-initiative provenance labels from ADR-0022 body (two inline references to the now-finished authoring scaffolding); no decision content changed, set remains coherent, all 22 bodies otherwise unchanged. v4 added ADR-0022 (D22) — deterministic helper tools, operator-approved 2026-06-08 (review gate = operator per spec §5.8 senior/human reviewer). content_sha256 = sha256 of .adr/log/*.md concatenated in sorted-name order.",
+  "amendment": "v11 added ADR-0031 (D31) — CR-010 reranker ledger hygiene (operator-approved 2026-06-12): prune complete+accepted+merged-wave records from .roadmap/08-rerank.json at STEP 0.1 after auto-reconcile (R-LH-1; merged = done_sentinel present on master), preserve open/live records — remaining_sequence + open deferred_findings (R-LH-2), auto + idempotent, ledger informational not source-of-truth (R-LH-3, D20). Collapse-with-git-trail retention; mechanical spine tool tools/det/prune-ledger.mjs, controller-direct (P3, W7/W8/W18 precedent). Additive to v10 (D1–D30 bodies unchanged); set coherent. Re-signed content_sha256 over the 31-body log set. v10 added ADR-0030 (D30) — CR-009 rename launcher command /self-host → /evolve, clean/no-alias (operator-approved 2026-06-12): surface-rename of the Claude Code launcher slash command only; self-host concept noun (titles, prose, filenames, frozen-doc references) unchanged. Lean cascade — command name not a frozen requirement + zero behavior change → controller-direct wiring edit (P3, CR-006 precedent), no new R-id/aPRD-version/HLD-delta. Additive to v9 (D1–D29 bodies unchanged); set coherent. Re-signed content_sha256 over the 30-body log set. v9 added ADR-0029 (D29) — CR-008 Amendment-1 to D28 (operator-approved 2026-06-12): brief.md branch: field as authoritative binding (R-MW-5), Option-B auto-checkout (Cases A–E), new HALT classes (wrong-branch/no-registration). Additive to v8 (D1–D28 bodies unchanged); set coherent. Re-signed content_sha256 over the 29-body log set. v8 added ADR-0028 (D28) — CR-007 branch-per-workstream model (operator-approved 2026-06-12): branch isolation (R-MW-1), auto-reconcile via merge --ff-only (R-MW-2), enforce-non-master HALT (R-MW-3), new-stream dispatch local-only (R-MW-4, G1 gate: NO auto-push). Additive to v7 (D1–D27 bodies unchanged); set coherent. Re-signed content_sha256 over the 28-body log set. v7 added ADR-0024..0027 (D24–D27) — CR-002 deterministic-machine, all EXTENDING D22 (operator-approved Phase-2 re-trigger 2026-06-11): D24 schema-registry + structured-output (new frozen artifact class schemas.lock), D25 io-manifest + resolver (new frozen artifact class io.lock), D26 deterministic spine (Tier-1 emitters + verdict/route/sequence/idgen/coverage compute), D27 open-decision resolutions (output grade · Tier-1 retirement · CR batching). Additive to v6 (D1–D23 bodies unchanged); set coherent. New ADR bodies authored directly from the frozen design corpus `_deterministic-machine/` docs 00–04 (the CR drafts), so draft_ref points there. Re-signed content_sha256 over the 27-body log set. v6 added ADR-0023 (D23) — stack ADR `stack = typescript`, the M12 Part-2 second canon profile / agnosticism proof (sibling of D21, NOT active; this repo's active stack stays ADR-0021). Additive to v5 (D1–D22 bodies unchanged); set coherent. Re-signed content_sha256 over the 23-body log set. v5 (editorial, operator-approved 2026-06-09) — scrubbed build-initiative provenance labels from ADR-0022 body (two inline references to the now-finished authoring scaffolding); no decision content changed, set remains coherent, all 22 bodies otherwise unchanged. v4 added ADR-0022 (D22) — deterministic helper tools, operator-approved 2026-06-08 (review gate = operator per spec §5.8 senior/human reviewer). content_sha256 = sha256 of .adr/log/*.md concatenated in sorted-name order.",
   "gate": {
     "reconcile_verdict": "coherent",
     "critique_verdict": "clean"
@@ -408,7 +408,21 @@
       "cr": "CR-009",
       "draft_ref": ".aprd/change-requests/CR-009.md",
       "log_ref": "log/0030-rename-launcher-command-self-host-to-evolve.md"
+    },
+    {
+      "id": "ADR-0031",
+      "dn": "D31",
+      "title": "Reranker ledger hygiene — prune merged-wave records at STEP 0.1",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "operator-approved",
+      "supersedes": null,
+      "superseded_by": null,
+      "cr": "CR-010",
+      "draft_ref": ".aprd/change-requests/CR-010.md",
+      "log_ref": "log/0031-reranker-ledger-hygiene-prune-merged.md"
     }
   ],
-  "adr_count": 30
+  "adr_count": 31
 }

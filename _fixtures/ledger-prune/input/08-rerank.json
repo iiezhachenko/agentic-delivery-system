@@ -1,0 +1,58 @@
+{
+  "base_ref": ".roadmap/07-sequence-reviewed.json",
+  "class": "ledger-prune-fixture",
+  "roadmap_version": 5,
+  "verdict": "re_ranked",
+  "_note": "roadmap_version 3 = stale historical sync note simulating accumulated bloat (wave A intake). roadmap_version 4 = stale historical sync note (wave B intake + lessons that git already retains). roadmap_version 5 = stale historical sync note (wave C built on feature branch, not yet merged). This _note grows unboundedly across syncs until ledger-prune collapses it (D31/CR-010).",
+  "completed": [
+    {
+      "position": 1,
+      "id": "WX-MERGED-A",
+      "name": "merged wave A",
+      "status": "shipped",
+      "unit": "src/merged-a.txt",
+      "done_sentinel": "src/merged-a.txt"
+    },
+    {
+      "position": 2,
+      "id": "WX-MERGED-B",
+      "name": "merged wave B",
+      "status": "shipped",
+      "unit": "src/merged-b.txt",
+      "done_sentinel": "src/merged-b.txt"
+    },
+    {
+      "position": 3,
+      "id": "WX-UNMERGED-C",
+      "name": "accepted wave C — on feature branch only, NOT merged to master",
+      "status": "shipped",
+      "unit": "src/unmerged-c.txt",
+      "done_sentinel": "src/unmerged-c.txt"
+    }
+  ],
+  "remaining_sequence": [
+    {
+      "position": 4,
+      "id": "WX-NEXT-D",
+      "name": "next unshipped build",
+      "status": "pending",
+      "unit": "src/next-d.txt",
+      "done_sentinel": "src/next-d.txt"
+    }
+  ],
+  "coverage": {
+    "scope_note": "Synthetic ledger-prune oracle. Merged set (present on master) = wave A + wave B; wave C accepted-but-unmerged; wave D unshipped.",
+    "completed": ["WX-MERGED-A", "WX-MERGED-B", "WX-UNMERGED-C"],
+    "remaining_ranked": ["WX-NEXT-D"],
+    "deferred_findings": [
+      {
+        "id": "IX-OPEN",
+        "source": "synthetic",
+        "status": "deferred",
+        "note": "Open carry-forward finding — MUST survive prune (R-LH-2). Not a merged wave."
+      }
+    ],
+    "missing": [],
+    "duplicated": []
+  }
+}

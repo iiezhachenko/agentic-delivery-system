@@ -1,7 +1,7 @@
 {
   "artifact": "components.json",
   "class": "self-host",
-  "note": "Role library = build-DAG nodes of agentic-delivery-pipeline deliverable. Scanned from prompts/ (built skeleton). One role = one prompt (D1) — EXCEPT emitter_owned roles (D26/D27): Tier-1 whole-mechanical role whose artifact owned end-to-end by tools/det/emit/*.mjs, prompt retired, role identity survives via sentinel + emitter_owned entry (no .md at unit_path). 39 roles, 2 emitter-owned. STREAM-MANAGER = operating-model helper (D28/CR-007): not a stochastic role, no prompt file — logic lives inline in orchestrator STEP 0.0 + STEP 0.1 + new-stream dispatch; _streams/ tree is the durable registry.",
+  "note": "Role library = build-DAG nodes of agentic-delivery-pipeline deliverable. Scanned from prompts/ (built skeleton). One role = one prompt (D1) — EXCEPT emitter_owned roles (D26/D27): Tier-1 whole-mechanical role whose artifact owned end-to-end by tools/det/emit/*.mjs, prompt retired, role identity survives via sentinel + emitter_owned entry (no .md at unit_path). 39 roles, 2 emitter-owned. STREAM-MANAGER = operating-model helper (D28/CR-007): not a stochastic role, no prompt file — logic lives inline in orchestrator STEP 0.0 + STEP 0.1 + new-stream dispatch; _streams/ tree is the durable registry. LEDGER-PRUNE = operating-model helper (D31/CR-010): not a stochastic role, det-tool-backed (tools/det/prune-ledger.mjs), no prompt file — prunes merged-wave records from the informational reranker ledger at STEP 0.1 after reconcile.",
   "phases": [
     {
       "phase": "00-aprd",
@@ -94,6 +94,16 @@
       "amends_adr": "ADR-0029",
       "cr": "CR-008",
       "note": "Operating-model helper (D28/D29). Not a stochastic island — logic is mechanical git + file writes (branch check, merge, brief write). Implemented inline in orchestrator STEP 0.0 (enforce-non-master R-MW-3; branch-match R-MW-5, D29 Option-B Cases A–E), STEP 0.1 (auto-reconcile, R-MW-2), and new-stream dispatch path (R-MW-4). No prompt file. Durable workstream registry = _streams/<slug>/brief.md; branch: field is authoritative binding (R-MW-5, D29). Precondition guard: branch in registered-pending-set OR (master + <=1 pending auto-checkout) AND reconcile_from_main clean | HALT (see contracts.json step-0-precondition)."
+    },
+    {
+      "role": "LEDGER-PRUNE",
+      "phase": "01-roadmap",
+      "emitter": "tools/det/prune-ledger.mjs",
+      "prompt_file": null,
+      "sentinel": "tools/det/prune-ledger.mjs",
+      "adr": "ADR-0031",
+      "cr": "CR-010",
+      "note": "Operating-model helper (D31). Not a stochastic island — logic is mechanical git read + JSON surgery (detect merged via git cat-file -e master:<done_sentinel>, drop merged completed[] rows + mirror, collapse _note). Det-tool-backed: pure pruneLedger(ledger, mergedSentinels) + git-backed CLI in tools/det/prune-ledger.mjs. Invoked inline at orchestrator STEP 0.1 after auto-reconcile. Prunes merged-only (R-LH-1); preserves remaining_sequence + open deferred_findings (R-LH-2); idempotent (R-LH-3). Ledger is informational ordering, not the disk-derived frontier (D20). Both-directions selftest: tools/det/prune-ledger.selftest.mjs vs _fixtures/ledger-prune/. Postcondition: contracts.json step-0.1-ledger-prune."
     }
   ],
   "emitter_owned": [

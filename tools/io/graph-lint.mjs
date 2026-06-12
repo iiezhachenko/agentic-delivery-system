@@ -19,7 +19,7 @@ const DEFAULT_ROOT = path.resolve(here, "..", "..");
 // --- constants: frozen-contracts embedded strings (copied VERBATIM from .hld/skeleton/contracts.json) ---
 const CONTRACTS_ARTIFACT = "contracts.json";
 const CONTRACTS_CLASS = "self-host";
-const CONTRACTS_NOTE = "Producer/consumer chain (PR2): each prompt writes the exact place+format the next reads; output schema of step N == input schema of step N+1. IDs thread R→AC→S→ADR→C→CT→F→commit. Precondition contracts (STREAM-MANAGER, D28+D29/CR-008): STEP 0 entry enforces branch isolation + branch-match before any frontier work begins.";
+const CONTRACTS_NOTE = "Producer/consumer chain (PR2): each prompt writes the exact place+format the next reads; output schema of step N == input schema of step N+1. IDs thread R→AC→S→ADR→C→CT→F→commit. Precondition contracts (STREAM-MANAGER, D28+D29/CR-008): STEP 0 entry enforces branch isolation + branch-match before any frontier work begins. Postcondition contracts (LEDGER-PRUNE, D31/CR-010): STEP 0.1 prunes merged-wave records from the informational reranker ledger after reconcile.";
 const CONTRACTS_RULE = "PR2";
 const CONTRACTS_TERMINAL = "terminal (accepted staging demo)";
 // preconditions: STREAM-MANAGER gate (CR-008/ADR-0029) — not derivable from registry phase list; embedded verbatim from frozen, like NOTE/TERMINAL above.
@@ -39,6 +39,19 @@ const CONTRACTS_PRECONDITIONS = [
     },
     consumers: ["STEP 0 frontier-scan", "all subsequent STEP 0–6"],
     violation_response: "HALT — list pending streams (Case D/E R-MW-5) OR list in-flight branches (R-MW-3) OR report merge conflict (R-MW-2); do not proceed",
+  },
+];
+// postconditions: LEDGER-PRUNE (CR-010/ADR-0031) — not derivable from registry phase list; embedded verbatim from frozen, like NOTE/TERMINAL/PRECONDITIONS above.
+const CONTRACTS_POSTCONDITIONS = [
+  {
+    id: "step-0.1-ledger-prune",
+    enforcer: "LEDGER-PRUNE (orchestrator STEP 0.1, tools/det/prune-ledger.mjs)",
+    adr: "ADR-0031",
+    cr: "CR-010",
+    trigger: "STEP 0.1, after git merge origin/main --ff-only == clean",
+    contract: "completed[] rows whose done_sentinel present on master pruned (R-LH-1, merged=complete+accepted+merged) AND remaining_sequence + open deferred_findings preserved (R-LH-2) AND idempotent re-run = no-op (R-LH-3)",
+    consumers: ["STEP 0 frontier-scan (derives frontier from disk sentinels, NOT this ledger — D20)"],
+    invariant: "ledger is informational ordering, never the source of truth; prune never alters the disk-derived frontier",
   },
 ];
 
@@ -75,6 +88,7 @@ export function generateContracts(meta) {
     note: CONTRACTS_NOTE,
     rule: CONTRACTS_RULE,
     preconditions: CONTRACTS_PRECONDITIONS,
+    postconditions: CONTRACTS_POSTCONDITIONS,
     chain,
   };
 }
