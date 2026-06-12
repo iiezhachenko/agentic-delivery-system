@@ -1,5 +1,5 @@
 {
-  "version": "ba759be+p15af10d9.l297a7900",
+  "version": "21eced2+p89a9c4e6.l225c842f",
   "files": [
     {
       "src": "adapters/claude/agents/adp-orchestrator.md",
@@ -86,9 +86,15 @@
       "harness": "all"
     },
     {
+      "src": "prompts/00-aprd/ADOPT.md",
+      "path": "prompts/00-aprd/ADOPT.md",
+      "sha256": "8879ede4593a696ab4d10aa1b22c8f992848ceaaa703a8af36d695942e26ed6e",
+      "harness": "all"
+    },
+    {
       "src": "prompts/00-aprd/CLASSIFIER.md",
       "path": "prompts/00-aprd/CLASSIFIER.md",
-      "sha256": "4164cdfbdba522aecc82e01bbe8cab8ec2af9ba079abfbaa6cc674a403af5774",
+      "sha256": "29b1c7825239095944467843d9d53357ba50120c5b82b8cb936245c6691a6ad5",
       "harness": "all"
     },
     {
@@ -373,6 +379,7 @@
       "code-canon/typescript.md",
       "docs/generic-usage-guide.md",
       "docs/generic-workflow.md",
+      "prompts/00-aprd/ADOPT.md",
       "prompts/00-aprd/CLASSIFIER.md",
       "prompts/00-aprd/CRITIQUE.md",
       "prompts/00-aprd/EXTRACT-RULES.md",
@@ -430,6 +437,7 @@
       "code-canon/typescript.md",
       "docs/generic-usage-guide.md",
       "docs/generic-workflow.md",
+      "prompts/00-aprd/ADOPT.md",
       "prompts/00-aprd/CLASSIFIER.md",
       "prompts/00-aprd/CRITIQUE.md",
       "prompts/00-aprd/EXTRACT-RULES.md",

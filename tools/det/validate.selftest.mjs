@@ -17,9 +17,10 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const REGISTRY = process.env.SCHEMA_REGISTRY
   ? path.resolve(process.env.SCHEMA_REGISTRY)
   : path.resolve(here, "..", "..", "schemas");
-const FIXTURES_GF = "/workspace/_fixtures/greenfield-clean";
-const FIXTURES_BF = "/workspace/_fixtures/brownfield-bugfix";
-const FIXTURES_GC = "/workspace/_fixtures/greenfield-canon";
+const ROOT = path.resolve(here, "..", "..");
+const FIXTURES_GF = `${ROOT}/_fixtures/greenfield-clean`;
+const FIXTURES_BF = `${ROOT}/_fixtures/brownfield-bugfix`;
+const FIXTURES_GC = `${ROOT}/_fixtures/greenfield-canon`;
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "schema-selftest-"));
 let pass = 0, fail = 0;
@@ -193,7 +194,7 @@ for (const [absPath, id] of gcPairs) {
 }
 
 // also validate greenfield build-reds diagnosis (skeleton-tested in original)
-const buildRedsDiagnosis = "/workspace/_fixtures/greenfield-build-reds/.build/slices/S4/diagnosis.json";
+const buildRedsDiagnosis = `${ROOT}/_fixtures/greenfield-build-reds/.build/slices/S4/diagnosis.json`;
 try {
   const inst = readJSON(buildRedsDiagnosis);
   const r = runValidate(inst, "build-diagnosis");
@@ -213,7 +214,7 @@ try {
 
 console.log(`\ndirection-1: ${dir1Validated} golden validated clean, ${dir1Skipped.length} skipped (listed):`);
 for (const { file, reason } of dir1Skipped) {
-  console.log(`  SKIP: ${file.replace("/workspace/_fixtures/", "")} — ${reason}`);
+  console.log(`  SKIP: ${file.replace(`${ROOT}/_fixtures/`, "")} — ${reason}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -374,7 +375,7 @@ const dir2Cases = [
   },
   {
     id: "build-diagnosis",
-    file: "/workspace/_fixtures/greenfield-build-reds/.build/slices/S4/diagnosis.json",
+    file: `${ROOT}/_fixtures/greenfield-build-reds/.build/slices/S4/diagnosis.json`,
     label: "verdict set to 'error' (not in enum)",
     mutate: (obj) => { obj.verdict = "error"; return obj; },
     keyword: "enum",

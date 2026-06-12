@@ -19,9 +19,28 @@ const DEFAULT_ROOT = path.resolve(here, "..", "..");
 // --- constants: frozen-contracts embedded strings (copied VERBATIM from .hld/skeleton/contracts.json) ---
 const CONTRACTS_ARTIFACT = "contracts.json";
 const CONTRACTS_CLASS = "self-host";
-const CONTRACTS_NOTE = "Producer/consumer chain (PR2): each prompt writes the exact place+format the next reads; output schema of step N == input schema of step N+1. IDs thread R→AC→S→ADR→C→CT→F→commit.";
+const CONTRACTS_NOTE = "Producer/consumer chain (PR2): each prompt writes the exact place+format the next reads; output schema of step N == input schema of step N+1. IDs thread R→AC→S→ADR→C→CT→F→commit. Precondition contracts (STREAM-MANAGER, D28+D29/CR-008): STEP 0 entry enforces branch isolation + branch-match before any frontier work begins.";
 const CONTRACTS_RULE = "PR2";
 const CONTRACTS_TERMINAL = "terminal (accepted staging demo)";
+// preconditions: STREAM-MANAGER gate (CR-008/ADR-0029) — not derivable from registry phase list; embedded verbatim from frozen, like NOTE/TERMINAL above.
+const CONTRACTS_PRECONDITIONS = [
+  {
+    id: "step-0-precondition",
+    enforcer: "STREAM-MANAGER (orchestrator STEP 0.0 + STEP 0.1)",
+    adr: "ADR-0029",
+    cr: "CR-008",
+    contract: "HEAD in registered-pending-branch-set (R-MW-5) OR (HEAD=master AND <=1 pending → auto-checkout) AND reconcile_from_main == clean | HALT",
+    branch_match_cases: {
+      A: "HEAD in pending set → pass",
+      B: "master + 1 pending → auto-checkout branch: value, continue",
+      C: "master + 0 pending → pass (solo-master)",
+      D: "master + >1 pending → HALT (ambiguous)",
+      E: "HEAD not in set AND not master → HALT (unregistered branch)",
+    },
+    consumers: ["STEP 0 frontier-scan", "all subsequent STEP 0–6"],
+    violation_response: "HALT — list pending streams (Case D/E R-MW-5) OR list in-flight branches (R-MW-3) OR report merge conflict (R-MW-2); do not proceed",
+  },
+];
 
 // --- deepEqual: order-insensitive structural equality (mirror validate.mjs) -----
 function deepEqual(a, b) {
@@ -55,6 +74,7 @@ export function generateContracts(meta) {
     class: CONTRACTS_CLASS,
     note: CONTRACTS_NOTE,
     rule: CONTRACTS_RULE,
+    preconditions: CONTRACTS_PRECONDITIONS,
     chain,
   };
 }

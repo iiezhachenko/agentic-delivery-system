@@ -11,10 +11,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { fileURLToPath } from "node:url";
 import { emit, idHighWater, integrationSeams } from "./baseline-map.mjs";
 import { validateFile } from "../validate.mjs";
 
-const FIX = "/workspace/_fixtures";
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+const FIX = `${ROOT}/_fixtures`;
 let pass = 0, fail = 0;
 const ok = (cond, msg) => { if (cond) pass++; else { fail++; console.log(`  FAIL: ${msg}`); } };
 const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf8"));

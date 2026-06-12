@@ -9,11 +9,14 @@
 //   build_order entry → comparison FLAGS the mismatch (proves check discriminates good/bad).
 // Determinism: emit twice → deep-equal. Mirrors coverage.selftest.mjs structure.
 import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { emitBuildPlan } from "./build-plan.mjs";
 import { validateFile } from "../validate.mjs";
 
-const GF = "/workspace/_fixtures/greenfield-clean";
-const BF = "/workspace/_fixtures/brownfield-feature";
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+const GF = `${ROOT}/_fixtures/greenfield-clean`;
+const BF = `${ROOT}/_fixtures/brownfield-feature`;
 let pass = 0, fail = 0;
 const ok = (cond, msg) => { if (cond) pass++; else { fail++; console.log(`  FAIL: ${msg}`); } };
 const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf8"));

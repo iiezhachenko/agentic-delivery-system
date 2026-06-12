@@ -5,9 +5,12 @@
 // Direction 2: break a bijection (orphan + double) → flagged; 2-owner entity → flagged;
 //   membership mocked when dep absent. Determinism: byte-identical twice.
 import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { bijection, bucketCoverage, singleOwner, membership, intersect } from "./coverage.mjs";
 
-const GF = "/workspace/_fixtures/greenfield-clean";
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const GF = `${ROOT}/_fixtures/greenfield-clean`;
 let pass = 0, fail = 0;
 const ok = (cond, msg) => { if (cond) pass++; else { fail++; console.log(`  FAIL: ${msg}`); } };
 const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf8"));

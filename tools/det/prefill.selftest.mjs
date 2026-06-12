@@ -6,10 +6,13 @@
 // Direction 2: planted defect — a hole left wrong-typed / mechanical field omitted makes the
 //   filled shell FAIL validation (the skeleton is load-bearing). Unknown schemaId throws.
 // Determinism: same input → byte-identical twice. Mirrors validate.selftest.mjs structure.
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { prefill, loadSchemaById } from "./prefill.mjs";
 import { validate } from "./validate.mjs";
 
-const REGISTRY = "/workspace/schemas";
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const REGISTRY = `${ROOT}/schemas`;
 let pass = 0, fail = 0;
 const ok = (cond, msg) => { if (cond) pass++; else { fail++; console.log(`  FAIL: ${msg}`); } };
 

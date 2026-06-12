@@ -1,5 +1,5 @@
 {
-  "target": "/workspace/_fixtures/economy/audit/planted-omission.md",
+  "target": "_fixtures/economy/audit/planted-omission.md",
   "type": "prompt",
   "verdict": "clean",
   "violations": [],

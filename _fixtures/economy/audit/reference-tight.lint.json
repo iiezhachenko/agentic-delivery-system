@@ -1,5 +1,5 @@
 {
-  "target": "/workspace/_fixtures/economy/audit/reference-tight.md",
+  "target": "_fixtures/economy/audit/reference-tight.md",
   "type": "prompt",
   "verdict": "clean",
   "violations": [],
