@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 33,
+  "roadmap_version": 34,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 33 (CR-015/ADR-0036 audit-spine playbook): W29a-AUDIT-PLAYBOOK complete — `prompts/_playbooks/audit-spine.md` promoted, CR-015 + ADR-0036 (D36) authored, adr.lock v16. Remaining audit-spine builds: W29f-LENS-DEFINE + W29g-AUDIT-RUN + W29h-AUDIT-REPORT + W29i-CLASSIFIER-OVERLAY + W29j-BASELINE-MAP-OVERLAY (on branch feature/audit-spine). Deferred=[I6, I7, I8, C8-BROWNFIELD-ORACLE] unchanged. Bugfix wave 8-entry frontier unchanged (unshipped). Retention = git is the trail (R-LH-2/D20).",
+  "_note": "roadmap_version 34 (CR-015/ADR-0036 audit-spine W29f): W29f-LENS-DEFINE complete — `prompts/00-aprd/LENS-DEFINE.md` promoted, components.json 39→40 roles (LENS-DEFINE added to 00-aprd phase), skeleton.lock v9→v10 re-signed, adr_version advanced to v16. Remaining audit-spine builds: W29g-AUDIT-RUN + W29h-AUDIT-REPORT + W29i-CLASSIFIER-OVERLAY + W29j-BASELINE-MAP-OVERLAY (on branch feature/audit-spine). Deferred=[I6, I7, I8, C8-BROWNFIELD-ORACLE] unchanged. Bugfix wave 8-entry frontier unchanged (unshipped). Retention = git is the trail (R-LH-2/D20).",
   "completed": [],
   "dependency_check": {
     "acyclic": true,
@@ -43,7 +43,7 @@
         "note": "Lint C8 flags repeated verbatim OPEN-tag across 5 ACs in the fixture. Operator-directed: mis-fire vs sanctioned mandatory-verbatim-tag pattern (W9/W10 precedent). Fixture oracle correct; do NOT alter fixture. Linter needs calibration for this pattern — treat as lint-calibration backlog. Route: next lint-calibration pass (P3, same as W9 C6/C8 fixes)."
       }
     ],
-    "in_progress_note": "CR-015 audit-spine playbook in flight (2026-06-12, roadmap_version 33, branch feature/audit-spine): W29a-AUDIT-PLAYBOOK shipped — `prompts/_playbooks/audit-spine.md` promoted + CR-015 + ADR-0036/D36 + adr.lock v16. Remaining W29f-LENS-DEFINE / W29g-AUDIT-RUN / W29h-AUDIT-REPORT / W29i-CLASSIFIER-OVERLAY / W29j-BASELINE-MAP-OVERLAY pending. I6/I7/I8 + C8-BROWNFIELD-ORACLE deferred (unchanged).",
+    "in_progress_note": "CR-015 audit-spine in flight (2026-06-12, roadmap_version 34, branch feature/audit-spine): W29a-AUDIT-PLAYBOOK + W29f-LENS-DEFINE shipped — `prompts/_playbooks/audit-spine.md` + `prompts/00-aprd/LENS-DEFINE.md` promoted. components.json 39→40 + skeleton.lock v10 re-signed. Remaining W29g-AUDIT-RUN / W29h-AUDIT-REPORT / W29i-CLASSIFIER-OVERLAY / W29j-BASELINE-MAP-OVERLAY pending. I6/I7/I8 + C8-BROWNFIELD-ORACLE deferred (unchanged).",
     "missing": [],
     "duplicated": []
   },

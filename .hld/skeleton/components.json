@@ -1,7 +1,7 @@
 {
   "artifact": "components.json",
   "class": "self-host",
-  "note": "Role library = build-DAG nodes of agentic-delivery-pipeline deliverable. Scanned from prompts/ (built skeleton). One role = one prompt (D1) — EXCEPT emitter_owned roles (D26/D27): Tier-1 whole-mechanical role whose artifact owned end-to-end by tools/det/emit/*.mjs, prompt retired, role identity survives via sentinel + emitter_owned entry (no .md at unit_path). 39 roles, 2 emitter-owned. STREAM-MANAGER = operating-model helper (D28/CR-007): not a stochastic role, no prompt file — logic lives inline in orchestrator STEP 0.0 + STEP 0.1 + new-stream dispatch; _streams/ tree is the durable registry. LEDGER-PRUNE = operating-model helper (D31/CR-010): not a stochastic role, det-tool-backed (tools/det/prune-ledger.mjs), no prompt file — prunes merged-wave records from the informational reranker ledger at STEP 0.1 after reconcile.",
+  "note": "Role library = build-DAG nodes of agentic-delivery-pipeline deliverable. Scanned from prompts/ (built skeleton). One role = one prompt (D1) — EXCEPT emitter_owned roles (D26/D27): Tier-1 whole-mechanical role whose artifact owned end-to-end by tools/det/emit/*.mjs, prompt retired, role identity survives via sentinel + emitter_owned entry (no .md at unit_path). 40 roles, 2 emitter-owned. STREAM-MANAGER = operating-model helper (D28/CR-007): not a stochastic role, no prompt file — logic lives inline in orchestrator STEP 0.0 + STEP 0.1 + new-stream dispatch; _streams/ tree is the durable registry. LEDGER-PRUNE = operating-model helper (D31/CR-010): not a stochastic role, det-tool-backed (tools/det/prune-ledger.mjs), no prompt file — prunes merged-wave records from the informational reranker ledger at STEP 0.1 after reconcile. LENS-DEFINE = audit-class interactive intake role (D36/CR-015): collects Operator-defined lens definitions + scope; writes .audit/lenses.json + .audit/scope.json; dispatched by CLASSIFIER when class=audit.",
   "phases": [
     {
       "phase": "00-aprd",
@@ -12,12 +12,13 @@
         "EXTRACT",
         "EXTRACT-RULES",
         "GAP-DETECT",
+        "LENS-DEFINE",
         "QUESTION-GEN",
         "RECONCILE",
         "SYNTHESIZE",
         "VERIFY"
       ],
-      "role_count": 9,
+      "role_count": 10,
       "unit_path": "prompts/00-aprd/<ROLE>.md"
     },
     {
@@ -122,5 +123,5 @@
       "note": "Tier-1 whole-mechanical (D26). Prompt retired W5/CR-002 (D27); artifact owned end-to-end by emitter (DAG-filter to build_set + real|mocked membership + coverage, deterministic, both modes). Role identity survives via sentinel + this entry (D1). Both-directions selftest: tools/det/emit/build-plan.selftest.mjs."
     }
   ],
-  "component_count": 39
+  "component_count": 40
 }
