@@ -27,9 +27,9 @@ active_stages:       { skeleton_identify: off, foundation_cut: off, scaffold: of
 depth_collapse:      { adr: blast-radius, hld: blast-radius }   # decision/design COLLAPSE by blast radius (D10/H11) — not hard-off
 aprd_extension:      [REPRO_STEPS, ROOT_CAUSE, BLAST_RADIUS, REGRESSION_GUARD]   # class-extension block SYNTHESIZE emits
 oracle_layers:       [reproduction, regression]   # reproduction (red→green) + regression BOTH mandatory
-prompt_overlays:     { BASELINE-MAP, GAP-DETECT, SYNTHESIZE, DIAGNOSE,
+prompt_overlays:     { BASELINE-MAP, GAP-DETECT, SYNTHESIZE, BUGFIX-LOCALIZE,
                        DERIVE-TESTS, MATERIALIZE-ORACLE, IMPLEMENT, VERIFY-OUTPUT }   # roles carrying a bugfix delta block
-new_roles:           []                              # BASELINE-MAP + DIAGNOSE already shipped — no net-new role
+new_roles:           [BUGFIX-LOCALIZE]               # net-new role for bugfix intake (CR-018/D37)
 build_depth:         single-unit-no-scaffold         # B13; single unit, typically no new component, harness exists
 verify_method:       inherited ladder + reproduction-must-flip-red→green + regression-must-stay-green
 ```
@@ -41,7 +41,7 @@ verify_method:       inherited ladder + reproduction-must-flip-red→green + reg
 - `grounding_corpus` — distinguishes from feature-add, which pulls canon-for-NEW-tech.
 - `active_stages` all off — harness already shipped by greenfield. Re-cutting skeleton/foundation/scaffold = redraw frozen box = BF1 violation.
 - `depth_collapse` — decision/design SCALE to blast radius (D10/H11), NOT hard-toggled like the three build-once stages. Typically 0 ADR / no HLD; boundary-moving or decision-reversing fix still earns ONE ADR / seam sketch.
-- `aprd_extension` — 4 blocks SYNTHESIZE adds at version-bump: REPRO_STEPS (how to trip defect), ROOT_CAUSE (DIAGNOSE verdict), BLAST_RADIUS (touched surface, scopes BF4 guard), REGRESSION_GUARD (BF4 — what stays green).
+- `aprd_extension` — 4 blocks SYNTHESIZE adds at version-bump: REPRO_STEPS (how to trip defect), ROOT_CAUSE (BUGFIX-LOCALIZE verdict), BLAST_RADIUS (touched surface, scopes BF4 guard), REGRESSION_GUARD (BF4 — what stays green).
 - `oracle_layers` — reproduction REPLACES feature-add's new-behavior layers (contract/flow/acceptance): bugfix asserts no new contract, makes ONE failing repro test flip red→green. Inherited contract tests on touched surface still run inside regression scope. Regression scoped to blast-radius + seams, NOT full suite (Risk R4).
-- `prompt_overlays` — DIAGNOSE = headline role (localize/root-cause); DERIVE-TESTS/MATERIALIZE-ORACLE author the reproduction test; IMPLEMENT = minimal fix at root cause; VERIFY-OUTPUT asserts repro green + regression green.
+- `prompt_overlays` — BUGFIX-LOCALIZE = headline role (localize/root-cause); runs at Phase 0 intake before synthesis. DERIVE-TESTS/MATERIALIZE-ORACLE author the reproduction test; IMPLEMENT = minimal fix at root cause; VERIFY-OUTPUT asserts repro green + regression green.
 - `build_depth: single-unit-no-scaffold` — new IDs (`R*/AC*/C*`) continue above baseline high-water-mark (BF3). Fix DOES edit existing src — that's the repair, scoped + regression-guarded (BF4). BF1 binds the FROZEN UPSTREAM (aprd.frozen/adr.log/locks) which never mutate; defect route there = new aPRD version + CR. NOT new-namespace-only.

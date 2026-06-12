@@ -1,7 +1,7 @@
 {
   "artifact": "components.json",
   "class": "self-host",
-  "note": "Role library = build-DAG nodes of agentic-delivery-pipeline deliverable. Scanned from prompts/ (built skeleton). One role = one prompt (D1) — EXCEPT emitter_owned roles (D26/D27): Tier-1 whole-mechanical role whose artifact owned end-to-end by tools/det/emit/*.mjs, prompt retired, role identity survives via sentinel + emitter_owned entry (no .md at unit_path). 43 roles, 2 emitter-owned. STREAM-MANAGER = operating-model helper (D28/CR-007): not a stochastic role, no prompt file — logic lives inline in orchestrator STEP 0.0 + STEP 0.1 + new-stream dispatch; _streams/ tree is the durable registry. LEDGER-PRUNE = operating-model helper (D31/CR-010): not a stochastic role, det-tool-backed (tools/det/prune-ledger.mjs), no prompt file — prunes merged-wave records from the informational reranker ledger at STEP 0.1 after reconcile. LENS-DEFINE = audit-class interactive intake role (D36/CR-015): collects Operator-defined lens definitions + scope; writes .audit/lenses.json + .audit/scope.json; dispatched by CLASSIFIER when class=audit. AUDIT-RUN = audit-class silent auditor role (D36/CR-015): reads lenses + scope; evaluates every criterion per in-scope file; writes .audit/audit-report.json; dispatched after LENS-DEFINE. AUDIT-REPORT = audit-class silent report writer role (D36/CR-015, trimmed D37/CR-017 §A): reads audit-report.json; writes .audit/report.md only; dispatched after AUDIT-RUN. AUDIT-PROMOTE = audit-class silent intake writer role (D37/CR-017 §B): reads audit-report.json; writes .aprd/00-raw-request.md shaped as ADP intake; invoked optionally after AUDIT-REPORT.",
+  "note": "Role library = build-DAG nodes of agentic-delivery-pipeline deliverable. Scanned from prompts/ (built skeleton). One role = one prompt (D1) — EXCEPT emitter_owned roles (D26/D27): Tier-1 whole-mechanical role whose artifact owned end-to-end by tools/det/emit/*.mjs, prompt retired, role identity survives via sentinel + emitter_owned entry (no .md at unit_path). 44 roles, 2 emitter-owned. STREAM-MANAGER = operating-model helper (D28/CR-007): not a stochastic role, no prompt file — logic lives inline in orchestrator STEP 0.0 + STEP 0.1 + new-stream dispatch; _streams/ tree is the durable registry. LEDGER-PRUNE = operating-model helper (D31/CR-010): not a stochastic role, det-tool-backed (tools/det/prune-ledger.mjs), no prompt file — prunes merged-wave records from the informational reranker ledger at STEP 0.1 after reconcile. LENS-DEFINE = audit-class interactive intake role (D36/CR-015): collects Operator-defined lens definitions + scope; writes .audit/lenses.json + .audit/scope.json; dispatched by CLASSIFIER when class=audit. AUDIT-RUN = audit-class silent auditor role (D36/CR-015): reads lenses + scope; evaluates every criterion per in-scope file; writes .audit/audit-report.json; dispatched after LENS-DEFINE. AUDIT-REPORT = audit-class silent report writer role (D36/CR-015, trimmed D37/CR-017 §A): reads audit-report.json; writes .audit/report.md only; dispatched after AUDIT-RUN. AUDIT-PROMOTE = audit-class silent intake writer role (D37/CR-017 §B): reads audit-report.json; writes .aprd/00-raw-request.md shaped as ADP intake; invoked optionally after AUDIT-REPORT. BUGFIX-LOCALIZE = bugfix-class Phase-0 intake role (D37/CR-018): reproduce → localize → root-cause a reported defect; writes .aprd/diagnosis.json; root_cause.cause carried VERBATIM by SYNTHESIZE (H10); extracted from DIAGNOSE Part C (SRP split).",
   "phases": [
     {
       "phase": "00-aprd",
@@ -10,6 +10,7 @@
         "AUDIT-PROMOTE",
         "AUDIT-REPORT",
         "AUDIT-RUN",
+        "BUGFIX-LOCALIZE",
         "CLASSIFIER",
         "CRITIQUE",
         "EXTRACT",
@@ -21,7 +22,7 @@
         "SYNTHESIZE",
         "VERIFY"
       ],
-      "role_count": 13,
+      "role_count": 14,
       "unit_path": "prompts/00-aprd/<ROLE>.md"
     },
     {
@@ -126,5 +127,5 @@
       "note": "Tier-1 whole-mechanical (D26). Prompt retired W5/CR-002 (D27); artifact owned end-to-end by emitter (DAG-filter to build_set + real|mocked membership + coverage, deterministic, both modes). Role identity survives via sentinel + this entry (D1). Both-directions selftest: tools/det/emit/build-plan.selftest.mjs."
     }
   ],
-  "component_count": 43
+  "component_count": 44
 }

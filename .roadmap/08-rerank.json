@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 42,
+  "roadmap_version": 43,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 42 (W30d-AUDIT-REPORT-SPLIT shipped, 2026-06-12): AUDIT-REPORT trimmed to report-only (D37/CR-017 §A), AUDIT-PROMOTE new role added (D37/CR-017 §B), audit-spine.md playbook updated (promote_path chain). components.json 42→43, skeleton.lock v12→v13. W30e–W30l unshipped (remaining CR-018–CR-021 role splits). W29i–W29j retained (CR-015 audit-spine overlay builds, still unshipped). Deferred unchanged [I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth).",
+  "_note": "roadmap_version 43 (W30e-DIAGNOSE-SPLIT shipped, 2026-06-12): DIAGNOSE trimmed to build-red only (two-mode: skeleton-build/slice-build), BUGFIX-LOCALIZE new Phase-0 role added (D37/CR-018), bugfix.md playbook rewired (prompt_overlays updated, new_roles=[BUGFIX-LOCALIZE]). components.json 43→44, skeleton.lock v13→v14, io.lock v2→v3. W30f–W30l unshipped (remaining CR-019–CR-021 role splits). W29i–W29j retained (CR-015 audit-spine overlay builds, still unshipped). Deferred unchanged [I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth).",
   "completed": [],
   "remaining_sequence": [
     {
@@ -86,7 +86,7 @@
       "position": 43,
       "id": "W30e-DIAGNOSE-SPLIT",
       "name": "CR-018: DIAGNOSE trimmed (build-red only) + BUGFIX-LOCALIZE added",
-      "status": "unshipped",
+      "status": "shipped",
       "unit": "prompts/00-aprd/BUGFIX-LOCALIZE.md",
       "done_sentinel": "prompts/00-aprd/BUGFIX-LOCALIZE.md",
       "depends_on": [
@@ -230,7 +230,7 @@
         "note": "Lint C8 flags repeated verbatim OPEN-tag across 5 ACs in the fixture. Operator-directed: mis-fire vs sanctioned mandatory-verbatim-tag pattern (W9/W10 precedent). Fixture oracle correct; do NOT alter fixture. Linter needs calibration for this pattern — treat as lint-calibration backlog. Route: next lint-calibration pass (P3, same as W9 C6/C8 fixes)."
       }
     ],
-    "in_progress_note": "CR-016 SRP-refactor planning signed (2026-06-12, roadmap_version 41, branch feature/spine-srp-refactor): W30a–W30c shipped — CR-016–CR-021 authored + ADR-0037 accepted (adr.lock v17). W30d–W30l (role splits, Class A + Class B) = next build workstream (unshipped). W29i–W29j (CR-015 audit-spine overlays) still pending. I6/I7/I8 + C8-BROWNFIELD-ORACLE deferred (unchanged).",
+    "in_progress_note": "SRP-refactor branch feature/spine-srp-refactor: W30a–W30e shipped (2026-06-12) — CR-016–CR-021 authored + ADR-0037 accepted (adr.lock v17) + W30d AUDIT-PROMOTE/AUDIT-REPORT-SPLIT + W30e DIAGNOSE-SPLIT/BUGFIX-LOCALIZE (roadmap_version 43, components.json 44, skeleton.lock v14, io.lock v3). W30f–W30l (CR-019–CR-021 role splits) = next. W29i–W29j (CR-015 audit-spine overlays) still pending. I6/I7/I8 + C8-BROWNFIELD-ORACLE deferred (unchanged).",
     "missing": [],
     "duplicated": []
   },

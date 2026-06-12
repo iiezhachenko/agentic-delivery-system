@@ -149,6 +149,24 @@
       ],
       "when": []
     },
+    "BUGFIX-LOCALIZE": {
+      "always": [
+        { "path": ".aprd/change-requests/CR-*.md", "glob": true, "hint": "PRIMARY — defect report: class:bugfix, REPRO_STEPS" },
+        { "path": ".aprd/aprd.lock",   "hint": "frozen baseline gate" },
+        { "path": ".adr/adr.lock",     "hint": "frozen baseline gate" },
+        { "path": ".hld/skeleton.lock","hint": "frozen baseline gate" },
+        { "path": ".aprd/aprd.frozen.md", "hint": "frozen baseline WHAT: expected behavior (BF1)" },
+        { "path": ".aprd/diagnosis.json", "optional": true, "hint": "prior run" }
+      ],
+      "when": [
+        { "if": { "class": "bugfix" },
+          "read": [
+            { "path": ".hld/slices/{slice}/contracts.json", "hint": "slice CT* + AC* on defect surface" },
+            { "path": ".build/slices/{slice}/oracle/oracle.json", "hint": "regression-baseline inventory" },
+            { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "trace REPRO_STEPS — read, never edit" }
+          ] }
+      ]
+    },
 
     "SLICE-EXTRACT": {
       "always": [
@@ -676,16 +694,6 @@
             { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "prior-built + this-slice code" },
             { "path": ".build/slices/{slice}/diagnosis.json", "optional": true, "hint": "prior run" }
           ] },
-        { "if": { "mode": "bugfix-localize" },
-          "read": [
-            { "path": ".aprd/change-requests/CR-*.md", "glob": true, "hint": "PRIMARY — defect report: class:bugfix" },
-            { "path": ".aprd/aprd.frozen.md", "hint": "frozen baseline WHAT: expected behavior" },
-            { "path": ".aprd/aprd.lock", "hint": "frozen baseline gate" },
-            { "path": ".hld/slices/{slice}/contracts.json", "hint": "slice CT* + AC* on defect surface" },
-            { "path": ".build/slices/{slice}/oracle/oracle.json", "hint": "regression-baseline inventory" },
-            { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "trace REPRO_STEPS — read, never edit" },
-            { "path": ".aprd/diagnosis.json", "optional": true, "hint": "prior run" }
-          ] }
       ]
     }
   }
