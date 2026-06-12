@@ -1,6 +1,6 @@
 # Self-Host Orchestrator — the control loop that builds the system on itself
 
-> The self-host control loop, with **no bookkeeping** (no status-pointer moves, no changelog append, no anti-bloat ceremony). State is **derived from disk** (D20). RE-RANK is the next-picker. Selected by the launcher (`/self-host` skill · `selfhost` agent); scoped to the repo root + the `agentic-delivery-pipeline` deliverable target.
+> The self-host control loop, with **no bookkeeping** (no status-pointer moves, no changelog append, no anti-bloat ceremony). State is **derived from disk** (D20). RE-RANK is the next-picker. Selected by the launcher (`/evolve` skill · `selfhost` agent); scoped to the repo root + the `agentic-delivery-pipeline` deliverable target.
 >
 > North Star: self-host-workflow §5, self-host-usage-guide §A1 Step 4. Stack: `D21`. Idempotency: `D20`.
 

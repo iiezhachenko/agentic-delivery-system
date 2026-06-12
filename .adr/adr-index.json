@@ -6,7 +6,7 @@
     "reconcile_verdict": "coherent",
     "critique_verdict": "clean"
   },
-  "note": "Canonical decision index (D1–D29 → ADR-0001..0029). D1–D4 are the foundational conventions; D21 is the stack ADR (stack = agentic-delivery-pipeline, this repo's active profile); D22 (operator-approved amendment) sanctions deterministic helper tools the spine may shell out to; D23 adds the second stack ADR (stack = typescript) — the M12 Part-2 agnosticism proof, a sibling profile, not the active one. D24–D27 (CR-002, deterministic-machine) EXTEND D22: D24 schema-registry + structured-output (new frozen class), D25 io-manifest + resolver (new frozen class), D26 deterministic spine (Tier-1 emitters + verdict/route/seq/id/coverage compute), D27 the three open-decision resolutions (output grade · Tier-1 retirement · CR batching). D28 (CR-007, operator-approved) branch-per-workstream model — branch isolation + auto-reconcile + enforce-non-master + new-stream dispatch local-only. D29 (CR-008, operator-approved) Amendment-1 to D28 — brief.md branch: authoritative binding (R-MW-5) + Option-B auto-checkout + new HALT classes (wrong-branch, no-registration). The index lives HERE as JSON, never as a markdown header (canonical fixture layout).",
+  "note": "Canonical decision index (D1–D30 → ADR-0001..0030). D1–D4 are the foundational conventions; D21 is the stack ADR (stack = agentic-delivery-pipeline, this repo's active profile); D22 (operator-approved amendment) sanctions deterministic helper tools the spine may shell out to; D23 adds the second stack ADR (stack = typescript) — the M12 Part-2 agnosticism proof, a sibling profile, not the active one. D24–D27 (CR-002, deterministic-machine) EXTEND D22: D24 schema-registry + structured-output (new frozen class), D25 io-manifest + resolver (new frozen class), D26 deterministic spine (Tier-1 emitters + verdict/route/seq/id/coverage compute), D27 the three open-decision resolutions (output grade · Tier-1 retirement · CR batching). D28 (CR-007, operator-approved) branch-per-workstream model — branch isolation + auto-reconcile + enforce-non-master + new-stream dispatch local-only. D29 (CR-008, operator-approved) Amendment-1 to D28 — brief.md branch: authoritative binding (R-MW-5) + Option-B auto-checkout + new HALT classes (wrong-branch, no-registration). D30 (CR-009, operator-approved) rename launcher command /self-host → /evolve, clean (no alias) — surface-rename only, self-host concept noun unchanged. The index lives HERE as JSON, never as a markdown header (canonical fixture layout).",
   "adrs": [
     {
       "id": "ADR-0001",
@@ -389,10 +389,24 @@
       "cr": "CR-008",
       "draft_ref": ".aprd/change-requests/CR-008.md",
       "log_ref": "log/0029-branch-binding-auto-checkout.md"
+    },
+    {
+      "id": "ADR-0030",
+      "dn": "D30",
+      "title": "Rename launcher command `/self-host` → `/evolve` (clean, no alias)",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "operator-approved",
+      "supersedes": null,
+      "superseded_by": null,
+      "cr": "CR-009",
+      "draft_ref": ".aprd/change-requests/CR-009.md",
+      "log_ref": "log/0030-rename-launcher-command-self-host-to-evolve.md"
     }
   ],
   "adr_counts": {
-    "rendered": 29,
+    "rendered": 30,
     "degenerate_forced": 0,
     "undecided_skipped": 0
   }

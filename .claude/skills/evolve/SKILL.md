@@ -1,5 +1,5 @@
 ---
-name: self-host
+name: evolve
 description: Run the delivery pipeline on its own project — author the next unshipped prompt
 argument-hint: "[optional: status | a specific ROLE to target, else RE-RANK picks the next]"
 ---

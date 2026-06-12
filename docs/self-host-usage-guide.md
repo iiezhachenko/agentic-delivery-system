@@ -30,7 +30,7 @@ Same two harnesses, same trade-offs as generic guide. Difference = purely what y
 | | **Claude Code** | **Kiro** |
 |---|---|---|
 | Form | Terminal CLI | Full IDE + chat panel |
-| Self-host driver | `/self-host` skill → **adp-orchestrator** wrapper (root-wired) scoped to repo root + agentic-delivery-pipeline target | CLI custom agent `selfhost` → same scope, run exclusively |
+| Self-host driver | `/evolve` skill → **adp-orchestrator** wrapper (root-wired) scoped to repo root + agentic-delivery-pipeline target | CLI custom agent `selfhost` → same scope, run exclusively |
 | Best when | scripted/automatable self-host runs | visual view of canonical trees + authored prompts |
 | Built-in spec flow | n/a | **not used** — system runs exclusively (as in generic guide) |
 
@@ -72,7 +72,7 @@ repo root/
 
 **Step 4 — The orchestrator wrapper binds the self-project params.** The canonical `.claude/agents/adp-orchestrator.md` wrapper (root-wired) is handed two things by the launcher: **WORKSPACE_ROOT = repo root** (engine + frozen trees coincide) + **DELIVERABLE_TARGET = agentic-delivery-pipeline coding-canon profile (`code-canon/agentic-delivery-pipeline.md`)** (so Build writes prompts + verifies via clean-room sim, not pytest). It reads the self-host loop body `prompts/_orchestrator.md` + runs it verbatim, spawning `step-runner` for clean-room verify. Outputs (authored prompts) land in `prompts/`.
 
-**Step 5 — `/self-host` entry point = a thin launcher** at `.claude/skills/self-host/SKILL.md`. It carries no loop logic — it just hands `$ARGUMENTS` to the **adp-orchestrator** wrapper with the self-host params:
+**Step 5 — `/evolve` entry point = a thin launcher** at `.claude/skills/evolve/SKILL.md`. It carries no loop logic — it just hands `$ARGUMENTS` to the **adp-orchestrator** wrapper with the self-host params:
 ```markdown
 ---
 name: self-host
@@ -102,17 +102,17 @@ claude
 
 **Step 2 — Build next prompt:**
 ```
-/self-host
+/evolve
 ```
 RE-RANK reads `.roadmap/`, picks first unshipped prompt (today: **RECONCILE/CRITIQUE** increment). Designs contract, IMPLEMENT authors `.md`, clean-room runner verifies against `_fixtures/`.
 
 **Step 3 — Judge at value gate** (Part C). First prompt: confirm **value** — does clean-room run deliver correct fixture value? Accept → promoted to `prompts/`. Once this gate clears once, loop proven.
 
-**Step 4 — Drain rest.** Re-run `/self-host` (or tell it to "continue draining the sequence"); loop authors each remaining prompt same way, you step back to spot-checks (workflow §7).
+**Step 4 — Drain rest.** Re-run `/evolve` (or tell it to "continue draining the sequence"); loop authors each remaining prompt same way, you step back to spot-checks (workflow §7).
 
 **Step 5 — Find outputs.** Authored prompts land in `prompts/<phase>/<ROLE>.md`; per-build records + verify verdicts land under build tree. Status **derived** — ask orchestrator to render from disk; no tracker file to read.
 
-**Resuming:** run `claude`, then `/resume` — or `/self-host` again. State on disk (canonical trees + `prompts/`), so continues from first unshipped/invalid prompt. See §3.
+**Resuming:** run `claude`, then `/resume` — or `/evolve` again. State on disk (canonical trees + `prompts/`), so continues from first unshipped/invalid prompt. See §3.
 
 ---
 
@@ -226,7 +226,7 @@ Self-build runs on same crash-safe guarantees as any delivery (decision **D20**)
 **Your gate answer safe too.** Value acceptance saved moment you give it; resume won't re-ask. Interrupted *before* you judged → re-presents prompt for judging, never silently promotes it.
 
 **How to resume (restart + re-run — no cleanup):**
-- **Claude Code:** `claude` → `/resume`, or `/self-host` again.
+- **Claude Code:** `claude` → `/resume`, or `/evolve` again.
 - **Kiro:** `kiro-cli chat --agent selfhost "continue"`.
 
 ---
@@ -251,11 +251,11 @@ Canonical trees = frozen artifacts — never hand-edited. Change to self-project
 **Run it — same launcher, phrased as a change to ADP:**
 ```
 # Claude Code
-/self-host "Add a `bugfix` class to the pipeline: classifier route + playbook + the role overlays it needs."
+/evolve "Add a `bugfix` class to the pipeline: classifier route + playbook + the role overlays it needs."
 # Kiro
 kiro-cli chat --agent selfhost "Add a `bugfix` class: classifier route + playbook + role overlays."
 ```
-Bare `/self-host` (no argument) still drains the planned roadmap. Hand it a **change request** and it runs the feature-add path instead — the classifier recognizes new-behavior-into-the-existing-prompt-library and routes `class=feature-add`.
+Bare `/evolve` (no argument) still drains the planned roadmap. Hand it a **change request** and it runs the feature-add path instead — the classifier recognizes new-behavior-into-the-existing-prompt-library and routes `class=feature-add`.
 
 **Meta-mapping — feature-add concepts (generic PART D) on the self-project:**
 
@@ -296,13 +296,13 @@ Bare `/self-host` (no argument) still drains the planned roadmap. Hand it a **ch
 - **Do I re-run aPRD / Roadmap / ADR / HLD?** No — those four phases already **frozen at repo root**. Only Build phase runs live. Re-running settled phases buys nothing + risks churn (workflow §4).
 - **Why can self-host start before generic Build phase finished?** Self-hosting needs only controller, oracle, synthesizer — all available now — and agentic-delivery-pipeline profile brings own build+verify mechanism (workflow §8).
 - **When am I "done"?** RE-RANK picks next prompt (not human), at least one prompt authored+shipped by pipeline because delivered correct fixture value (value gate cleared once), loop drained rest (workflow §9). Fully validated when **second** deliverable profile also runs through unchanged spine.
-- **How do I add a NEW capability (class/role/playbook) to ADP?** Bring it as a change request to the self-project (`/self-host "add …"` / `--agent selfhost "add …"`). ADP runs **feature-add on itself**: versions its own requirements, authors only the new prompts, and a regression guard keeps every shipped prompt's fixture oracle green. Full how-to: **§4A**. (Newly possible now that the feature-add capability is shipped — it was itself bootstrapped via the planned self-slice loop, since a capability can't feature-add itself into existence.)
+- **How do I add a NEW capability (class/role/playbook) to ADP?** Bring it as a change request to the self-project (`/evolve "add …"` / `--agent selfhost "add …"`). ADP runs **feature-add on itself**: versions its own requirements, authors only the new prompts, and a regression guard keeps every shipped prompt's fixture oracle green. Full how-to: **§4A**. (Newly possible now that the feature-add capability is shipped — it was itself bootstrapped via the planned self-slice loop, since a capability can't feature-add itself into existence.)
 - **Claude Code or Kiro — does self-build differ?** No. Same target, same trees, same value gate, same authored prompts; only surface (terminal vs IDE) + launcher differ.
 - **Status or run-loop file to maintain?** No — no hand-maintained tracker, changelog, run-loop file. State **derived from disk** (workflow §5): "what's done" scanned from `prompts/` + `_fixtures/` + locks, "what's next" = RE-RANK over roadmap.
 
 ## 8. Shortest version
 
-> **Deploy:** on top of generic deploy, point orchestrator at (1) **workspace root = repo root** (where four frozen trees already live) + (2) agentic-delivery-pipeline **coding-canon profile** `code-canon/agentic-delivery-pipeline.md` (selected by stack ADR), via launcher (Claude Code `/self-host`; Kiro `--agent selfhost`). **Use:** run launcher — RE-RANK picks next unshipped prompt, IMPLEMENT writes it, clean-room runner verifies against `_fixtures/`. **Judge:** at one gate, confirm prompt **delivers correct fixture value**; accept → promoted to `prompts/`. Clear that gate once (the proof), then **step back** + let loop drain rest. System builds system. **Adding a NEW capability to ADP** (a class/role/playbook the roadmap doesn't list)? Hand the launcher a change request — ADP runs feature-add on itself: versions its own requirements, authors only the new prompts, regression-guards every shipped prompt (**§4A**).
+> **Deploy:** on top of generic deploy, point orchestrator at (1) **workspace root = repo root** (where four frozen trees already live) + (2) agentic-delivery-pipeline **coding-canon profile** `code-canon/agentic-delivery-pipeline.md` (selected by stack ADR), via launcher (Claude Code `/evolve`; Kiro `--agent selfhost`). **Use:** run launcher — RE-RANK picks next unshipped prompt, IMPLEMENT writes it, clean-room runner verifies against `_fixtures/`. **Judge:** at one gate, confirm prompt **delivers correct fixture value**; accept → promoted to `prompts/`. Clear that gate once (the proof), then **step back** + let loop drain rest. System builds system. **Adding a NEW capability to ADP** (a class/role/playbook the roadmap doesn't list)? Hand the launcher a change request — ADP runs feature-add on itself: versions its own requirements, authors only the new prompts, regression-guards every shipped prompt (**§4A**).
 
 ---
 
