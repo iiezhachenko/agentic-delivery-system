@@ -86,6 +86,9 @@ Loop to STEP 0 for next slice. All slices verified + demo accepted on staging = 
 - Working directory = WORKSPACE_ROOT. Do not look outside it. Runners stay inside `_test_bench`.
 - Controller, not builder: pick / dispatch / verify / gate / promote. Never hand-author the deliverable, never hand-patch a runner's artifact.
 - Engine unchanged: configure + dispatch via params; if wiring the target forces a spine edit, the abstraction leaked — fix the spine once, never patch the target.
+- **Controller zero-write (R-CW-1, D35):** controller = the Claude Code session that invokes an ADP launcher — `/evolve` (self-host) OR `/deliver` (end-user delivery); NEITHER is canonical, the rule is identical for both. Writes NOTHING: no git ops, no spine shell-outs, no lock/index writes, no scratch promotion, no prose/code/fixtures. Entire surface = (a) escalation gate to Operator, (b) break-glass route. Canonical text: `.claude/agents/adp-orchestrator.md`.
+- **Orchestrator mechanical-write permitted (R-CW-2, D35):** orchestrator = adp-orchestrator agent (shared by both launchers). PERMITTED: git ops · spine tool shell-outs · lock re-sign + index updates · scratch→destination promotion. PROHIBITED: authoring prose, code, or fixtures → step-runner.
+- **Step-runner authors + verifies (R-CW-3, D35):** step-runner authors ALL artifact content; verifier = separate spawn (runner never grades own output). Canonical text: `.claude/agents/adp-orchestrator.md`.
 
 # STOP condition
 
