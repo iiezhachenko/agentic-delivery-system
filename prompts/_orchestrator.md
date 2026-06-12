@@ -36,10 +36,16 @@ Drive the delivery pipeline on its own project — "build the agentic delivery s
 - **`status`** (or "what's next" / dry-run) — render derived state + name the next unshipped prompt, **write nothing**. Run STEP 0 + STEP 1 only, report, STOP. This is how the operator asks "where are we?" — there is no file to read (usage §A2 Step 5).
 - **(default, no arg)** — build the next prompt: STEP 0 → STEP 6, pause at the gate (STEP 5).
 - **a specific `<ROLE>` arg** — target that prompt instead of letting RE-RANK pick (STEP 1 override); the rest of the loop is identical.
+- **`new-stream <slug> "<brief>"`** — queue a new workstream (R-MW-4, D28): create branch `feature/<slug>` locally off current HEAD (do NOT push), write `_streams/<slug>/brief.md` (ask, branch, status=pending, date), emit "New workstream queued on branch `feature/<slug>`. Check out that branch in a new harness session." STOP — do not advance the current workstream. Local-only (operator pushes when ready; no auto-push).
 
 # CONTROL LOOP
 
 ## STEP 0 — Derive state from disk (D20; never read a tracker)
+
+**STEP 0.0 — Enforce-non-master (R-MW-3, D28).** Run `git rev-parse --abbrev-ref HEAD`. If result = `master` or `main`: run `git branch --list 'feature/*' 'bugfix/*'`. Any present → HALT. Emit: "On master with in-flight workstream branches: [list]. Check out the target workstream branch and re-run." Do not proceed to STEP 0.1 or the frontier-scan.
+
+**STEP 0.1 — Auto-reconcile from main (R-MW-2, D28).** Run `git fetch origin && git merge origin/main --ff-only`. Clean merge → continue. Non-fast-forward or conflict → HALT. Emit: "Merge conflict or non-fast-forward against origin/main. Resolve manually, then re-run." Do not proceed to the frontier-scan. If no remote (local-only repo) skip `git fetch`; run `git merge main --ff-only` only if `main` branch exists locally; if not, skip reconcile and continue.
+
 Compute "what's done" by scanning, not by reading a status file:
 1. Read `.roadmap/08-rerank.json` — `remaining_sequence[]` (ordered remaining prompt-builds) + `completed[]` (already-shipped).
 2. For each entry, resolve its **`done_sentinel`** — the disk path whose presence = that build shipped (the self-host analog of D14's "first slice with no `components.json`"): the build's promoted output. A prompt-build is **done** iff its sentinel exists AND schema-validates AND **carries the build's class discriminator** — schema-valid alone is NOT enough (a partial/invalid artifact, OR an inherited baseline copy squatting the overlay path, counts as *not done* — D20 guarantee 5). **Discriminator (defeats the brownfield false-positive):** a brownfield overlay golden shares both path AND JSON schema with the greenfield baseline copy it must overwrite — so a schema-only check reads the un-overwritten greenfield copy as "done". Sentinel is done only if the golden's own `class`/`mode` == the build's class AND the class-specific structure is materialized (bugfix → `class_ext`/`reproduction_test` non-empty + `oracle_layers:[reproduction,regression]` + repaired `src/`; feature-add → its new-behavior layers) AND the role `.md` carries that class's inline delta/overlay block (the `prompt_overlays` entry named in `_playbooks/<class>.md`). Sentinels:
@@ -114,6 +120,7 @@ On accept: atomically move the scratch `.md` to its `prompts/<NN-phase>/<ROLE>.m
 - **NEVER run Layer-3 verify inline.** Runner + verifier MUST each be a `step-runner` subagent spawn (STEP 4.1). Inline execution = broken clean-room + context bloat. No exception.
 - No bookkeeping file, ever — no status file, no changelog, no anti-bloat ceremony. Re-introducing one re-introduces the drift it caused. (The STEP-4 authoring-quality gate is NOT this — distinction in STEP 4 intro.)
 - Engine unchanged (invariant #1): you configure + dispatch; if wiring the target forces a spine edit, the abstraction leaked — fix the spine once (P3), never patch the target.
+- **Branch enforcement is unconditional (D28/R-MW-3).** STEP 0.0 runs before any frontier-scan, before any build work. No bypass — not for `status` mode, not for `new-stream`. If on master with in-flight workstream branches, HALT every time.
 
 # STOP condition
 - `status` mode → printed the derived done/remaining tally + the named next prompt, wrote nothing → STOP.
