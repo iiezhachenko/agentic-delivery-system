@@ -25,11 +25,14 @@ P-DERIVE-TESTS-INC · P-RECONCILE-CRITIQUE-INC · P-BUILD-PLAN-SLICE · P-MATERI
 
 Frontier = first entry whose `done_sentinel` absent or schema-invalid — bugfix wave (8 entries above) still pending; **CR-007 multi-stream wave** positions 19–22 in `08-rerank.json` ALL SHIPPED (branch `feature/multi-stream-workstreams`, roadmap_version 26). **CR-008 branch-binding wave** positions 23–26 in `08-rerank.json` (same branch). W20-ADR-0028-AMEND BLOCKED at operator gate Q2 (design option selection required, roadmap_version 27).
 
-## Shipped head-start (audit-spine — W29a/W29f/W29g promoted, CR-015/ADR-0036)
+## Shipped head-start (audit-spine — W29a/W29f–W29j promoted, CR-015/ADR-0036)
 - audit-spine playbook (`prompts/_playbooks/audit-spine.md`) — operator gate ACCEPT 2026-06-12, branch `feature/audit-spine`.
 - CR-015 + ADR-0036 (D36) authored + adr.lock v16 re-signed.
 - LENS-DEFINE (`prompts/00-aprd/LENS-DEFINE.md`) — operator gate ACCEPT 2026-06-12.
 - AUDIT-RUN (`prompts/00-aprd/AUDIT-RUN.md`) — operator gate ACCEPT 2026-06-12. schema `audit-report` added. components.json 40→41, skeleton.lock v11, schemas.lock v3.
+- AUDIT-REPORT (`prompts/00-aprd/AUDIT-REPORT.md`, W29h) — silent report writer (`1e15945`).
+- W29i CLASSIFIER audit overlay (`prompts/00-aprd/CLASSIFIER.md`, `13c7967`) — `class=audit` routing + schema v4. Sentinel present on disk.
+- W29j BASELINE-MAP audit overlay (`prompts/00-aprd/BASELINE-MAP.md`, `6535710`) — read-existing-first grounding delta. Sentinel present on disk.
 
 ## Shipped head-start (SRP-refactor — W30a–W30f, CR-016–CR-019/ADR-0037, branch feature/spine-srp-refactor)
 - CR-016–CR-021 authored + ADR-0037 (D37) accepted, adr.lock v17 re-signed.
@@ -37,6 +40,8 @@ Frontier = first entry whose `done_sentinel` absent or schema-invalid — bugfix
 - DIAGNOSE trimmed to build-red only (two-mode: skeleton-build/slice-build). BUGFIX-LOCALIZE new Phase-0 role (D37/CR-018). bugfix.md playbook rewired. components.json 43→44, skeleton.lock v13→v14, io.lock v2→v3.
 - SEQUENCE trimmed to greenfield-only (CR-019). SEQUENCE-FEATURE-ADD new Phase-1 role (D37/CR-019). feature-add.md playbook rewired. components.json 44→45, skeleton.lock v14→v15, io.lock v3→v4.
 
-## Remaining (audit-spine — build in order on branch feature/audit-spine)
-1. **W29i-CLASSIFIER-OVERLAY** — CLASSIFIER audit delta block (emit `class=audit` + `has_adp_artifacts` guard). Sentinel: `class=audit` routing present in `prompts/00-aprd/CLASSIFIER.md`.
-2. **W29j-BASELINE-MAP-OVERLAY** — BASELINE-MAP audit delta block (read-existing-first grounding; baseline inventory before Operator interaction). Sentinel: audit overlay block present in `prompts/00-aprd/BASELINE-MAP.md`.
+## Remaining (SRP-refactor — build in order on branch feature/spine-srp-refactor)
+W30g–W30l (CR-020–CR-021 role splits). Frontier = first entry in `08-rerank.json` whose `done_sentinel` is absent/schema-invalid on disk. (Audit-spine W29i/W29j reconciled to shipped 2026-06-12 — sentinels present on disk, committed `13c7967`/`6535710`; were stale `unshipped` in tracker.)
+
+## Open engine-fix (independent of SRP wave)
+- **CR-022** — `_orchestrator.md` STEP 0 must derive frontier from `done_sentinel` on disk, not the `status` flag, + self-reconcile stale flags. Root cause of the W29i/W29j stale-flag mis-route. Spec: `.aprd/change-requests/CR-022.md`. Sentinel (when built): STEP 0 references `done_sentinel` disk scan as the gate.
