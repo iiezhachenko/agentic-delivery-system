@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 41,
+  "roadmap_version": 42,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 41 (CR-016 SRP-refactor post-gate sign): W30c-ADR0037-SIGN shipped — ADR-0037 promoted to log (status Accepted), adr-index.json rendered=37, adr.lock v17 (sha256 over 37 log bodies). W30d–W30l unshipped (role-split builds, subsequent workstream). W29i–W29j retained (CR-015 audit-spine overlay builds, still unshipped). Deferred unchanged [I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth).",
+  "_note": "roadmap_version 42 (W30d-AUDIT-REPORT-SPLIT shipped, 2026-06-12): AUDIT-REPORT trimmed to report-only (D37/CR-017 §A), AUDIT-PROMOTE new role added (D37/CR-017 §B), audit-spine.md playbook updated (promote_path chain). components.json 42→43, skeleton.lock v12→v13. W30e–W30l unshipped (remaining CR-018–CR-021 role splits). W29i–W29j retained (CR-015 audit-spine overlay builds, still unshipped). Deferred unchanged [I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth).",
   "completed": [],
   "remaining_sequence": [
     {
@@ -73,7 +73,7 @@
       "position": 42,
       "id": "W30d-AUDIT-REPORT-SPLIT",
       "name": "CR-017: AUDIT-REPORT trimmed (report only) + AUDIT-PROMOTE added",
-      "status": "unshipped",
+      "status": "shipped",
       "unit": "prompts/00-aprd/AUDIT-PROMOTE.md",
       "done_sentinel": "prompts/00-aprd/AUDIT-PROMOTE.md",
       "depends_on": [

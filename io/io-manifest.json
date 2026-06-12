@@ -143,6 +143,12 @@
       ],
       "when": []
     },
+    "AUDIT-PROMOTE": {
+      "always": [
+        { "path": ".audit/audit-report.json", "hint": "AUDIT-RUN output — findings[], summary; source of all intake content" }
+      ],
+      "when": []
+    },
 
     "SLICE-EXTRACT": {
       "always": [

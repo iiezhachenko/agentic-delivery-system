@@ -31,7 +31,10 @@ Frontier = first entry whose `done_sentinel` absent or schema-invalid — bugfix
 - LENS-DEFINE (`prompts/00-aprd/LENS-DEFINE.md`) — operator gate ACCEPT 2026-06-12.
 - AUDIT-RUN (`prompts/00-aprd/AUDIT-RUN.md`) — operator gate ACCEPT 2026-06-12. schema `audit-report` added. components.json 40→41, skeleton.lock v11, schemas.lock v3.
 
+## Shipped head-start (SRP-refactor — W30a–W30d, CR-016–CR-017/ADR-0037, branch feature/spine-srp-refactor)
+- CR-016–CR-021 authored + ADR-0037 (D37) accepted, adr.lock v17 re-signed.
+- AUDIT-REPORT trimmed to report-only (D37/CR-017 §A). AUDIT-PROMOTE new role (D37/CR-017 §B). audit-spine.md playbook updated. components.json 42→43, skeleton.lock v12→v13.
+
 ## Remaining (audit-spine — build in order on branch feature/audit-spine)
-1. **W29h-AUDIT-REPORT** — `prompts/00-aprd/AUDIT-REPORT.md` (silent: read `.audit/audit-report.json`; write `.audit/report.md` + optionally `.aprd/00-raw-request.md`). Sentinel: `prompts/00-aprd/AUDIT-REPORT.md`.
-2. **W29i-CLASSIFIER-OVERLAY** — CLASSIFIER audit delta block (emit `class=audit` + `has_adp_artifacts` guard). Sentinel: `class=audit` routing present in `prompts/00-aprd/CLASSIFIER.md`.
-3. **W29j-BASELINE-MAP-OVERLAY** — BASELINE-MAP audit delta block (read-existing-first grounding; baseline inventory before Operator interaction). Sentinel: audit overlay block present in `prompts/00-aprd/BASELINE-MAP.md`.
+1. **W29i-CLASSIFIER-OVERLAY** — CLASSIFIER audit delta block (emit `class=audit` + `has_adp_artifacts` guard). Sentinel: `class=audit` routing present in `prompts/00-aprd/CLASSIFIER.md`.
+2. **W29j-BASELINE-MAP-OVERLAY** — BASELINE-MAP audit delta block (read-existing-first grounding; baseline inventory before Operator interaction). Sentinel: audit overlay block present in `prompts/00-aprd/BASELINE-MAP.md`.
