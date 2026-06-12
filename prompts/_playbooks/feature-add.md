@@ -26,7 +26,7 @@ grounding_corpus:    [existing .aprd/.adr/.hld/.build, src/, conventions, canon-
 active_stages:       { skeleton_identify: off, foundation_cut: off, scaffold: off }   # foundation + harness already built — don't re-cut/re-scaffold
 aprd_extension:      [INTEGRATION_SEAMS, REGRESSION_GUARD, CONVENTION_BASELINE]       # class-extension block SYNTHESIZE emits (BF6/BF4/BF5)
 oracle_layers:       [contract, flow, acceptance, regression]   # regression layer MANDATORY (BF4)
-prompt_overlays:     { EXTRACT, GAP-DETECT, SYNTHESIZE, SLICE-EXTRACT, SEQUENCE,
+prompt_overlays:     { EXTRACT, GAP-DETECT, SYNTHESIZE, SLICE-EXTRACT, SEQUENCE-FEATURE-ADD,
                        MATERIALIZE-ORACLE, IMPLEMENT, INTEGRATE, VERIFY-OUTPUT }       # roles carrying a feature-add delta block
 new_roles:           [BASELINE-MAP]                              # net-new role, head of feature-add intake
 build_depth:         per-slice-no-scaffold                       # MODE=slice; harness exists, no scaffold
@@ -41,3 +41,4 @@ verify_method:       inherited ladder + regression-must-stay-green
 - `aprd_extension` — 3 blocks SYNTHESIZE adds at version-bump: INTEGRATION_SEAMS (BF6 — where feature plugs into existing components), REGRESSION_GUARD (BF4 — what stays green), CONVENTION_BASELINE (BF5 — existing conventions new code matches).
 - `oracle_layers += regression` — binds BF4. Regression layer MANDATORY but scoped to touched surface + declared seams, NOT full inherited suite (Risk R4 — full re-run blows cost/time).
 - `build_depth: per-slice-no-scaffold` — MODE=slice; harness exists so no scaffold step. New IDs (`R*/AC*/S*/ADR*/C*`) continue above baseline high-water-mark (BF3); each slice integrates at a declared seam (BF6).
+- `prompt_overlays: SEQUENCE-FEATURE-ADD` — roadmap sequencing for feature-add dispatches to SEQUENCE-FEATURE-ADD (CR-019/D37 SRP split: SEQUENCE greenfield-only; feature-add path extracted).

@@ -31,10 +31,11 @@ Frontier = first entry whose `done_sentinel` absent or schema-invalid — bugfix
 - LENS-DEFINE (`prompts/00-aprd/LENS-DEFINE.md`) — operator gate ACCEPT 2026-06-12.
 - AUDIT-RUN (`prompts/00-aprd/AUDIT-RUN.md`) — operator gate ACCEPT 2026-06-12. schema `audit-report` added. components.json 40→41, skeleton.lock v11, schemas.lock v3.
 
-## Shipped head-start (SRP-refactor — W30a–W30e, CR-016–CR-018/ADR-0037, branch feature/spine-srp-refactor)
+## Shipped head-start (SRP-refactor — W30a–W30f, CR-016–CR-019/ADR-0037, branch feature/spine-srp-refactor)
 - CR-016–CR-021 authored + ADR-0037 (D37) accepted, adr.lock v17 re-signed.
 - AUDIT-REPORT trimmed to report-only (D37/CR-017 §A). AUDIT-PROMOTE new role (D37/CR-017 §B). audit-spine.md playbook updated. components.json 42→43, skeleton.lock v12→v13.
 - DIAGNOSE trimmed to build-red only (two-mode: skeleton-build/slice-build). BUGFIX-LOCALIZE new Phase-0 role (D37/CR-018). bugfix.md playbook rewired. components.json 43→44, skeleton.lock v13→v14, io.lock v2→v3.
+- SEQUENCE trimmed to greenfield-only (CR-019). SEQUENCE-FEATURE-ADD new Phase-1 role (D37/CR-019). feature-add.md playbook rewired. components.json 44→45, skeleton.lock v14→v15, io.lock v3→v4.
 
 ## Remaining (audit-spine — build in order on branch feature/audit-spine)
 1. **W29i-CLASSIFIER-OVERLAY** — CLASSIFIER audit delta block (emit `class=audit` + `has_adp_artifacts` guard). Sentinel: `class=audit` routing present in `prompts/00-aprd/CLASSIFIER.md`.

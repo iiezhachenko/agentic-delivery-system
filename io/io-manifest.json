@@ -203,10 +203,15 @@
         { "path": ".roadmap/02-slices.json", "hint": "slice bodies (value/retires_risk/depends_on): scoring + cost-proxy, verbatim" },
         { "path": ".roadmap/03-verticality.json", "hint": "verdict + valid[]; only validated-vertical sequenced" }
       ],
-      "when": [
-        { "if": { "class": "feature-add" },
-          "read": [ { "path": ".roadmap/08-rerank.json", "hint": "BASELINE roadmap: completed[]=PIN (BF1), never re-sequenced; base_slices for dangling check" } ] }
-      ]
+      "when": []
+    },
+    "SEQUENCE-FEATURE-ADD": {
+      "always": [
+        { "path": ".roadmap/02-slices.json", "hint": "NEW candidate slice bodies (value/retires_risk/depends_on): scoring + cost-proxy, verbatim" },
+        { "path": ".roadmap/03-verticality.json", "hint": "verdict + valid[] for new slices; only validated-vertical slices ordered" },
+        { "path": ".roadmap/08-rerank.json", "hint": "BASELINE roadmap: completed[]=PIN (BF1), never re-sequenced; base_slices for dangling check" }
+      ],
+      "when": []
     },
     "FOUNDATION-CUT": {
       "always": [
@@ -693,7 +698,7 @@
             { "path": ".build/skeleton/integration-record.json", "hint": "FROZEN skeleton composition root" },
             { "path": "src/freelancer_app/**/*.py", "glob": true, "hint": "prior-built + this-slice code" },
             { "path": ".build/slices/{slice}/diagnosis.json", "optional": true, "hint": "prior run" }
-          ] },
+          ] }
       ]
     }
   }
