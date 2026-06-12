@@ -37,12 +37,20 @@ Drive the delivery pipeline on its own project — "build the agentic delivery s
 - **(default, no arg)** — build the next prompt: STEP 0 → STEP 6, pause at the gate (STEP 5).
 - **a specific `<ROLE>` arg** — target that prompt instead of letting RE-RANK pick (STEP 1 override); the rest of the loop is identical.
 - **`new-stream <slug> "<brief>"`** — queue a new workstream (R-MW-4, D28): create branch `feature/<slug>` locally off current HEAD (do NOT push), write `_streams/<slug>/brief.md` (ask, branch, status=pending, date), emit "New workstream queued on branch `feature/<slug>`. Check out that branch in a new harness session." STOP — do not advance the current workstream. Local-only (operator pushes when ready; no auto-push).
+- **`switch-to <slug>`** — switch to a registered workstream branch (R-MW-5, D29): read `_streams/<slug>/brief.md`; if absent → HALT "No stream registered as `<slug>`; run `new-stream` first."; checkout (or create) the `branch:` value; emit "Switched to branch `<branch>` for workstream `<slug>`. Re-run orchestrator to continue.". STOP — do not advance any workstream. Composes with Option-B auto-checkout.
 
 # CONTROL LOOP
 
 ## STEP 0 — Derive state from disk (D20; never read a tracker)
 
-**STEP 0.0 — Enforce-non-master (R-MW-3, D28).** Run `git rev-parse --abbrev-ref HEAD`. If result = `master` or `main`: run `git branch --list 'feature/*' 'bugfix/*'`. Any present → HALT. Emit: "On master with in-flight workstream branches: [list]. Check out the target workstream branch and re-run." Do not proceed to STEP 0.1 or the frontier-scan.
+**STEP 0.0 — Branch-match + enforce-non-master (R-MW-3/R-MW-5, D28/D29).** Run `git rev-parse --abbrev-ref HEAD` → HEAD. Read all `_streams/*/brief.md` where `status: pending` → collect `branch:` values = **registered set**. Evaluate (cases are exhaustive + mutually exclusive):
+- **Case A — HEAD in registered set** → correct branch. Proceed to STEP 0.1. No action.
+- **Case B — HEAD = `master`/`main` AND exactly 1 pending stream** → auto-checkout: run `git checkout <branch>` (or `git checkout -B <branch>` if absent); emit "Auto-checked out branch `<branch>` for workstream `<slug>`."; continue to STEP 0.1.
+- **Case C — HEAD = `master`/`main` AND 0 pending streams** → solo-master flow. Proceed to STEP 0.1.
+- **Case D — HEAD = `master`/`main` AND >1 pending streams** → HALT. Emit: "On master with multiple pending workstreams: [list slug + branch for each]. Check out the target workstream branch and re-run." Do not proceed.
+- **Case E — HEAD not in registered set AND not `master`/`main`** → HALT. Emit: "Branch `<HEAD>` not registered in `_streams/`; run `new-stream` to register it or `switch-to <slug>` to move to a registered workstream." Do not proceed.
+
+Note: `_streams/` absent or empty → registered set is empty → HEAD = master Case C (proceed) OR HEAD ≠ master Case E (HALT).
 
 **STEP 0.1 — Auto-reconcile from main (R-MW-2, D28).** Run `git fetch origin && git merge origin/main --ff-only`. Clean merge → continue. Non-fast-forward or conflict → HALT. Emit: "Merge conflict or non-fast-forward against origin/main. Resolve manually, then re-run." Do not proceed to the frontier-scan. If no remote (local-only repo) skip `git fetch`; run `git merge main --ff-only` only if `main` branch exists locally; if not, skip reconcile and continue.
 
@@ -120,7 +128,7 @@ On accept: atomically move the scratch `.md` to its `prompts/<NN-phase>/<ROLE>.m
 - **NEVER run Layer-3 verify inline.** Runner + verifier MUST each be a `step-runner` subagent spawn (STEP 4.1). Inline execution = broken clean-room + context bloat. No exception.
 - No bookkeeping file, ever — no status file, no changelog, no anti-bloat ceremony. Re-introducing one re-introduces the drift it caused. (The STEP-4 authoring-quality gate is NOT this — distinction in STEP 4 intro.)
 - Engine unchanged (invariant #1): you configure + dispatch; if wiring the target forces a spine edit, the abstraction leaked — fix the spine once (P3), never patch the target.
-- **Branch enforcement is unconditional (D28/R-MW-3).** STEP 0.0 runs before any frontier-scan, before any build work. No bypass — not for `status` mode, not for `new-stream`. If on master with in-flight workstream branches, HALT every time.
+- **Branch enforcement is unconditional (D28/D29, R-MW-3/R-MW-5).** STEP 0.0 runs before any frontier-scan, before any build work. No bypass — not for `status` mode, not for `new-stream`, not for `switch-to`. Cases A–E are exhaustive: every HEAD state routes to proceed OR auto-checkout OR HALT. Unregistered non-master branch always HALTs (Case E).
 
 # STOP condition
 - `status` mode → printed the derived done/remaining tally + the named next prompt, wrote nothing → STOP.
