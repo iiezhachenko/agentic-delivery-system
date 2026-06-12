@@ -136,6 +136,13 @@
       "always": [ { "path": ".aprd/03-grounding/rules-reconciled.json", "hint": "agreed AGR* + conflicts CONF*; carry tier/tool/setting verbatim, currency-check setting" } ],
       "when": []
     },
+    "AUDIT-REPORT": {
+      "always": [
+        { "path": ".aprd/aprd.lock", "hint": "project name source for report header" },
+        { "path": ".audit/audit-report.json", "hint": "AUDIT-RUN output — lenses, scope, findings[], summary; source of all report content" }
+      ],
+      "when": []
+    },
 
     "SLICE-EXTRACT": {
       "always": [

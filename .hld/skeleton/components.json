@@ -1,12 +1,13 @@
 {
   "artifact": "components.json",
   "class": "self-host",
-  "note": "Role library = build-DAG nodes of agentic-delivery-pipeline deliverable. Scanned from prompts/ (built skeleton). One role = one prompt (D1) — EXCEPT emitter_owned roles (D26/D27): Tier-1 whole-mechanical role whose artifact owned end-to-end by tools/det/emit/*.mjs, prompt retired, role identity survives via sentinel + emitter_owned entry (no .md at unit_path). 41 roles, 2 emitter-owned. STREAM-MANAGER = operating-model helper (D28/CR-007): not a stochastic role, no prompt file — logic lives inline in orchestrator STEP 0.0 + STEP 0.1 + new-stream dispatch; _streams/ tree is the durable registry. LEDGER-PRUNE = operating-model helper (D31/CR-010): not a stochastic role, det-tool-backed (tools/det/prune-ledger.mjs), no prompt file — prunes merged-wave records from the informational reranker ledger at STEP 0.1 after reconcile. LENS-DEFINE = audit-class interactive intake role (D36/CR-015): collects Operator-defined lens definitions + scope; writes .audit/lenses.json + .audit/scope.json; dispatched by CLASSIFIER when class=audit. AUDIT-RUN = audit-class silent auditor role (D36/CR-015): reads lenses + scope; evaluates every criterion per in-scope file; writes .audit/audit-report.json; dispatched after LENS-DEFINE.",
+  "note": "Role library = build-DAG nodes of agentic-delivery-pipeline deliverable. Scanned from prompts/ (built skeleton). One role = one prompt (D1) — EXCEPT emitter_owned roles (D26/D27): Tier-1 whole-mechanical role whose artifact owned end-to-end by tools/det/emit/*.mjs, prompt retired, role identity survives via sentinel + emitter_owned entry (no .md at unit_path). 42 roles, 2 emitter-owned. STREAM-MANAGER = operating-model helper (D28/CR-007): not a stochastic role, no prompt file — logic lives inline in orchestrator STEP 0.0 + STEP 0.1 + new-stream dispatch; _streams/ tree is the durable registry. LEDGER-PRUNE = operating-model helper (D31/CR-010): not a stochastic role, det-tool-backed (tools/det/prune-ledger.mjs), no prompt file — prunes merged-wave records from the informational reranker ledger at STEP 0.1 after reconcile. LENS-DEFINE = audit-class interactive intake role (D36/CR-015): collects Operator-defined lens definitions + scope; writes .audit/lenses.json + .audit/scope.json; dispatched by CLASSIFIER when class=audit. AUDIT-RUN = audit-class silent auditor role (D36/CR-015): reads lenses + scope; evaluates every criterion per in-scope file; writes .audit/audit-report.json; dispatched after LENS-DEFINE. AUDIT-REPORT = audit-class silent report writer role (D36/CR-015): reads audit-report.json; writes .audit/report.md + .aprd/00-raw-request.md; dispatched after AUDIT-RUN.",
   "phases": [
     {
       "phase": "00-aprd",
       "name": "aPRD (Understand)",
       "roles": [
+        "AUDIT-REPORT",
         "AUDIT-RUN",
         "CLASSIFIER",
         "CRITIQUE",
@@ -19,7 +20,7 @@
         "SYNTHESIZE",
         "VERIFY"
       ],
-      "role_count": 11,
+      "role_count": 12,
       "unit_path": "prompts/00-aprd/<ROLE>.md"
     },
     {
@@ -124,5 +125,5 @@
       "note": "Tier-1 whole-mechanical (D26). Prompt retired W5/CR-002 (D27); artifact owned end-to-end by emitter (DAG-filter to build_set + real|mocked membership + coverage, deterministic, both modes). Role identity survives via sentinel + this entry (D1). Both-directions selftest: tools/det/emit/build-plan.selftest.mjs."
     }
   ],
-  "component_count": 41
+  "component_count": 42
 }

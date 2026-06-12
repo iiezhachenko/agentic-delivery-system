@@ -1,14 +1,14 @@
 {
   "artifact": "io/io-manifest.json",
-  "version": "v1",
-  "content_sha256": "48222a13ebeae008649fdf1d8599184e05d0e82880b62d31eedde4142256db7f",
+  "version": "v2",
+  "content_sha256": "f86cb8a7c25a6d0e21d8621a9639e643d5f88b1d7cf52deba6ded68ef281e7d0",
   "content_sha256_algo": "sha256 of io/io-manifest.json file bytes verbatim (single file). Node crypto.createHash('sha256').update(<file bytes>).digest('hex'); == coreutils sha256sum.",
   "signer": "self-host:agentic-delivery-pipeline",
-  "signed_at": "2026-06-11T00:00:00Z",
+  "signed_at": "2026-06-12T13:00:00Z",
   "status": "frozen",
   "class": "self-host",
   "mode": "io-manifest",
-  "role_count": 40,
+  "role_count": 41,
   "group_count": 6,
-  "note": "W2 of CR-002, externalizes the input read-graph per D25/R11 (groups + roles[].always + roles[].when[] over state mode/class/pass). resolve(role,state) -> flat deduped path list via tools/io/resolve.mjs; orchestrator STEP-4.1 seeds _test_bench + path-grade injects. Prompts declare no inputs (W6 re-author drops inputs:). Collision roles (CRITIQUE/RECONCILE in >1 phase) keyed <ROLE>@<phase>. Both-directions selftest: tools/io/resolve.selftest.mjs."
+  "note": "v2 = v1 + W29h/CR-015 AUDIT-REPORT role entry (2026-06-12): AUDIT-REPORT added to roles[] — always reads .aprd/aprd.lock (project name) + .audit/audit-report.json (AUDIT-RUN output, schema audit-report). role_count 40→41. v1 = W2 of CR-002, externalizes the input read-graph per D25/R11 (groups + roles[].always + roles[].when[] over state mode/class/pass). resolve(role,state) -> flat deduped path list via tools/io/resolve.mjs; orchestrator STEP-4.1 seeds _test_bench + path-grade injects. Prompts declare no inputs (W6 re-author drops inputs:). Collision roles (CRITIQUE/RECONCILE in >1 phase) keyed <ROLE>@<phase>. Both-directions selftest: tools/io/resolve.selftest.mjs."
 }
