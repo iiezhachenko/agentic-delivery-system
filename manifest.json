@@ -1,5 +1,5 @@
 {
-  "version": "3055ba3+p89a9c4e6.l0af0ac8b",
+  "version": "6535710+p0370f2e9.le499ca6a",
   "files": [
     {
       "src": "adapters/claude/agents/adp-orchestrator.md",
@@ -92,9 +92,27 @@
       "harness": "all"
     },
     {
+      "src": "prompts/00-aprd/AUDIT-REPORT.md",
+      "path": "prompts/00-aprd/AUDIT-REPORT.md",
+      "sha256": "87b64a12d3dcac0ed848961d0d77838e49185a94d230d4ea05664aab09cba85d",
+      "harness": "all"
+    },
+    {
+      "src": "prompts/00-aprd/AUDIT-RUN.md",
+      "path": "prompts/00-aprd/AUDIT-RUN.md",
+      "sha256": "744276972bd71eb57863d2b57cc19339235e2f4d8acd756109e00548d5f71ff7",
+      "harness": "all"
+    },
+    {
+      "src": "prompts/00-aprd/BASELINE-MAP.md",
+      "path": "prompts/00-aprd/BASELINE-MAP.md",
+      "sha256": "65e68e6320fc2adb2a551ef7331868d01a36dba37dd348fa741d5f7c2d7391ff",
+      "harness": "all"
+    },
+    {
       "src": "prompts/00-aprd/CLASSIFIER.md",
       "path": "prompts/00-aprd/CLASSIFIER.md",
-      "sha256": "29b1c7825239095944467843d9d53357ba50120c5b82b8cb936245c6691a6ad5",
+      "sha256": "529521084a0fda83736aa2db1e162168f29d733e1b070c7da505ceb1ce7b238d",
       "harness": "all"
     },
     {
@@ -119,6 +137,12 @@
       "src": "prompts/00-aprd/GAP-DETECT.md",
       "path": "prompts/00-aprd/GAP-DETECT.md",
       "sha256": "a48e3df30082738da9906e16cb8e64b214d1d345f376296e8f2c745160152a52",
+      "harness": "all"
+    },
+    {
+      "src": "prompts/00-aprd/LENS-DEFINE.md",
+      "path": "prompts/00-aprd/LENS-DEFINE.md",
+      "sha256": "7189de33e8ba690b23a5f2db2ee03e88a434a54aacd70249c6e0e9cd8142321b",
       "harness": "all"
     },
     {
@@ -328,7 +352,7 @@
     {
       "src": "prompts/_orchestrator.generic.md",
       "path": "prompts/_orchestrator.md",
-      "sha256": "ecca48c0a6e69c64c83aef69b2b70fab0bc940b02fe39ba35c2bdd37ec3043c0",
+      "sha256": "e650d5c1f18f122be2b9c59c0bec0ebb033342d269309857389e31ab4fa53e73",
       "harness": "all"
     },
     {
@@ -380,11 +404,15 @@
       "docs/generic-usage-guide.md",
       "docs/generic-workflow.md",
       "prompts/00-aprd/ADOPT.md",
+      "prompts/00-aprd/AUDIT-REPORT.md",
+      "prompts/00-aprd/AUDIT-RUN.md",
+      "prompts/00-aprd/BASELINE-MAP.md",
       "prompts/00-aprd/CLASSIFIER.md",
       "prompts/00-aprd/CRITIQUE.md",
       "prompts/00-aprd/EXTRACT-RULES.md",
       "prompts/00-aprd/EXTRACT.md",
       "prompts/00-aprd/GAP-DETECT.md",
+      "prompts/00-aprd/LENS-DEFINE.md",
       "prompts/00-aprd/QUESTION-GEN.md",
       "prompts/00-aprd/RECONCILE.md",
       "prompts/00-aprd/SYNTHESIZE.md",
@@ -438,11 +466,15 @@
       "docs/generic-usage-guide.md",
       "docs/generic-workflow.md",
       "prompts/00-aprd/ADOPT.md",
+      "prompts/00-aprd/AUDIT-REPORT.md",
+      "prompts/00-aprd/AUDIT-RUN.md",
+      "prompts/00-aprd/BASELINE-MAP.md",
       "prompts/00-aprd/CLASSIFIER.md",
       "prompts/00-aprd/CRITIQUE.md",
       "prompts/00-aprd/EXTRACT-RULES.md",
       "prompts/00-aprd/EXTRACT.md",
       "prompts/00-aprd/GAP-DETECT.md",
+      "prompts/00-aprd/LENS-DEFINE.md",
       "prompts/00-aprd/QUESTION-GEN.md",
       "prompts/00-aprd/RECONCILE.md",
       "prompts/00-aprd/SYNTHESIZE.md",

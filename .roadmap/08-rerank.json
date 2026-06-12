@@ -1,33 +1,10 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 37,
+  "roadmap_version": 38,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 37 (CR-015 W29h shipped): W29h-AUDIT-REPORT promoted — sentinel prompts/00-aprd/AUDIT-REPORT.md on disk. Remaining W29i-CLASSIFIER-OVERLAY / W29j-BASELINE-MAP-OVERLAY pending. Bugfix wave 8-entry frontier unchanged (unshipped). Deferred=[I6, I7, I8, C8-BROWNFIELD-ORACLE] unchanged.",
-  "completed": [
-    {
-      "position": 35,
-      "id": "W29g-AUDIT-RUN",
-      "name": "AUDIT-RUN role prompt — silent: read baseline + lenses + scope, evaluate criteria, write audit-report.json",
-      "status": "shipped",
-      "unit": "prompts/00-aprd/AUDIT-RUN.md",
-      "done_sentinel": "prompts/00-aprd/AUDIT-RUN.md",
-      "depends_on": ["W29f-LENS-DEFINE"],
-      "cr": "CR-015",
-      "class": "audit"
-    },
-    {
-      "position": 36,
-      "id": "W29h-AUDIT-REPORT",
-      "name": "AUDIT-REPORT role prompt — silent: read audit-report.json, write report.md + optional 00-raw-request.md",
-      "status": "shipped",
-      "unit": "prompts/00-aprd/AUDIT-REPORT.md",
-      "done_sentinel": "prompts/00-aprd/AUDIT-REPORT.md",
-      "depends_on": ["W29g-AUDIT-RUN"],
-      "cr": "CR-015",
-      "class": "audit"
-    }
-  ],
+  "_note": "roadmap_version 38 (D31/CR-010 ledger-prune): pruned 2 merged+accepted+complete wave(s) [W29g-AUDIT-RUN, W29h-AUDIT-REPORT] — done_sentinel present on master. Live: remaining=2, kept-completed=0, deferred=[I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth; loop derives frontier from disk sentinels). Prior version history recoverable from git.",
+  "completed": [],
   "remaining_sequence": [
     {
       "position": 37,
@@ -36,7 +13,9 @@
       "status": "unshipped",
       "unit": "prompts/00-aprd/CLASSIFIER.md",
       "done_sentinel": "class=audit routing present in prompts/00-aprd/CLASSIFIER.md",
-      "depends_on": ["W29f-LENS-DEFINE"],
+      "depends_on": [
+        "W29f-LENS-DEFINE"
+      ],
       "cr": "CR-015",
       "class": "audit"
     },
@@ -47,7 +26,9 @@
       "status": "unshipped",
       "unit": "prompts/00-aprd/BASELINE-MAP.md",
       "done_sentinel": "audit overlay block present in prompts/00-aprd/BASELINE-MAP.md",
-      "depends_on": ["W29f-LENS-DEFINE"],
+      "depends_on": [
+        "W29f-LENS-DEFINE"
+      ],
       "cr": "CR-015",
       "class": "audit"
     }
