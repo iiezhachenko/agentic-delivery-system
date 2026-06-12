@@ -19,6 +19,7 @@ bugfix = brownfield repair class, re-enters SAME project (existing `.aprd/.adr/.
 
 ```yaml
 class: bugfix
+has_adp_artifacts:   true                # guard: ADP foundation (.aprd/.hld/.adr/) must exist before playbook activates; false -> HALT (CLASSIFIER Rule 2 checks upstream — CR-004 §B)
 classifier_hints:    "existing behavior wrong/crash/incorrect-output — repair to spec, no new behavior"
 grounding_order:     read-existing-first   # BF2; action = reproduce → localize → root-cause BEFORE client
 grounding_corpus:    [existing code, tests, git-history, runtime-repro]   # NO external canon — bugfix adds no new tech
@@ -35,6 +36,7 @@ verify_method:       inherited ladder + reproduction-must-flip-red→green + reg
 
 # Field bindings (one home each — no engine restate, no downstream-schema re-doc)
 
+- `has_adp_artifacts: true` — pre-check guard. CLASSIFIER verifies `.aprd/`, `.hld/`, `.adr/` all present before routing here (Rule 2, CR-004 §B). Reached only when true; reached with foundation absent (edge case) → HALT: "ADP foundation absent. Run `adopt` dispatch first, then re-run."
 - `grounding_order: read-existing-first` — binds BF2. Truth = existing code + reproduction; client asked only for residue repro can't answer.
 - `grounding_corpus` — distinguishes from feature-add, which pulls canon-for-NEW-tech.
 - `active_stages` all off — harness already shipped by greenfield. Re-cutting skeleton/foundation/scaffold = redraw frozen box = BF1 violation.

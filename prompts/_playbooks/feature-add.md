@@ -19,6 +19,7 @@ feature-add = change-request mechanism frozen canon already promised (P8), fired
 
 ```yaml
 class: feature-add
+has_adp_artifacts:   true                # guard: ADP foundation (.aprd/.hld/.adr/) must exist before playbook activates; false -> HALT (CLASSIFIER Rule 2 checks upstream — CR-004 §B)
 classifier_hints:    "new behavior into existing codebase"
 grounding_order:     read-existing-first   # flips greenfield ask-first (BF2); read .aprd/.adr/.hld/.build + src/ + conventions BEFORE client
 grounding_corpus:    [existing .aprd/.adr/.hld/.build, src/, conventions, canon-for-NEW-tech-only]
@@ -34,6 +35,7 @@ verify_method:       inherited ladder + regression-must-stay-green
 
 # Field bindings (one home each — no engine restate, no downstream-schema re-doc)
 
+- `has_adp_artifacts: true` — pre-check guard. CLASSIFIER verifies `.aprd/`, `.hld/`, `.adr/` all present before routing here (Rule 2, CR-004 §B). Reached only when true; reached with foundation absent (edge case) → HALT: "ADP foundation absent. Run `adopt` dispatch first, then re-run."
 - `grounding_order: read-existing-first` — binds BF2. Baseline truth (`.aprd/.adr/.hld/.build` + `src/` + conventions) read ONCE up front; client asked only for residue existing artifacts can't answer. Flips greenfield ask-first.
 - `active_stages` all off — foundation + harness already shipped by greenfield. Re-cutting skeleton/foundation/scaffold = redraw frozen box = BF1 violation. Stay additive.
 - `aprd_extension` — 3 blocks SYNTHESIZE adds at version-bump: INTEGRATION_SEAMS (BF6 — where feature plugs into existing components), REGRESSION_GUARD (BF4 — what stays green), CONVENTION_BASELINE (BF5 — existing conventions new code matches).
