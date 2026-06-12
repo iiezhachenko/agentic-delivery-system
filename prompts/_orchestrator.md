@@ -92,6 +92,7 @@ Present the verify result. The operator confirms, in priority order (usage §C1)
 
 ## STEP 6 — Promote (this is "shipped"; no changelog, no pointer move)
 On accept: atomically move the scratch `.md` to its `prompts/<NN-phase>/<ROLE>.md` home (and, for a new golden, promote it to `_fixtures/`). That promotion IS the ship — "shipped" = the freeze on disk + git (workflow §5.5).
+- **After the move succeeds, clean ALL scratch working files for this build:** `lint.json`, `economy-audit.json`, runner/verifier input `.txt` files, both-directions artefacts, superseded scratch `.md` variants. Order: move first, then clean. Cleanup fires only on accept/promote — NOT before the move succeeds, NOT on reject (no promotion occurred; scratch already discarded).
 - **Write NO bookkeeping.** Do not append a changelog, do not move a status pointer, do not run an anti-bloat pass. The next STEP-0 scan derives the new done-state from the promoted file itself.
 - Loop: return to STEP 0 for the next prompt, or STOP if the operator stepped back after the gate (workflow §7) — the loop then drains the remainder on its own, you spot-check.
 
