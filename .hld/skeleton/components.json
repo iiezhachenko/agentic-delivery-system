@@ -1,7 +1,7 @@
 {
   "artifact": "components.json",
   "class": "self-host",
-  "note": "Role library = build-DAG nodes of agentic-delivery-pipeline deliverable. Scanned from prompts/ (built skeleton). One role = one prompt (D1) — EXCEPT emitter_owned roles (D26/D27): Tier-1 whole-mechanical role whose artifact owned end-to-end by tools/det/emit/*.mjs, prompt retired, role identity survives via sentinel + emitter_owned entry (no .md at unit_path). 39 roles, 2 emitter-owned.",
+  "note": "Role library = build-DAG nodes of agentic-delivery-pipeline deliverable. Scanned from prompts/ (built skeleton). One role = one prompt (D1) — EXCEPT emitter_owned roles (D26/D27): Tier-1 whole-mechanical role whose artifact owned end-to-end by tools/det/emit/*.mjs, prompt retired, role identity survives via sentinel + emitter_owned entry (no .md at unit_path). 39 roles, 2 emitter-owned. STREAM-MANAGER = operating-model helper (D28/CR-007): not a stochastic role, no prompt file — logic lives inline in orchestrator STEP 0.0 + STEP 0.1 + new-stream dispatch; _streams/ tree is the durable registry.",
   "phases": [
     {
       "phase": "00-aprd",
@@ -81,6 +81,18 @@
       ],
       "role_count": 8,
       "unit_path": "prompts/04-build/<ROLE>.md"
+    }
+  ],
+  "inline_orchestrator": [
+    {
+      "role": "STREAM-MANAGER",
+      "phase": "00-aprd",
+      "emitter": null,
+      "prompt_file": null,
+      "sentinel": "_streams/<slug>/brief.md",
+      "adr": "ADR-0028",
+      "cr": "CR-007",
+      "note": "Operating-model helper (D28). Not a stochastic island — logic is mechanical git + file writes (branch check, merge, brief write). Implemented inline in orchestrator STEP 0.0 (enforce-non-master, R-MW-3), STEP 0.1 (auto-reconcile, R-MW-2), and new-stream dispatch path (R-MW-4). No prompt file. Durable workstream registry = _streams/<slug>/brief.md. Precondition guard: branch != master OR no in-flight workstream branches (see contracts.json step-0-precondition)."
     }
   ],
   "emitter_owned": [
