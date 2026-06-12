@@ -18,7 +18,7 @@
         "properties": {
           "id": { "type": "string", "pattern": "^SR[0-9]+$", "description": "stable subrequest id; SR1, SR2, … never renumbered on re-run" },
           "text": { "type": "string", "description": "faithfully-scoped slice of request; strip only connective tissue, never scope-bearing words" },
-          "class": { "type": "string", "enum": ["greenfield","feature-add","bugfix","refactor","migration","perf","integration","investigation"], "description": "one of the eight request classes" },
+          "class": { "type": "string", "enum": ["greenfield","feature-add","bugfix","audit","refactor","migration","perf","integration","investigation"], "description": "one of the nine request classes" },
           "confidence": { "type": "number", "minimum": 0, "maximum": 1, "description": "classifier confidence for this subrequest's class assignment" },
           "reason": { "type": "string", "description": "words in request that drove this class" }
         }
