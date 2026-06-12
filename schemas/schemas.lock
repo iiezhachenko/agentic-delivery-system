@@ -1,14 +1,14 @@
 {
   "artifact": "schemas/",
-  "version": "v2",
-  "content_sha256": "40efcc05b736dba6f7ebd9a12946020bf7ff6378940d239d111e238641e7cee1",
+  "version": "v3",
+  "content_sha256": "15d5407aa41f848bab25e2c08057b681aff1844b98db9486e0917063b2ff2158",
   "content_sha256_algo": "sha256 of all *.schema.json files and _meta.json under schemas/, files enumerated by recursive readdir with entries sorted alphabetically at each directory level, file contents concatenated in that sorted order (no separators), hashed as single stream. Order: _meta.json first (root), then subdirs 00-aprd/ 01-roadmap/ 02-adr/ 03-hld/ 04-build/ each sorted internally. Node crypto.createHash('sha256').update(<file bytes>...).digest('hex').",
   "signer": "self-host:agentic-delivery-pipeline",
-  "signed_at": "2026-06-11T00:00:00Z",
+  "signed_at": "2026-06-12T12:00:00Z",
   "status": "frozen",
   "class": "self-host",
   "mode": "schema-registry",
-  "schema_count": 47,
-  "supersedes": "v1:8d9f27868f64e99e958ea3c075503f86ffca93c374acff5ace14ccab0d218c40",
-  "note": "W1b of CR-003: registry enriched to D24 §1 fidelity. description on every property (2424 props, 0 missing) ported from pre-CR prompt inline `## Output schema` field-docs (P5/B11); loose element-bearing fields tightened (255->0) so non-conformant shapes fail. Both-directions selftest tightened: thin v1 PASSED a flattened seam_realization, enriched v2 FAILS it (type). v1 pinned by content_sha256 in supersedes."
+  "schema_count": 48,
+  "supersedes": "v2:40efcc05b736dba6f7ebd9a12946020bf7ff6378940d239d111e238641e7cee1",
+  "note": "v3 = v2 + W29g/CR-015 audit-report schema (2026-06-12): schemas/00-aprd/audit-report.schema.json added (AUDIT-RUN output — lens-based audit findings + summary). _meta.json updated with audit-report entry (produced_by AUDIT-RUN, consumed_by AUDIT-REPORT). schema_count 47→48. v2 pinned by content_sha256 in supersedes."
 }

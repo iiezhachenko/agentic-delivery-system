@@ -25,13 +25,13 @@ P-DERIVE-TESTS-INC · P-RECONCILE-CRITIQUE-INC · P-BUILD-PLAN-SLICE · P-MATERI
 
 Frontier = first entry whose `done_sentinel` absent or schema-invalid — bugfix wave (8 entries above) still pending; **CR-007 multi-stream wave** positions 19–22 in `08-rerank.json` ALL SHIPPED (branch `feature/multi-stream-workstreams`, roadmap_version 26). **CR-008 branch-binding wave** positions 23–26 in `08-rerank.json` (same branch). W20-ADR-0028-AMEND BLOCKED at operator gate Q2 (design option selection required, roadmap_version 27).
 
-## Shipped head-start (audit-spine — W29a playbook promoted, CR-015/ADR-0036)
+## Shipped head-start (audit-spine — W29a/W29f/W29g promoted, CR-015/ADR-0036)
 - audit-spine playbook (`prompts/_playbooks/audit-spine.md`) — operator gate ACCEPT 2026-06-12, branch `feature/audit-spine`.
 - CR-015 + ADR-0036 (D36) authored + adr.lock v16 re-signed.
+- LENS-DEFINE (`prompts/00-aprd/LENS-DEFINE.md`) — operator gate ACCEPT 2026-06-12.
+- AUDIT-RUN (`prompts/00-aprd/AUDIT-RUN.md`) — operator gate ACCEPT 2026-06-12. schema `audit-report` added. components.json 40→41, skeleton.lock v11, schemas.lock v3.
 
 ## Remaining (audit-spine — build in order on branch feature/audit-spine)
-1. **W29f-LENS-DEFINE** — `prompts/00-aprd/LENS-DEFINE.md` (interactive: collect lenses + scope from Operator; write `.audit/lenses.json` + `.audit/scope.json`). Sentinel: `prompts/00-aprd/LENS-DEFINE.md`.
-2. **W29g-AUDIT-RUN** — `prompts/00-aprd/AUDIT-RUN.md` (silent: read baseline + lenses + scope; evaluate each criterion per file in scope; write `.audit/audit-report.json`). Sentinel: `prompts/00-aprd/AUDIT-RUN.md`.
-3. **W29h-AUDIT-REPORT** — `prompts/00-aprd/AUDIT-REPORT.md` (silent: read `.audit/audit-report.json`; write `.audit/report.md` + optionally `.aprd/00-raw-request.md`). Sentinel: `prompts/00-aprd/AUDIT-REPORT.md`.
-4. **W29i-CLASSIFIER-OVERLAY** — CLASSIFIER audit delta block (emit `class=audit` + `has_adp_artifacts` guard). Sentinel: `class=audit` routing present in `prompts/00-aprd/CLASSIFIER.md`.
-5. **W29j-BASELINE-MAP-OVERLAY** — BASELINE-MAP audit delta block (read-existing-first grounding; baseline inventory before Operator interaction). Sentinel: audit overlay block present in `prompts/00-aprd/BASELINE-MAP.md`.
+1. **W29h-AUDIT-REPORT** — `prompts/00-aprd/AUDIT-REPORT.md` (silent: read `.audit/audit-report.json`; write `.audit/report.md` + optionally `.aprd/00-raw-request.md`). Sentinel: `prompts/00-aprd/AUDIT-REPORT.md`.
+2. **W29i-CLASSIFIER-OVERLAY** — CLASSIFIER audit delta block (emit `class=audit` + `has_adp_artifacts` guard). Sentinel: `class=audit` routing present in `prompts/00-aprd/CLASSIFIER.md`.
+3. **W29j-BASELINE-MAP-OVERLAY** — BASELINE-MAP audit delta block (read-existing-first grounding; baseline inventory before Operator interaction). Sentinel: audit overlay block present in `prompts/00-aprd/BASELINE-MAP.md`.

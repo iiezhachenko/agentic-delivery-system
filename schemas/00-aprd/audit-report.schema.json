@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "audit-report",
+  "title": "AUDIT-RUN output — lens-based audit findings + summary",
+  "type": "object",
+  "required": ["lenses", "scope", "findings", "summary"],
+  "properties": {
+    "lenses": {
+      "type": "array",
+      "description": "input lenses array preserved verbatim from .audit/lenses.json for traceability",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "description", "criteria"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^L[0-9]+$", "description": "lens id; L1, L2, …" },
+          "name": { "type": "string", "description": "lens name as supplied by Operator" },
+          "description": { "type": "string", "description": "lens description as supplied by Operator" },
+          "criteria": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "test", "severity"],
+              "properties": {
+                "id": { "type": "string", "pattern": "^LC[0-9]+$", "description": "criterion id; LC1, LC2, … globally across all lenses" },
+                "test": { "type": "string", "description": "criterion test description as supplied by Operator" },
+                "severity": { "type": "string", "enum": ["info", "warn", "block"], "description": "severity when criterion fails" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "description": "input scope object preserved verbatim from .audit/scope.json",
+      "required": ["scope", "default_used"],
+      "properties": {
+        "scope": { "type": "array", "items": { "type": "string" }, "description": "glob patterns defining audit scope" },
+        "default_used": { "type": "boolean", "description": "true if Operator did not supply scope and default ** was used" }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "description": "findings where a criterion failed; empty array means all criteria passed for all in-scope files",
+      "items": {
+        "type": "object",
+        "required": ["lens_id", "file", "criterion_id", "severity", "finding", "remediation"],
+        "properties": {
+          "lens_id": { "type": "string", "pattern": "^L[0-9]+$", "description": "lens id this finding belongs to" },
+          "file": { "type": "string", "description": "path to the file where criterion failed, relative to project root" },
+          "line": { "type": "integer", "description": "line number of the finding when a single line is identified; omit when not applicable" },
+          "criterion_id": { "type": "string", "pattern": "^LC[0-9]+$", "description": "criterion id that failed" },
+          "severity": { "type": "string", "enum": ["info", "warn", "block"], "description": "severity from the criterion definition" },
+          "finding": { "type": "string", "description": "what was observed in the file that caused the criterion to fail" },
+          "remediation": { "type": "string", "description": "what to do to address the finding" }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "description": "aggregate counts across all findings",
+      "required": ["total", "block_count", "warn_count", "info_count", "pass_count"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0, "description": "total number of findings recorded" },
+        "block_count": { "type": "integer", "minimum": 0, "description": "findings with severity=block" },
+        "warn_count": { "type": "integer", "minimum": 0, "description": "findings with severity=warn" },
+        "info_count": { "type": "integer", "minimum": 0, "description": "findings with severity=info" },
+        "pass_count": { "type": "integer", "minimum": 0, "description": "count of (file, criterion) pairs with no finding — total assessments minus total findings" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -5,6 +5,7 @@
   "07-assumptions":        { "path": "00-aprd/07-assumptions.schema.json",        "version": 1, "produced_by": ["SYNTHESIZE"],        "consumed_by": ["CRITIQUE"] },
   "08-critique":           { "path": "00-aprd/08-critique.schema.json",           "version": 1, "produced_by": ["CRITIQUE"],          "consumed_by": [] },
   "baseline-map":          { "path": "00-aprd/baseline-map.schema.json",          "version": 1, "produced_by": ["BASELINE-MAP"],      "consumed_by": ["EXTRACT","GAP-DETECT","SYNTHESIZE","SLICE-EXTRACT"] },
+  "audit-report":          { "path": "00-aprd/audit-report.schema.json",          "version": 1, "produced_by": ["AUDIT-RUN"],         "consumed_by": ["AUDIT-REPORT"] },
   "diagnosis":             { "path": "00-aprd/diagnosis.schema.json",             "version": 1, "produced_by": ["DIAGNOSE"],          "consumed_by": ["SYNTHESIZE","GAP-DETECT"] },
   "rules-extracted":       { "path": "00-aprd/rules-extracted.schema.json",       "version": 1, "produced_by": ["EXTRACT-RULES"],     "consumed_by": ["RECONCILE"] },
   "rules-reconciled":      { "path": "00-aprd/rules-reconciled.schema.json",      "version": 1, "produced_by": ["RECONCILE"],         "consumed_by": ["VERIFY"] },
