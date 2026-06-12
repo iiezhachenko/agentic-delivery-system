@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 38,
+  "roadmap_version": 41,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 38 (D31/CR-010 ledger-prune): pruned 2 merged+accepted+complete wave(s) [W29g-AUDIT-RUN, W29h-AUDIT-REPORT] — done_sentinel present on master. Live: remaining=2, kept-completed=0, deferred=[I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth; loop derives frontier from disk sentinels). Prior version history recoverable from git.",
+  "_note": "roadmap_version 41 (CR-016 SRP-refactor post-gate sign): W30c-ADR0037-SIGN shipped — ADR-0037 promoted to log (status Accepted), adr-index.json rendered=37, adr.lock v17 (sha256 over 37 log bodies). W30d–W30l unshipped (role-split builds, subsequent workstream). W29i–W29j retained (CR-015 audit-spine overlay builds, still unshipped). Deferred unchanged [I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth).",
   "completed": [],
   "remaining_sequence": [
     {
@@ -31,6 +31,165 @@
       ],
       "cr": "CR-015",
       "class": "audit"
+    },
+    {
+      "position": 39,
+      "id": "W30a-CR016-UMBRELLA",
+      "name": "CR-016 umbrella + per-cluster CRs (CR-017–CR-021) authored",
+      "status": "shipped",
+      "unit": ".aprd/change-requests/CR-016.md",
+      "done_sentinel": ".aprd/change-requests/CR-016.md",
+      "depends_on": [],
+      "cr": "CR-016",
+      "class": "planning"
+    },
+    {
+      "position": 40,
+      "id": "W30b-ADR0037-DRAFT",
+      "name": "ADR-0037 draft authored — SRP split policy + bugfix-mode-family decision",
+      "status": "shipped",
+      "unit": ".adr/drafts/0037-srp-split-policy-bugfix-mode-family.draft.md",
+      "done_sentinel": ".adr/drafts/0037-srp-split-policy-bugfix-mode-family.draft.md",
+      "depends_on": [
+        "W30a-CR016-UMBRELLA"
+      ],
+      "cr": "CR-016",
+      "class": "planning"
+    },
+    {
+      "position": 41,
+      "id": "W30c-ADR0037-SIGN",
+      "name": "ADR-0037 body promoted to log + adr-index.json updated + adr.lock re-signed v17",
+      "status": "shipped",
+      "unit": ".adr/log/0037-srp-split-policy-bugfix-mode-family.md",
+      "done_sentinel": ".adr/log/0037-srp-split-policy-bugfix-mode-family.md",
+      "depends_on": [
+        "W30b-ADR0037-DRAFT"
+      ],
+      "cr": "CR-016",
+      "class": "planning"
+    },
+    {
+      "position": 42,
+      "id": "W30d-AUDIT-REPORT-SPLIT",
+      "name": "CR-017: AUDIT-REPORT trimmed (report only) + AUDIT-PROMOTE added",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/AUDIT-PROMOTE.md",
+      "done_sentinel": "prompts/00-aprd/AUDIT-PROMOTE.md",
+      "depends_on": [
+        "W30c-ADR0037-SIGN"
+      ],
+      "cr": "CR-017",
+      "class": "refactor"
+    },
+    {
+      "position": 43,
+      "id": "W30e-DIAGNOSE-SPLIT",
+      "name": "CR-018: DIAGNOSE trimmed (build-red only) + BUGFIX-LOCALIZE added",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/BUGFIX-LOCALIZE.md",
+      "done_sentinel": "prompts/00-aprd/BUGFIX-LOCALIZE.md",
+      "depends_on": [
+        "W30c-ADR0037-SIGN"
+      ],
+      "cr": "CR-018",
+      "class": "refactor"
+    },
+    {
+      "position": 44,
+      "id": "W30f-SEQUENCE-SPLIT",
+      "name": "CR-019: SEQUENCE trimmed (greenfield only) + SEQUENCE-FEATURE-ADD added",
+      "status": "unshipped",
+      "unit": "prompts/01-roadmap/SEQUENCE-FEATURE-ADD.md",
+      "done_sentinel": "prompts/01-roadmap/SEQUENCE-FEATURE-ADD.md",
+      "depends_on": [
+        "W30c-ADR0037-SIGN"
+      ],
+      "cr": "CR-019",
+      "class": "refactor"
+    },
+    {
+      "position": 45,
+      "id": "W30g-DERIVE-TESTS-SPLIT",
+      "name": "CR-020: DERIVE-TESTS trimmed (test-specs only) + DERIVE-BUILD-DAG added",
+      "status": "unshipped",
+      "unit": "prompts/03-hld/DERIVE-BUILD-DAG.md",
+      "done_sentinel": "prompts/03-hld/DERIVE-BUILD-DAG.md",
+      "depends_on": [
+        "W30c-ADR0037-SIGN"
+      ],
+      "cr": "CR-020",
+      "class": "refactor"
+    },
+    {
+      "position": 46,
+      "id": "W30h-SYNTHESIZE-INCREMENT-SPLIT",
+      "name": "CR-021: SYNTHESIZE trimmed (greenfield only) + SYNTHESIZE-INCREMENT added (feature-add/bugfix)",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/SYNTHESIZE-INCREMENT.md",
+      "done_sentinel": "prompts/00-aprd/SYNTHESIZE-INCREMENT.md",
+      "depends_on": [
+        "W30c-ADR0037-SIGN"
+      ],
+      "cr": "CR-021",
+      "source_finding": "F10",
+      "class": "refactor"
+    },
+    {
+      "position": 47,
+      "id": "W30i-IMPLEMENT-BUGFIX-SPLIT",
+      "name": "CR-021: IMPLEMENT trimmed (greenfield/feature-add only) + IMPLEMENT-BUGFIX added",
+      "status": "unshipped",
+      "unit": "prompts/04-build/IMPLEMENT-BUGFIX.md",
+      "done_sentinel": "prompts/04-build/IMPLEMENT-BUGFIX.md",
+      "depends_on": [
+        "W30c-ADR0037-SIGN"
+      ],
+      "cr": "CR-021",
+      "source_finding": "F11",
+      "class": "refactor"
+    },
+    {
+      "position": 48,
+      "id": "W30j-MATERIALIZE-ORACLE-BUGFIX-SPLIT",
+      "name": "CR-021: MATERIALIZE-ORACLE trimmed (greenfield/feature-add only) + MATERIALIZE-ORACLE-BUGFIX added",
+      "status": "unshipped",
+      "unit": "prompts/04-build/MATERIALIZE-ORACLE-BUGFIX.md",
+      "done_sentinel": "prompts/04-build/MATERIALIZE-ORACLE-BUGFIX.md",
+      "depends_on": [
+        "W30c-ADR0037-SIGN"
+      ],
+      "cr": "CR-021",
+      "source_finding": "F12",
+      "class": "refactor"
+    },
+    {
+      "position": 49,
+      "id": "W30k-VERIFY-OUTPUT-BUGFIX-SPLIT",
+      "name": "CR-021: VERIFY-OUTPUT trimmed (greenfield/feature-add only) + VERIFY-OUTPUT-BUGFIX added",
+      "status": "unshipped",
+      "unit": "prompts/04-build/VERIFY-OUTPUT-BUGFIX.md",
+      "done_sentinel": "prompts/04-build/VERIFY-OUTPUT-BUGFIX.md",
+      "depends_on": [
+        "W30c-ADR0037-SIGN"
+      ],
+      "cr": "CR-021",
+      "source_finding": "F13",
+      "class": "refactor"
+    },
+    {
+      "position": 50,
+      "id": "W30l-DERIVE-TESTS-BUGFIX-SPLIT",
+      "name": "CR-021: DERIVE-TESTS bugfix pass (Part C) extracted → DERIVE-TESTS-BUGFIX added",
+      "status": "unshipped",
+      "unit": "prompts/03-hld/DERIVE-TESTS-BUGFIX.md",
+      "done_sentinel": "prompts/03-hld/DERIVE-TESTS-BUGFIX.md",
+      "depends_on": [
+        "W30c-ADR0037-SIGN"
+      ],
+      "cr": "CR-021",
+      "source_finding": "F9",
+      "class": "refactor"
     }
   ],
   "dependency_check": {
@@ -71,7 +230,7 @@
         "note": "Lint C8 flags repeated verbatim OPEN-tag across 5 ACs in the fixture. Operator-directed: mis-fire vs sanctioned mandatory-verbatim-tag pattern (W9/W10 precedent). Fixture oracle correct; do NOT alter fixture. Linter needs calibration for this pattern — treat as lint-calibration backlog. Route: next lint-calibration pass (P3, same as W9 C6/C8 fixes)."
       }
     ],
-    "in_progress_note": "CR-015 audit-spine in flight (2026-06-12, roadmap_version 37, branch feature/audit-spine): W29a-AUDIT-PLAYBOOK + W29f-LENS-DEFINE + W29g-AUDIT-RUN + W29h-AUDIT-REPORT shipped — prompts/_playbooks/audit-spine.md + prompts/00-aprd/LENS-DEFINE.md + prompts/00-aprd/AUDIT-RUN.md + prompts/00-aprd/AUDIT-REPORT.md promoted. components.json 41->42 + skeleton.lock v12 re-signed. schemas/00-aprd/audit-report.schema.json present + schemas.lock v3 unchanged. io-manifest.json AUDIT-REPORT role entry added. Remaining W29i-CLASSIFIER-OVERLAY / W29j-BASELINE-MAP-OVERLAY pending. I6/I7/I8 + C8-BROWNFIELD-ORACLE deferred (unchanged).",
+    "in_progress_note": "CR-016 SRP-refactor planning signed (2026-06-12, roadmap_version 41, branch feature/spine-srp-refactor): W30a–W30c shipped — CR-016–CR-021 authored + ADR-0037 accepted (adr.lock v17). W30d–W30l (role splits, Class A + Class B) = next build workstream (unshipped). W29i–W29j (CR-015 audit-spine overlays) still pending. I6/I7/I8 + C8-BROWNFIELD-ORACLE deferred (unchanged).",
     "missing": [],
     "duplicated": []
   },
