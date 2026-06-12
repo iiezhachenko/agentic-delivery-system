@@ -1,17 +1,24 @@
 {
   "artifact": "contracts.json",
   "class": "self-host",
-  "note": "Producer/consumer chain (PR2): each prompt writes the exact place+format the next reads; output schema of step N == input schema of step N+1. IDs thread R→AC→S→ADR→C→CT→F→commit. Precondition contracts (STREAM-MANAGER, D28/CR-007): STEP 0 entry enforces branch isolation before any frontier work begins.",
+  "note": "Producer/consumer chain (PR2): each prompt writes the exact place+format the next reads; output schema of step N == input schema of step N+1. IDs thread R→AC→S→ADR→C→CT→F→commit. Precondition contracts (STREAM-MANAGER, D28+D29/CR-008): STEP 0 entry enforces branch isolation + branch-match before any frontier work begins.",
   "rule": "PR2",
   "preconditions": [
     {
       "id": "step-0-precondition",
       "enforcer": "STREAM-MANAGER (orchestrator STEP 0.0 + STEP 0.1)",
-      "adr": "ADR-0028",
-      "cr": "CR-007",
-      "contract": "branch != master (OR no in-flight feature/* bugfix/* branches) AND reconcile_from_main == clean | HALT",
+      "adr": "ADR-0029",
+      "cr": "CR-008",
+      "contract": "HEAD in registered-pending-branch-set (R-MW-5) OR (HEAD=master AND <=1 pending → auto-checkout) AND reconcile_from_main == clean | HALT",
+      "branch_match_cases": {
+        "A": "HEAD in pending set → pass",
+        "B": "master + 1 pending → auto-checkout branch: value, continue",
+        "C": "master + 0 pending → pass (solo-master)",
+        "D": "master + >1 pending → HALT (ambiguous)",
+        "E": "HEAD not in set AND not master → HALT (unregistered branch)"
+      },
       "consumers": ["STEP 0 frontier-scan", "all subsequent STEP 0–6"],
-      "violation_response": "HALT — list in-flight branches (R-MW-3) OR report merge conflict (R-MW-2); do not proceed"
+      "violation_response": "HALT — list pending streams (Case D/E R-MW-5) OR list in-flight branches (R-MW-3) OR report merge conflict (R-MW-2); do not proceed"
     }
   ],
   "chain": [

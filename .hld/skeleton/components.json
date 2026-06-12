@@ -91,8 +91,9 @@
       "prompt_file": null,
       "sentinel": "_streams/<slug>/brief.md",
       "adr": "ADR-0028",
-      "cr": "CR-007",
-      "note": "Operating-model helper (D28). Not a stochastic island — logic is mechanical git + file writes (branch check, merge, brief write). Implemented inline in orchestrator STEP 0.0 (enforce-non-master, R-MW-3), STEP 0.1 (auto-reconcile, R-MW-2), and new-stream dispatch path (R-MW-4). No prompt file. Durable workstream registry = _streams/<slug>/brief.md. Precondition guard: branch != master OR no in-flight workstream branches (see contracts.json step-0-precondition)."
+      "amends_adr": "ADR-0029",
+      "cr": "CR-008",
+      "note": "Operating-model helper (D28/D29). Not a stochastic island — logic is mechanical git + file writes (branch check, merge, brief write). Implemented inline in orchestrator STEP 0.0 (enforce-non-master R-MW-3; branch-match R-MW-5, D29 Option-B Cases A–E), STEP 0.1 (auto-reconcile, R-MW-2), and new-stream dispatch path (R-MW-4). No prompt file. Durable workstream registry = _streams/<slug>/brief.md; branch: field is authoritative binding (R-MW-5, D29). Precondition guard: branch in registered-pending-set OR (master + <=1 pending auto-checkout) AND reconcile_from_main clean | HALT (see contracts.json step-0-precondition)."
     }
   ],
   "emitter_owned": [

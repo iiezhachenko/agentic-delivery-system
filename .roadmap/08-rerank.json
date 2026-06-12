@@ -228,7 +228,7 @@
       "position": 23,
       "id": "W20-ADR-0028-AMEND",
       "name": "ADR-0028 Amendment-1: branch-binding + R-MW-5",
-      "done_sentinel": ".adr/log/0028-branch-per-workstream.md",
+      "done_sentinel": ".adr/log/0029-branch-binding-auto-checkout.md",
       "cr": "CR-008",
       "class": "feature-add",
       "depends_on": [],
