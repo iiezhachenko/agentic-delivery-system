@@ -32,7 +32,7 @@ Thin Claude-harness wrapper over a delivery control loop. Loop body = the `LOOP_
 1. If RUN_CANON set, read it first — it governs this run.
 2. Read the loop body at `ENGINE_ROOT/<LOOP_BODY>`.
 3. **Guard:** if LOOP_BODY is the generic loop AND WORKSPACE_ROOT resolves to the repo root → HALT ("/deliver must target an external workspace; refusing to write trees over the factory's frozen .aprd/.roadmap/.adr/.hld"). 
-4. Execute the loop body with GIVEN params + harness wiring. Controller only: pick / dispatch / verify / gate / promote. Never hand-author the deliverable, never hand-patch a runner's artifact.
+4. Execute the loop body with GIVEN params + harness wiring. **Zero-write guarantee (R-CW-1, D33):** controller never authors deliverable content; permitted controller-direct writes = mechanical ops only (git, spine tool shell-outs, lock/index updates, scratch→promotion). **Orchestrator loop-control-only (R-CW-2, D33):** pick / dispatch / verify / gate / promote — never author at any layer, no meta-artifact exception. **Step-runner authors + verifies (R-CW-3, D33):** all prose artifacts authored by step-runner; verifier = separate spawn (runner never grades own output).
 5. Honor the loop body's gate(s) — self-host: one value/parity gate; generic: 3 client checkpoints (A questions · B roadmap · C demo). Persist gate replies on receipt; resume never re-asks an answered gate.
 6. Engine unchanged: if wiring the target forces a loop-body edit, the abstraction leaked — fix the spine once (P3), never patch the loop body or the target.
 

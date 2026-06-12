@@ -6,7 +6,7 @@
     "reconcile_verdict": "coherent",
     "critique_verdict": "clean"
   },
-  "note": "Canonical decision index (D1–D31 → ADR-0001..0031). D1–D4 are the foundational conventions; D21 is the stack ADR (stack = agentic-delivery-pipeline, this repo's active profile); D22 (operator-approved amendment) sanctions deterministic helper tools the spine may shell out to; D23 adds the second stack ADR (stack = typescript) — the M12 Part-2 agnosticism proof, a sibling profile, not the active one. D24–D27 (CR-002, deterministic-machine) EXTEND D22: D24 schema-registry + structured-output (new frozen class), D25 io-manifest + resolver (new frozen class), D26 deterministic spine (Tier-1 emitters + verdict/route/seq/id/coverage compute), D27 the three open-decision resolutions (output grade · Tier-1 retirement · CR batching). D28 (CR-007, operator-approved) branch-per-workstream model — branch isolation + auto-reconcile + enforce-non-master + new-stream dispatch local-only. D29 (CR-008, operator-approved) Amendment-1 to D28 — brief.md branch: authoritative binding (R-MW-5) + Option-B auto-checkout + new HALT classes (wrong-branch, no-registration). D30 (CR-009, operator-approved) rename launcher command /self-host → /evolve, clean (no alias) — surface-rename only, self-host concept noun unchanged. D31 (CR-010, operator-approved) reranker ledger hygiene — prune complete+accepted+merged-wave records at STEP 0.1 (sentinel-on-master = merged), collapse-with-git-trail, preserve live records (D20: ledger is informational, not source of truth). The index lives HERE as JSON, never as a markdown header (canonical fixture layout).",
+  "note": "Canonical decision index (D1–D33 → ADR-0001..0033). D1–D4 are the foundational conventions; D21 is the stack ADR (stack = agentic-delivery-pipeline, this repo's active profile); D22 (operator-approved amendment) sanctions deterministic helper tools the spine may shell out to; D23 adds the second stack ADR (stack = typescript) — the M12 Part-2 agnosticism proof, a sibling profile, not the active one. D24–D27 (CR-002, deterministic-machine) EXTEND D22: D24 schema-registry + structured-output (new frozen class), D25 io-manifest + resolver (new frozen class), D26 deterministic spine (Tier-1 emitters + verdict/route/seq/id/coverage compute), D27 the three open-decision resolutions (output grade · Tier-1 retirement · CR batching). D28 (CR-007, operator-approved) branch-per-workstream model — branch isolation + auto-reconcile + enforce-non-master + new-stream dispatch local-only. D29 (CR-008, operator-approved) Amendment-1 to D28 — brief.md branch: authoritative binding (R-MW-5) + Option-B auto-checkout + new HALT classes (wrong-branch, no-registration). D30 (CR-009, operator-approved) rename launcher command /self-host → /evolve, clean (no alias) — surface-rename only, self-host concept noun unchanged. D31 (CR-010, operator-approved) reranker ledger hygiene — prune complete+accepted+merged-wave records at STEP 0.1 (sentinel-on-master = merged), collapse-with-git-trail, preserve live records (D20: ledger is informational, not source of truth). D32 (CR-011, operator-approved) controller zero-write guarantee — controller-direct writes permitted only for mechanical deterministic ops (git, spine tool shell-outs, lock/index updates, scratch→promotion); rule prose, ADR bodies, CR docs route through step-runner clean-room (R-CW-1). D33 (CR-012, operator-approved) corrects D32 — splits R-CW-1 into three precise requirements: R-CW-1 (controller zero-write guarantee), R-CW-2 (orchestrator loop-control-only), R-CW-3 (step-runner authors+verifies). D32 marked superseded_by ADR-0033; D32 body frozen/untouched. The index lives HERE as JSON, never as a markdown header (canonical fixture layout).",
   "adrs": [
     {
       "id": "ADR-0001",
@@ -417,10 +417,38 @@
       "cr": "CR-010",
       "draft_ref": ".aprd/change-requests/CR-010.md",
       "log_ref": "log/0031-reranker-ledger-hygiene-prune-merged.md"
+    },
+    {
+      "id": "ADR-0032",
+      "dn": "D32",
+      "title": "Controller zero-write guarantee — prose authoring routes through step-runner",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "operator-approved",
+      "supersedes": null,
+      "superseded_by": "ADR-0033",
+      "cr": "CR-011",
+      "draft_ref": ".aprd/change-requests/CR-011.md",
+      "log_ref": "log/0032-controller-zero-write-guarantee.md"
+    },
+    {
+      "id": "ADR-0033",
+      "dn": "D33",
+      "title": "Controller zero-write + clean-room separation of concerns (supersedes D32)",
+      "status": "Accepted",
+      "mode": "foundation",
+      "scope": "global",
+      "source": "operator-approved",
+      "supersedes": "ADR-0032",
+      "superseded_by": null,
+      "cr": "CR-012",
+      "draft_ref": ".aprd/change-requests/CR-012.md",
+      "log_ref": "log/0033-controller-zero-write-clean-room-separation.md"
     }
   ],
   "adr_counts": {
-    "rendered": 31,
+    "rendered": 33,
     "degenerate_forced": 0,
     "undecided_skipped": 0
   }
