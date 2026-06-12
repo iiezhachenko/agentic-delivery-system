@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 32,
+  "roadmap_version": 33,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 32 (D31/CR-010 ledger-prune): pruned 26 merged+accepted+complete wave(s) [W0-CANON-CR, W1-SCHEMA-REGISTRY, W2-IO-MANIFEST, W3-GRAPH-LINT, W4-DET-MODULES, W5-TIER1-EMITTERS, W6-REAUTHOR-04BUILD, W1b-REGISTRY-ENRICH, W6-REAUTHOR-REST, W7-ORCH-SWAP, W9-ECON-RECONCILE, W10-ECON-SWEEP-FULL, W8-PACK-GATE, W11-ADOPT-ROLE, W12-CLASSIFIER-DELTA, W13-PLAYBOOK-GROUNDING, W14-BROWNFIELD-ORACLE, W15-ORCH-SPAWN-FIX, W18-ORCH-MULTISTREAM, W19-STREAM-ORACLE, W16-ADR-0028, W17-HLD-STREAM-COMPONENT, W20-ADR-0028-AMEND, W21-HLD-STREAM-BINDING, W22-ORCH-BRANCH-BINDING, W23-STREAM-BINDING-ORACLE] — done_sentinel present on master. Live: remaining=0, kept-completed=0, deferred=[I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth; loop derives frontier from disk sentinels). Prior version history recoverable from git.",
+  "_note": "roadmap_version 33 (CR-015/ADR-0036 audit-spine playbook): W29a-AUDIT-PLAYBOOK complete — `prompts/_playbooks/audit-spine.md` promoted, CR-015 + ADR-0036 (D36) authored, adr.lock v16. Remaining audit-spine builds: W29f-LENS-DEFINE + W29g-AUDIT-RUN + W29h-AUDIT-REPORT + W29i-CLASSIFIER-OVERLAY + W29j-BASELINE-MAP-OVERLAY (on branch feature/audit-spine). Deferred=[I6, I7, I8, C8-BROWNFIELD-ORACLE] unchanged. Bugfix wave 8-entry frontier unchanged (unshipped). Retention = git is the trail (R-LH-2/D20).",
   "completed": [],
   "dependency_check": {
     "acyclic": true,
@@ -43,7 +43,7 @@
         "note": "Lint C8 flags repeated verbatim OPEN-tag across 5 ACs in the fixture. Operator-directed: mis-fire vs sanctioned mandatory-verbatim-tag pattern (W9/W10 precedent). Fixture oracle correct; do NOT alter fixture. Linter needs calibration for this pattern — treat as lint-calibration backlog. Route: next lint-calibration pass (P3, same as W9 C6/C8 fixes)."
       }
     ],
-    "in_progress_note": "CR-010 reranker ledger hygiene in flight (2026-06-12, roadmap_version 32). Full cascade shipped on branch feature/rerank-prune (local-only, G1): CR-010.md + ADR-0031/D31 + adr.lock v11 + contracts.json postcondition (graph-lint generator regen) + components.json LEDGER-PRUNE + skeleton.lock v9 + tools/det/prune-ledger.mjs (+ selftest + _fixtures/ledger-prune/ oracle) + orchestrator STEP 0.1b. First prune applied here (this v32): pruned 26 merged waves W0–W23. Awaiting operator value/parity gate; operator next action: push + PR + merge to master. I6/I7/I8 + C8-BROWNFIELD-ORACLE deferred (unchanged).",
+    "in_progress_note": "CR-015 audit-spine playbook in flight (2026-06-12, roadmap_version 33, branch feature/audit-spine): W29a-AUDIT-PLAYBOOK shipped — `prompts/_playbooks/audit-spine.md` promoted + CR-015 + ADR-0036/D36 + adr.lock v16. Remaining W29f-LENS-DEFINE / W29g-AUDIT-RUN / W29h-AUDIT-REPORT / W29i-CLASSIFIER-OVERLAY / W29j-BASELINE-MAP-OVERLAY pending. I6/I7/I8 + C8-BROWNFIELD-ORACLE deferred (unchanged).",
     "missing": [],
     "duplicated": []
   },
