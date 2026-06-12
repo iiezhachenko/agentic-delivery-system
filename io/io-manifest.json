@@ -383,8 +383,7 @@
         { "if": { "pass": "skeleton" },
           "read": [
             { "path": ".hld/skeleton/contracts.json", "hint": "frozen CT* set; shape + declared failure_modes" },
-            { "path": ".hld/skeleton/flows.json", "hint": "frozen F* paths + failure_path" },
-            { "path": ".hld/skeleton/components.json", "hint": "dependency graph (edges+nodes) to topo-sort into build DAG" }
+            { "path": ".hld/skeleton/flows.json", "hint": "frozen F* paths + failure_path" }
           ] },
         { "if": { "pass": "increment" },
           "read": [
@@ -393,6 +392,16 @@
             { "path": ".hld/slices/{slice}/flows.json", "hint": "slice NEW flow=source for new flow test" },
             { "path": ".hld/slices/{slice}/contracts.json", "hint": "touched_contracts + new_contracts" },
             { "path": ".roadmap/08-rerank.json", "hint": "living roadmap" }
+          ] }
+      ]
+    },
+    "DERIVE-BUILD-DAG": {
+      "always": [ "hld_frame" ],
+      "when": [
+        { "if": { "pass": "skeleton" },
+          "read": [
+            { "path": ".hld/skeleton/components.json", "hint": "dependency graph (edges+nodes) to topo-sort into build DAG" },
+            { "path": ".hld/skeleton/contracts.json", "hint": "frozen CT* set; seam edges for DAG validation" }
           ] }
       ]
     },

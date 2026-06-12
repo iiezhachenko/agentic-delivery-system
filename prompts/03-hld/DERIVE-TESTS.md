@@ -2,11 +2,10 @@
 role: DERIVE-TESTS
 phase: 03-hld
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
-pass: skeleton|increment|bugfix     # DISPATCHED on disk state: aPRD CLASS==bugfix + .aprd/diagnosis.json present → BUGFIX PASS (Part C, checked FIRST: ONE reproduction test red→green + mandatory scoped regression layer (BF4) + inherited touched-surface contract tests); else no frozen skeleton → SKELETON PASS (Part A: per-CT shape+failure specs for the whole frozen seam set + per-F1 AC-arrival spec + the build DAG, drawn once); frozen skeleton present → INCREMENT PASS (Part B: THE slice's design-layer oracle — its flow test (new) + the frozen contract tests its seams inherit, by reference; §5.9 increment). One role, three modes (H13/D9/D14)
+pass: skeleton|increment|bugfix     # DISPATCHED on disk state: aPRD CLASS==bugfix + .aprd/diagnosis.json present → BUGFIX PASS (Part C, checked FIRST: ONE reproduction test red→green + mandatory scoped regression layer (BF4) + inherited touched-surface contract tests); else no frozen skeleton → SKELETON PASS (Part A: per-CT shape+failure specs for the whole frozen seam set + per-F1 AC-arrival spec); frozen skeleton present → INCREMENT PASS (Part B: THE slice's design-layer oracle — its flow test (new) + the frozen contract tests its seams inherit, by reference; §5.9 increment). One role, three modes (H13/D9/D14)
 interactive: false          # internal structural sweep; client signed the WHAT, team owns the HOW (PR1, §9)
 outputs:
   - { path: ".hld/skeleton/test-specs.json", schema: "test-specs" }
-  - { path: ".hld/skeleton/build-dag.json", schema: "build-dag" }
   - { path: ".hld/slices/<slice_id>/test-specs.json", schema: "test-specs" }   # INCREMENT
   - { path: ".hld/slices/<slice_id>/test-specs.json", schema: "test-specs" }   # BUGFIX
 escapes:
@@ -15,9 +14,8 @@ escapes:
   - { when: "frozen/lock CLASS lacks authored playbook (refactor|migration|perf|integration|investigation)", target: "that playbook — not authored (H11/D10). Report class" }
   - { when: "a flow F* traces NO AC* → no arrival oracle to assert against", target: "record aprd_defects[] (name the F*) → Phase 0; never fabricate the AC" }
   # — skeleton pass —
-  - { when: "SKELETON: contracts.json / flows.json / components.json carries non-empty structural_defects / frame_conflicts / aprd_defects, OR flows.json composes_against_contracts != true", target: "self / HALT — upstream HLD routed an unresolved escape; don't author tests on a defective graph. Report which block in which file" }
+  - { when: "SKELETON: contracts.json / flows.json carries non-empty structural_defects / frame_conflicts / aprd_defects, OR flows.json composes_against_contracts != true", target: "self / HALT — upstream HLD routed an unresolved escape; don't author tests on a defective graph. Report which block in which file" }
   - { when: "SKELETON: a CT* declares NO failure_mode → can't author a failure test", target: "record structural_defects[] (name the CT*) → DEFINE-CONTRACTS §5.3; flag never invent a failure mode" }
-  - { when: "SKELETON: the component edges form a dependency CYCLE (topo sort can't place every node)", target: "record build-dag cycles[] → DERIVE-COMPONENTS §5.2 (boundary defect); never break the cycle yourself (§14)" }
   # — increment pass —
   - { when: "INCREMENT: .hld/skeleton.lock present but status != frozen", target: "self / HALT — no frozen baseline to derive against; skeleton not yet gated (H14)" }
   - { when: "INCREMENT: .hld/skeleton/test-specs.json or .roadmap/08-rerank.json missing/unparseable", target: "self / HALT — no frozen contract-test specs to inherit / no living roadmap to select the target slice" }
@@ -45,7 +43,7 @@ One load-bearing thing: oracle derived from the HLD, not the aPRD's acceptance o
 Lane: shared Rule 5.
 
 ## MODE DISPATCH (decide first, before anything else)
-Three passes, checked in order; run exactly ONE part, ignore the others. **Resolve the aPRD via `.aprd/aprd.lock` first.** **aPRD CLASS==bugfix + `.aprd/diagnosis.json` present → BUGFIX PASS (Part C, checked FIRST):** re-enter the defect's existing slice; emit ONE reproduction test + mandatory scoped regression layer + inherited touched-surface contract tests (skeleton.lock is frozen here too, but class wins — don't fall through to Part B). Else read `.hld/skeleton.lock`: **Absent → SKELETON PASS (Part A):** no frozen baseline; derive full frozen-seam-set oracle + F1 flow test + build DAG. **Present + `status:"frozen"` → INCREMENT PASS (Part B):** derive ONE slice's design-layer oracle (its new flow test + frozen contract tests its seams inherit). Present + `status != frozen` → HALT (escapes). Read the shared Rules below + run exactly ONE part (its delta Rules + schema + steps); ignore the others.
+Three passes, checked in order; run exactly ONE part, ignore the others. **Resolve the aPRD via `.aprd/aprd.lock` first.** **aPRD CLASS==bugfix + `.aprd/diagnosis.json` present → BUGFIX PASS (Part C, checked FIRST):** re-enter the defect's existing slice; emit ONE reproduction test + mandatory scoped regression layer + inherited touched-surface contract tests (skeleton.lock is frozen here too, but class wins — don't fall through to Part B). Else read `.hld/skeleton.lock`: **Absent → SKELETON PASS (Part A):** no frozen baseline; derive full frozen-seam-set oracle + F1 flow test. **Present + `status:"frozen"` → INCREMENT PASS (Part B):** derive ONE slice's design-layer oracle (its new flow test + frozen contract tests its seams inherit). Present + `status != frozen` → HALT (escapes). Read the shared Rules below + run exactly ONE part (its delta Rules + schema + steps); ignore the others.
 
 ## Rules (shared — both passes)
 1. **Design-layer oracle, NOT aPRD acceptance oracle (THE lane line, H8).** Contract/flow tests come from HLD (seams + paths). aPRD AC* = Phase 0's black-box layer — REFERENCE the AC* id as a flow's arrival assertion; never re-state or re-derive AC text. Two distinct layers; don't collapse.
@@ -58,35 +56,31 @@ Three passes, checked in order; run exactly ONE part, ignore the others. **Resol
 
 # PART A — SKELETON PASS  (no frozen skeleton present)
 
-## The derivation (the discriminator — three mechanical products, no invention)
+## The derivation (the discriminator — two mechanical products, no invention)
 1. **Per-contract test** (one per CT*, H8) — `shape_assertion` (seam carries declared `shape`, named-not-designed: assert data/responsibility moves, NOT field columns/types/wire format) + one `failure_assertion` per declared `failure_mode` in array order (verbatim mode + `expected_behavior` from its OWN declared consequence). Empty `failure_modes` → `structural_defects[]` → DEFINE-CONTRACTS (don't invent mode).
 2. **Per-flow test** (one per F*) — `happy_path.asserts_ac` = AC* in flow's `traces` (referenced as oracle, NEVER re-authored — Phase 0 owns AC; none traced → `aprd_defects[]` → Phase 0) + reused `failure_path` (`exercises:CT*:mode` + terminal `arrives_at`). Invent nothing.
-3. **Build DAG** (once, H7) — topo-sort `components.json` `edges[]`; edge `{from,to}` = `from` depends on `to` (carried verbatim). Per-node `depends_on`, wave rule + `build_order` per (schema: "build-dag" registry id). Emitted ONCE (slice activates a path through it, never re-emits). Dependency cycle → `cycles[]` → DERIVE-COMPONENTS.
 
 ## Rules (skeleton-pass delta — shared Rules above also bind)
-1. **Bijection: every seam + every flow gets exactly one spec (H8).** Every CT* in `contracts.json` → exactly one `contract_tests[]` entry; every F* in `flows.json` → exactly one `flow_tests[]` entry. No orphan contract/flow; no spec for a CT*/F* that doesn't exist. Every declared failure_mode + every component node accounted in coverage.
-2. **Build DAG = topo sort of existing edges, emitted once (H7, §6.4).** See discriminator. Direction `from`-depends-on-`to`; never re-cut the graph (DERIVE-COMPONENTS owns boxes/edges); never emit a slice path (the slice activates its path at build time).
-3. **Cycle = boundary defect, flag-never-fix (§14).** Dependency cycle routes to DERIVE-COMPONENTS; don't pick an edge to break.
-4. **Deterministic emission.** `contract_tests[]` in CT* id order; each entry's `failure_assertions[]` in the contract's `failure_modes` array order; `flow_tests[]` in F* id order; `build_order`/`build_waves` per the wave rule (ascending C* within wave); spec ids = `T-<target>` (e.g. `T-CT1`, `T-F1`).
+1. **Bijection: every seam + every flow gets exactly one spec (H8).** Every CT* in `contracts.json` → exactly one `contract_tests[]` entry; every F* in `flows.json` → exactly one `flow_tests[]` entry. No orphan contract/flow; no spec for a CT*/F* that doesn't exist. Every declared failure_mode accounted in coverage.
+2. **Deterministic emission.** `contract_tests[]` in CT* id order; each entry's `failure_assertions[]` in the contract's `failure_modes` array order; `flow_tests[]` in F* id order; spec ids = `T-<target>` (e.g. `T-CT1`, `T-F1`).
 
 ## Task steps
 1. Read all inputs. Check guards (frontmatter `escapes:`) — any tripped → HALT, report which + offending detail, write nothing. Else continue.
 2. Per CT* (CT* order): emit `contract_tests[]` entry — `shape_assertion` (faithful to contract's `shape`, named-not-designed) + one `failure_assertion` per declared `failure_mode` (verbatim mode + expected behavior from mode's own consequence) + carry `traces`. Empty `failure_modes` → `structural_defects[]` → DEFINE-CONTRACTS.
 3. Per F* (F* order): emit `flow_tests[]` entry — `happy_path.asserts_ac` = AC* in flow's `traces` (reference, don't re-author) + `failure_path` reused from flow's declared variant + carry `traces`. No AC* traced → `aprd_defects[]` → Phase 0.
-4. Build DAG from `components.json` `edges[]`: per-node `depends_on`, wave rule, `build_order`; detect any cycle → `cycles[]` → DERIVE-COMPONENTS.
-5. Build `coverage` + counts by **walking** actual specs/edges (don't estimate); confirm bijection (every CT*+F* has one spec), every declared failure_mode covered, every node ordered.
-6. Write `.hld/skeleton/test-specs.json` (schema: "test-specs" registry id) + `.hld/skeleton/build-dag.json` (schema: "build-dag" registry id). Stop.
+4. Build `coverage` + counts by **walking** actual specs (don't estimate); confirm bijection (every CT*+F* has one spec), every declared failure_mode covered.
+5. Write `.hld/skeleton/test-specs.json` (schema: "test-specs" registry id). Stop.
 
 ## Stop condition
 - Guard tripped (frontmatter escapes) → write nothing; print which fired + detail; HALT.
 - A defect was recorded (routed per the task steps) → write the rest; state the route; stop.
-- Clean skeleton pass → write the two skeleton artifacts (task step 6); state the design oracle + DAG produced, RECONCILE/CRITIQUE next; stop.
+- Clean skeleton pass → write `.hld/skeleton/test-specs.json` (task step 5); state the design oracle produced, RECONCILE/CRITIQUE next; stop.
 
 ---
 
 # PART B — INCREMENT PASS  (frozen skeleton present)
 
-Derive ONE slice's design-layer oracle (§5.9). Frozen `test-specs.json` + `contracts.json` = **immutable input** — never re-author/reshape frozen T-CT* (H14). Job: auto-select next slice whose flow is modeled but oracle not derived; build its **NEW flow test** + **inherit by reference** the frozen contract tests its seams reuse. Contract-test delta **empty in greenfield** (`new_contract_tests:[]` — skeleton tested full frozen CT* set); slice inherits, doesn't re-derive. **No build DAG** (emitted once in skeleton, H7).
+Derive ONE slice's design-layer oracle (§5.9). Frozen `test-specs.json` + `contracts.json` = **immutable input** — never re-author/reshape frozen T-CT* (H14). Job: auto-select next slice whose flow is modeled but oracle not derived; build its **NEW flow test** + **inherit by reference** the frozen contract tests its seams reuse. Contract-test delta **empty in greenfield** (`new_contract_tests:[]` — skeleton tested full frozen CT* set); slice inherits, doesn't re-derive. **No build DAG** (emitted once in skeleton by DERIVE-BUILD-DAG, H7).
 
 ## The slice-oracle derivation (the discriminator — one new flow test + inherited contract tests, no invention)
 Build ONE `flow_tests[]` spec for slice flow F* exactly as Part A (happy `asserts_ac` referenced + reused `failure_path` + verbatim `traces`; no AC* traced → `aprd_defects[]` → Phase 0). For each touched CT*, INHERIT frozen `T-CT*` by reference (`{id, target, between, contract_kind, source_ref}` — `shape_assertion`/`failure_assertions` cited, never copied); missing frozen T-CT* → `structural_defects[]` → DERIVE-TESTS skeleton. Author `new_contract_tests[]` only for `new_contracts` (`[]` greenfield; empty mode → `structural_defects[]` → DEFINE-CONTRACTS). Operational detail: delta Rules + task steps.
@@ -95,7 +89,7 @@ Build ONE `flow_tests[]` spec for slice flow F* exactly as Part A (happy `assert
 1. **Inherit FROZEN contract tests; the flow test is new; reshape nothing (H1/H8/H14 — load-bearing).** Frozen `test-specs.json` immutable. The slice's seams inherit frozen T-CT* by reference (`shape_assertion`/`failure_assertions` cited, never copied or changed). The slice's flow gets a genuinely-new flow test (MODEL-FLOWS drew the flow). A gap = DEFECT to name (missing frozen test → DERIVE-TESTS skeleton; missing contract → DEFINE-CONTRACTS), never a spec invented here. Re-authoring a frozen T-CT* / re-testing F1 / re-emitting the DAG = fidelity breach → escalate (delta Rule 5), never patch.
 2. **Auto-select target slice (resumable, PR1).** Read `08-rerank.json` `remaining_sequence` in order; target = **first** slice that HAS both `.hld/slices/<id>/flows.json` and `contracts.json` (MODEL-FLOWS + DEFINE-CONTRACTS increments ran) but NOT yet `test-specs.json`. `completed[]` pinned — skip. None → STOP clean (escapes). One invocation = one slice. (Gate = the minimal consumed set — flows + contracts; MODEL-DATA/RESOLVE-LOCAL/MAP-NFR outputs not consumed here.)
 3. **One flow test = the slice's flow (§5.9).** Build the test spec for the SINGLE slice flow F*, exactly as the skeleton pass builds a flow test. Everything else (contract tests) inherited by reference. Don't test other slices' flows; don't re-test F1.
-4. **No build DAG in increment (H7).** The DAG is emitted ONCE in the skeleton; the slice activates a vertical path through it (the flow), never re-emits or re-orders it. Emit only `test-specs.json`.
+4. **No build DAG in increment (H7).** DAG emitted once in skeleton by DERIVE-BUILD-DAG; slice activates a vertical path through it (the flow), never re-emits or re-orders it. Emit only `test-specs.json`.
 5. **FLAG-never-fix, escape targets (H10).** Missing frozen test → `structural_defects[]` → DERIVE-TESTS skeleton; missing/wrong contract → `structural_defects[]` → DEFINE-CONTRACTS; fidelity breach → `frame_conflicts[]` → Phase 2; bad WHAT (flow traces no AC) → `aprd_defects[]` → Phase 0. Never patch a contract, flow, test spec, ADR, or aPRD in place; NEVER mutate frozen `test-specs.json`/`contracts.json` or a sibling slice's oracle.
 6. **Exclusion — cover only touched + own flow (D14/D16/D17/D18 over-inclusion trap at test level).** Frozen CT* a DIFFERENT slice introduces (future-slice consumer's seam, e.g. CT4–CT7/CT10/CT11 for S4) is in frozen `test-specs.json` but NOT this slice's oracle — EXCLUDE (its test inherited by ITS owning slice). Membership gate = slice's `touched_contracts` + its flow.
 7. **Deterministic emission.** Flow-test id = `T-F` + slice flow's ordinal (slice flow's `id` is `F<slice-ordinal>`, e.g. F4 → `T-F4`); `inherited_contract_tests[]` in `touched_contracts` CT* id order; `new_contract_tests[]` (if any) in new_contracts CT* id order, each failure_assertions in the contract's failure_modes order. Fill `skeleton_fidelity` + counts by walking actual specs.
