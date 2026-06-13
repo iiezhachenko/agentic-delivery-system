@@ -91,7 +91,9 @@ let step3Fail = fail;
     { root: ROOT }
   );
   ok(drGood.needs_confirmation === false, `adp_derive good: needs_confirmation expected false, got ${drGood.needs_confirmation}`);
-  console.log(`  adp_derive (good): needs_confirmation=${drGood.needs_confirmation} escape=${drGood.escape}`);
+  ok(drGood.artifact != null, `adp_derive good: artifact must be present in response (not null/undefined) — RC-2 fix`);
+  ok(drGood.artifact && drGood.artifact.subrequests != null, `adp_derive good: artifact.subrequests present`);
+  console.log(`  adp_derive (good): needs_confirmation=${drGood.needs_confirmation} escape=${drGood.escape} artifact.subrequests=${drGood.artifact && drGood.artifact.subrequests ? drGood.artifact.subrequests.length : "MISSING"}`);
 
   // adp_submit: pure gate — validate written artifact
   const r = await adp_submit(
@@ -149,7 +151,8 @@ let step4Fail = fail;
   );
   ok(drDefect.needs_confirmation === true,
     `adp_derive defect: needs_confirmation expected true, got ${drDefect.needs_confirmation}`);
-  console.log(`  adp_derive (defect): needs_confirmation=${drDefect.needs_confirmation}`);
+  ok(drDefect.artifact != null, `adp_derive defect: artifact must be present in response (not null/undefined) — RC-2 fix`);
+  console.log(`  adp_derive (defect): needs_confirmation=${drDefect.needs_confirmation} artifact_present=${drDefect.artifact != null}`);
 
   // adp_submit: pure gate — validate written artifact
   const rD = await adp_submit(

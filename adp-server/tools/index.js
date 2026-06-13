@@ -11,6 +11,7 @@ import { bijection, bucketCoverage, singleOwner, membership, intersect } from ".
 import { prefill } from "../../tools/det/prefill.mjs";
 import { deriveClassification } from "../../tools/det/classify-derive.mjs";
 import { deriveExtraction } from "../../tools/det/extract-derive.mjs";
+import { deriveGaps } from "../../tools/det/gap-derive.mjs";
 import { validateFile } from "../../tools/det/validate.mjs";
 import { resolve as ioResolve, loadManifest } from "../../tools/io/resolve.mjs";
 import { emit as emitBaselineMap } from "../../tools/det/emit/baseline-map.mjs";
@@ -88,7 +89,7 @@ export async function adp_emit(params, { root = "." } = {}) {
 }
 
 // schemaId -> derive fn: server computes deterministic fields from role judgment primitives (D38)
-const DERIVERS = { "01-classification": deriveClassification, "02-extraction": deriveExtraction };
+const DERIVERS = { "01-classification": deriveClassification, "02-extraction": deriveExtraction, "04-gaps": deriveGaps };
 
 // --- adp_derive: server determinism — derive + splice shell + (opt) questions + write (D38) ----
 export async function adp_derive(params, { root = "." } = {}) {
@@ -101,17 +102,19 @@ export async function adp_derive(params, { root = "." } = {}) {
     artifact.confirmation_questions = confirmation_questions.map((q, i) => Object.assign({}, q, { id: `Q${i + 1}` }));
   }
   if (output_path) {
-    const full = path.join(root, output_path);
+    // absolute output_path (e.g. /tmp/...) must NOT be joined with root; path.join strips leading slash.
+    const full = path.isAbsolute(output_path) ? output_path : path.join(root, output_path);
     fs.mkdirSync(path.dirname(full), { recursive: true });
     fs.writeFileSync(full, JSON.stringify(artifact, null, 2));
   }
-  return { output_path: output_path || null, needs_confirmation: derived.needs_confirmation, escape: derived.escape };
+  return { output_path: output_path || null, artifact, needs_confirmation: derived.needs_confirmation, escape: derived.escape };
 }
 
 // --- adp_submit: pure gate — validate(artifactPath, schemaId) → verdict only -----
 export async function adp_submit(params, { root = "." } = {}) {
   const { artifactPath, schemaId } = params;
-  const { valid, errors } = validateFile(path.join(root, artifactPath), schemaId);
+  const fullArtifact = path.isAbsolute(artifactPath) ? artifactPath : path.join(root, artifactPath);
+  const { valid, errors } = validateFile(fullArtifact, schemaId);
   return { verdict: valid ? "pass" : "fail", errors: errors || [] };
 }
 

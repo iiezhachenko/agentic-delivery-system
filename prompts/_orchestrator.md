@@ -106,6 +106,7 @@ Present the verify result. The operator confirms, in priority order (usage §C1)
 3. **Both directions held** — known-good PASS + planted-defect FAIL.
 - **Accept → STEP 6.** **Reject (value wrong) → re-author (STEP 3).** **Reject (spine leak) → fix the spine once (P3), not the target; re-run.**
 - Persist the gate reply on receipt (D20 guarantee 6) — resume never re-asks an answered gate; interrupted-before-reply re-presents, never silently promotes.
+- **D39 gate format (absolute):** internal build-loop steps (lint, ECONOMY-AUDIT, node CLI, direct-spawn, raw-pipe) = build-time evidence — label them as such, NEVER present as operator steps. Operator gate = ONLY `mcp__adp__*` native tool calls from a FRESH Claude Code session loading `.mcp.json`. Both directions (known-good → value-parity; planted-defect → divergence) expressed entirely as native MCP calls. No shell commands in the gate block.
 
 ## STEP 6 — Promote (this is "shipped"; no changelog, no pointer move)
 On accept: atomically move the scratch `.md` to its `prompts/<NN-phase>/<ROLE>.md` home (and, for a new golden, promote it to `_fixtures/`). That promotion IS the ship — "shipped" = the freeze on disk + git (workflow §5.5).
