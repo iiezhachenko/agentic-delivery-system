@@ -189,3 +189,10 @@ export async function adp_coverage(params, { root = "." } = {}) {
   if (op === "intersect") return intersect(rest.a, rest.b);
   throw new Error("unknown coverage op: " + op);
 }
+
+// --- adp_route_tier: per-hole tier routing (CR-025) ----------------------------
+export async function adp_route_tier(params, { root = "." } = {}) {
+  const { role, holeType } = params;
+  const { routeTier } = await import("../tier-router.js");
+  return { tier: routeTier(role, holeType || "narration") };
+}

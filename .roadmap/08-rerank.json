@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/archive/2026-06-13-multi-stream/08-rerank.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 55,
+  "roadmap_version": 56,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 55 (2026-06-13): W31f shipped — projector selftest tools/io/project.selftest.mjs promoted. Frontier: W31g (tier router adp-server/tier-router.js). roadmap_version 54 (2026-06-13): W31e shipped — context projector tools/io/project.mjs promoted. Frontier: W31f (projector selftest tools/io/project.selftest.mjs). roadmap_version 53 (2026-06-13): W31d shipped — MCP driver loop adp-server/driver.js promoted. Frontier: W31e (context projector tools/io/project.mjs). roadmap_version 52 (2026-06-13): W31c shipped — MCP tool surface adp-server/tools/index.js promoted. Frontier: W31d (MCP driver loop). roadmap_version 51 (2026-06-13): W31a shipped — ADR-0038 draft promoted to .adr/drafts/. adr-index rendered=38, adr.lock v18. Frontier: W31b (ADR-0038 accepted + adr.lock re-sign). roadmap_version 50 (2026-06-13): new workstream feature/mcp-adp-powers. CRs 023-026 — invert ADP control into MCP 'ADP Powers' server. Prior W29–W30 work all shipped (sentinels on disk); this frontier starts at W31. Source: _self-host/00-analysis.md + _self-host/01-8b-offload.md.",
+  "_note": "roadmap_version 56 (2026-06-13): W31g shipped — tier router adp-server/tier-router.js + tools/index.js (adp_route_tier) promoted. Frontier: W31h (tier router selftest tools/det/route-tier.selftest.mjs). roadmap_version 55 (2026-06-13): W31f shipped — projector selftest tools/io/project.selftest.mjs promoted. Frontier: W31g (tier router adp-server/tier-router.js). roadmap_version 54 (2026-06-13): W31e shipped — context projector tools/io/project.mjs promoted. Frontier: W31f (projector selftest tools/io/project.selftest.mjs). roadmap_version 53 (2026-06-13): W31d shipped — MCP driver loop adp-server/driver.js promoted. Frontier: W31e (context projector tools/io/project.mjs). roadmap_version 52 (2026-06-13): W31c shipped — MCP tool surface adp-server/tools/index.js promoted. Frontier: W31d (MCP driver loop). roadmap_version 51 (2026-06-13): W31a shipped — ADR-0038 draft promoted to .adr/drafts/. adr-index rendered=38, adr.lock v18. Frontier: W31b (ADR-0038 accepted + adr.lock re-sign). roadmap_version 50 (2026-06-13): new workstream feature/mcp-adp-powers. CRs 023-026 — invert ADP control into MCP 'ADP Powers' server. Prior W29–W30 work all shipped (sentinels on disk); this frontier starts at W31. Source: _self-host/00-analysis.md + _self-host/01-8b-offload.md.",
   "completed": [],
   "remaining_sequence": [
     {
@@ -76,7 +76,7 @@
       "position": 57,
       "id": "W31g-TIER-ROUTER",
       "name": "Tier router: adp_route_tier tool + deterministic tier table (Class-A vs Class-B) + local 8B endpoint config",
-      "status": "unshipped",
+      "status": "shipped",
       "unit": "adp-server/tier-router.js",
       "done_sentinel": "adp-server/tier-router.js",
       "depends_on": ["W31f-PROJECTOR-SELFTEST"],
