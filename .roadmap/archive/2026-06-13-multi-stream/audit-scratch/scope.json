@@ -1,0 +1,10 @@
+{
+  "scope": ["prompts/**/*.md"],
+  "exclude": [
+    "prompts/_playbooks/**",
+    "prompts/_orchestrator*.md",
+    "prompts/_step-runner.md",
+    "prompts/_economy-audit.md"
+  ],
+  "default_used": false
+}

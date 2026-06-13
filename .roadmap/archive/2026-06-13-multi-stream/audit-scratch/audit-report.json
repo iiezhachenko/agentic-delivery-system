@@ -1,0 +1,154 @@
+{
+  "lenses": [
+    {
+      "id": "L1",
+      "name": "SRP (Single Responsibility Principle)",
+      "description": "Each prompt file must do exactly one thing. A prompt violates SRP if it combines multiple distinct responsibilities (intake+validation, authoring+verification, routing+reporting, etc.) in a single role file.",
+      "criteria": [
+        {
+          "id": "LC1",
+          "test": "Prompt declares or performs more than one distinct output concern — writes to 2+ unrelated output paths, has 2+ unrelated task-step sections, or its role name covers 2+ separable functions.",
+          "severity": "block"
+        },
+        {
+          "id": "LC2",
+          "test": "Prompt's task steps cross a phase boundary (e.g. a Build-phase prompt also does aPRD intake; an ADR prompt also writes HLD artifacts).",
+          "severity": "block"
+        },
+        {
+          "id": "LC3",
+          "test": "Prompt's role/lane description lists 2+ separable responsibilities without a clear single primary.",
+          "severity": "warn"
+        },
+        {
+          "id": "LC4",
+          "test": "Prompt contains conditional branching that makes it behave as a different role depending on a flag — mode-switching within one file where the modes have different primary outputs.",
+          "severity": "warn"
+        }
+      ]
+    }
+  ],
+  "scope": {
+    "scope": ["prompts/**/*.md"],
+    "exclude": [
+      "prompts/_playbooks/**",
+      "prompts/_orchestrator*.md",
+      "prompts/_step-runner.md",
+      "prompts/_economy-audit.md"
+    ],
+    "default_used": false
+  },
+  "findings": [
+    {
+      "lens_id": "L1",
+      "file": "prompts/00-aprd/AUDIT-REPORT.md",
+      "criterion_id": "LC1",
+      "severity": "block",
+      "finding": "Declares two unrelated output paths in frontmatter: `.audit/report.md` (operator-facing audit report) and `.aprd/00-raw-request.md` (Phase-0 ADP intake artifact for downstream pipeline ingestion). Different downstream consumers, different schemas, different phases. Two separable functions: produce audit report vs generate ADP intake artifact.",
+      "remediation": "Split into two roles: one writes `.audit/report.md` (audit presentation), one writes `.aprd/00-raw-request.md` (intake promotion). Or fold the intake artifact write into a separate AUDIT-PROMOTE role."
+    },
+    {
+      "lens_id": "L1",
+      "file": "prompts/00-aprd/AUDIT-REPORT.md",
+      "criterion_id": "LC3",
+      "severity": "warn",
+      "finding": "Role description states two co-equal outputs: 'writes `.audit/report.md` + `.aprd/00-raw-request.md`' — report writing and intake artifact generation listed without a single named primary responsibility.",
+      "remediation": "Clarify single primary (audit report) with intake artifact as byproduct; or split roles per LC1 remediation."
+    },
+    {
+      "lens_id": "L1",
+      "file": "prompts/00-aprd/DIAGNOSE.md",
+      "criterion_id": "LC1",
+      "severity": "block",
+      "finding": "Declares three output paths across modes: `.build/skeleton/diagnosis.json`, `.build/slices/<id>/diagnosis.json` (build-red adjudication outputs), and `.aprd/diagnosis.json` (Phase-0 bugfix intake output). The third output is in `.aprd/` namespace and serves Phase-0 intake — fundamentally different from build-red self-heal-vs-escape adjudication. Two unrelated primary concerns in one file.",
+      "remediation": "Split BUGFIX-LOCALIZE (Part C) into a separate role in phase 00-aprd. Keep DIAGNOSE in 04-build for build-red adjudication only (Parts A + B)."
+    },
+    {
+      "lens_id": "L1",
+      "file": "prompts/00-aprd/DIAGNOSE.md",
+      "criterion_id": "LC2",
+      "severity": "block",
+      "finding": "Prompt declared in phase 04-build. Part C (BUGFIX-LOCALIZE) performs Phase-0 intake work: reads change-requests, reads frozen aprd.frozen.md, reproduces/localizes/root-causes a defect, writes `.aprd/diagnosis.json`. Phase-0 intake operations inside a Phase-4-labeled prompt = phase boundary crossing.",
+      "remediation": "Move BUGFIX-LOCALIZE to a separate prompt in 00-aprd phase. DIAGNOSE (04-build) handles only build-red adjudication."
+    },
+    {
+      "lens_id": "L1",
+      "file": "prompts/00-aprd/DIAGNOSE.md",
+      "criterion_id": "LC4",
+      "severity": "warn",
+      "finding": "Three modes where bugfix-localize behaves as a completely different role (Phase-0 intake: reproduce+localize+root-cause) vs build-red modes (build verification adjudication). Different primary outputs (`.aprd/diagnosis.json` vs `.build/*/diagnosis.json`) and different trigger signals.",
+      "remediation": "Extract BUGFIX-LOCALIZE into separate role. Remaining two modes (skeleton-build, slice-build) share same primary function and would no longer trigger LC4."
+    },
+    {
+      "lens_id": "L1",
+      "file": "prompts/01-roadmap/SEQUENCE.md",
+      "criterion_id": "LC1",
+      "severity": "block",
+      "finding": "Declares two unrelated output paths: `.roadmap/05-sequence.json` (proposed sequencing artifact consumed by SKELETON-IDENTIFY/FOUNDATION-CUT/SEQUENCE-REVIEW) and `.roadmap/08-rerank.json` (living roadmap consumed by slice build loop and RE-RANK). Greenfield path writes 05-sequence.json only; feature-add path writes 08-rerank.json only. Two separable output concerns serving different downstream stages.",
+      "remediation": "Split feature-add sequence emission into a separate role, or restrict SEQUENCE to outputting only 05-sequence.json, with RE-RANK (or new SEQUENCE-FEATURE-ADD role) producing 08-rerank.json for the feature-add path."
+    },
+    {
+      "lens_id": "L1",
+      "file": "prompts/01-roadmap/SEQUENCE.md",
+      "criterion_id": "LC4",
+      "severity": "warn",
+      "finding": "Greenfield and feature-add branches produce different primary outputs (05-sequence.json vs 08-rerank.json) and omit different pipeline stages (no skeleton pin, no FOUNDATION-CUT consumption in feature-add). Two branches behave as different roles.",
+      "remediation": "Split into SEQUENCE (greenfield) and SEQUENCE-FEATURE-ADD roles, each with single primary output."
+    },
+    {
+      "lens_id": "L1",
+      "file": "prompts/03-hld/DERIVE-TESTS.md",
+      "criterion_id": "LC1",
+      "severity": "block",
+      "finding": "Skeleton pass declares two distinct unrelated output paths: `.hld/skeleton/test-specs.json` AND `.hld/skeleton/build-dag.json`. These serve unrelated concerns — test oracle specifications vs build dependency graph. Two distinct task-step sections with separate discriminators and separate consumers (MATERIALIZE-ORACLE uses test-specs; IMPLEMENT uses build-dag).",
+      "remediation": "Extract build-dag emission into a separate role (e.g. DERIVE-BUILD-DAG). DERIVE-TESTS outputs only test-specs.json."
+    },
+    {
+      "lens_id": "L1",
+      "file": "prompts/03-hld/DERIVE-TESTS.md",
+      "criterion_id": "LC4",
+      "severity": "warn",
+      "finding": "Bugfix pass (Part C) behaves as a substantially different role: re-enters existing slice, mints reproduction test + regression layer instead of contract/flow/acceptance specs, triggered by class==bugfix+diagnosis.json. Different primary outputs (reproduction/regression layers vs standard test-specs) and different trigger signal from skeleton/increment modes.",
+      "remediation": "Extract bugfix pass into separate prompt (e.g. DERIVE-TESTS-BUGFIX). DERIVE-TESTS handles skeleton|increment passes only."
+    },
+    {
+      "lens_id": "L1",
+      "file": "prompts/00-aprd/SYNTHESIZE.md",
+      "criterion_id": "LC4",
+      "severity": "warn",
+      "finding": "Greenfield branch produces draft (`.aprd/drafts/aprd.v1.md`) requiring subsequent CRITIQUE + sign-off gate. Feature-add and bugfix branches produce frozen version directly plus re-sign `aprd.lock`. Different primary outputs (draft vs immediately-frozen artifact + lock re-sign) and different downstream consequences. Greenfield never writes `aprd.lock`; feature-add/bugfix always write it.",
+      "remediation": "Consider splitting greenfield SYNTHESIZE (draft awaiting CRITIQUE) from SYNTHESIZE-INCREMENT (frozen version bump + lock re-sign). Alternatively accept mode branching as designed given single conceptual function (produce aPRD contract for current class)."
+    },
+    {
+      "lens_id": "L1",
+      "file": "prompts/04-build/IMPLEMENT.md",
+      "criterion_id": "LC4",
+      "severity": "warn",
+      "finding": "Bugfix branch replaces component-build with minimal in-place edit of existing code at BLAST_RADIUS symbol — opposite behavior to greenfield/feature-add (write new component vs edit existing symbol). Different dispatch signal (diagnosis.json + class==bugfix vs build-plan dispatch). Different primary behavioral mode within one file.",
+      "remediation": "Consider extracting bugfix repair into separate IMPLEMENT-BUGFIX role. Low priority — outputs remain in same namespace."
+    },
+    {
+      "lens_id": "L1",
+      "file": "prompts/04-build/MATERIALIZE-ORACLE.md",
+      "criterion_id": "LC4",
+      "severity": "warn",
+      "finding": "Bugfix branch materializes reproduction+regression layers instead of full contract/flow/acceptance oracle; supersedes existing slice oracle (in-place re-entry). No build-plan dispatch. Substantially different behavior from greenfield/feature-add modes.",
+      "remediation": "Consider extracting bugfix oracle materialization into separate role. Low priority — same output namespace."
+    },
+    {
+      "lens_id": "L1",
+      "file": "prompts/04-build/VERIFY-OUTPUT.md",
+      "criterion_id": "LC4",
+      "severity": "warn",
+      "finding": "Bugfix mode runs different verification bar (reproduction red→green + scoped regression) instead of full contract/flow/acceptance/class-ext ladder. Different dispatch signal (oracle_layers:[reproduction,regression]). Behaves as different verification function for bugfix class.",
+      "remediation": "Consider extracting bugfix verification into separate role. Low priority — same output namespace."
+    }
+  ],
+  "summary": {
+    "total": 13,
+    "block_count": 6,
+    "warn_count": 7,
+    "info_count": 0,
+    "pass_count": 159
+  }
+}

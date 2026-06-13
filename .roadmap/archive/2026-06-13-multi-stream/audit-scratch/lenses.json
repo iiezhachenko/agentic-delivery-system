@@ -1,0 +1,31 @@
+{
+  "lenses": [
+    {
+      "id": "L1",
+      "name": "SRP (Single Responsibility Principle)",
+      "description": "Each prompt file must do exactly one thing. A prompt violates SRP if it combines multiple distinct responsibilities (intake+validation, authoring+verification, routing+reporting, etc.) in a single role file.",
+      "criteria": [
+        {
+          "id": "LC1",
+          "test": "Prompt declares or performs more than one distinct output concern — writes to 2+ unrelated output paths, has 2+ unrelated task-step sections, or its role name covers 2+ separable functions.",
+          "severity": "block"
+        },
+        {
+          "id": "LC2",
+          "test": "Prompt's task steps cross a phase boundary (e.g. a Build-phase prompt also does aPRD intake; an ADR prompt also writes HLD artifacts).",
+          "severity": "block"
+        },
+        {
+          "id": "LC3",
+          "test": "Prompt's role/lane description lists 2+ separable responsibilities without a clear single primary.",
+          "severity": "warn"
+        },
+        {
+          "id": "LC4",
+          "test": "Prompt contains conditional branching that makes it behave as a different role depending on a flag — mode-switching within one file where the modes have different primary outputs.",
+          "severity": "warn"
+        }
+      ]
+    }
+  ]
+}
