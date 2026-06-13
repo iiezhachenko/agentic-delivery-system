@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/archive/2026-06-13-multi-stream/08-rerank.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 57,
+  "roadmap_version": 58,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 57 (2026-06-13): W31h shipped — tier router selftest tools/det/route-tier.selftest.mjs promoted. Frontier: W31j (role thinning Phase 1 prompts/01-roadmap/RE-RANK.md). roadmap_version 56 (2026-06-13): W31g shipped — tier router adp-server/tier-router.js + tools/index.js (adp_route_tier) promoted. Frontier: W31h (tier router selftest tools/det/route-tier.selftest.mjs). roadmap_version 55 (2026-06-13): W31f shipped — projector selftest tools/io/project.selftest.mjs promoted. Frontier: W31g (tier router adp-server/tier-router.js). roadmap_version 54 (2026-06-13): W31e shipped — context projector tools/io/project.mjs promoted. Frontier: W31f (projector selftest tools/io/project.selftest.mjs). roadmap_version 53 (2026-06-13): W31d shipped — MCP driver loop adp-server/driver.js promoted. Frontier: W31e (context projector tools/io/project.mjs). roadmap_version 52 (2026-06-13): W31c shipped — MCP tool surface adp-server/tools/index.js promoted. Frontier: W31d (MCP driver loop). roadmap_version 51 (2026-06-13): W31a shipped — ADR-0038 draft promoted to .adr/drafts/. adr-index rendered=38, adr.lock v18. Frontier: W31b (ADR-0038 accepted + adr.lock re-sign). roadmap_version 50 (2026-06-13): new workstream feature/mcp-adp-powers. CRs 023-026 — invert ADP control into MCP 'ADP Powers' server. Prior W29–W30 work all shipped (sentinels on disk); this frontier starts at W31. Source: _self-host/00-analysis.md + _self-host/01-8b-offload.md.",
+  "_note": "roadmap_version 58 (2026-06-13): SENTINEL-FIX for refactor class (W31i–W31m, CR-026). Bug: thinning tasks used pre-existing prompt paths as done_sentinel → bare file-existence read them all 'done' before any thinning ran; W31i was falsely flagged shipped (never built — CLASSIFIER.md unchanged since W29i, no commit) and STEP-0 mis-reported the loop drained. Fix: (a) W31i status reverted shipped→unshipped; (b) added done_discriminator to all 5 refactor entries; (c) authored _playbooks/refactor.md defining the class discriminator (frontmatter `thinned: CR-026` marker + server-owned sections removed + both-directions hold) — orchestrator STEP 0.2 sanctioned hook, frozen orchestrator untouched. Frontier now correctly: W31i (role thinning Phase 0 prompts/00-aprd/*). roadmap_version 57 (2026-06-13): W31h shipped — tier router selftest tools/det/route-tier.selftest.mjs promoted. Frontier: W31j (role thinning Phase 1 prompts/01-roadmap/RE-RANK.md). roadmap_version 56 (2026-06-13): W31g shipped — tier router adp-server/tier-router.js + tools/index.js (adp_route_tier) promoted. Frontier: W31h (tier router selftest tools/det/route-tier.selftest.mjs). roadmap_version 55 (2026-06-13): W31f shipped — projector selftest tools/io/project.selftest.mjs promoted. Frontier: W31g (tier router adp-server/tier-router.js). roadmap_version 54 (2026-06-13): W31e shipped — context projector tools/io/project.mjs promoted. Frontier: W31f (projector selftest tools/io/project.selftest.mjs). roadmap_version 53 (2026-06-13): W31d shipped — MCP driver loop adp-server/driver.js promoted. Frontier: W31e (context projector tools/io/project.mjs). roadmap_version 52 (2026-06-13): W31c shipped — MCP tool surface adp-server/tools/index.js promoted. Frontier: W31d (MCP driver loop). roadmap_version 51 (2026-06-13): W31a shipped — ADR-0038 draft promoted to .adr/drafts/. adr-index rendered=38, adr.lock v18. Frontier: W31b (ADR-0038 accepted + adr.lock re-sign). roadmap_version 50 (2026-06-13): new workstream feature/mcp-adp-powers. CRs 023-026 — invert ADP control into MCP 'ADP Powers' server. Prior W29–W30 work all shipped (sentinels on disk); this frontier starts at W31. Source: _self-host/00-analysis.md + _self-host/01-8b-offload.md.",
   "completed": [],
   "remaining_sequence": [
     {
@@ -98,9 +98,10 @@
       "position": 59,
       "id": "W31i-ROLE-THIN-PHASE0",
       "name": "Role thinning Phase 0 (aPRD roles): strip mode-dispatch/guards/schema-prose from prompts/00-aprd/*; re-verify each both-directions",
-      "status": "shipped",
+      "status": "unshipped",
       "unit": "prompts/00-aprd/CLASSIFIER.md",
       "done_sentinel": "prompts/00-aprd/CLASSIFIER.md",
+      "done_discriminator": "refactor class (_playbooks/refactor.md): bare file-existence is NOT done — target pre-exists. Done iff thinned prompt carries frontmatter `thinned: CR-026` marker AND server-owned sections (dispatch/guards/schema-prose) removed AND both-directions still hold.",
       "depends_on": ["W31d-MCP-DRIVER-LOOP"],
       "cr": "CR-026",
       "class": "refactor"
@@ -112,6 +113,7 @@
       "status": "unshipped",
       "unit": "prompts/01-roadmap/RE-RANK.md",
       "done_sentinel": "prompts/01-roadmap/RE-RANK.md",
+      "done_discriminator": "refactor class (_playbooks/refactor.md): bare file-existence is NOT done — target pre-exists. Done iff thinned prompt carries frontmatter `thinned: CR-026` marker AND server-owned sections removed AND both-directions still hold.",
       "depends_on": ["W31i-ROLE-THIN-PHASE0"],
       "cr": "CR-026",
       "class": "refactor"
@@ -123,6 +125,7 @@
       "status": "unshipped",
       "unit": "prompts/02-adr/DECISION-EXTRACT.md",
       "done_sentinel": "prompts/02-adr/DECISION-EXTRACT.md",
+      "done_discriminator": "refactor class (_playbooks/refactor.md): bare file-existence is NOT done — target pre-exists. Done iff thinned prompt carries frontmatter `thinned: CR-026` marker AND server-owned sections removed AND both-directions still hold.",
       "depends_on": ["W31j-ROLE-THIN-PHASE1"],
       "cr": "CR-026",
       "class": "refactor"
@@ -134,6 +137,7 @@
       "status": "unshipped",
       "unit": "prompts/03-hld/DERIVE-COMPONENTS.md",
       "done_sentinel": "prompts/03-hld/DERIVE-COMPONENTS.md",
+      "done_discriminator": "refactor class (_playbooks/refactor.md): bare file-existence is NOT done — target pre-exists. Done iff thinned prompt carries frontmatter `thinned: CR-026` marker AND server-owned sections removed AND both-directions still hold.",
       "depends_on": ["W31k-ROLE-THIN-PHASE2"],
       "cr": "CR-026",
       "class": "refactor"
@@ -145,6 +149,7 @@
       "status": "unshipped",
       "unit": "prompts/04-build/IMPLEMENT.md",
       "done_sentinel": "prompts/04-build/IMPLEMENT.md",
+      "done_discriminator": "refactor class (_playbooks/refactor.md): bare file-existence is NOT done — target pre-exists. Done iff thinned prompt carries frontmatter `thinned: CR-026` marker AND server-owned sections removed AND both-directions still hold.",
       "depends_on": ["W31l-ROLE-THIN-PHASE3"],
       "cr": "CR-026",
       "class": "refactor"
