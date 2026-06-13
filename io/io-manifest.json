@@ -1,6 +1,6 @@
 {
   "$schema_version": 1,
-  "_note": "Read-graph SOURCE OF TRUTH (D25/R11). groups = recurring bundles (one home, AB1); roles[].always = unconditional; roles[].when[] = predicate-gated (AND-equality over state keys mode/class/pass). read entry = group-id string OR inline path-object {path,hint?,glob?,indirect?,optional?}. Resolver tools/io/resolve.mjs expands: always-groups -> when-union -> {scope}/{slice} fill -> lock#field indirection -> glob -> drop-missing-optional -> dedupe. Prompts declare NO inputs (W6 re-author drops inputs:). io-manifest change = new version + downstream change-request (frozen class, mirrors schemas.lock).",
+  "_note": "Read-graph SOURCE OF TRUTH (D25/R11). groups = recurring bundles (one home, AB1); roles[].always = unconditional; roles[].when[] = predicate-gated (AND-equality over state keys mode/class/pass). read entry = group-id string OR inline path-object {path,hint?,glob?,indirect?,optional?}. Resolver tools/io/resolve.mjs expands: always-groups -> when-union -> {scope}/{slice} fill -> lock#field indirection -> glob -> drop-missing-optional -> dedupe. Prompts declare NO inputs (W6 re-author drops inputs:). io-manifest change = new version + downstream change-request (frozen class, mirrors schemas.lock). v7 = v6 + W30j/CR-021 MATERIALIZE-ORACLE-BUGFIX role entry (2026-06-13): MATERIALIZE-ORACLE-BUGFIX added to roles[] — when class=bugfix reads .aprd/diagnosis.json + current_what + slice test-specs.json (bugfix design oracle). MATERIALIZE-ORACLE.when[] bugfix block removed (class=bugfix dispatch moved to MATERIALIZE-ORACLE-BUGFIX per SRP split D37/CR-021/F12). role_count 45→46.",
   "groups": {
     "frozen_frame": [
       { "path": ".adr/adr.lock",                 "hint": "frozen gate (status==frozen); class" },
@@ -562,10 +562,21 @@
             { "path": ".roadmap/08-rerank.json", "hint": "auto-select target slice" }
           ] },
         { "if": { "mode": "slice-build", "class": "feature-add" },
-          "read": [ "current_what", { "path": ".aprd/baseline-map.json", "hint": "existing_oracle suites (REGRESSION_GUARD BF4)" } ] },
+          "read": [ "current_what", { "path": ".aprd/baseline-map.json", "hint": "existing_oracle suites (REGRESSION_GUARD BF4)" } ] }
+      ]
+    },
+    "MATERIALIZE-ORACLE-BUGFIX": {
+      "always": [
+        "frame_adrs",
+        { "path": ".aprd/aprd.lock", "hint": "frozen WHAT gate" },
+        { "path": ".hld/skeleton.lock", "hint": "frozen skeleton gate + reconcile_critique_verdict==clean" },
+        { "path": ".hld/skeleton/components.json", "hint": "component id/name/traces" },
+        { "path": ".hld/skeleton/test-specs.json", "hint": "frozen CT* spec: T-CT9 by ref" }
+      ],
+      "when": [
         { "if": { "mode": "slice-build", "class": "bugfix" },
           "read": [
-            { "path": ".aprd/diagnosis.json", "hint": "DISPATCH signal + localization" },
+            { "path": ".aprd/diagnosis.json", "hint": "DISPATCH signal + localization.symbol (defect_site)" },
             "current_what",
             { "path": ".hld/slices/{slice}/test-specs.json", "hint": "bugfix design oracle: reproduction_test" }
           ] }
