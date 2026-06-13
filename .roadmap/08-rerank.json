@@ -1,16 +1,16 @@
 {
   "base_ref": ".roadmap/archive/2026-06-13-multi-stream/08-rerank.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 50,
+  "roadmap_version": 51,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 50 (2026-06-13): new workstream feature/mcp-adp-powers. CRs 023-026 — invert ADP control into MCP 'ADP Powers' server. Prior W29–W30 work all shipped (sentinels on disk); this frontier starts at W31. Source: _self-host/00-analysis.md + _self-host/01-8b-offload.md.",
+  "_note": "roadmap_version 51 (2026-06-13): W31a shipped — ADR-0038 draft promoted to .adr/drafts/. adr-index rendered=38, adr.lock v18. Frontier: W31b (ADR-0038 accepted + adr.lock re-sign). roadmap_version 50 (2026-06-13): new workstream feature/mcp-adp-powers. CRs 023-026 — invert ADP control into MCP 'ADP Powers' server. Prior W29–W30 work all shipped (sentinels on disk); this frontier starts at W31. Source: _self-host/00-analysis.md + _self-host/01-8b-offload.md.",
   "completed": [],
   "remaining_sequence": [
     {
       "position": 51,
       "id": "W31a-ADR0038-DRAFT",
       "name": "ADR-0038 draft: MCP driver loop architecture decision",
-      "status": "unshipped",
+      "status": "shipped",
       "unit": ".adr/drafts/0038-mcp-adp-powers-driver-loop.draft.md",
       "done_sentinel": ".adr/drafts/0038-mcp-adp-powers-driver-loop.draft.md",
       "depends_on": [],
