@@ -2,6 +2,8 @@
 role: CRITIQUE
 phase: 00-aprd
 class: <dispatched by playbook>   # was greenfield-only; feature-add + bugfix playbooks now authored (prompts/_playbooks/). Other classes still HALT at CLASSIFIER.
+thinned: CR-026
+mcp_powered: true
 interactive: false          # adversarial review — reads disk, writes the issues list to disk, stops. Does NOT re-run SYNTHESIZE and does NOT touch the client; the loop-back and sign-off gate are separate orchestration steps (§5.6/§5.4, PR1).
 outputs:
   - { path: ".aprd/08-critique.json", schema: "08-critique" }
@@ -62,9 +64,9 @@ Genuinely on the line *after* applying resolution test — fork might survive, A
    - Each declined interpretation in `04`: recorded in `OUT_OF_SCOPE`? Any requirement-implied optional extra left unbounded? (`unbounded-scope`)
    - Each `A*`: gap_ref resolves to real `G*`, decision faithful, no duplicate? Each `G*`: resolved by exactly one `A*`? (`untraceable-assumption`)
    - All id references resolve; draft ↔ `07` agree; counts match; flags match. (`broken-id-thread`)
-4. Each genuine blocker: mint issue into `issues[]` — `id` (contiguous `I1, I2, …`), `category` (exactly one of the five enum values), `target_ref` (primary artifact id the issue concerns — `R*`/`AC*`/`A*`/`G*`/`OUT_OF_SCOPE`; name the rest in `problem`), `problem` (defect AND why it blocks freeze — build choice still open, output not binary, scope unbounded, or thread that breaks; cite concrete ids), `fix_hint` (concrete actionable change SYNTHESIZE should make to clear it; not "make it better"). Clean draft → `issues` is `[]`.
-5. Write `.aprd/08-critique.json`. Output object = `{aprd_ref, assumptions_ref, gaps_ref, class, verdict, issues, issue_count}`: `aprd_ref`/`assumptions_ref`/`gaps_ref` = the paths of the draft / `07` / `04` read step 1 (`.aprd/drafts/aprd.v1.md`, `.aprd/07-assumptions.json`, `.aprd/04-gaps.json`); `class` = the class in the draft (`greenfield`|`feature-add`|`bugfix`); `verdict` = `blocked` if `issues` non-empty, else `clean` (deterministic); `issue_count` = length of `issues`. Stop.
+4. Each genuine blocker: collect issue primitive — `category` (exactly one of the five enum values), `target_ref` (primary artifact id the issue concerns — `R*`/`AC*`/`A*`/`G*`/`OUT_OF_SCOPE`; name the rest in `problem`), `problem` (defect AND why it blocks freeze — build choice still open, output not binary, scope unbounded, or thread that breaks; cite concrete ids), `fix_hint` (concrete actionable change SYNTHESIZE should make to clear it; not "make it better"). Clean draft → `issues` primitives is `[]`. Never mint `id`, never compute `verdict`, never count — server owns those.
+5. Emit judgment primitives to server (`critique-derive`): `issues[]` each `{category, target_ref, problem, fix_hint}`. Pass envelope opts: `{class}` from draft (+ `aprd_ref`, `assumptions_ref`, `gaps_ref` = paths read in step 1). Server mints I* ids, computes `verdict`, `issue_count`, writes `.aprd/08-critique.json`. Stop.
 
 ## Stop condition
 - Guard tripped (frontmatter `escapes:`) → write nothing; print which guard fired + offending detail; "HALT".
-- Reviewed → write `.aprd/08-critique.json` (create `.aprd/` if absent; only output); report verdict + issue count (if blocked: category of each issue); state "critique complete — SYNTHESIZE re-run next" (if blocked) or "critique clean — sign-off gate next" (if clean); stop. No client interaction, no rewrite of draft, no freeze.
+- Reviewed → server writes `.aprd/08-critique.json`; report verdict + issue count (if blocked: category of each issue); state "critique complete — SYNTHESIZE re-run next" (if blocked) or "critique clean — sign-off gate next" (if clean); stop. No client interaction, no rewrite of draft, no freeze.
