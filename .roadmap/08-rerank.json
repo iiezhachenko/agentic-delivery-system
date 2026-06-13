@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/archive/2026-06-13-multi-stream/08-rerank.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 61,
+  "roadmap_version": 63,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 61 (2026-06-13): CR-026 REFRAMED refactor->mcp-modernize per operator ruling — each role-thinning co-delivers the MCP switch (judgment-only role + server-side determinism module + MCP-path both-directions verify; zero determinism in role). W31i-T01-CLASSIFIER shipped as the REFERENCE impl: thinned mcp_powered role + tools/det/classify-derive.mjs (+selftest) + adp-server real stdio MCP server (server.mjs) + adp_derive/adp_submit-gate/adp_classify_derive + sentinelDone discriminator fix in adp_status + slim tool payloads (adp_status 43k->459 chars) + .mcp.json registration; verified live through launched server (greenfield + compound two-phase), operator-run (D39). compound-mixed golden de-staled (escape non_greenfield_subrequests->unplaybooked_subrequests, schema-valid). New iron law D39 (ADR-0039 draft): operator runs every demo, agent never self-runs the proof — frozen in CLAUDE.md + adp-orchestrator.md; formal ADR sign = W31n. Added W31n (ADR-0039 sign), W31o (MCP projection audit generalization). Remaining W31i-T02..W31m now mcp-modernize units (51) with new done_discriminator. Frontier: W31i-T02-ADOPT. PRIOR: roadmap_version 60 (2026-06-13): W31j-W31m DECOMPOSED into atomic per-prompt ledger increments (same pattern as W31i roadmap_version 59), each its own frontier with own done_sentinel + done_discriminator (incl ECONOMY-AUDIT clean) + 3-attempt budget + lint/economy/parity verify. W31j=8 (prompts/01-roadmap/*), W31k=7 (prompts/02-adr/*), W31l=10 (prompts/03-hld/*), W31m=10 (prompts/04-build/*). All ",
+  "_note": "roadmap_version 63 (2026-06-13): W31i-T10-EXTRACT SHIPPED (2nd mcp-modernize unit, 1st generalization). Thinned judgment-only EXTRACT + tools/det/extract-derive.mjs (E*/R*/C*/U* mint, R* contiguous explicit->implied, inferred-stamp) registered DERIVERS 02-extraction; verified fresh-session native MCP demo (operator-run, D39 sharpened: fresh-session+native = full-wiring proof). _playbooks/mcp-modernize.md authored (class + done-discriminator + economy budget raised 3->5 for latent prose debt). D39 iron law sharpened: acceptance demo MUST be fresh Claude Code session via native mcp__server__* calls. Frontier: W31i-T11-GAP-DETECT. PRIOR: roadmap_version 62 (2026-06-13): RE-RANK per operator ruling — Phase-0 mcp-modernize units reordered SCHEMA-SHAPED first (derive pattern proven on CLASSIFIER reference), SCAFFOLD + EMITTER deferred. Frontier now W31i-T10-EXTRACT (02-extraction; schema-shaped, io-manifest-wired, g",
   "completed": [],
   "remaining_sequence": [
     {
@@ -124,121 +124,9 @@
     },
     {
       "position": 60,
-      "id": "W31i-T02-ADOPT",
-      "name": "Role thinning Phase 0 (T02/17): thin prompts/00-aprd/ADOPT.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
-      "status": "unshipped",
-      "unit": "prompts/00-aprd/ADOPT.md",
-      "done_sentinel": "prompts/00-aprd/ADOPT.md",
-      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
-      "depends_on": [
-        "W31i-T01-CLASSIFIER"
-      ],
-      "cr": "CR-026",
-      "class": "mcp-modernize"
-    },
-    {
-      "position": 61,
-      "id": "W31i-T03-AUDIT-PROMOTE",
-      "name": "Role thinning Phase 0 (T03/17): thin prompts/00-aprd/AUDIT-PROMOTE.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
-      "status": "unshipped",
-      "unit": "prompts/00-aprd/AUDIT-PROMOTE.md",
-      "done_sentinel": "prompts/00-aprd/AUDIT-PROMOTE.md",
-      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
-      "depends_on": [
-        "W31i-T02-ADOPT"
-      ],
-      "cr": "CR-026",
-      "class": "mcp-modernize"
-    },
-    {
-      "position": 62,
-      "id": "W31i-T04-AUDIT-REPORT",
-      "name": "Role thinning Phase 0 (T04/17): thin prompts/00-aprd/AUDIT-REPORT.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
-      "status": "unshipped",
-      "unit": "prompts/00-aprd/AUDIT-REPORT.md",
-      "done_sentinel": "prompts/00-aprd/AUDIT-REPORT.md",
-      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
-      "depends_on": [
-        "W31i-T03-AUDIT-PROMOTE"
-      ],
-      "cr": "CR-026",
-      "class": "mcp-modernize"
-    },
-    {
-      "position": 63,
-      "id": "W31i-T05-AUDIT-RUN",
-      "name": "Role thinning Phase 0 (T05/17): thin prompts/00-aprd/AUDIT-RUN.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
-      "status": "unshipped",
-      "unit": "prompts/00-aprd/AUDIT-RUN.md",
-      "done_sentinel": "prompts/00-aprd/AUDIT-RUN.md",
-      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
-      "depends_on": [
-        "W31i-T04-AUDIT-REPORT"
-      ],
-      "cr": "CR-026",
-      "class": "mcp-modernize"
-    },
-    {
-      "position": 64,
-      "id": "W31i-T06-BASELINE-MAP",
-      "name": "Role thinning Phase 0 (T06/17): thin prompts/00-aprd/BASELINE-MAP.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
-      "status": "unshipped",
-      "unit": "prompts/00-aprd/BASELINE-MAP.md",
-      "done_sentinel": "prompts/00-aprd/BASELINE-MAP.md",
-      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
-      "depends_on": [
-        "W31i-T05-AUDIT-RUN"
-      ],
-      "cr": "CR-026",
-      "class": "mcp-modernize"
-    },
-    {
-      "position": 65,
-      "id": "W31i-T07-BUGFIX-LOCALIZE",
-      "name": "Role thinning Phase 0 (T07/17): thin prompts/00-aprd/BUGFIX-LOCALIZE.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
-      "status": "unshipped",
-      "unit": "prompts/00-aprd/BUGFIX-LOCALIZE.md",
-      "done_sentinel": "prompts/00-aprd/BUGFIX-LOCALIZE.md",
-      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
-      "depends_on": [
-        "W31i-T06-BASELINE-MAP"
-      ],
-      "cr": "CR-026",
-      "class": "mcp-modernize"
-    },
-    {
-      "position": 66,
-      "id": "W31i-T08-CRITIQUE",
-      "name": "Role thinning Phase 0 (T08/17): thin prompts/00-aprd/CRITIQUE.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
-      "status": "unshipped",
-      "unit": "prompts/00-aprd/CRITIQUE.md",
-      "done_sentinel": "prompts/00-aprd/CRITIQUE.md",
-      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
-      "depends_on": [
-        "W31i-T07-BUGFIX-LOCALIZE"
-      ],
-      "cr": "CR-026",
-      "class": "mcp-modernize"
-    },
-    {
-      "position": 67,
-      "id": "W31i-T09-EXTRACT-RULES",
-      "name": "Role thinning Phase 0 (T09/17): thin prompts/00-aprd/EXTRACT-RULES.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
-      "status": "unshipped",
-      "unit": "prompts/00-aprd/EXTRACT-RULES.md",
-      "done_sentinel": "prompts/00-aprd/EXTRACT-RULES.md",
-      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
-      "depends_on": [
-        "W31i-T08-CRITIQUE"
-      ],
-      "cr": "CR-026",
-      "class": "mcp-modernize"
-    },
-    {
-      "position": 68,
       "id": "W31i-T10-EXTRACT",
       "name": "Role thinning Phase 0 (T10/17): thin prompts/00-aprd/EXTRACT.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
-      "status": "unshipped",
+      "status": "shipped",
       "unit": "prompts/00-aprd/EXTRACT.md",
       "done_sentinel": "prompts/00-aprd/EXTRACT.md",
       "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
@@ -249,7 +137,7 @@
       "class": "mcp-modernize"
     },
     {
-      "position": 69,
+      "position": 61,
       "id": "W31i-T11-GAP-DETECT",
       "name": "Role thinning Phase 0 (T11/17): thin prompts/00-aprd/GAP-DETECT.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
       "status": "unshipped",
@@ -263,35 +151,35 @@
       "class": "mcp-modernize"
     },
     {
-      "position": 70,
-      "id": "W31i-T12-LENS-DEFINE",
-      "name": "Role thinning Phase 0 (T12/17): thin prompts/00-aprd/LENS-DEFINE.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
+      "position": 62,
+      "id": "W31i-T08-CRITIQUE",
+      "name": "Role thinning Phase 0 (T08/17): thin prompts/00-aprd/CRITIQUE.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
       "status": "unshipped",
-      "unit": "prompts/00-aprd/LENS-DEFINE.md",
-      "done_sentinel": "prompts/00-aprd/LENS-DEFINE.md",
+      "unit": "prompts/00-aprd/CRITIQUE.md",
+      "done_sentinel": "prompts/00-aprd/CRITIQUE.md",
       "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
       "depends_on": [
-        "W31i-T11-GAP-DETECT"
+        "W31i-T07-BUGFIX-LOCALIZE"
       ],
       "cr": "CR-026",
       "class": "mcp-modernize"
     },
     {
-      "position": 71,
-      "id": "W31i-T13-QUESTION-GEN",
-      "name": "Role thinning Phase 0 (T13/17): thin prompts/00-aprd/QUESTION-GEN.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
+      "position": 63,
+      "id": "W31i-T09-EXTRACT-RULES",
+      "name": "Role thinning Phase 0 (T09/17): thin prompts/00-aprd/EXTRACT-RULES.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
       "status": "unshipped",
-      "unit": "prompts/00-aprd/QUESTION-GEN.md",
-      "done_sentinel": "prompts/00-aprd/QUESTION-GEN.md",
+      "unit": "prompts/00-aprd/EXTRACT-RULES.md",
+      "done_sentinel": "prompts/00-aprd/EXTRACT-RULES.md",
       "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
       "depends_on": [
-        "W31i-T12-LENS-DEFINE"
+        "W31i-T08-CRITIQUE"
       ],
       "cr": "CR-026",
       "class": "mcp-modernize"
     },
     {
-      "position": 72,
+      "position": 64,
       "id": "W31i-T14-RECONCILE",
       "name": "Role thinning Phase 0 (T14/17): thin prompts/00-aprd/RECONCILE.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
       "status": "unshipped",
@@ -305,35 +193,7 @@
       "class": "mcp-modernize"
     },
     {
-      "position": 73,
-      "id": "W31i-T15-SYNTHESIZE-INCREMENT",
-      "name": "Role thinning Phase 0 (T15/17): thin prompts/00-aprd/SYNTHESIZE-INCREMENT.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
-      "status": "unshipped",
-      "unit": "prompts/00-aprd/SYNTHESIZE-INCREMENT.md",
-      "done_sentinel": "prompts/00-aprd/SYNTHESIZE-INCREMENT.md",
-      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
-      "depends_on": [
-        "W31i-T14-RECONCILE"
-      ],
-      "cr": "CR-026",
-      "class": "mcp-modernize"
-    },
-    {
-      "position": 74,
-      "id": "W31i-T16-SYNTHESIZE",
-      "name": "Role thinning Phase 0 (T16/17): thin prompts/00-aprd/SYNTHESIZE.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
-      "status": "unshipped",
-      "unit": "prompts/00-aprd/SYNTHESIZE.md",
-      "done_sentinel": "prompts/00-aprd/SYNTHESIZE.md",
-      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
-      "depends_on": [
-        "W31i-T15-SYNTHESIZE-INCREMENT"
-      ],
-      "cr": "CR-026",
-      "class": "mcp-modernize"
-    },
-    {
-      "position": 75,
+      "position": 65,
       "id": "W31i-T17-VERIFY",
       "name": "Role thinning Phase 0 (T17/17): thin prompts/00-aprd/VERIFY.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions. Last Phase-0 task; completing it completes W31i. | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
       "status": "unshipped",
@@ -345,6 +205,153 @@
       ],
       "cr": "CR-026",
       "class": "mcp-modernize"
+    },
+    {
+      "position": 66,
+      "id": "W31i-T05-AUDIT-RUN",
+      "name": "Role thinning Phase 0 (T05/17): thin prompts/00-aprd/AUDIT-RUN.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/AUDIT-RUN.md",
+      "done_sentinel": "prompts/00-aprd/AUDIT-RUN.md",
+      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
+      "depends_on": [
+        "W31i-T04-AUDIT-REPORT"
+      ],
+      "cr": "CR-026",
+      "class": "mcp-modernize"
+    },
+    {
+      "position": 67,
+      "id": "W31i-T07-BUGFIX-LOCALIZE",
+      "name": "Role thinning Phase 0 (T07/17): thin prompts/00-aprd/BUGFIX-LOCALIZE.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/BUGFIX-LOCALIZE.md",
+      "done_sentinel": "prompts/00-aprd/BUGFIX-LOCALIZE.md",
+      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
+      "depends_on": [
+        "W31i-T06-BASELINE-MAP"
+      ],
+      "cr": "CR-026",
+      "class": "mcp-modernize"
+    },
+    {
+      "position": 68,
+      "id": "W31i-T12-LENS-DEFINE",
+      "name": "Role thinning Phase 0 (T12/17): thin prompts/00-aprd/LENS-DEFINE.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/LENS-DEFINE.md",
+      "done_sentinel": "prompts/00-aprd/LENS-DEFINE.md",
+      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
+      "depends_on": [
+        "W31i-T11-GAP-DETECT"
+      ],
+      "cr": "CR-026",
+      "class": "mcp-modernize"
+    },
+    {
+      "position": 69,
+      "id": "W31i-T13-QUESTION-GEN",
+      "name": "Role thinning Phase 0 (T13/17): thin prompts/00-aprd/QUESTION-GEN.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/QUESTION-GEN.md",
+      "done_sentinel": "prompts/00-aprd/QUESTION-GEN.md",
+      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
+      "depends_on": [
+        "W31i-T12-LENS-DEFINE"
+      ],
+      "cr": "CR-026",
+      "class": "mcp-modernize",
+      "defer_reason": "scaffold role (schema:null) — needs scaffold sub-pattern, not derive; deferred per operator reorder 2026-06-13"
+    },
+    {
+      "position": 70,
+      "id": "W31i-T15-SYNTHESIZE-INCREMENT",
+      "name": "Role thinning Phase 0 (T15/17): thin prompts/00-aprd/SYNTHESIZE-INCREMENT.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/SYNTHESIZE-INCREMENT.md",
+      "done_sentinel": "prompts/00-aprd/SYNTHESIZE-INCREMENT.md",
+      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
+      "depends_on": [
+        "W31i-T14-RECONCILE"
+      ],
+      "cr": "CR-026",
+      "class": "mcp-modernize",
+      "defer_reason": "scaffold role (schema:null) — needs scaffold sub-pattern, not derive; deferred per operator reorder 2026-06-13"
+    },
+    {
+      "position": 71,
+      "id": "W31i-T16-SYNTHESIZE",
+      "name": "Role thinning Phase 0 (T16/17): thin prompts/00-aprd/SYNTHESIZE.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/SYNTHESIZE.md",
+      "done_sentinel": "prompts/00-aprd/SYNTHESIZE.md",
+      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
+      "depends_on": [
+        "W31i-T15-SYNTHESIZE-INCREMENT"
+      ],
+      "cr": "CR-026",
+      "class": "mcp-modernize",
+      "defer_reason": "scaffold role (schema:null) — needs scaffold sub-pattern, not derive; deferred per operator reorder 2026-06-13"
+    },
+    {
+      "position": 72,
+      "id": "W31i-T02-ADOPT",
+      "name": "Role thinning Phase 0 (T02/17): thin prompts/00-aprd/ADOPT.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/ADOPT.md",
+      "done_sentinel": "prompts/00-aprd/ADOPT.md",
+      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
+      "depends_on": [
+        "W31i-T01-CLASSIFIER"
+      ],
+      "cr": "CR-026",
+      "class": "mcp-modernize",
+      "defer_reason": "scaffold role (schema:null) — needs scaffold sub-pattern, not derive; deferred per operator reorder 2026-06-13"
+    },
+    {
+      "position": 73,
+      "id": "W31i-T03-AUDIT-PROMOTE",
+      "name": "Role thinning Phase 0 (T03/17): thin prompts/00-aprd/AUDIT-PROMOTE.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/AUDIT-PROMOTE.md",
+      "done_sentinel": "prompts/00-aprd/AUDIT-PROMOTE.md",
+      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
+      "depends_on": [
+        "W31i-T02-ADOPT"
+      ],
+      "cr": "CR-026",
+      "class": "mcp-modernize",
+      "defer_reason": "scaffold role (schema:null) — needs scaffold sub-pattern, not derive; deferred per operator reorder 2026-06-13"
+    },
+    {
+      "position": 74,
+      "id": "W31i-T04-AUDIT-REPORT",
+      "name": "Role thinning Phase 0 (T04/17): thin prompts/00-aprd/AUDIT-REPORT.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/AUDIT-REPORT.md",
+      "done_sentinel": "prompts/00-aprd/AUDIT-REPORT.md",
+      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
+      "depends_on": [
+        "W31i-T03-AUDIT-PROMOTE"
+      ],
+      "cr": "CR-026",
+      "class": "mcp-modernize",
+      "defer_reason": "scaffold role (schema:null) — needs scaffold sub-pattern, not derive; deferred per operator reorder 2026-06-13"
+    },
+    {
+      "position": 75,
+      "id": "W31i-T06-BASELINE-MAP",
+      "name": "Role thinning Phase 0 (T06/17): thin prompts/00-aprd/BASELINE-MAP.md - strip server-owned prose + full economy clean (scan issues per-task), re-verify both-directions | MCP-modernize: judgment-only role + server-side derive module + MCP-path both-directions verify.",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/BASELINE-MAP.md",
+      "done_sentinel": "prompts/00-aprd/BASELINE-MAP.md",
+      "done_discriminator": "mcp-modernize class (D38/D39; CLASSIFIER = reference impl). Bare file-existence NOT done (target pre-exists). Done iff role .md carries frontmatter `thinned: CR-026` AND `mcp_powered: true` AND role is judgment-only (zero deterministic mechanisms — id-mint/min/predicate/escape-derivation moved to a server-side det module a la tools/det/classify-derive.mjs, registered in adp-server DERIVERS + wired adp_derive) AND verified through the launched MCP server (adp_next->adp_derive->adp_submit) both-directions vs the _fixtures/ golden: GOOD primitives reproduce golden (no regression) + planted-defect judgment diverges, with role emitting only judgment primitives (zero-determinism-in-role). Operator runs the demo (D39).",
+      "depends_on": [
+        "W31i-T05-AUDIT-RUN"
+      ],
+      "cr": "CR-026",
+      "class": "mcp-modernize",
+      "defer_reason": "Tier-1 emitter (already code, D26/D27) — mcp-modernize via adp_emit, not derive"
     },
     {
       "position": 76,

@@ -19,6 +19,8 @@ cr: null
 
   **Decision:** Any demonstration or acceptance verification of working behavior is **operator-executed, always**. At every gate the agent's entire job re: proof = hand the operator EXPLICIT, copy-pasteable reproducible steps (exact commands + exact expected output), then STOP. The operator executes, observes, confirms. Agent-run output is NEVER the acceptance proof.
 
+  **Fresh-session, native-integration rule (sharpening, operator ruling 2026-06-13 during EXTRACT W31i-T10):** the acceptance demo MUST run from a **fresh Claude Code session** that loads the registered `.mcp.json` server and calls the `mcp__<server>__*` tools **natively**. Only that proves the full wiring end-to-end — `.mcp.json` correct + host connects + tools exposed + callable. Raw-protocol piping (`printf … | node server.mjs`) or a direct server spawn is a build-time check that BYPASSES the host wiring — it is NOT an acceptance demo.
+
   **Composes with prior canon:** extends "LLM reconciles/verifies, never authors truth", D3 (deliverable = file on disk, not chat reply), D20 (disk source of truth), the operator gate, and adversarial-role separation. The new sharpening: the agent may not substitute its own execution for the operator's verification of working software.
 
   **Scope:** binds every launcher (`/evolve`, `/deliver`) + every gate + every "show it works" moment. NO exception — no "but I already ran it", no scripting shortcut that replays an agent-run result as the proof. Internal clean-room build-loop selftests still run during authoring (part of the build), but they are NOT the demo; the demo the human signs off on is operator-reproduced.

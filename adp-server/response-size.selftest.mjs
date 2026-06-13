@@ -25,8 +25,8 @@ console.log("=== adp_status slim response ===");
   ok(chars < 2000, `adp_status JSON < 2000 chars (got ${chars})`);
   ok(result.frontier !== undefined, "frontier field present");
   ok(result.frontier !== null, "frontier is not null (frontier exists in rerank)");
-  ok(result.frontier?.id === "W31i-T01-CLASSIFIER",
-    `frontier.id === "W31i-T01-CLASSIFIER" (got ${result.frontier?.id})`);
+  ok(typeof result.frontier?.id === "string" && result.frontier.id.length > 0,
+    `frontier.id is a non-empty string (got ${result.frontier?.id}) — not hard-coded; frontier moves as units ship`);
   ok(typeof result.done_count === "number", `done_count is number (got ${typeof result.done_count})`);
   ok(typeof result.remaining_count === "number", `remaining_count is number (got ${typeof result.remaining_count})`);
   ok(!("done" in result), 'no "done" array key (full array removed)');

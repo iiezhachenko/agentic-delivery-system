@@ -93,8 +93,8 @@ async function run() {
 
   if (statusObj !== null) {
     assert(
-      'tools/call adp_status: frontier === "W31i-T01-CLASSIFIER"',
-      statusObj.frontier && statusObj.frontier.id === "W31i-T01-CLASSIFIER"
+      'tools/call adp_status: frontier.id is a non-empty string (not hard-coded; moves as units ship)',
+      statusObj.frontier && typeof statusObj.frontier.id === "string" && statusObj.frontier.id.length > 0
     );
   }
 

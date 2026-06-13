@@ -10,6 +10,7 @@ import { assignAdrIds, highWater, nextId } from "../../tools/det/idgen.mjs";
 import { bijection, bucketCoverage, singleOwner, membership, intersect } from "../../tools/det/coverage.mjs";
 import { prefill } from "../../tools/det/prefill.mjs";
 import { deriveClassification } from "../../tools/det/classify-derive.mjs";
+import { deriveExtraction } from "../../tools/det/extract-derive.mjs";
 import { validateFile } from "../../tools/det/validate.mjs";
 import { resolve as ioResolve, loadManifest } from "../../tools/io/resolve.mjs";
 import { emit as emitBaselineMap } from "../../tools/det/emit/baseline-map.mjs";
@@ -87,7 +88,7 @@ export async function adp_emit(params, { root = "." } = {}) {
 }
 
 // schemaId -> derive fn: server computes deterministic fields from role judgment primitives (D38)
-const DERIVERS = { "01-classification": deriveClassification };
+const DERIVERS = { "01-classification": deriveClassification, "02-extraction": deriveExtraction };
 
 // --- adp_derive: server determinism — derive + splice shell + (opt) questions + write (D38) ----
 export async function adp_derive(params, { root = "." } = {}) {
