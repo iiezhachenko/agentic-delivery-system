@@ -22,6 +22,7 @@ Think, write, reply terse like smart caveman. All technical substance stays. Onl
 - **LLM reconciles/verifies, never authors truth.** Cheapest-source-first; model specializes canon to contract, canon never source of truth.
 - **Adversarial roles stay hostile** (GAP-DETECT, CRITIQUE, anti-cheat).
 - **Author against DRY skeleton** (`.hld/skeleton/prompt-skeleton.md`): one home per fact (AB1–AB6 in `.hld/skeleton/coding-canon.md`). Substance invariant; only duplication dies.
+- **No harness MEMORY — ever.** Prohibited from the Claude-Code memory store. ALL decisions, notes, caveats land in ADP on-disk trees: decisions → `.adr/`, build/frontier state + fix records → `.roadmap/`, class rules → `_playbooks/`, requirements → `.aprd/`, design → `.hld/`. Disk is the sole source of truth (D20); a note outside these trees does not exist.
 
 ## Immutability & verify
 
