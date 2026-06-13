@@ -9,6 +9,7 @@ import { sequence } from "../../tools/det/sequence.mjs";
 import { assignAdrIds, highWater, nextId } from "../../tools/det/idgen.mjs";
 import { bijection, bucketCoverage, singleOwner, membership, intersect } from "../../tools/det/coverage.mjs";
 import { prefill } from "../../tools/det/prefill.mjs";
+import { deriveClassification } from "../../tools/det/classify-derive.mjs";
 import { validateFile } from "../../tools/det/validate.mjs";
 import { resolve as ioResolve, loadManifest } from "../../tools/io/resolve.mjs";
 import { emit as emitBaselineMap } from "../../tools/det/emit/baseline-map.mjs";
@@ -16,17 +17,36 @@ import { emitBuildPlan } from "../../tools/det/emit/build-plan.mjs";
 import { emit as emitDeriveTests } from "../../tools/det/emit/derive-tests.mjs";
 import { aggregateVerification } from "../../tools/det/emit/verify-output.mjs";
 
-// --- adp_status: frontier tally + done/remaining partition --------------------
+// sentinelDone: disk-derived done-check WITH class discriminator (D20 guarantee 5; _playbooks/refactor.md).
+// refactor/mcp-modernize edit a pre-existing file in place → bare existence is NOT done;
+// require the completion marker in the sentinel's frontmatter. Other classes: existence suffices.
+export function sentinelDone(entry, root = ".") {
+  const rel = entry.done_sentinel;
+  if (!rel) return false;
+  const full = path.join(root, rel);
+  if (!fs.existsSync(full)) return false;
+  if (entry.class === "refactor" || entry.class === "mcp-modernize") {
+    const text = fs.readFileSync(full, "utf8");
+    if (!/^thinned:\s*\S+/m.test(text)) return false;            // CR-026 completion stamp
+    if (entry.class === "mcp-modernize" && !/^mcp_powered:\s*true\s*$/m.test(text)) return false;
+  }
+  return true;
+}
+
+// --- adp_status: frontier tally + done/remaining counts (slim — no full entry dump) ---
 export async function adp_status(params, { root = "." } = {}) {
   const rerank = JSON.parse(fs.readFileSync(path.join(root, ".roadmap/08-rerank.json"), "utf8"));
-  const done = [], remaining = [];
-  for (const entry of rerank.completed || []) done.push(entry);
+  let done_count = (rerank.completed || []).length;
+  let remaining_count = 0;
+  let frontier = null;
   for (const entry of rerank.remaining_sequence || []) {
-    const hasSentinel = entry.done_sentinel && fs.existsSync(path.join(root, entry.done_sentinel));
-    (hasSentinel ? done : remaining).push(entry);
+    if (sentinelDone(entry, root)) { done_count++; }
+    else { if (!frontier) frontier = entry; remaining_count++; }
   }
-  const frontier = remaining.length > 0 ? remaining[0] : null;
-  return { done, remaining, frontier };
+  const slim = frontier
+    ? { id: frontier.id, name: frontier.name, unit: frontier.unit, class: frontier.class, state: frontier.state || {}, schemaId: frontier.schemaId || null, cr: frontier.cr || null }
+    : null;
+  return { frontier: slim, done_count, remaining_count };
 }
 
 // --- adp_next: step packet assembly (resolve + prefill) ---------------------------
@@ -66,11 +86,31 @@ export async function adp_emit(params, { root = "." } = {}) {
   throw new Error("unknown Tier-1 role: " + role);
 }
 
-// --- adp_submit: gate verdict (validate + verdict) --------------------------------
+// schemaId -> derive fn: server computes deterministic fields from role judgment primitives (D38)
+const DERIVERS = { "01-classification": deriveClassification };
+
+// --- adp_derive: server determinism — derive + splice shell + (opt) questions + write (D38) ----
+export async function adp_derive(params, { root = "." } = {}) {
+  const { schemaId, primitives, shell, opts, confirmation_questions, output_path } = params;
+  const fn = DERIVERS[schemaId];
+  if (!fn) throw new Error("no deriver registered for schema: " + schemaId);
+  const derived = fn(primitives, opts || {});
+  const artifact = Object.assign({}, shell || {}, derived);
+  if (Array.isArray(confirmation_questions)) {
+    artifact.confirmation_questions = confirmation_questions.map((q, i) => Object.assign({}, q, { id: `Q${i + 1}` }));
+  }
+  if (output_path) {
+    const full = path.join(root, output_path);
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, JSON.stringify(artifact, null, 2));
+  }
+  return { output_path: output_path || null, needs_confirmation: derived.needs_confirmation, escape: derived.escape };
+}
+
+// --- adp_submit: pure gate — validate(artifactPath, schemaId) → verdict only -----
 export async function adp_submit(params, { root = "." } = {}) {
   const { artifactPath, schemaId } = params;
-  const fullPath = path.join(root, artifactPath);
-  const { valid, errors } = validateFile(fullPath, schemaId);
+  const { valid, errors } = validateFile(path.join(root, artifactPath), schemaId);
   return { verdict: valid ? "pass" : "fail", errors: errors || [] };
 }
 
@@ -188,6 +228,12 @@ export async function adp_coverage(params, { root = "." } = {}) {
   if (op === "membership") return membership(rest.dep, rest.buildSet);
   if (op === "intersect") return intersect(rest.a, rest.b);
   throw new Error("unknown coverage op: " + op);
+}
+
+// --- adp_classify_derive: classification derived fields (CR-026/D38) ------------
+export async function adp_classify_derive(params, { root = "." } = {}) {
+  const { primitives, opts } = params;
+  return deriveClassification(primitives, opts || {});
 }
 
 // --- adp_route_tier: per-hole tier routing (CR-025) ----------------------------

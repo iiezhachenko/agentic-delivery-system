@@ -1,0 +1,11 @@
+{
+  "subrequests": [
+    {
+      "text": "web app where freelancers can log their billable hours against client projects and export a monthly PDF invoice; no existing system — starting from scratch; should support multiple currencies",
+      "class": "greenfield",
+      "confidence": 0.5,
+      "reason": "client states 'no existing system — we're starting from scratch'; all described capabilities (hour logging, PDF invoice, multi-currency) are features of one net-new system"
+    }
+  ],
+  "is_compound": false
+}

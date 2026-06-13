@@ -80,7 +80,7 @@
     }
   ],
   "escape": {
-    "non_greenfield_subrequests": ["SR1", "SR2", "SR3", "SR4"],
-    "note": "All four subrequests are non-greenfield (bugfix, perf, feature-add, investigation). No greenfield downstream pipeline applies. Playbooks for bugfix, perf, feature-add, and investigation are not yet authored — HALT after client confirms decomposition and classes."
+    "unplaybooked_subrequests": ["SR2", "SR4"],
+    "note": "Classes [perf, investigation] lack authored playbooks; pipeline halts pending client confirmation."
   }
 }

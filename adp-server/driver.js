@@ -32,11 +32,11 @@ async function runStatus(params, root) {
   const branch = await adp_branch({}, { root });
   if (branch.action === "halt") return { mode: "halt", message: branch.message, streams: branch.streams };
 
-  const { done, remaining, frontier } = await adp_status({}, { root });
+  const { frontier, done_count, remaining_count } = await adp_status({}, { root });
   return {
     mode: "status",
-    done: done.length,
-    remaining: remaining.length,
+    done: done_count,
+    remaining: remaining_count,
     frontier: frontier?.id || null,
     next: frontier || null,
   };
@@ -55,7 +55,7 @@ async function runDefault(params, root) {
   }
 
   // STEP 0.2 — frontier scan
-  const { done, remaining, frontier } = await adp_status({}, { root });
+  const { frontier } = await adp_status({}, { root });
   if (!frontier) {
     return { mode: "done", message: "loop drained, all unshipped prompts built" };
   }
