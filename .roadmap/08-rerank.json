@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/07-sequence-reviewed.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 48,
+  "roadmap_version": 49,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 48 (W30k-VERIFY-OUTPUT-BUGFIX-SPLIT shipped, 2026-06-13): VERIFY-OUTPUT.when[] bugfix block removed + bugfix mode/class/escapes/delta/branch trimmed (class=bugfix dispatch moved to VERIFY-OUTPUT-BUGFIX per SRP split D37/CR-021/F13), VERIFY-OUTPUT-BUGFIX new Phase-4 role added, io-manifest VERIFY-OUTPUT bugfix when removed + VERIFY-OUTPUT-BUGFIX entry added, components.json 49→50, io.lock v7→v8, skeleton.lock v18→v19. W30l unshipped (remaining CR-021 role split: DERIVE-TESTS-BUGFIX). Deferred unchanged [I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth).",
+  "_note": "roadmap_version 49 (W30l-DERIVE-TESTS-BUGFIX-SPLIT shipped, 2026-06-13): DERIVE-TESTS Part C bugfix pass removed + bugfix class dispatch + escape added (class=bugfix → DERIVE-TESTS-BUGFIX per SRP split D37/CR-021/F9), DERIVE-TESTS-BUGFIX new Phase-3 role added, io-manifest DERIVE-TESTS bugfix Part C removed + DERIVE-TESTS-BUGFIX entry added, components.json 50→51, io.lock v8→v9, skeleton.lock v19→v20. CR-021 cluster W30i–W30l now complete (all 4 splits shipped). No further W30 units remain. Deferred unchanged [I6, I7, I8, C8-BROWNFIELD-ORACLE]. Retention = git is the trail (R-LH-2/D20: ledger is informational ordering, not the source of truth).",
   "completed": [],
   "remaining_sequence": [
     {
@@ -181,7 +181,7 @@
       "position": 50,
       "id": "W30l-DERIVE-TESTS-BUGFIX-SPLIT",
       "name": "CR-021: DERIVE-TESTS bugfix pass (Part C) extracted → DERIVE-TESTS-BUGFIX added",
-      "status": "unshipped",
+      "status": "shipped",
       "unit": "prompts/03-hld/DERIVE-TESTS-BUGFIX.md",
       "done_sentinel": "prompts/03-hld/DERIVE-TESTS-BUGFIX.md",
       "depends_on": [
@@ -230,7 +230,7 @@
         "note": "Lint C8 flags repeated verbatim OPEN-tag across 5 ACs in the fixture. Operator-directed: mis-fire vs sanctioned mandatory-verbatim-tag pattern (W9/W10 precedent). Fixture oracle correct; do NOT alter fixture. Linter needs calibration for this pattern — treat as lint-calibration backlog. Route: next lint-calibration pass (P3, same as W9 C6/C8 fixes)."
       }
     ],
-    "in_progress_note": "SRP-refactor branch feature/spine-srp-refactor: W30a–W30k shipped (2026-06-12/13) — CR-016–CR-021 authored + ADR-0037 accepted + AUDIT-PROMOTE + BUGFIX-LOCALIZE + SEQUENCE-FEATURE-ADD + DERIVE-BUILD-DAG + SYNTHESIZE-INCREMENT + IMPLEMENT-BUGFIX + MATERIALIZE-ORACLE-BUGFIX + VERIFY-OUTPUT-BUGFIX (roadmap_version 48, components.json 50, skeleton.lock v19, io.lock v8). W30l (CR-021 remaining split: DERIVE-TESTS-BUGFIX) = next. I6/I7/I8 + C8-BROWNFIELD-ORACLE deferred (unchanged).",
+    "in_progress_note": "SRP-refactor branch feature/spine-srp-refactor: W30a–W30l shipped (2026-06-12/13) — CR-016–CR-021 authored + ADR-0037 accepted + AUDIT-PROMOTE + BUGFIX-LOCALIZE + SEQUENCE-FEATURE-ADD + DERIVE-BUILD-DAG + SYNTHESIZE-INCREMENT + IMPLEMENT-BUGFIX + MATERIALIZE-ORACLE-BUGFIX + VERIFY-OUTPUT-BUGFIX + DERIVE-TESTS-BUGFIX (roadmap_version 49, components.json 51, skeleton.lock v20, io.lock v9). CR-021 cluster W30i–W30l complete. No W30 units remain. I6/I7/I8 + C8-BROWNFIELD-ORACLE deferred (unchanged).",
     "missing": [],
     "duplicated": []
   },

@@ -1,6 +1,6 @@
 {
   "$schema_version": 1,
-  "_note": "Read-graph SOURCE OF TRUTH (D25/R11). groups = recurring bundles (one home, AB1); roles[].always = unconditional; roles[].when[] = predicate-gated (AND-equality over state keys mode/class/pass). read entry = group-id string OR inline path-object {path,hint?,glob?,indirect?,optional?}. Resolver tools/io/resolve.mjs expands: always-groups -> when-union -> {scope}/{slice} fill -> lock#field indirection -> glob -> drop-missing-optional -> dedupe. Prompts declare NO inputs (W6 re-author drops inputs:). io-manifest change = new version + downstream change-request (frozen class, mirrors schemas.lock). v8 = v7 + W30k/CR-021 VERIFY-OUTPUT-BUGFIX role entry (2026-06-13): VERIFY-OUTPUT-BUGFIX added to roles[] — when class=bugfix reads .aprd/diagnosis.json + current_what (bugfix verifier). VERIFY-OUTPUT.when[] bugfix block removed (class=bugfix dispatch moved to VERIFY-OUTPUT-BUGFIX per SRP split D37/CR-021/F13). role_count 46→47.",
+  "_note": "Read-graph SOURCE OF TRUTH (D25/R11). groups = recurring bundles (one home, AB1); roles[].always = unconditional; roles[].when[] = predicate-gated (AND-equality over state keys mode/class/pass). read entry = group-id string OR inline path-object {path,hint?,glob?,indirect?,optional?}. Resolver tools/io/resolve.mjs expands: always-groups -> when-union -> {scope}/{slice} fill -> lock#field indirection -> glob -> drop-missing-optional -> dedupe. Prompts declare NO inputs (W6 re-author drops inputs:). io-manifest change = new version + downstream change-request (frozen class, mirrors schemas.lock). v9 = v8 + W30l/CR-021 DERIVE-TESTS-BUGFIX role entry (2026-06-13): DERIVE-TESTS-BUGFIX added to roles[] — when class=bugfix reads skeleton.lock + skeleton/test-specs.json + 08-rerank.json + .aprd/diagnosis.json + current_what (bugfix test-oracle author, re-derives one reproduction test red→green + mandatory scoped regression layer + inherited defect-path contract tests). DERIVE-TESTS bugfix Part C removed (class=bugfix dispatch moved to DERIVE-TESTS-BUGFIX per SRP split D37/CR-021/F9). role_count 47→48.",
   "groups": {
     "frozen_frame": [
       { "path": ".adr/adr.lock",                 "hint": "frozen gate (status==frozen); class" },
@@ -396,6 +396,19 @@
             { "path": ".hld/slices/{slice}/flows.json", "hint": "slice NEW flow=source for new flow test" },
             { "path": ".hld/slices/{slice}/contracts.json", "hint": "touched_contracts + new_contracts" },
             { "path": ".roadmap/08-rerank.json", "hint": "living roadmap" }
+          ] }
+      ]
+    },
+    "DERIVE-TESTS-BUGFIX": {
+      "always": [ "hld_frame" ],
+      "when": [
+        { "if": { "class": "bugfix" },
+          "read": [
+            { "path": ".hld/skeleton.lock", "hint": "DISPATCH + freeze gate: status==frozen required" },
+            { "path": ".hld/skeleton/test-specs.json", "hint": "frozen contract test specs; defect-path T-CT* inherited by reference" },
+            { "path": ".roadmap/08-rerank.json", "hint": "living roadmap; target slice context" },
+            { "path": ".aprd/diagnosis.json", "hint": "localization.symbol (defect_site) + root_cause.cause" },
+            "current_what"
           ] }
       ]
     },
