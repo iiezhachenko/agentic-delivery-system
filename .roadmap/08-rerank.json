@@ -1,0 +1,153 @@
+{
+  "base_ref": ".roadmap/archive/2026-06-13-multi-stream/08-rerank.json",
+  "class": "agentic-delivery-pipeline",
+  "roadmap_version": 50,
+  "verdict": "re_ranked",
+  "_note": "roadmap_version 50 (2026-06-13): new workstream feature/mcp-adp-powers. CRs 023-026 — invert ADP control into MCP 'ADP Powers' server. Prior W29–W30 work all shipped (sentinels on disk); this frontier starts at W31. Source: _self-host/00-analysis.md + _self-host/01-8b-offload.md.",
+  "completed": [],
+  "remaining_sequence": [
+    {
+      "position": 51,
+      "id": "W31a-ADR0038-DRAFT",
+      "name": "ADR-0038 draft: MCP driver loop architecture decision",
+      "status": "unshipped",
+      "unit": ".adr/drafts/0038-mcp-adp-powers-driver-loop.draft.md",
+      "done_sentinel": ".adr/drafts/0038-mcp-adp-powers-driver-loop.draft.md",
+      "depends_on": [],
+      "cr": "CR-023",
+      "class": "planning"
+    },
+    {
+      "position": 52,
+      "id": "W31b-ADR0038-SIGN",
+      "name": "ADR-0038 accepted + adr.lock re-signed",
+      "status": "unshipped",
+      "unit": ".adr/log/0038-mcp-adp-powers-driver-loop.md",
+      "done_sentinel": ".adr/log/0038-mcp-adp-powers-driver-loop.md",
+      "depends_on": ["W31a-ADR0038-DRAFT"],
+      "cr": "CR-023",
+      "class": "planning"
+    },
+    {
+      "position": 53,
+      "id": "W31c-MCP-TOOL-SURFACE",
+      "name": "MCP tool surface scaffold: adp_status/next/submit/promote/branch/emit/guard tools wrapping existing spine modules",
+      "status": "unshipped",
+      "unit": "adp-server/tools/index.js",
+      "done_sentinel": "adp-server/tools/index.js",
+      "depends_on": ["W31b-ADR0038-SIGN"],
+      "cr": "CR-023",
+      "class": "architecture"
+    },
+    {
+      "position": 54,
+      "id": "W31d-MCP-DRIVER-LOOP",
+      "name": "MCP driver loop: STEP 0-6 transcribed to code in adp-server/driver.js",
+      "status": "unshipped",
+      "unit": "adp-server/driver.js",
+      "done_sentinel": "adp-server/driver.js",
+      "depends_on": ["W31c-MCP-TOOL-SURFACE"],
+      "cr": "CR-023",
+      "class": "architecture"
+    },
+    {
+      "position": 55,
+      "id": "W31e-PROJECTOR-MODULE",
+      "name": "Context projector: tools/io/project.mjs + io-manifest project: field + both-directions selftest",
+      "status": "unshipped",
+      "unit": "tools/io/project.mjs",
+      "done_sentinel": "tools/io/project.mjs",
+      "depends_on": ["W31d-MCP-DRIVER-LOOP"],
+      "cr": "CR-024",
+      "class": "spine-extension"
+    },
+    {
+      "position": 56,
+      "id": "W31f-PROJECTOR-SELFTEST",
+      "name": "Context projector selftests: planted dropped-field case FAILS, whole-file PASSES, key-pattern + dot-path + array-filter all green",
+      "status": "unshipped",
+      "unit": "tools/io/project.selftest.mjs",
+      "done_sentinel": "tools/io/project.selftest.mjs",
+      "depends_on": ["W31e-PROJECTOR-MODULE"],
+      "cr": "CR-024",
+      "class": "spine-extension"
+    },
+    {
+      "position": 57,
+      "id": "W31g-TIER-ROUTER",
+      "name": "Tier router: adp_route_tier tool + deterministic tier table (Class-A vs Class-B) + local 8B endpoint config",
+      "status": "unshipped",
+      "unit": "adp-server/tier-router.js",
+      "done_sentinel": "adp-server/tier-router.js",
+      "depends_on": ["W31f-PROJECTOR-SELFTEST"],
+      "cr": "CR-025",
+      "class": "architecture"
+    },
+    {
+      "position": 58,
+      "id": "W31h-TIER-ROUTER-SELFTEST",
+      "name": "Tier router selftests: Class-A narration hole → local-8b, Class-B decision hole → claude, planted swap FAILS",
+      "status": "unshipped",
+      "unit": "tools/det/route-tier.selftest.mjs",
+      "done_sentinel": "tools/det/route-tier.selftest.mjs",
+      "depends_on": ["W31g-TIER-ROUTER"],
+      "cr": "CR-025",
+      "class": "architecture"
+    },
+    {
+      "position": 59,
+      "id": "W31i-ROLE-THIN-PHASE0",
+      "name": "Role thinning Phase 0 (aPRD roles): strip mode-dispatch/guards/schema-prose from prompts/00-aprd/*; re-verify each both-directions",
+      "status": "unshipped",
+      "unit": "prompts/00-aprd/CLASSIFIER.md",
+      "done_sentinel": "prompts/00-aprd/CLASSIFIER.md",
+      "depends_on": ["W31d-MCP-DRIVER-LOOP"],
+      "cr": "CR-026",
+      "class": "refactor"
+    },
+    {
+      "position": 60,
+      "id": "W31j-ROLE-THIN-PHASE1",
+      "name": "Role thinning Phase 1 (Roadmap roles): strip server-owned prose from prompts/01-roadmap/*; re-verify each both-directions",
+      "status": "unshipped",
+      "unit": "prompts/01-roadmap/RE-RANK.md",
+      "done_sentinel": "prompts/01-roadmap/RE-RANK.md",
+      "depends_on": ["W31i-ROLE-THIN-PHASE0"],
+      "cr": "CR-026",
+      "class": "refactor"
+    },
+    {
+      "position": 61,
+      "id": "W31k-ROLE-THIN-PHASE2",
+      "name": "Role thinning Phase 2 (ADR roles): strip server-owned prose from prompts/02-adr/*; re-verify each both-directions",
+      "status": "unshipped",
+      "unit": "prompts/02-adr/DECISION-EXTRACT.md",
+      "done_sentinel": "prompts/02-adr/DECISION-EXTRACT.md",
+      "depends_on": ["W31j-ROLE-THIN-PHASE1"],
+      "cr": "CR-026",
+      "class": "refactor"
+    },
+    {
+      "position": 62,
+      "id": "W31l-ROLE-THIN-PHASE3",
+      "name": "Role thinning Phase 3 (HLD roles): strip server-owned prose from prompts/03-hld/*; re-verify each both-directions",
+      "status": "unshipped",
+      "unit": "prompts/03-hld/DERIVE-COMPONENTS.md",
+      "done_sentinel": "prompts/03-hld/DERIVE-COMPONENTS.md",
+      "depends_on": ["W31k-ROLE-THIN-PHASE2"],
+      "cr": "CR-026",
+      "class": "refactor"
+    },
+    {
+      "position": 63,
+      "id": "W31m-ROLE-THIN-PHASE4",
+      "name": "Role thinning Phase 4 (Build roles): strip server-owned prose from prompts/04-build/*; re-verify each both-directions",
+      "status": "unshipped",
+      "unit": "prompts/04-build/IMPLEMENT.md",
+      "done_sentinel": "prompts/04-build/IMPLEMENT.md",
+      "depends_on": ["W31l-ROLE-THIN-PHASE3"],
+      "cr": "CR-026",
+      "class": "refactor"
+    }
+  ]
+}
