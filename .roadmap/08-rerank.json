@@ -1,9 +1,9 @@
 {
   "base_ref": ".roadmap/archive/2026-06-13-multi-stream/08-rerank.json",
   "class": "agentic-delivery-pipeline",
-  "roadmap_version": 51,
+  "roadmap_version": 52,
   "verdict": "re_ranked",
-  "_note": "roadmap_version 51 (2026-06-13): W31a shipped — ADR-0038 draft promoted to .adr/drafts/. adr-index rendered=38, adr.lock v18. Frontier: W31b (ADR-0038 accepted + adr.lock re-sign). roadmap_version 50 (2026-06-13): new workstream feature/mcp-adp-powers. CRs 023-026 — invert ADP control into MCP 'ADP Powers' server. Prior W29–W30 work all shipped (sentinels on disk); this frontier starts at W31. Source: _self-host/00-analysis.md + _self-host/01-8b-offload.md.",
+  "_note": "roadmap_version 52 (2026-06-13): W31c shipped — MCP tool surface adp-server/tools/index.js promoted. Frontier: W31d (MCP driver loop). roadmap_version 51 (2026-06-13): W31a shipped — ADR-0038 draft promoted to .adr/drafts/. adr-index rendered=38, adr.lock v18. Frontier: W31b (ADR-0038 accepted + adr.lock re-sign). roadmap_version 50 (2026-06-13): new workstream feature/mcp-adp-powers. CRs 023-026 — invert ADP control into MCP 'ADP Powers' server. Prior W29–W30 work all shipped (sentinels on disk); this frontier starts at W31. Source: _self-host/00-analysis.md + _self-host/01-8b-offload.md.",
   "completed": [],
   "remaining_sequence": [
     {
@@ -21,7 +21,7 @@
       "position": 52,
       "id": "W31b-ADR0038-SIGN",
       "name": "ADR-0038 accepted + adr.lock re-signed",
-      "status": "unshipped",
+      "status": "shipped",
       "unit": ".adr/log/0038-mcp-adp-powers-driver-loop.md",
       "done_sentinel": ".adr/log/0038-mcp-adp-powers-driver-loop.md",
       "depends_on": ["W31a-ADR0038-DRAFT"],
@@ -32,7 +32,7 @@
       "position": 53,
       "id": "W31c-MCP-TOOL-SURFACE",
       "name": "MCP tool surface scaffold: adp_status/next/submit/promote/branch/emit/guard tools wrapping existing spine modules",
-      "status": "unshipped",
+      "status": "shipped",
       "unit": "adp-server/tools/index.js",
       "done_sentinel": "adp-server/tools/index.js",
       "depends_on": ["W31b-ADR0038-SIGN"],
@@ -98,7 +98,7 @@
       "position": 59,
       "id": "W31i-ROLE-THIN-PHASE0",
       "name": "Role thinning Phase 0 (aPRD roles): strip mode-dispatch/guards/schema-prose from prompts/00-aprd/*; re-verify each both-directions",
-      "status": "unshipped",
+      "status": "shipped",
       "unit": "prompts/00-aprd/CLASSIFIER.md",
       "done_sentinel": "prompts/00-aprd/CLASSIFIER.md",
       "depends_on": ["W31d-MCP-DRIVER-LOOP"],
