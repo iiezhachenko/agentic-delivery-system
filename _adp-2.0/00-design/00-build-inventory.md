@@ -13,6 +13,7 @@
 - **Four build tracks, gated:** (1) Backbone surface — the core rewrite. (2) Memory stores — episodic + promotion gate are P0 (CP4 demand-driven canon dies without them). (3) Go canon engine — `go/analysis` stack, W0–W6. (4) Bootstrap/deploy — pack + `.adp/` containment + deliver-as-client.
 - **Funding-gated (BD §10):** 50-role migration NOT committed on principle. Spike CLASSIFIER + one heavy role through new surface, measure token cost, prove driver thin, THEN scope full migration. Build backbone-first against one already-ported role.
 - Disk = sole source of truth (D20). Engine stateless. Verify-before-promote. **Operator runs the demo (D39) — CUSTOMER-FACING only** (see §11): operator runs the same commands a client runs, observes a customer-facing feature of the deliverable work. Client never touches MCP/schemas/ids; native `mcp__adp__*` calls = build-time wiring check, NOT the acceptance demo. All carried into Go unchanged.
+- **Spec ships as executable BDD (regression mandate, see §4-P + §12):** today spec/design = JSON in `.adp/` — opaque to non-ADP engineers, inert (no spec↔behavior tie), detached (containment keeps it OUT of product trees). Fix: every delivered CODE feature ships Gherkin `.feature` + Godog step-defs in the PRODUCT trees. AC = source → `@AC`-tagged `Scenario`. Makes spec executable (regression-guarded in client CI), readable without ADP, resident IN shipped code — a 3rd-party contractor maintains/extends it without ADP. Acceptance oracle for code slices = Godog both-directions; canon-compliance oracle = `go/analysis`. TWO oracles, both ship in product trees.
 
 ---
 
@@ -187,9 +188,10 @@ Status legend: **PORT** (logic exists in JS, re-implement in Go) · **NEW** (no 
 
 | Item | Status | Notes |
 |---|---|---|
-| Separate-spawn verifier vs GOLDEN | PORT | value-match (known-good) + divergence (planted-defect); BOTH directions |
-| Gate stays OUTSIDE repair loop | NEW-discipline | folding correctness in regresses adversarial verify |
-| Live-repo path: operator + self-consistency | NEW | no golden on stranger repo (BD §7); det cross-artifact checks substitute |
+| Separate-spawn verifier vs GOLDEN | PORT | value-match (known-good) + divergence (planted-defect); BOTH directions; for NON-code artifact slices (aPRD/ADR/HLD) |
+| **BDD/Godog acceptance leg (CODE slices)** | NEW | scenarios run vs emitted code; both-directions = PASS on good emit / FAIL on planted defect. Replaces golden-divergence for code; the shipped regression oracle (§4-P, §12) |
+| Gate stays OUTSIDE repair loop | NEW-discipline | folding correctness in regresses adversarial verify; binds BOTH legs (golden + Godog) |
+| Live-repo path: operator + self-consistency | NEW | no golden on stranger repo (BD §7); det cross-artifact checks + Godog scenarios substitute (BDD ships → works on stranger repo too) |
 
 ### H. Operator gates via elicitation — NEW-from-prose (TA §5)
 
@@ -234,7 +236,7 @@ Status legend: **PORT** (logic exists in JS, re-implement in Go) · **NEW** (no 
 | W5 | Quality | NEW | GC-PERF/TEST/ENC/STD residue; ~15–25 |
 | W6 | Validate + cut baseline + wire growth | NEW | prune dead/over-reaching; cut ~80–120 firing rules; wire C-ABSENT telemetry growth (ties to episodic store P0) |
 
-> Canon engine is two oracle layers: (1) **canon-compliance** (code obeys rules) = `go/analysis`; (2) **acceptance** (code does what task wanted) = BDD/Gherkin (Godog) — keep distinct (GC W0 note).
+> Canon engine is two oracle layers, kept distinct (GC W0): (1) **canon-compliance** (code obeys rules) = `go/analysis`; (2) **acceptance** (code does what task wanted) = BDD/Gherkin (Godog). **§4-P promotes layer (2) from a side-note to a MANDATORY SHIPPED artifact** — both oracles now live in the product trees and regression-guard the deliverable. Godog runner stands up in this track alongside `go/analysis`; the two never conflate.
 
 ### L. Bootstrap / deploy — PORT+complete (BD)
 
@@ -283,6 +285,23 @@ Steering = ARGS on `/adp-deliver` (`--class` greenfield/feature-add/bugfix/audit
 **Boundary:** entry-point control = `/adp-*`. Mid-run steering = operator gates via elicitation (§4-H), kept distinct. Optional scriptable `/adp-gate accept|reject|answer` deferred (flag, not core — chosen surface is intent-based ~5 commands).
 
 **Not per-phase:** `/adp-aprd`/`/adp-roadmap`/… rejected — fights D20 (frontier re-derives the phase), and client thinks in intent not internal phases. Phase-bounding → `--until` arg.
+
+### P. BDD acceptance specs — NEW (mandatory shipped; the regression solution, §12)
+
+Every delivered CODE feature ships executable BDD in the PRODUCT trees. Attaches at the build/code-emission stage (the `F` in the thread), NOT at spec/ADR/HLD stages. AC (already authored upstream) = the source the scenario projects from. Spec becomes a test that lives with the code → regression-guarded + outsider-maintainable. Reconciles TA golden-divergence oracle with GC Godog acceptance oracle: **code slices verified by Godog; non-code artifact slices stay golden-divergence (§G).**
+
+| Item | Status | From → To | Notes |
+|---|---|---|---|
+| `bdd-feature` schema | NEW | — → `schema/` | structured Gherkin: `{feature, scenarios[{id, ac_tags[], steps[given/when/then]}], background}`; embed + lock like all schemas |
+| **BDD-AUTHOR role** (doctrine + answer-form + slot-map) | NEW | — → `doctrine/` | schema-blind: agent fills Given/When/Then prose slots; engine owns scenario-id mint, `@AC` binding, `.feature` path. One per code-emitting role-class |
+| Scenario deriver | NEW | — → `derive` | mint scenario ids · splice `@AC-NNNN` tags · emit step-skeleton stubs · write `.feature` to product tree (not `.adp/`) |
+| Step-definition emission | NEW-from-prose | folds into code-emit role | Go glue binding Given/When/Then → product code; canon-checked (`go/analysis`), not BDD-authored prose |
+| **Godog acceptance gate** | NEW | — → `validate`/`elicit` | runs scenarios vs emitted code; both-directions = scenario PASS on good emit / FAIL on planted defect. Stays OUTSIDE shape-repair loop (OP6 invariant). The acceptance-oracle leg of §G for code slices |
+| AC→scenario coverage gate | PORT-extend | `tools/det/coverage.mjs` → `validate` | every `AC` id maps to ≥1 `@AC`-tagged scenario; uncovered AC ⇒ HALT (extends id-thread self-consistency) |
+| Thread extension | NEW | — | `R → AC → @AC-scenario → .feature → step-def → F → commit`; traceable both ways with ZERO ADP knowledge |
+| Product-tree placement | NEW-discipline | — | `.feature` + step-defs land in repo's real `features/`/`tests/`, NEVER `.adp/`. Reinforces containment iron rule (spec-as-test = product test) |
+
+> **Where design lives in shipped code (the full answer):** behavioral design constraints → BDD scenarios (Godog); structural design constraints + idioms → canon rules (`go/analysis`); pure non-testable rationale → ADR, referenced by `@ADR-NNNN` tag on feature/step-def. Two executable oracles ship; rationale links back. "Specs + designs live inside the code" = these two oracles resident in product trees.
 
 ---
 
@@ -387,6 +406,9 @@ Ordering logic:
 | 8 | **Provenance-gate** — stranger-repo source priming a write (injection) | MD §4.5 | untrusted source primes exploration, NEVER authorizes write |
 | 9 | **Canon trigger-curation** = perpetual FTE labor (CC8) | GC §3 | maximize linter-auto-derivable fraction; grow demand-driven only |
 | 10 | **Single-Opus canon** — no cross-model decorrelation | GC standing | linter = the decorrelated second opinion; ground-is-ONLY-truth; GPT5.5 bolts on later |
+| 11 | **Step-def maintenance burden** — Go glue per scenario could swamp role authoring | §4-P | scenario deriver emits step skeletons; shared step-libraries per role-class; reuse-over-author |
+| 12 | **Gherkin↔AC drift** — scenario prose mis-states the AC it claims to cover | §4-P | `@AC` tag binding + coverage gate (every AC ≥1 scenario); re-review scenario on AC change (mirrors projection-drift risk #2) |
+| 13 | **Godog adds build-time + flaky-scenario risk** | §4-P | acceptance gate outside repair loop; deterministic step-defs only; ships as client regression suite, runs at pack gate |
 
 ---
 
@@ -401,6 +423,8 @@ Ordering logic:
 - Register + Economy bind every artifact (caveman; one home per fact).
 - Immutability: frozen artifacts + locks never overwritten; change = new version + downstream re-trigger; generated-frozen → amend the generator.
 - `.adp/` containment iron rule: all ADP artifacts under one `.adp/` root; product code/tests in repo's real trees.
+- **BDD acceptance mandate (§4-P, §12):** every delivered code feature ships executable BDD (Gherkin + Godog) in product trees; NO code promoted with an AC lacking a passing scenario. Spec-as-test is a product test → repo `tests/`/`features/`, never `.adp/` (reinforces containment). Thread carries `@AC` end-to-end: `R → AC → @AC-scenario → .feature → step-def → F`.
+- Acceptance oracle is mode-split: CODE slices = Godog both-directions; NON-code artifact slices = golden-divergence. Both stay OUTSIDE the shape-repair loop.
 
 ---
 
@@ -414,6 +438,9 @@ Ordering logic:
 | D4 | **Migration commitment** | (a) full 50-role on principle · (b) funding-gated spike-first | **(b)** — BD §10 mandate; measure token cost first. |
 | D5 | **Episodic store location** | (a) `.adp/episodic/` in-workspace only · (b) durable source-repo ledger | **(b)** — must survive teardown (MD §4.1); workspace `.adp/episodic/` = write buffer, flush on promote. |
 | D6 | **Client control surface** | (a) single god-`/deliver` w/ args · (b) intent-based `/adp-*` (~5 cmds) · (c) per-phase commands | **(b)** — DECIDED: `/adp-deliver` (+steering args) · `/adp-revise` · `/adp-status` · `/adp-show` · `/adp-init`. Verbs over disk state, not phases (fights D20). Frozen-class client contract. Needs ADR + aPRD change-request (§4-O). |
+| D7 | **BDD framework** | (a) Godog (Cucumber-Go) · (b) plain Go table-tests · (c) hand-rolled Gherkin parser | **(a)** now — Gherkin = the readable-by-outsider carrier; GC W0 already names Godog. GC "own-harness later" = migration path, not v1. (b) loses the plain-language spec; (c) premature. |
+| D8 | **Feature-file home** | (a) product trees (`features/`/`tests/`) · (b) `.adp/` | **(a)** — spec MUST ship + survive without ADP; `.adp/` placement would defeat the whole maintainability goal (§12). |
+| D9 | **Funding-spike role** | (a) CLASSIFIER (surface-only) · (b) a code-emitting slice | **(b)** — a small code-emitting feature proves the read/write surface AND the BDD acceptance oracle AND the §11 customer demo in ONE slice. CLASSIFIER proves only the surface; can't exercise Godog. |
 
 ---
 
@@ -448,3 +475,51 @@ flowchart TD
 - **Operator gate (elicitation, §4-H):** surfaces the customer-facing demo steps; operator executes them; nothing is "verified" until the operator ran the customer-facing feature.
 - **ADP-builds-ADP case:** ADP's own client-facing surface = the launcher commands (e.g. `/deliver`) producing a working deliverable. Even self-development demos show that customer-facing command producing the feature — NOT inspection of ADP's MCP internals.
 - **Strengthens, does not weaken D39:** still operator-executed, still against the deployed build, still no agent self-grading. Refinement = the *content* of the demo is a customer feature, and the MCP-native-call check is reclassified as build-time wiring, not acceptance.
+
+---
+
+## 12. Regression-testability — the BDD mandate (the solution)
+
+### Problem
+
+ADP threads `R → AC → S → ADR → C` as JSON under `.adp/`. Three failures kill maintainability + regression-safety:
+
+1. **Opaque** — non-ADP engineer can't read ADP's JSON spec. A 3rd-party contractor onboards to product code, sees no spec they can use.
+2. **Inert** — no executable tie between spec and behavior. Code drifts; stale JSON spec never fails a test. No regression guard.
+3. **Detached** — `.adp/` containment keeps spec OUT of product trees. Clone the product, get zero spec. Spec dies the moment ADP leaves.
+
+Net: deliverable is not self-describing, not regression-guarded, not extendable without ADP.
+
+### Solution — spec ships as executable BDD, resident in product code
+
+Every delivered CODE feature ships Gherkin `.feature` + Godog step-defs in the PRODUCT trees. The AC ADP already threads becomes the source of an `@AC`-tagged `Scenario`. The spec stops being a detached JSON note and becomes a living, executable test that travels with the code.
+
+```mermaid
+flowchart LR
+    R["R (requirement)"] --> AC["AC (acceptance criterion)<br/>·.adp/ JSON·"]
+    AC -->|BDD-AUTHOR projects| SC["@AC-NNNN Scenario<br/>Given/When/Then ·plain language·"]
+    SC --> FEAT[".feature file<br/>·PRODUCT trees·"]
+    FEAT --> STEP["step-defs (Go)<br/>·canon-checked·"]
+    STEP --> F["F · product code"]
+    F -->|Godog runs scenarios| GATE["acceptance gate<br/>PASS good / FAIL defect"]
+    GATE --> SHIP["ships: code + .feature + step-defs<br/>= regression suite in client CI"]
+```
+
+Four properties this buys:
+
+| Property | How | Closes |
+|---|---|---|
+| **Executable** | Godog runs scenarios in client CI on every change | inert (regression guard) |
+| **Readable** | Gherkin is plain English; `@AC` tags trace back; no ADP knowledge needed | opaque (outsider-maintainable) |
+| **Resident** | `.feature` + step-defs live in product trees, survive `.adp/` teardown | detached (travels with code) |
+| **Traceable** | thread `R → AC → @AC-scenario → .feature → step-def → F → commit`, both directions | spec↔code linkage without ADP |
+
+### Two-oracle reconciliation (TA golden-divergence ⊕ GC Godog)
+
+- **Acceptance oracle is mode-split.** CODE slices verified by Godog both-directions (scenario PASS on good emit, FAIL on planted defect). NON-code artifact slices (aPRD/ADR/HLD) stay golden-divergence (TA §9). Both legs of §G; both outside the shape-repair loop (folding correctness in regresses adversarial verify).
+- **Design also lives in shipped code, split by testability:** behavioral constraints → BDD scenarios (Godog); structural constraints + idioms → canon rules (`go/analysis`); pure non-testable rationale → ADR, referenced by `@ADR-NNNN` tag. The two executable oracles ship in product trees; rationale links back. That is the literal meaning of "specs + designs live inside the code ADP ships."
+- **Promotes GC's side-note (§K W0) to first-class.** Godog was already named as the acceptance layer; the only change is making it MANDATORY and SHIPPED, not a build-time afterthought.
+
+### Build impact (folded into the inventory above)
+
+New surface in §4-P: `bdd-feature` schema · **BDD-AUTHOR** role (AC→scenario projection) · scenario deriver (`@AC` splice + `.feature` write to product tree) · step-def emission (canon-checked Go) · **Godog acceptance gate** (§G code leg) · AC→scenario coverage gate (extends `adp_coverage`). Decisions D7–D9. Risks #11–#13. Funding spike runs a code-emitting slice (D9) so M-Oracle's both-directions proof IS the Godog pass/fail, and that same slice powers the §11 customer demo — one slice proves surface-thinness + BDD acceptance + customer-facing demo together.
