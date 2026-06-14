@@ -32,15 +32,21 @@ Phase CF = land tier-1 BORROWED canon at commit 0. CF done ⟺ ALL THREE lane di
 cd _adp-2.0/_deliverables/adp-2.0-code
 
 # leg 1 — lint both-directions (W0a)
-golangci-lint run ./_canon-floor/lint/clean/...     # expect: 0 issues (GREEN)
-golangci-lint run ./_canon-floor/lint/planted/...   # expect: ≥1 issue, exit 1 (RED)
+golangci-lint run ./_canon-floor/lint/clean/...                  # expect: 0 issues (GREEN)
+golangci-lint run --no-config ./_canon-floor/lint/planted/...    # expect: ≥1 issue (errcheck+ineffassign), exit 1 (RED)
+#   NOTE: planted lint REQUIRES --no-config. .golangci.yml globally excludes _canon-floor/**/planted/** (R-CF6)
+#   so the real gate never false-reds; WITH config the planted run is 0-issues GREEN (no proof). --no-config =
+#   v2 default linters, exclusion off → planted reds. (task 04.)
 
 # leg 2 — arch both-directions (W0b)
-go-arch-lint check                                  # clean tree: PASS
-#   (then point arch-lint/depguard at _canon-floor/arch/planted/) # expect: violation, exit 1 (RED)
+go-arch-lint check                                               # clean tree → PASS (exit 0, GREEN)
+golangci-lint run --default=none --enable=depguard ./...         # clean depguard (import-CONTENT) → 0 issues (GREEN)
+( cd _canon-floor/arch/planted && go-arch-lint check )           # planted core→adapter edge → violation, exit 1 (RED)
+#   NOTE: planted arch fixture = OWN nested go.mod, run from INSIDE its dir vs its own .go-arch-lint.yml. The
+#   root config excludes _canon-floor/arch/planted (R-CF6) so the main gate stays green. (task 09.)
 
 # leg 3 — analysistest harness (W0c)
-go test ./internal/canon/...                        # expect: PASS (pos fires, neg silent)
+go test ./internal/canon/...                                     # expect: PASS (pos fires, neg silent)
 ```
 
 ## Acceptance
