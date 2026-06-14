@@ -8,3 +8,6 @@ dist/
 *.tgz
 *.tgz.sha256
 *.tgz.sig
+
+# Go Stuff
+.citmp/
