@@ -14,6 +14,7 @@
 - **Funding-gated (BD §10):** 50-role migration NOT committed on principle. Spike CLASSIFIER + one heavy role through new surface, measure token cost, prove driver thin, THEN scope full migration. Build backbone-first against one already-ported role.
 - Disk = sole source of truth (D20). Engine stateless. Verify-before-promote. **Operator runs the demo (D39) — CUSTOMER-FACING only** (see §11): operator runs the same commands a client runs, observes a customer-facing feature of the deliverable work. Client never touches MCP/schemas/ids; native `mcp__adp__*` calls = build-time wiring check, NOT the acceptance demo. All carried into Go unchanged.
 - **Spec ships as executable BDD (regression mandate, see §4-P + §12):** today spec/design = JSON in `.adp/` — opaque to non-ADP engineers, inert (no spec↔behavior tie), detached (containment keeps it OUT of product trees). Fix: every delivered CODE feature ships Gherkin `.feature` + Godog step-defs in the PRODUCT trees. AC = source → `@AC`-tagged `Scenario`. Makes spec executable (regression-guarded in client CI), readable without ADP, resident IN shipped code — a 3rd-party contractor maintains/extends it without ADP. Acceptance oracle for code slices = Godog both-directions; canon-compliance oracle = `go/analysis`. TWO oracles, both ship in product trees.
+- **Canon paradox dissolved (§13 — the build-start blocker):** engine = Go, must obey Go canon; Go canon does NOT exist yet (Track 4 PRODUCES it) and grows from the build's OWN telemetry → circular. Fix = canon in **2 tiers**. Tier-1 **BORROWED** (off-the-shelf golangci-lint stack + the already-FROZEN P-TOOL arch profile) gates EVERY commit from line 0 — pre-grounded, zero authoring. Tier-2 **AUTHORED** (GC-* rules, W3–W6) grown demand-driven from telemetry the engine emits building ITSELF. Foundation never ungoverned; canon never speculative. Corrects §6: borrowed floor → P0-pre (not post-gate); authored rules stay post-gate.
 
 ---
 
@@ -409,6 +410,7 @@ Ordering logic:
 | 11 | **Step-def maintenance burden** — Go glue per scenario could swamp role authoring | §4-P | scenario deriver emits step skeletons; shared step-libraries per role-class; reuse-over-author |
 | 12 | **Gherkin↔AC drift** — scenario prose mis-states the AC it claims to cover | §4-P | `@AC` tag binding + coverage gate (every AC ≥1 scenario); re-review scenario on AC change (mirrors projection-drift risk #2) |
 | 13 | **Godog adds build-time + flaky-scenario risk** | §4-P | acceptance gate outside repair loop; deterministic step-defs only; ships as client regression suite, runs at pack gate |
+| 14 | **Foundation poured before canon exists** — substrate (§6 P0) + spike (P1) = most load-bearing Go, written FIRST; canon track lands LAST → ungoverned floor | §13 | tier-1 borrowed canon (golangci CI + frozen P-TOOL arch configs) = HARD gate from commit 0; tier-2 authored rules retro-check the substrate (analysistest + golangci re-run) on landing |
 
 ---
 
@@ -441,6 +443,7 @@ Ordering logic:
 | D7 | **BDD framework** | (a) Godog (Cucumber-Go) · (b) plain Go table-tests · (c) hand-rolled Gherkin parser | **(a)** now — Gherkin = the readable-by-outsider carrier; GC W0 already names Godog. GC "own-harness later" = migration path, not v1. (b) loses the plain-language spec; (c) premature. |
 | D8 | **Feature-file home** | (a) product trees (`features/`/`tests/`) · (b) `.adp/` | **(a)** — spec MUST ship + survive without ADP; `.adp/` placement would defeat the whole maintainability goal (§12). |
 | D9 | **Funding-spike role** | (a) CLASSIFIER (surface-only) · (b) a code-emitting slice | **(b)** — a small code-emitting feature proves the read/write surface AND the BDD acceptance oracle AND the §11 customer demo in ONE slice. CLASSIFIER proves only the surface; can't exercise Godog. |
+| D10 | **Canon at build start** (§13) | (a) wait for Track-4 canon before writing engine Go · (b) borrow linter + frozen-arch canon at commit 0, earn ADP-specific rules from the build's own telemetry | **(b)** — (a) IS the paradox: canon comes FROM the build, so waiting deadlocks. (b) dissolves it — tier-1 borrowed governs the foundation, tier-2 authored grows from real C-ABSENT telemetry. Faithful to CP4 (seed thin = the borrowed linters) + W2 (import before generate). |
 
 ---
 
@@ -523,3 +526,55 @@ Four properties this buys:
 ### Build impact (folded into the inventory above)
 
 New surface in §4-P: `bdd-feature` schema · **BDD-AUTHOR** role (AC→scenario projection) · scenario deriver (`@AC` splice + `.feature` write to product tree) · step-def emission (canon-checked Go) · **Godog acceptance gate** (§G code leg) · AC→scenario coverage gate (extends `adp_coverage`). Decisions D7–D9. Risks #11–#13. Funding spike runs a code-emitting slice (D9) so M-Oracle's both-directions proof IS the Godog pass/fail, and that same slice powers the §11 customer demo — one slice proves surface-thinness + BDD acceptance + customer-facing demo together.
+
+---
+
+## 13. Canon bootstrap — dissolving the no-canon paradox (the build-start blocker)
+
+### Problem (the paradox)
+
+Engine = Go code that must obey Go canon. But canon does not exist + cannot exist before the build:
+
+1. **No canon now.** Track 4 (§K, W0–W6) is the thing that PRODUCES Go canon.
+2. **Self-reference.** The canon engine is itself ADP 2.0 Go → must obey canon → circular.
+3. **Telemetry-fed.** Canon grows demand-driven from C-ABSENT episodic telemetry (CP4 / W6) — telemetry that exists only once the engine RUNS + builds things. Canon cannot be complete before the build; the build FEEDS the canon.
+4. **Temporal inversion.** Code that most needs canon — substrate + spike (§6 P0/P1), the most load-bearing Go — gets written FIRST; canon track (§K) lands LAST (post-gate). Naive read ⇒ foundation poured ungoverned (risk #14).
+
+### Solution — "borrow then earn": canon = 2 tiers, only tier-2 is missing
+
+Canon was never one undifferentiated thing. **Tier-1 = externally-grounded, exists TODAY, zero ADP authoring. Tier-2 = ADP-specific, authored, demand-driven.** The paradox only ever touched tier-2. Land tier-1 at commit 0; earn tier-2 from the build itself. Paradox → spiral.
+
+```mermaid
+flowchart TD
+    T1["TIER-1 · BORROWED canon (commit 0, cost ≈ config)<br/>golangci-lint stack (staticcheck·govet·gosec·errcheck·…)<br/>+ compiler (cycles·internal/) + FROZEN P-TOOL arch profile<br/>= pre-grounded · pre-triggered · zero authoring"]
+    BUILD["BUILD ENGINE governed from line 0<br/>substrate + spike written UNDER tier-1 canon"]
+    TELE["episodic store (Track 2 · P0)<br/>captures engine's OWN build failures = first C-ABSENT telemetry"]
+    T2["TIER-2 · AUTHORED canon (post-gate, demand-driven)<br/>GC-ERR/CONC/CTX/RES + P-TOOL invariants<br/>grown via SOP C–F from real telemetry (W3–W6)"]
+    RETRO["retro-harden: already-built substrate re-checked<br/>(analysistest + golangci re-run) as each tier-2 rule lands"]
+    T1 --> BUILD --> TELE --> T2 --> RETRO
+    RETRO -.governs next build.-> BUILD
+```
+
+**Move 1 — Borrowed canon floor (commit 0; cost ≈ CI config).** Off-the-shelf linter stack = canon that is pre-grounded + pre-triggered (GC W0 FROZEN engine stack + W2 import-sources). Wire golangci-lint meta-bundle (staticcheck·govet·gosec·errcheck·ineffassign·unused·gocritic·revive) + compiler (import cycles · `internal/` visibility) as a **HARD CI gate BEFORE the first hand-written Go line**. This IS CP4 "seed thin" — consumed as a tool NOW, transcribed into the rule schema LATER (W2). Risk #10's "linter = decorrelated second opinion" doubles here as the day-1 governor.
+
+**Move 2 — Frozen architecture profile (commit 0; cost ≈ 2 configs).** P-TOOL profile (GC App C / W1) is ALREADY frozen in input — the hardest arch decisions are done. Adopt as the binding layout spec for the engine itself: core⊥adapter · package-by-domain · consumer-side interfaces · acyclic deps (compiler) · no global mutable state · atomic writes · context-closed invocation. Stand up depguard + go-arch-lint configs encoding it. Architecture canon governs from line 1 — free, research pre-frozen.
+
+**Move 3 — Engine's own build = first canon-growth episode (earn tier-2).** ADP-specific rules (GC-ERR/CONC/CTX/RES + P-TOOL invariants: no-IO-in-core · atomic-write · no-cross-invocation-state) are NOT pre-authored. Grown demand-driven (CP4 / W6) from C-ABSENT telemetry whose FIRST source = the engine building ITSELF. Episodic store (Track 2 · P0) captures build failures; promotion gate hardens recurring ones through SOP C–F; already-built substrate retro-checked (analysistest + golangci re-run on whole tree) as each rule lands. Generated-frozen + immutability discipline applies to every rule-store write.
+
+### Consequence for the build order (corrects §6)
+
+§6 originally placed ALL canon post-gate (P2). **SPLIT it:**
+
+| Tier | What | Lands | Cost | Gates |
+|---|---|---|---|---|
+| **1 borrowed** | golangci CI · compiler · FROZEN P-TOOL freeze · depguard/go-arch-lint configs · W0 rule-schema + analysistest harness shell | **P0-pre** (commit 0) | config only | every Go commit incl. substrate + spike |
+| **2 authored** | W3–W6 GC-* rules + P-TOOL invariants | **post-gate** (P2), demand-driven | high (gated) | new code + retro-checks built code |
+
+Net: no ungoverned foundation · no speculative mass-authoring · no blocking wait. The build is not blocked-on-canon; the build PRODUCES the canon.
+
+### Faithfulness to the inputs
+
+- **CP4 (seed thin, grow from failure):** borrowed linters = the thin seed — pulled to commit 0, not post-gate; W3–W6 = grow-from-failure off real telemetry.
+- **W2 ("import free grounded rules BEFORE generating"):** import = commit-0 CI consumption; generate = post-gate authoring. Same ordering, made temporal.
+- **Two-oracle split intact:** this bootstraps the canon-COMPLIANCE oracle (go/analysis + linters); the ACCEPTANCE oracle = Godog (§4-P) stays distinct — never conflated.
+- **Single-Opus (GC standing / risk #10):** the borrowed linter IS the decorrelated second opinion for the engine's own code, before any ADP rule is grown.
