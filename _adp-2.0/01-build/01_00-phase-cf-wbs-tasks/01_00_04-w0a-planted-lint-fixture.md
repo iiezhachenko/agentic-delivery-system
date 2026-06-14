@@ -36,10 +36,16 @@ Fixture pair: a clean Go copy (lint PASS) + a planted-defect copy (lint FAIL), p
 Agent does NOT run the proof. Agent hands operator these exact steps + expected output; operator runs from clean checkout:
 ```
 cd _adp-2.0/_deliverables/adp-2.0-code
-golangci-lint run ./_canon-floor/lint/clean/...     # expect: 0 issues, exit 0 (GREEN)
-golangci-lint run ./_canon-floor/lint/planted/...   # expect: ≥1 issue, exit 1 (RED)
+golangci-lint run ./_canon-floor/lint/clean/...                # expect: 0 issues, exit 0 (GREEN)
+golangci-lint run --no-config ./_canon-floor/lint/planted/...  # expect: ≥1 issue (errcheck+ineffassign), exit 1 (RED)
 ```
 Both directions must hold: clean → green, planted → red.
+
+NOTE (R-CF6 tension — discovered at acceptance): `.golangci.yml` `exclusions.paths` is GLOBAL — it fires even
+when golangci is pointed straight at `planted/`, so the real config CANNOT red planted (`golangci-lint run ./_canon-floor/lint/planted/...` → 0 issues). Planted is therefore linted with `--no-config`: v2 default linters
+(errcheck govet ineffassign staticcheck unused) = SUBSET of the 8-set (we only add gosec gocritic revive), and
+adding linters never removes a finding → red-under-defaults proves red-under-the-8-set. Clean direction is NOT
+excluded, so it runs against the real config. R-CF6 (main gate stays green) intact — exclusion unchanged.
 
 ## Boundary — OUT of scope
 
