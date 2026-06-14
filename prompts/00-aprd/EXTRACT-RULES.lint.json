@@ -1,0 +1,13 @@
+{
+  "target": "/workspace/prompts/00-aprd/EXTRACT-RULES.md",
+  "type": "prompt",
+  "verdict": "clean",
+  "violations": [],
+  "warnings": [],
+  "counts": {
+    "lines_total": 54,
+    "est_tokens": 2232,
+    "by_rule": {},
+    "warnings": 0
+  }
+}

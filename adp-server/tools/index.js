@@ -13,6 +13,7 @@ import { deriveClassification } from "../../tools/det/classify-derive.mjs";
 import { deriveExtraction } from "../../tools/det/extract-derive.mjs";
 import { deriveGaps } from "../../tools/det/gap-derive.mjs";
 import { deriveCritique } from "../../tools/det/critique-derive.mjs";
+import { deriveExtractRules } from "../../tools/det/extract-rules-derive.mjs";
 import { validateFile } from "../../tools/det/validate.mjs";
 import { resolve as ioResolve, loadManifest } from "../../tools/io/resolve.mjs";
 import { emit as emitBaselineMap } from "../../tools/det/emit/baseline-map.mjs";
@@ -90,7 +91,7 @@ export async function adp_emit(params, { root = "." } = {}) {
 }
 
 // schemaId -> derive fn: server computes deterministic fields from role judgment primitives (D38)
-const DERIVERS = { "01-classification": deriveClassification, "02-extraction": deriveExtraction, "04-gaps": deriveGaps, "08-critique": deriveCritique };
+const DERIVERS = { "01-classification": deriveClassification, "02-extraction": deriveExtraction, "04-gaps": deriveGaps, "08-critique": deriveCritique, "rules-extracted": deriveExtractRules };
 
 // --- adp_derive: server determinism — derive + splice shell + (opt) questions + write (D38) ----
 export async function adp_derive(params, { root = "." } = {}) {

@@ -1,0 +1,17 @@
+{
+  "target": "/workspace/prompts/00-aprd/EXTRACT-RULES.md",
+  "type": "prompt",
+  "lint_ref": "/workspace/prompts/00-aprd/EXTRACT-RULES.lint.json",
+  "oracle": ["AB1-AB9", "P13", "A-ECON"],
+  "verdict": "clean",
+  "issues": [],
+  "issue_count": 0,
+  "by_category": {
+    "duplicate-fact": 0,
+    "no-objective": 0,
+    "mandate-narration": 0,
+    "ambiguous": 0,
+    "re-spec": 0,
+    "starvation": 0
+  }
+}

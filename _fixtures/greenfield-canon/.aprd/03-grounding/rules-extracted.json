@@ -195,6 +195,6 @@
     "sources_extracted": 3,
     "sources_unfetched": 1,
     "rules_total": 15,
-    "by_tier": { "1": 9, "2": 6, "3": 0 }
+    "by_tier": { "1": 9, "2": 6 }
   }
 }
